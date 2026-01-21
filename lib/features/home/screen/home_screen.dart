@@ -37,39 +37,39 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 16.h),
 
                     // ✅ Category pills (Light selected)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _CategoryPill(
-                            label: 'Light',
-                            isSelected: true,
-                            icon: Icons.lightbulb_outline,
-                            imagePath: 'assets/Mask group (3).png',
-                            onTap: () {},
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: _CategoryPill(
-                            label: 'Shading',
-                            isSelected: false,
-                            icon: Icons.blinds_outlined,
-                            imagePath: 'assets/Mask group (2).png',
-                            onTap: () {},
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: _CategoryPill(
-                            label: 'HVAC',
-                            isSelected: false,
-                            icon: Icons.ac_unit_outlined,
-                            imagePath: 'assets/Mask group (4).png',
-                            onTap: () {},
-                          ),
-                        ),
-                      ],
-                    ),
+                    SizedBox(
+      height: 63.h,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        children: [
+          _CategoryPill(
+            label: 'Light',
+            isSelected: true,
+            icon: Icons.lightbulb_outline,
+            imagePath: 'assets/Mask group (3).png',
+            onTap: () {},
+          ),
+          SizedBox(width: 12.w),
+          _CategoryPill(
+            label: 'Shading',
+            isSelected: false,
+            icon: Icons.blinds_outlined,
+            imagePath: 'assets/Mask group (2).png',
+            onTap: () {},
+          ),
+          SizedBox(width: 12.w),
+          _CategoryPill(
+            label: 'HVAC',
+            isSelected: false,
+            icon: Icons.ac_unit_outlined,
+            imagePath: 'assets/Mask group (4).png',
+            onTap: () {},
+          ),
+        ],
+      ),
+    ),
+
 
                     SizedBox(height: 18.h),
 
@@ -479,7 +479,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
 
             Row(
               children: [
-                _CircleBtn(child: Icon(Icons.remove, size: 16.sp)),
+                _CircleBtn(child: Icon(Icons.remove, size: 20.sp)),
                 Expanded(
                   child: Center(
                     child: Text(
@@ -492,7 +492,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
                     ),
                   ),
                 ),
-                _CircleBtn(child: Icon(Icons.add, size: 16.sp)),
+                _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
               ],
             ),
           ],
@@ -649,7 +649,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
             child: Text(
               deviceName,
               style: TextStyle(
-                fontSize: 13.sp,
+                fontSize: 16.sp,
                 color: const Color(0xFF111827),
                 height: 1.15,
               ),
@@ -798,115 +798,109 @@ class _CategoryPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(999);
+
+    // ✅ auto width based on content (text)
+    Widget pillBody(Widget child) {
+      return IntrinsicWidth(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 0,       // ✅ no extra forced width
+            maxWidth: 220.w,   // ✅ prevent too wide pills
+          ),
+          child: child,
+        ),
+      );
+    }
+
+    Widget innerRow({required bool selected}) {
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12.w), // ✅ compact padding
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ✅ icon circle
+            Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF3F4F6),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: imagePath != null
+                  ? Image.asset(
+                      imagePath!,
+                      width: 22.w,
+                      height: 22.w,
+                      fit: BoxFit.contain,
+                    )
+                  : Icon(icon, size: 20.sp, color: const Color(0xFF111827)),
+            ),
+            SizedBox(width: 10.w),
+
+            // ✅ full text (no ellipsis)
+            Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.clip,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                color: const Color(0xFF111827),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: radius,
       child: isSelected
-          ? Container(
-              height: 54.h,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFFD700), // Yellow
-                    Color(0xFF00FF00), // Green
-                    Color(0xFF87CEEB), // Light blue
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(999),
-            
-              ),
-              padding: const EdgeInsets.all(1),
-              child: Container(
+          ? pillBody(
+              Container(
+                height: 63.h,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
+                  gradient: const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xFFFFD700), // yellow
+                      Color(0xFF00FF99), // green-ish
+                      Color(0xFF15DFFE), // cyan
+                    ],
+                    stops: [0.0, 0.55, 1.0],
+                  ),
+                  borderRadius: radius,
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 38.w,
-                      height: 38.w,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: imagePath != null
-                          ? Center(
-                              child: Image.asset(
-                                imagePath!,
-                                width: 18.w,
-                                height: 18.w,
-                                fit: BoxFit.contain,
-                              ),
-                            )
-                          : Icon(icon, size: 18.sp, color: const Color(0xFF111827)),
-                    ),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                    ),
-                  ],
+                padding: EdgeInsets.all(1.6.r), // ✅ border thickness
+                child: Container(
+                  height: 63.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: radius,
+                  ),
+                  child: innerRow(selected: true),
                 ),
               ),
             )
-          : Container(
-              height: 54.h,
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.74),
-                border: Border.all(color: const Color(0xFFE1E1E1), width: 1),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 38.w,
-                    height: 38.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: imagePath != null
-                        ? Center(
-                            child: Image.asset(
-                              imagePath!,
-                              width: 18.w,
-                              height: 18.w,
-                              fit: BoxFit.contain,
-                            ),
-                          )
-                        : Icon(icon, size: 18.sp, color: const Color(0xFF111827)),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF111827),
-                      ),
-                    ),
-                  ),
-                ],
+          : pillBody(
+              Container(
+                height: 63.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: const Color(0xFFE1E1E1), width: 1.5),
+                  borderRadius: radius,
+                ),
+                child: innerRow(selected: false),
               ),
             ),
     );
   }
 }
-
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.title);
 
@@ -982,7 +976,7 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = size ?? 36.w;
+    final s = size ?? 35.w;
     return Container(
       width: s,
       height: s,
@@ -1033,7 +1027,7 @@ class _LightDimmerCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 15.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF111827),
                   height: 1.18,
@@ -1160,7 +1154,7 @@ class _ThermostatCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 13.sp, color: const Color(0xFF111827), height: 1.15),
+                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
                 ),
               ),
               SizedBox(height: 10.h),
@@ -1221,7 +1215,7 @@ class _BlindCard extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 15.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     height: 1.18,
@@ -1313,7 +1307,7 @@ class _ToggleCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 13.sp, color: const Color(0xFF111827), height: 1.15),
+                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
                 ),
               ),
               SizedBox(height: 6.h),
@@ -1474,7 +1468,7 @@ class _FavoritesRow extends StatelessWidget {
                   children: [
                     Text(
                       'Bedroom Thermostat\nparents room',
-                      style: TextStyle(fontSize: 13.sp, color: const Color(0xFF111827), height: 1.15),
+                      style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1482,9 +1476,9 @@ class _FavoritesRow extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _CircleBtn(child: Icon(Icons.remove, size: 18.sp)),
-                        Text('24.6°c', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
-                        _CircleBtn(child: Icon(Icons.add, size: 18.sp)),
+                        _CircleBtn(child: Icon(Icons.remove, size: 20.sp)),
+                        Text('24.6°c', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                        _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
                       ],
                     ),
                   ],
@@ -1547,21 +1541,21 @@ class _ShadingTile extends StatelessWidget {
                   children: [
                     _ModeBadge(mode: mode, filled: modeFilled),
                     SizedBox(width: 10.w),
-                    Icon(Icons.arrow_downward, size: 16.sp),
+                    Icon(Icons.arrow_downward, size: 20.sp),
                     SizedBox(width: 4.w),
-                    Text('100%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
+                    Text('100%', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
                     SizedBox(width: 10.w),
-                    Icon(Icons.volume_up_outlined, size: 16.sp),
+                    Icon(Icons.volume_up_outlined, size: 18.sp),
                     SizedBox(width: 4.w),
-                    Text('50%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700)),
+                    Text('50%', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
                   ],
                 ),
               ],
             ),
           ),
-          _CircleBtn(child: Icon(Icons.keyboard_arrow_down, size: 20.sp)),
+          _CircleBtn(child: Icon(Icons.keyboard_arrow_down, size: 13.sp)),
           SizedBox(width: 10.w),
-          _CircleBtn(child: Icon(Icons.keyboard_arrow_up, size: 20.sp)),
+          _CircleBtn(child: Icon(Icons.keyboard_arrow_up, size: 13.sp)),
         ],
       ),
     );

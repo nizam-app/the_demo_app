@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_snack_bar.dart';
-import 'package:workpleis/features/auth/logic/login_scren.dart';
-import 'package:workpleis/features/auth/screens/home_screen.dart';
+import 'package:workpleis/features/auth/screens/login_scren.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/auth/screens/register_screen.dart';
 import 'package:workpleis/features/auth/screens/splash_screen.dart';
 

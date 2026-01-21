@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
-import 'package:workpleis/features/auth/screens/home_screen.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/auth/screens/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -306,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                SizedBox(height: 130.h),
+                SizedBox(height: 110.h),
                 
                 // "Don't have an account? Register" text
                 Center(
