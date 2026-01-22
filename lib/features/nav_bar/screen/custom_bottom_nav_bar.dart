@@ -29,7 +29,7 @@ class CustomBottomNavBar extends StatelessWidget {
           topRight: Radius.circular(18.r),
         ),
         child: Container(
-          height: 86.h,
+          height: 75.h,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(.95),
             border: const Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
@@ -66,9 +66,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   // ✅ Items
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 10.h, top: 16.h),
-                      child: Row(
+                    child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: List.generate(items.length, (i) {
                           final isSelected = i == selectedIndex;
@@ -85,7 +83,7 @@ class CustomBottomNavBar extends StatelessWidget {
                             ),
                           );
                         }),
-                      ),
+                      
                     ),
                   ),
                 ],
@@ -173,10 +171,10 @@ class BottomNavItem extends StatelessWidget {
                       top: -6.h,
                       right: -6.w,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE11D48),
-                          borderRadius: BorderRadius.circular(99.r),
+                          color: const Color(0xFfFE019A),
+                          borderRadius: BorderRadius.circular(18.r),
                           border: Border.all(color: Colors.white, width: 2.w),
                         ),
                         child: Text(
@@ -209,6 +207,12 @@ class BottomNavItem extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
+              ),
+              
             ),
           ),
         ],
