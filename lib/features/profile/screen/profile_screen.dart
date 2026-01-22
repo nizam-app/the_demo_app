@@ -197,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: Image.asset(
                             'assets/apple.png',
                             width: 32.w,
-                            height: 32.w,
+                            height: 32.h,
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -206,8 +206,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           label: 'Google',
                           icon: Image.asset(
                             'assets/google.png',
-                            width: 32.w,
-                            height: 32.w,
+                            width: 29.w,
+                            height: 29.h,
                             fit: BoxFit.contain,
                           ),
                         ),
@@ -452,7 +452,7 @@ class _CardList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.symmetric(vertical: 5.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
@@ -735,7 +735,8 @@ class _ConnectItem extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
+         
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF111827),
           ),
         ),
@@ -744,7 +745,7 @@ class _ConnectItem extends StatelessWidget {
           '+',
           style: TextStyle(
             fontSize: 36.sp,
-            fontWeight: FontWeight.w200,
+            fontWeight: FontWeight.w100,
             height: 1,
             color: const Color(0xFF111827),
           ),
