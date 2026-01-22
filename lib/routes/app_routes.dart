@@ -14,6 +14,7 @@ class AppRouter {
       initialLocation:initial,
       errorBuilder: (context, state) {
         final String badPath = state.uri.toString();
+        
         return CustomGoErrorPage(
           location: badPath,
           error: state.error,
