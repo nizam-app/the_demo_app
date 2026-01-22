@@ -3,20 +3,89 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
+import '../../auth/screens/devices_screen.dart';
+import '../../profile/screen/profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static const String routeName = '/home';
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedNavIndex = -1; // -1 means no item selected (showing home content)
+
+  void _onNavItemTapped(int index) {
+    // Navigate to DevicesScreen when Devices is tapped (index 0)
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DevicesScreen()),
+      ).then((_) {
+        // Reset selection when coming back from DevicesScreen
+        setState(() {
+          _selectedNavIndex = -1;
+        });
+      });
+    } else {
+      // For other items, just update the selection (you can add navigation later)
+      setState(() {
+        _selectedNavIndex = index;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
-
-      // ✅ Bottom nav স্ক্রিনশটের মতো fixed
-      bottomNavigationBar: const _BottomNavBar(selectedIndex: 2),
-
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(20.w),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.person_outline, color: Color(0xFF111827)),
+                title: Text(
+                  'Profile',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push(ProfileScreen.routeName);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedNavIndex == -1 ? 0 : _selectedNavIndex,
+        onItemTapped: _onNavItemTapped,
+      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -30,7 +99,7 @@ class HomeScreen extends StatelessWidget {
 
                     // ✅ Header
                     _Header(
-                      onMenuTap: () {},
+                      onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
                       onEditTap: () {},
                     ),
 
@@ -1663,17 +1732,14 @@ class _ChartCardState extends State<_ChartCard> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24.r),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: CustomPaint(
-            painter: _WaveChartPainter(
-              markerXPercent: _marker,
-              label: label,
-              mainSeries: _main,
-              secondarySeries: _secondary,
-            ),
-            child: const SizedBox.expand(),
+        child: CustomPaint(
+          painter: _WaveChartPainter(
+            markerXPercent: _marker,
+            label: label,
+            mainSeries: _main,
+            secondarySeries: _secondary,
           ),
+          child: const SizedBox.expand(),
         ),
       ),
     );
@@ -1859,161 +1925,6 @@ class _WaveChartPainter extends CustomPainter {
   }
 }
 
-// ---------------------------
-// Bottom Nav
-// ---------------------------
-class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar({required this.selectedIndex});
-
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = const [
-      _NavItemData('Devices', 'assets/Group 28.png'),
-      _NavItemData('Analytics', 'assets/bar 5.png'),
-      _NavItemData('Voice', 'assets/image 98.png'),
-      _NavItemData('Notifications', 'assets/Group 43.png'),
-      _NavItemData('Automations', 'assets/Mask group (8).png'),
-    ];
-
-    return Container(
-    height: 92.h, 
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.90)),
-      child: Column(
-        children: [
-          Container(height: 1, color: const Color(0xFFE1E1E1)),
-        Expanded(
-  child: Stack(
-    children: [
-      // ✅ Top indicator (like Image-1)
-      Positioned(
-        top: 6.h, // ✅ indicator stays above icons
-        left: -26,
-        right: 0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(items.length, (i) {
-            final isSelected = i == selectedIndex;
-            return SizedBox(
-              width: 56.w, // same slot width for every item
-              child: isSelected
-                  ? Container(
-                      height: 4.h,
-                      width: 86.w, // ✅ wider bar like Image-1
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0088FE),
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            );
-          }),
-        ),
-      ),
-
-      // ✅ Items row (icons + labels)
- Align(
-  alignment: Alignment.bottomCenter,
-  child: Padding(
-    padding: EdgeInsets.only(bottom: 10.h, top: 18.h), // ✅ space for big icon
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(items.length, (i) {
-        final isSelected = i == selectedIndex;
-        return _BottomNavItem(
-          label: items[i].label,
-          imagePath: items[i].imagePath,
-          isSelected: isSelected,
-          showBadge: items[i].label == 'Notifications',
-        );
-      }),
-    ),
-  ),
-),
- ],
-  ),
-),
-  SizedBox(height: 6.h),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItemData {
-  const _NavItemData(this.label, this.imagePath);
-  final String label;
-  final String imagePath;
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.label,
-    required this.imagePath,
-    required this.isSelected,
-    required this.showBadge,
-  });
-
-  final String label;
-  final String imagePath;
-  final bool isSelected;
-  final bool showBadge;
-
-  @override
-  Widget build(BuildContext context) {
-  final iconSize = isSelected ?  38.w : 26.w; // ✅ perfect + no overflow
-
-    return SizedBox(
-      width: 70.w,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                imagePath,
-                width:showBadge? 30: iconSize,
-                height: iconSize,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
-                ),
-              ),
-            ],
-          ),
-          // if (showBadge)
-          //   Positioned(
-          //     right: 10.w,
-          //     top: 10.h,
-          //     child: Container(
-          //       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-          //       decoration: BoxDecoration(
-          //         color: const Color(0xFFFE019A),
-          //         borderRadius: BorderRadius.circular(99),
-          //       ),
-          //       child: Text(
-          //         '12',
-          //         style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: Colors.white),
-          //       ),
-          //     ),
-          //   ),
-        ],
-      ),
-    );
-  }
-}
 
 // ---------------------------
 // Circular progress painter

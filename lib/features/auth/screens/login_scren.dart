@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
-import 'package:workpleis/features/auth/screens/register_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Welcome to Aican',
                   style: TextStyle(
-                    fontSize: 26.sp,
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
@@ -63,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Please enter your registration email and password.',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
@@ -175,13 +175,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                           fontFamily: 'Inter',
+                          
                         ),
                       ),
                     ),
                   ),
                 ),
                 
-                SizedBox(height: 32.h),
+                SizedBox(height: 20.h),
                 
                 // "Or via social networks" text
                 Center(
@@ -324,7 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          context.go(RegisterScreen.routeName);
+                          // context.go(RegisterScreen.routeName);
                         },
                         child: Text(
                           'Register',

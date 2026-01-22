@@ -1,15 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 
-class DevicesScreen extends StatelessWidget {
+class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
   
   static const String routeName = '/devices';
 
   @override
+  State<DevicesScreen> createState() => _DevicesScreenState();
+}
+
+class _DevicesScreenState extends State<DevicesScreen> {
+  int _selectedNavIndex = 0; // Devices is selected (index 0)
+
+  void _onNavItemTapped(int index) {
+    if (index == 0) {
+      // Already on Devices screen, do nothing
+      setState(() {
+        _selectedNavIndex = 0;
+      });
+    } else {
+      // Navigate back to Home screen for other items
+      Navigator.pop(context);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedNavIndex,
+        onItemTapped: _onNavItemTapped,
+      ),
       body: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
