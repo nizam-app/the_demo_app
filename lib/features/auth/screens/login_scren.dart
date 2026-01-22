@@ -307,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                SizedBox(height: 110.h),
+                SizedBox(height: 130.h),
                 
                 // "Don't have an account? Register" text
                 Center(

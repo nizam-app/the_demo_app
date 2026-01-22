@@ -127,6 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Mask group (4).png',
             onTap: () {},
           ),
+              SizedBox(width: 12.w),
+            _CategoryPill(
+            label: 'Security',
+            isSelected: false,
+            icon: Icons.ac_unit_outlined,
+            imagePath: 'assets/securety.png',
+            onTap: () {},
+          ),
         ],
       ),
     ),
@@ -156,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           imagePath: 'assets/Mask group (5).png',
                         ),
                         _ThermostatCard(
-                          title: 'Bathroom heating and\nboiler thermostat',
+                          title: 'Bathroom heating and boiler thermostat',
                           value: 24.6,
                           mode: 'M',
                           modeFilled: true,
@@ -171,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           imagePath: 'assets/Rectangle 823.png',
                         ),
                         _ToggleCard(
-                          title: 'Irrigation entry and\nfront home two valve',
+                          title: 'Irrigation entry and front home two valve',
                           isOn: true,
                           mode: 'A',
                           modeFilled: false,
@@ -1206,16 +1214,36 @@ class _ThermostatCard extends StatelessWidget {
               imagePath != null
                   ? Image.asset(
                       imagePath!,
-                      width: 44.w,
-                      height: 44.w,
+                      width: 52.w,
+                      height: 52.w,
                       fit: BoxFit.contain,
                     )
                   : Icon(Icons.thermostat_outlined, size: 44.sp, color: const Color(0xFF0088FE)),
-              SizedBox(height: 8.h),
+              SizedBox(height: 10.h),
               Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
+                        style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (title.contains('\n')) ...[
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          title.split('\n').length > 1 ? title.split('\n')[1] : '',
+                          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               SizedBox(height: 10.h),
@@ -1267,7 +1295,7 @@ class _BlindCard extends StatelessWidget {
               if (imagePath != null)
                 Image.asset(
                   imagePath!,
-                  width: 60.w,
+                  width: 65.w,
                   height: 65.w,
                   fit: BoxFit.contain,
                 ),
@@ -1359,16 +1387,18 @@ class _ToggleCard extends StatelessWidget {
               imagePath != null
                   ? Image.asset(
                       imagePath!,
-                      width: 42.w,
-                      height: 42.w,
+                      width: 52.w,
+                      height: 52.w,
                       fit: BoxFit.contain,
                     )
                   : Icon(Icons.water_drop_outlined, size: 42.sp, color: const Color(0xFF00C2FF)),
-              SizedBox(height: 8.h),
+              SizedBox(height: 10.h),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(height: 6.h),
