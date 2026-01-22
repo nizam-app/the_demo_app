@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
-import '../../auth/screens/devices_screen.dart';
 import '../../profile/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,25 +18,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _selectedNavIndex = -1; // -1 means no item selected (showing home content)
+  int _selectedNavIndex = 2; // Voice is index 2
 
   void _onNavItemTapped(int index) {
-    // Navigate to DevicesScreen when Devices is tapped (index 0)
-    if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const DevicesScreen()),
-      ).then((_) {
-        // Reset selection when coming back from DevicesScreen
-        setState(() {
-          _selectedNavIndex = -1;
-        });
-      });
-    } else {
-      // For other items, just update the selection (you can add navigation later)
-      setState(() {
-        _selectedNavIndex = index;
-      });
+    final routes = [
+      '/devices',
+      '/analytics',
+      '/home', // Voice points to home
+      '/notifications',
+      '/automations',
+    ];
+    if (index < routes.length) {
+      context.go(routes[index]);
     }
   }
 
@@ -83,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        selectedIndex: _selectedNavIndex == -1 ? 0 : _selectedNavIndex,
+        selectedIndex: _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),
       body: SafeArea(
@@ -1764,8 +1756,8 @@ class _WaveChartPainter extends CustomPainter {
     final blue = const Color(0xFF0088FE);
     final lightBlue = const Color(0xFF9DBDFF);
 
-    final chartTop = 8.0;
-    final chartBottom = size.height - 8.0;
+   final chartTop = 0.0;
+final chartBottom = size.height - 0.5;
     final chartHeight = chartBottom - chartTop;
 
     List<Offset> toPoints(List<double> series) {

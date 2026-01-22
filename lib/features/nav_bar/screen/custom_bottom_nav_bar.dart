@@ -13,7 +13,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = const [
+    const items = [
       NavItemData('Devices', 'assets/Group 28.png'),
       NavItemData('Analytics', 'assets/bar 5.png'),
       NavItemData('Voice', 'assets/image 98.png'),
@@ -21,68 +21,78 @@ class CustomBottomNavBar extends StatelessWidget {
       NavItemData('Automations', 'assets/Mask group (8).png'),
     ];
 
-    return Container(
-      height: 92.h,
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.90)),
-      child: Column(
-        children: [
-          Container(height: 1, color: const Color(0xFFE1E1E1)),
-          Expanded(
-            child: Stack(
-              children: [
-                // ✅ Top indicator (like Image-1)
-                Positioned(
-                  top: 6.h, // ✅ indicator stays above icons
-                  left: -26,
-                  right: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(items.length, (i) {
-                      final isSelected = i == selectedIndex;
-                      return SizedBox(
-                        width: 56.w, // same slot width for every item
-                        child: isSelected
-                            ? Container(
-                                height: 4.h,
-                                width: 86.w, // ✅ wider bar like Image-1
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0088FE),
-                                  borderRadius: BorderRadius.circular(99),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      );
-                    }),
-                  ),
-                ),
+    return SafeArea(
+      top: false,
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(18.r),
+          topRight: Radius.circular(18.r),
+        ),
+        child: Container(
+          height: 86.h,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(.95),
+            border: const Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+          ),
+          child: LayoutBuilder(
+            builder: (context, c) {
+              final slotW = c.maxWidth / items.length;
+              final indicatorW = 56.w;
+              final indicatorH = 4.h;
 
-                // ✅ Items row (icons + labels)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 10.h, top: 18.h), // ✅ space for big icon
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(items.length, (i) {
-                        final isSelected = i == selectedIndex;
-                        return GestureDetector(
-                          onTap: () => onItemTapped(i),
-                          child: BottomNavItem(
-                            label: items[i].label,
-                            imagePath: items[i].imagePath,
-                            isSelected: isSelected,
-                            showBadge: items[i].label == 'Notifications',
-                          ),
-                        );
-                      }),
+              final left = selectedIndex >= 0 && selectedIndex < items.length
+                  ? (slotW * selectedIndex) + (slotW - indicatorW) / 2
+                  : -1000.0; // Hide indicator when no selection
+
+              return Stack(
+                children: [
+                  // ✅ Smooth top indicator (centered)
+                  if (selectedIndex >= 0 && selectedIndex < items.length)
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      top: 6.h,
+                      left: left,
+                      child: Container(
+                        width: indicatorW,
+                        height: indicatorH,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0088FE),
+                          borderRadius: BorderRadius.circular(99.r),
+                        ),
+                      ),
+                    ),
+
+                  // ✅ Items
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 10.h, top: 16.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: List.generate(items.length, (i) {
+                          final isSelected = i == selectedIndex;
+                          return InkResponse(
+                            onTap: () => onItemTapped(i),
+                            radius: 28.r,
+                            child: RepaintBoundary( // ✅ smoother (less repaint)
+                              child: BottomNavItem(
+                                label: items[i].label,
+                                imagePath: items[i].imagePath,
+                                isSelected: isSelected,
+                                showBadge: items[i].label == 'Notifications',
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
-          SizedBox(height: 6.h),
-        ],
+        ),
       ),
     );
   }
@@ -110,36 +120,96 @@ class BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = isSelected ? 38.w : 26.w; // ✅ perfect + no overflow
+    final slotW = 70.w;
+
+    // ✅ fixed sizes (no jump)
+    final iconBox = 36.w;
+    final iconSize = 26.w;
 
     return SizedBox(
-      width: 70.w,
-      child: Stack(
-        clipBehavior: Clip.none,
+      width: slotW,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                imagePath,
-                width: showBadge ? 30 : iconSize,
-                height: iconSize,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
+          AnimatedScale(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            scale: isSelected ? 1.05 : 1.0,
+            child: SizedBox(
+              width: iconBox,
+              height: iconBox,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  // ✅ selected blue circle behind icon (like screenshot)
+                  if (isSelected)
+                    Container(
+                      width: iconBox,
+                      height: iconBox,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF0088FE),
+                      ),
+                    ),
+
+                  // ✅ icon (tint to match)
+                  Image.asset(
+                    imagePath,
+                    width: iconSize,
+                    height: iconSize,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                    filterQuality: FilterQuality.medium,
+                    color: isSelected
+                        ? Colors.white
+                        : const Color(0xFF111827), // black-ish
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+
+                  // ✅ small badge (if you need later)
+                  if (showBadge)
+                    Positioned(
+                      top: -6.h,
+                      right: -6.w,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE11D48),
+                          borderRadius: BorderRadius.circular(99.r),
+                          border: Border.all(color: Colors.white, width: 2.w),
+                        ),
+                        child: Text(
+                          '12',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              SizedBox(height: 4.h),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
-                ),
-              ),
-            ],
+            ),
+          ),
+
+          SizedBox(height: 6.h),
+
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
+            ),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
