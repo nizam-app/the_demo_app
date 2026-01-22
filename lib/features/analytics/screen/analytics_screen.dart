@@ -59,7 +59,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),

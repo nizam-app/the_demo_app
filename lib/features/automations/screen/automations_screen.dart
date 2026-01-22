@@ -59,7 +59,7 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),
