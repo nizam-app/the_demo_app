@@ -2,7 +2,6 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_snack_bar.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
-import 'package:workpleis/features/auth/screens/register_screen.dart';
 import 'package:workpleis/features/profile/screen/profile_screen.dart';
 import 'package:workpleis/features/auth/screens/devices_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
@@ -70,11 +69,6 @@ class AppRouter {
           path: LoginScreen.routeName,
           name: LoginScreen.routeName,
           builder: (context, state) => const LoginScreen(),
-        ), GoRoute(
-          path: RegisterScreen.routeName,
-          name: RegisterScreen.routeName,
-          builder: (context, state) => const RegisterScreen(),
         ),
-
       ]);
 }
