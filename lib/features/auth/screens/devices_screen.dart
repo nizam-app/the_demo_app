@@ -44,65 +44,85 @@ class _DevicesScreenState extends State<DevicesScreen> {
               Padding(
                 padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
                 child: Row(
-                  children: [
-                    _CircleIconButton(
-                      icon: Icons.chevron_left,
-                      onTap: () => Navigator.maybePop(context),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'Devices',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                          ),
-                        ),
-                      ),
-                    ),
-                    _CircleIconButton(
-                      icon: Icons.more_horiz,
-                      onTap: () {},
-                    ),
-                    SizedBox(width: 10.w),
-                    _CircleIconButton(
-                      icon: Icons.add,
-                      bg: const Color(0xFF0088FE),
-                      iconColor: Colors.white,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
+  children: [
+    _CircleIconButton(
+      icon: Icons.chevron_left_rounded,
+      onTap: () => Navigator.maybePop(context),
+      size: 44,                // image-like
+      bg: const Color(0xFFE5E7EB),
+      iconColor: Colors.black87,
+      iconSize: 26,
+    ),
+
+    // ✅ Keep title perfectly centered by reserving equal space on both sides
+    Expanded(
+      child: Center(
+        child: Text(
+          'Devices',
+          style: TextStyle(
+            fontSize: 22.sp,     // image-like (bigger)
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+          ),
+        ),
+      ),
+    ),
+
+    Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _CircleIconButton(
+          icon: Icons.more_horiz_rounded,
+          onTap: () {},
+          size: 44,
+          bg: const Color(0xFFF3F4F6),
+          iconColor: const Color(0xFF111827),
+          iconSize: 22,
+        ),
+        SizedBox(width: 12.w),
+        _CircleIconButton(
+          icon: Icons.add_rounded,
+          onTap: () {},
+          size: 44,
+          bg: const Color(0xFF0088FE),
+          iconColor: Colors.white,   // ✅ fix
+          iconSize: 24,
+        ),
+      ],
+    ),
+  ],
+)
+
               ),
 
               // -------- Search ----------
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
                 child: _SearchBar(),
               ),
 
               SizedBox(height: 10.h),
 
               // -------- Filter chips ----------
-              SizedBox(
-                height: 34.h,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  children: const [
-                    _FilterChipPill(label: 'All', selected: true),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Favorites'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Smart'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Groups'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Category'),
-                  ],
-                ),
-              ),
+             SizedBox(
+  height: 40.h,
+  child: ListView(
+    scrollDirection: Axis.horizontal,
+    padding: EdgeInsets.symmetric(horizontal: 14.w),
+    children: const [
+      _FilterChipPill(label: 'All', selected: true),
+      SizedBox(width: 10),
+      _FilterChipPill(label: 'Favorites'),
+      SizedBox(width: 10),
+      _FilterChipPill(label: 'Smart'),
+      SizedBox(width: 10),
+      _FilterChipPill(label: 'Groups'),
+      SizedBox(width: 10),
+      _FilterChipPill(label: 'Category'),
+    ],
+  ),
+),
+
 
               SizedBox(height: 12.h),
 
@@ -110,7 +130,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                 child: Text(
-                  'Devices',
+                  'Devicesssss',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -168,7 +188,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   // Alarm
                   _DeviceRow(
                     leading: const _LockIcon(),
-                    title: 'Alarm',
+                    title: 'Security Alarm',
                     subtitle: const _SmallText('Disarmed'),
                     trailing: const _CircleActionBlue(icon: Icons.power_settings_new),
                   ),
@@ -420,7 +440,7 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40.h,
+      height: 46.h,
       padding: EdgeInsets.symmetric(horizontal: 12.w),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
@@ -428,12 +448,12 @@ class _SearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.search, size: 18.sp, color: const Color(0xFF6B7280)),
+          Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
           SizedBox(width: 8.w),
           Text(
             'Search',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 16.sp,
               color: const Color(0xFF9CA3AF),
               fontWeight: FontWeight.w400,
             ),
@@ -445,25 +465,42 @@ class _SearchBar extends StatelessWidget {
 }
 
 class _FilterChipPill extends StatelessWidget {
-  const _FilterChipPill({required this.label, this.selected = false});
+  const _FilterChipPill({
+    required this.label,
+    this.selected = false,
+  });
+
   final String label;
   final bool selected;
 
   @override
   Widget build(BuildContext context) {
-    final border = selected ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB);
-    final text = selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
+    final borderColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
+
+    final textColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      height: 36.h, // ✅ exact pill height
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: border, width: 1),
+        borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
+        border: Border.all(
+          color: borderColor,
+          width: 1.5, // ✅ thicker border like image
+        ),
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 12.sp, color: text, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 14.sp,          // ✅ slightly bigger text
+          fontWeight: FontWeight.w600,
+          color: textColor,
+          height: 1,
+        ),
       ),
     );
   }
@@ -475,26 +512,37 @@ class _CircleIconButton extends StatelessWidget {
   const _CircleIconButton({
     required this.icon,
     required this.onTap,
+    this.size = 44,
     this.bg = const Color(0xFFF3F4F6),
     this.iconColor = const Color(0xFF111827),
+    this.iconSize = 22,
   });
 
   final IconData icon;
   final VoidCallback onTap;
+  final double size;
   final Color bg;
   final Color iconColor;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
       child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: Icon(icon, size: 18.sp, color: iconColor),
+        width: size.w,
+        height: size.w,
+        decoration: BoxDecoration(
+          color: bg,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: iconSize.sp,
+            color: iconColor,
+          ),
+        ),
       ),
     );
   }
