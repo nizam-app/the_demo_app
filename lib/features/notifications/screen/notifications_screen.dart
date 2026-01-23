@@ -59,7 +59,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),

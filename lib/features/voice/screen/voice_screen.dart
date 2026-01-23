@@ -59,7 +59,7 @@ class _VoiceScreenState extends State<VoiceScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
+      bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),

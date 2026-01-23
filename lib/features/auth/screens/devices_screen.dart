@@ -309,7 +309,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ),
         ),
       ),
-        bottomNavigationBar: CustomBottomNavBar(
+        bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex == -1 ? 0 : _selectedNavIndex,
         onItemTapped: _onNavItemTapped,
       ),
