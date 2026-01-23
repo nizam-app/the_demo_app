@@ -79,7 +79,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
           iconColor: const Color(0xFF111827),
           iconSize: 22,
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 10.w),
         _CircleIconButton(
           icon: Icons.add_rounded,
           onTap: () {},
@@ -145,60 +145,47 @@ class _DevicesScreenState extends State<DevicesScreen> {
               _DeviceListCard(
                 children: [
                   // RGBW
-                  _DeviceRow(
-                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-                    leading: ClipOval(
-                      child: Image.asset(
-                        'assets/Rectangle.png',
-                        width: 34.w,
-                        height: 34.w,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 34.w,
-                            height: 34.w,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    title: 'RGBW',
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            _ModeDot(text: 'A', filled: false),
-                            SizedBox(width: 6),
-                            _SmallText('Off'),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        const _TinyGreyText('LCD0C12'),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: const [
-                            _TagChip(text: 'Lighting', bg: Color(0xFF0088FE), outlined: true),
-                            SizedBox(width: 6),
-                            _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 10.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                        SizedBox(width: 10.w),
-                        const _ToggleSwitch(isOn: true),
-                      ],
-                    ),
-                  ),
+              // RGBW
+_DeviceRow(
+  topRight: const _TimeTag(text: '18:32', blueIcon: true),
+  leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
+  title: 'RGBW',
+  subtitle: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          const _ModeDot(text: 'A', filled: false),
+          SizedBox(width: 6.w),
+          const _SmallText('Off'),
+        ],
+      ),
+      SizedBox(height: 2.h),
+      const _TinyGreyText('LCD0C12'),
+      SizedBox(height: 6.h),
+
+      // ✅ Row -> Wrap (fix overflow)
+      Wrap(
+        spacing: 6.w,
+        runSpacing: 6.h,
+        children: const [
+          _TagChip(text: 'Lighting', bg: Color(0xFF0088FE), outlined: true),
+          _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
+        ],
+      ),
+    ],
+  ),
+  trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const _CircleMiniBtn(icon: Icons.remove),
+      SizedBox(width: 8.w),
+      const _CircleMiniBtn(icon: Icons.add),
+      SizedBox(width: 8.w),
+      const _ToggleSwitch(isOn: true),
+    ],
+  ),
+),
 
                   const _RowDivider(),
 
@@ -362,10 +349,11 @@ class _DeviceListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 14.w),
+      // ✅ Screenshot-এর মতো full width look
+      margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(children: children),
     );
@@ -393,15 +381,21 @@ class _DeviceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h), // ✅ Image-1 padding
       child: Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(width: 6.w),
-              SizedBox(width: 34.w, height: 34.w, child: Center(child: leading)),
-              SizedBox(width: 10.w),
+              // ✅ bigger leading slot like Image-1
+              SizedBox(
+                width: 46.w,
+                height: 46.w,
+                child: Center(child: leading),
+              ),
+
+              SizedBox(width: 12.w),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,9 +403,10 @@ class _DeviceRow extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF111827),
+                        height: 1.05,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -419,15 +414,16 @@ class _DeviceRow extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10.w),
+
+              SizedBox(width: 12.w),
               trailing,
-              SizedBox(width: 4.w),
             ],
           ),
+
           if (topRight != null)
             Positioned(
               right: 0,
-              top: 0,
+              top: -2.h, // ✅ lifts like Image-1
               child: topRight!,
             ),
         ],
@@ -443,12 +439,11 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(left: 56.w),
-      color: const Color(0xFFF1F1F1),
+      margin: EdgeInsets.only(left: 74.w), // ✅ 16 + 46 + 12
+      color: const Color(0xFFE5E7EB),
     );
   }
 }
-
 /* ---------------- Search + Chips ---------------- */
 
 class _SearchBar extends StatelessWidget {
@@ -578,15 +573,22 @@ class _CircleMiniBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArrow =
+        icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+
     return Container(
-      width: 56.w,
-      height: 56.w,
+      width: 44.w, // ✅ closer to Image-1
+      height: 44.w,
       decoration: const BoxDecoration(
         color: Color(0xFFF3F4F6),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(icon, size: 30.sp, color: const Color(0xFF111827)),
+      child: Icon(
+        icon,
+        size: (isArrow ? 26 : 22).sp,
+        color: const Color(0xFF111827),
+      ),
     );
   }
 }
@@ -596,31 +598,29 @@ class _CircleActionBlue extends StatelessWidget {
     this.icon,
     this.imagePath,
   }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
-  
+
   final IconData? icon;
   final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 18.h), // ✅ pin-এর নিচে নামায়
-      child: Container(
-        width: 56.w,
-        height: 56.w,
-        decoration: const BoxDecoration(
-          color: Color(0xFF0088FE),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: imagePath != null
-            ? Image.asset(
-                imagePath!,
-                width: 28.sp,
-                height: 28.sp,
-                fit: BoxFit.contain,
-              )
-            : Icon(icon!, size: 28.sp, color: Colors.white),
+    return Container(
+      // ✅ Screenshot-এর real size (56 ❌)
+      width: 40.w,
+      height: 40.w,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0088FE),
+        shape: BoxShape.circle,
       ),
+      alignment: Alignment.center,
+      child: imagePath != null
+          ? Image.asset(
+              imagePath!,
+              width: 20.sp,
+              height: 20.sp,
+              fit: BoxFit.contain,
+            )
+          : Icon(icon!, size: 20.sp, color: Colors.white),
     );
   }
 }
@@ -632,8 +632,8 @@ class _ToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52.w,
-      height: 30.h,
+      width: 62.w,  // ✅ closer to iOS toggle size
+      height: 32.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
@@ -642,9 +642,12 @@ class _ToggleSwitch extends StatelessWidget {
       child: Align(
         alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 26.w,
-          height: 26.w,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          width: 28.w,
+          height: 28.w,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
@@ -657,37 +660,33 @@ class _SmallText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDisarmed = text.trim().toLowerCase() == 'disarmed';
+    final v = text.trim().toLowerCase();
+    final isStrong = v == 'disarmed' || v == 'blocked' || v == 'off';
 
     return Text(
       text,
       style: TextStyle(
-        fontSize: isDisarmed ? 16.sp : 12.sp,
-        fontWeight: isDisarmed ? FontWeight.w700 : FontWeight.w400,
-        color: isDisarmed ? const Color(0xFF111827) : const Color(0xFF6B7280),
+        fontSize: isStrong ? 16.sp : 12.sp,
+        fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
+        color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
       ),
     );
   }
 }
+
 class _PinOnly extends StatelessWidget {
   const _PinOnly();
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: Padding(
-        padding: EdgeInsets.only(top: 2.h, right: 2.w),
-        child: Image.asset(
-          'assets/image 81 (1).png',
-          width: 16.sp,
-          height: 16.sp,
-          fit: BoxFit.contain,
-          color: const Color(0xFF0088FE),
-          colorBlendMode: BlendMode.srcIn,
-        ),
-      ),
+    return Image.asset(
+      'assets/image 81 (1).png',
+      width: 16.sp,
+      height: 16.sp,
+      fit: BoxFit.contain,
+      color: const Color(0xFF0088FE),
+      colorBlendMode: BlendMode.srcIn,
     );
   }
 }
@@ -719,16 +718,15 @@ class _TinyGreyText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 18.sp,
+        // ✅ Screenshot: id/text খুব ছোট (18 ❌)
+        fontSize: 10.sp,
         fontWeight: FontWeight.w500,
         color: const Color(0xFF6B7280),
-        height: 1.0,
+        height: 1.05,
       ),
     );
   }
 }
-
-
 /* ---------------- Badges / Tags ---------------- */
 
 class _ModeDot extends StatelessWidget {
@@ -738,9 +736,13 @@ class _ModeDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ A ছোট, M বড় (same call, no structure change)
+    final isBig = filled; // M row filled=true => bigger
+    final s = (isBig ? 34 : 26).w;
+
     return Container(
-      width: 34.w,  // ✅ bigger
-      height: 34.w,
+      width: s,
+      height: s,
       decoration: BoxDecoration(
         color: filled ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
         shape: BoxShape.circle,
@@ -749,9 +751,9 @@ class _ModeDot extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 18.sp, // ✅ bigger
+          fontSize: (isBig ? 18 : 14).sp,
           fontWeight: FontWeight.w700,
-          color: filled ? Colors.white : const Color(0xFF111827),
+          color: filled ? Colors.white : const Color(0xFF6B7280),
           height: 1.0,
         ),
       ),
@@ -772,56 +774,45 @@ class _TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: outlined ? Colors.white : bg,
-        borderRadius: BorderRadius.circular(6.r),
-        border: outlined
-            ? Border.all(
-                color: bg,
-                width: 2,
-              )
-            : null,
+        borderRadius: BorderRadius.circular(8.r),
+        border: outlined ? Border.all(color: bg, width: 1.5) : null,
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10.sp,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: outlined ? bg : Colors.white,
+          height: 1.0,
         ),
       ),
     );
   }
 }
-
 /* ---------------- Top right tags (time/star) ---------------- */
 
 class _TimeTag extends StatelessWidget {
   const _TimeTag({
     required this.text,
     this.blueIcon = true,
-    this.iconSize,
-    this.fontSize,
   });
 
   final String text;
   final bool blueIcon;
-  final double? iconSize;
-  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {
-    final iSize = (iconSize ?? 16).sp;   // screenshot vibe
-    final tSize = (fontSize ?? 13).sp;   // screenshot vibe
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'assets/image 81 (1).png',
-          width: iSize,
-          height: iSize,
+          'assets/image 81 (1).png', // pin
+          width: 14.sp,
+          height: 14.sp,
+          fit: BoxFit.contain,
           color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
           colorBlendMode: BlendMode.srcIn,
         ),
@@ -829,9 +820,9 @@ class _TimeTag extends StatelessWidget {
         Text(
           text,
           style: TextStyle(
-            fontSize: tSize,
-            color: const Color(0xFF111827), // screenshot মতো ডার্ক
-            fontWeight: FontWeight.w600,    // bold look
+            fontSize: 10.sp, // ✅ screenshot small
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w600,
             height: 1.0,
           ),
         ),
@@ -839,7 +830,6 @@ class _TimeTag extends StatelessWidget {
     );
   }
 }
-
 class _StarTimeTag extends StatelessWidget {
   const _StarTimeTag({required this.time});
   final String time;
@@ -849,14 +839,14 @@ class _StarTimeTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded, size: 22.sp, color: const Color(0xFFFBBF24)),
-        SizedBox(width: 10.w),
+        Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24)),
+        SizedBox(width: 6.w),
         Text(
           time,
           style: TextStyle(
-            fontSize: 20.sp,
+            fontSize: 10.sp, // ✅ screenshot small
             color: const Color(0xFF111827),
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             height: 1.0,
           ),
         ),
@@ -864,13 +854,12 @@ class _StarTimeTag extends StatelessWidget {
     );
   }
 }
-
 class _StarOnly extends StatelessWidget {
   const _StarOnly();
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.star, size: 14.sp, color: const Color(0xFFFBBF24));
+    return Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24));
   }
 }
 

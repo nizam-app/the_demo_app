@@ -1054,10 +1054,10 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = size ?? 35.w;
+    final s = size ?? 35;
     return Container(
-      width: s,
-      height: s,
+      width: s.w,
+      height: s.h,
       decoration: const BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
@@ -1330,7 +1330,14 @@ class _BlindCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _CircleBtn(child: Icon(Icons.keyboard_arrow_down, size: 18.sp)),
+                      _CircleBtn(
+                        child: Image.asset(
+                          'assets/Mask group (17).png',
+                          width: 13.sp,
+                          height: 13.sp,
+                          fit: BoxFit.contain,
+                        ),size: 35,
+                      ),
                       SizedBox(width: 6.w),
                       Image.asset(
                         'assets/Group 32.jpg',
@@ -1356,7 +1363,14 @@ class _BlindCard extends StatelessWidget {
                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                       ),
                       SizedBox(width: 6.w),
-                      _CircleBtn(child: Icon(Icons.keyboard_arrow_up, size: 18.sp)),
+                      _CircleBtn(
+                        child: Image.asset(
+                          'assets/Mask group (16).png',
+                          width: 13.sp,
+                          height: 13.sp,
+                          fit: BoxFit.contain,
+                        ),size: 35,
+                      ),
                     ],
                   ),
                 ),
@@ -1418,12 +1432,19 @@ class _ToggleCard extends StatelessWidget {
                     isOn ? 'On' : 'Off',
                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                   ),
-                  Switch(
-                    value: isOn,
-                    onChanged: (_) {},
-                    activeColor: Colors.white,
-                    activeTrackColor: const Color(0xFF0088FE),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  SizedBox(
+                    width: 60.w,
+                    height: 35.h,
+                    child: Transform.scale(
+                      scale: 1.17, // Scale to fit 60w x 35h (35/30 ≈ 1.17)
+                      child: Switch(
+                        value: isOn,
+                        onChanged: (_) {},
+                        activeColor: Colors.white,
+                        activeTrackColor: const Color(0xFF0088FE),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -2538,8 +2559,8 @@ class _ToggleSwitch extends StatelessWidget {
       child: Align(
         alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 26.w,
-          height: 26.w,
+          width: 30.86.w,
+          height: 30.86.w,
           decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
         ),
       ),
