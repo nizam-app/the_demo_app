@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
+
 
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
@@ -46,12 +46,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 child: Row(
   children: [
     _CircleIconButton(
-      icon: Icons.chevron_left_rounded,
+      imagePath: 'assets/aro.png',
       onTap: () => Navigator.maybePop(context),
-      size: 44,                // image-like
+      size: 32,                // image-like
       bg: const Color(0xFFE5E7EB),
       iconColor: Colors.black87,
-      iconSize: 26,
+      iconSize: 14,
     ),
 
     // ✅ Keep title perfectly centered by reserving equal space on both sides
@@ -74,19 +74,19 @@ class _DevicesScreenState extends State<DevicesScreen> {
         _CircleIconButton(
           icon: Icons.more_horiz_rounded,
           onTap: () {},
-          size: 44,
+          size: 32,
           bg: const Color(0xFFF3F4F6),
           iconColor: const Color(0xFF111827),
           iconSize: 22,
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 10.w),
         _CircleIconButton(
           icon: Icons.add_rounded,
           onTap: () {},
-          size: 44,
+          size: 32,
           bg: const Color(0xFF0088FE),
           iconColor: Colors.white,   // ✅ fix
-          iconSize: 24,
+          iconSize: 23,
         ),
       ],
     ),
@@ -97,7 +97,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
               // -------- Search ----------
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w),
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h  ),
                 child: _SearchBar(),
               ),
 
@@ -130,9 +130,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                 child: Text(
-                  'Devicesssss',
+                  'Devices',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
                   ),
@@ -145,83 +145,90 @@ class _DevicesScreenState extends State<DevicesScreen> {
               _DeviceListCard(
                 children: [
                   // RGBW
-                  _DeviceRow(
-                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-                    leading: const _GradientCircleIcon(size: 34),
-                    title: 'RGBW',
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            _ModeDot(text: 'A', filled: false),
-                            SizedBox(width: 6),
-                            _SmallText('Off'),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        const _TinyGreyText('LCD0C12'),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: const [
-                            _TagChip(text: 'Lighting', bg: Color(0xFF0088FE)),
-                            SizedBox(width: 6),
-                            _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 10.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                        SizedBox(width: 10.w),
-                        const _ToggleSwitch(isOn: true),
-                      ],
-                    ),
-                  ),
+              // RGBW
+_DeviceRow(
+  topRight: const _TimeTag(text: '18:32', blueIcon: true),
+  leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
+  title: 'RGBW',
+  subtitle: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          const _ModeDot(text: 'A', filled: false),
+          SizedBox(width: 6.w),
+          const _SmallText('Off'),
+        ],
+      ),
+      SizedBox(height: 2.h),
+      const _TinyGreyText('LCD0C12'),
+      SizedBox(height: 6.h),
+
+      // ✅ Row -> Wrap (fix overflow)
+      Wrap(
+        spacing: 6.w,
+        runSpacing: 6.h,
+        children: const [
+          _TagChip(text: 'Lighting', bg: Color(0xFF0088FE), outlined: true),
+          _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
+        ],
+      ),
+    ],
+  ),
+  trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const _CircleMiniBtn(icon: Icons.remove),
+      SizedBox(width: 8.w),
+      const _CircleMiniBtn(icon: Icons.add),
+      SizedBox(width: 8.w),
+      const _ToggleSwitch(isOn: true),
+    ],
+  ),
+),
 
                   const _RowDivider(),
 
                   // Alarm
                   _DeviceRow(
+                    topRight: const _PinOnly(),
                     leading: const _LockIcon(),
-                    title: 'Security Alarm',
+                    title: 'Alarm',
                     subtitle: const _SmallText('Disarmed'),
-                    trailing: const _CircleActionBlue(icon: Icons.power_settings_new),
+                    trailing: const _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
                   ),
 
                   const _RowDivider(),
 
                   // Bathroom
-                  _DeviceRow(
-                    leading: const _PowerRingIcon(),
-                    title: 'Bathroom',
-                    subtitle: Row(
-                      children: const [
-                        _ModeDot(text: 'M', filled: true),
-                        SizedBox(width: 8),
-                        Text(
-                          '24.6°c',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111827),
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 10.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                      ],
-                    ),
-                  ),
+            _DeviceRow(
+  leading: const _PowerRingIcon(),
+  title: 'Bathroom',
+  subtitle: Row(
+    children: const [
+      _ModeDot(text: 'M', filled: true),
+      SizedBox(width: 10),
+      Icon(Icons.thermostat, size: 18, color: Color(0xFF38BDF8)), // চাইলে image asset দিন
+      SizedBox(width: 6),
+      Text(
+        '24.6°C',
+        style: TextStyle(
+          fontSize: 20, // screenshot vibe
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF111827),
+        ),
+      ),
+    ],
+  ),
+  trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const _CircleMiniBtn(icon: Icons.remove),
+      SizedBox(width: 14.w),
+      const _CircleMiniBtn(icon: Icons.add),
+    ],
+  ),
+),
 
                   const _RowDivider(),
 
@@ -257,7 +264,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     leading: const _PlayCircleIcon(),
                     title: 'Block Irrigation Schedule',
                     subtitle: const _SmallText('Blocked'),
-                    trailing: const _CircleActionBlue(icon: Icons.play_arrow),
+                    trailing: const _CircleActionBlue(imagePath: 'assets/play.png'),
                   ),
 
                   const _RowDivider(),
@@ -310,15 +317,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
               _DeviceListCard(
                 children: const [
                   _ControlUnitRow(
-                    icon: Icons.memory,
-                    iconColor: Color(0xFF0088FE),
+                    imagePath: 'assets/image 124.png',
                     title: 'CORE20',
                     sub: 'CORE20-4B37-3419-363A',
                   ),
                   _RowDivider(),
                   _ControlUnitRow(
-                    icon: Icons.warning_amber_rounded,
-                    iconColor: Color(0xFFFE019A),
+                    imagePath: 'assets/image 124.png',
                     title: 'D012',
                     sub: '11 Devices',
                     sub2: 'CORE20-4B37-3419-363A',
@@ -329,10 +334,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ),
         ),
       ),
-        bottomNavigationBar: BottomNavBarWidget(
-        selectedIndex: _selectedNavIndex == -1 ? 0 : _selectedNavIndex,
-        onItemTapped: _onNavItemTapped,
-      ),
+      
     );
     
   }
@@ -347,10 +349,11 @@ class _DeviceListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 14.w),
+      // ✅ Screenshot-এর মতো full width look
+      margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(children: children),
     );
@@ -378,15 +381,21 @@ class _DeviceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h), // ✅ Image-1 padding
       child: Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(width: 6.w),
-              SizedBox(width: 34.w, height: 34.w, child: Center(child: leading)),
-              SizedBox(width: 10.w),
+              // ✅ bigger leading slot like Image-1
+              SizedBox(
+                width: 46.w,
+                height: 46.w,
+                child: Center(child: leading),
+              ),
+
+              SizedBox(width: 12.w),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,9 +403,10 @@ class _DeviceRow extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF111827),
+                        height: 1.05,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -404,15 +414,16 @@ class _DeviceRow extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(width: 10.w),
+
+              SizedBox(width: 12.w),
               trailing,
-              SizedBox(width: 4.w),
             ],
           ),
+
           if (topRight != null)
             Positioned(
               right: 0,
-              top: 0,
+              top: -2.h, // ✅ lifts like Image-1
               child: topRight!,
             ),
         ],
@@ -428,12 +439,11 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(left: 56.w),
-      color: const Color(0xFFF1F1F1),
+      margin: EdgeInsets.only(left: 74.w), // ✅ 16 + 46 + 12
+      color: const Color(0xFFE5E7EB),
     );
   }
 }
-
 /* ---------------- Search + Chips ---------------- */
 
 class _SearchBar extends StatelessWidget {
@@ -510,15 +520,17 @@ class _FilterChipPill extends StatelessWidget {
 
 class _CircleIconButton extends StatelessWidget {
   const _CircleIconButton({
-    required this.icon,
+    this.icon,
+    this.imagePath,
     required this.onTap,
     this.size = 44,
     this.bg = const Color(0xFFF3F4F6),
     this.iconColor = const Color(0xFF111827),
     this.iconSize = 22,
-  });
+  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
 
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath;
   final VoidCallback onTap;
   final double size;
   final Color bg;
@@ -537,11 +549,18 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Center(
-          child: Icon(
-            icon,
-            size: iconSize.sp,
-            color: iconColor,
-          ),
+          child: imagePath != null
+              ? Image.asset(
+                  imagePath!,
+                  width: iconSize.sp,
+                  height: iconSize.sp,
+                  fit: BoxFit.contain,
+                )
+              : Icon(
+                  icon!,
+                  size: iconSize.sp,
+                  color: iconColor,
+                ),
         ),
       ),
     );
@@ -554,34 +573,54 @@ class _CircleMiniBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArrow =
+        icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+
     return Container(
-      width: 30.w,
-      height: 30.w,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+      width: 44.w, // ✅ closer to Image-1
+      height: 44.w,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF3F4F6),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(icon, size: 18.sp, color: const Color(0xFF111827)),
+      child: Icon(
+        icon,
+        size: (isArrow ? 26 : 22).sp,
+        color: const Color(0xFF111827),
+      ),
     );
   }
 }
 
 class _CircleActionBlue extends StatelessWidget {
-  const _CircleActionBlue({required this.icon});
-  final IconData icon;
+  const _CircleActionBlue({
+    this.icon,
+    this.imagePath,
+  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
+
+  final IconData? icon;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 34.w,
-      height: 34.w,
+      // ✅ Screenshot-এর real size (56 ❌)
+      width: 40.w,
+      height: 40.w,
       decoration: const BoxDecoration(
         color: Color(0xFF0088FE),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(icon, size: 18.sp, color: Colors.white),
+      child: imagePath != null
+          ? Image.asset(
+              imagePath!,
+              width: 20.sp,
+              height: 20.sp,
+              fit: BoxFit.contain,
+            )
+          : Icon(icon!, size: 20.sp, color: Colors.white),
     );
   }
 }
@@ -593,8 +632,8 @@ class _ToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 52.w,
-      height: 30.h,
+      width: 62.w,  // ✅ closer to iOS toggle size
+      height: 32.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
@@ -603,16 +642,17 @@ class _ToggleSwitch extends StatelessWidget {
       child: Align(
         alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 26.w,
-          height: 26.w,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          width: 28.w,
+          height: 28.w,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
   }
 }
-
-/* ---------------- Small texts ---------------- */
 
 class _SmallText extends StatelessWidget {
   const _SmallText(this.text);
@@ -620,16 +660,37 @@ class _SmallText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final v = text.trim().toLowerCase();
+    final isStrong = v == 'disarmed' || v == 'blocked' || v == 'off';
+
     return Text(
       text,
       style: TextStyle(
-        fontSize: 12.sp,
-        fontWeight: FontWeight.w400,
-        color: const Color(0xFF6B7280),
+        fontSize: isStrong ? 16.sp : 12.sp,
+        fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
+        color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
+        height: 1.05,
       ),
     );
   }
 }
+
+class _PinOnly extends StatelessWidget {
+  const _PinOnly();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/image 81 (1).png',
+      width: 16.sp,
+      height: 16.sp,
+      fit: BoxFit.contain,
+      color: const Color(0xFF0088FE),
+      colorBlendMode: BlendMode.srcIn,
+    );
+  }
+}
+
 
 class _BoldSmall extends StatelessWidget {
   const _BoldSmall(this.text);
@@ -657,14 +718,15 @@ class _TinyGreyText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
+        // ✅ Screenshot: id/text খুব ছোট (18 ❌)
         fontSize: 10.sp,
-        fontWeight: FontWeight.w400,
-        color: const Color(0xFF9CA3AF),
+        fontWeight: FontWeight.w500,
+        color: const Color(0xFF6B7280),
+        height: 1.05,
       ),
     );
   }
 }
-
 /* ---------------- Badges / Tags ---------------- */
 
 class _ModeDot extends StatelessWidget {
@@ -674,9 +736,13 @@ class _ModeDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ A ছোট, M বড় (same call, no structure change)
+    final isBig = filled; // M row filled=true => bigger
+    final s = (isBig ? 34 : 26).w;
+
     return Container(
-      width: 18.w,
-      height: 18.w,
+      width: s,
+      height: s,
       decoration: BoxDecoration(
         color: filled ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
         shape: BoxShape.circle,
@@ -685,9 +751,10 @@ class _ModeDot extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10.sp,
+          fontSize: (isBig ? 18 : 14).sp,
           fontWeight: FontWeight.w700,
-          color: filled ? Colors.white : const Color(0xFF111827),
+          color: filled ? Colors.white : const Color(0xFF6B7280),
+          height: 1.0,
         ),
       ),
     );
@@ -695,34 +762,44 @@ class _ModeDot extends StatelessWidget {
 }
 
 class _TagChip extends StatelessWidget {
-  const _TagChip({required this.text, required this.bg});
+  const _TagChip({
+    required this.text,
+    required this.bg,
+    this.outlined = false,
+  });
   final String text;
   final Color bg;
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6.r),
+        color: outlined ? Colors.white : bg,
+        borderRadius: BorderRadius.circular(8.r),
+        border: outlined ? Border.all(color: bg, width: 1.5) : null,
       ),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 10.sp,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: outlined ? bg : Colors.white,
+          height: 1.0,
         ),
       ),
     );
   }
 }
-
 /* ---------------- Top right tags (time/star) ---------------- */
 
 class _TimeTag extends StatelessWidget {
-  const _TimeTag({required this.text, this.blueIcon = false});
+  const _TimeTag({
+    required this.text,
+    this.blueIcon = true,
+  });
+
   final String text;
   final bool blueIcon;
 
@@ -731,25 +808,28 @@ class _TimeTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          Icons.wifi,
-          size: 12.sp,
+        Image.asset(
+          'assets/image 81 (1).png', // pin
+          width: 14.sp,
+          height: 14.sp,
+          fit: BoxFit.contain,
           color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
+          colorBlendMode: BlendMode.srcIn,
         ),
-        SizedBox(width: 4.w),
+        SizedBox(width: 6.w),
         Text(
           text,
           style: TextStyle(
-            fontSize: 10.sp,
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
+            fontSize: 10.sp, // ✅ screenshot small
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w600,
+            height: 1.0,
           ),
         ),
       ],
     );
   }
 }
-
 class _StarTimeTag extends StatelessWidget {
   const _StarTimeTag({required this.time});
   final String time;
@@ -759,29 +839,30 @@ class _StarTimeTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star, size: 14.sp, color: const Color(0xFFFBBF24)),
-        SizedBox(width: 4.w),
+        Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24)),
+        SizedBox(width: 6.w),
         Text(
           time,
           style: TextStyle(
-            fontSize: 10.sp,
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
+            fontSize: 10.sp, // ✅ screenshot small
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w600,
+            height: 1.0,
           ),
         ),
       ],
     );
   }
 }
-
 class _StarOnly extends StatelessWidget {
   const _StarOnly();
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.star, size: 14.sp, color: const Color(0xFFFBBF24));
+    return Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24));
   }
 }
+
 
 /* ---------------- Leading icons (approx same) ---------------- */
 
@@ -815,14 +896,17 @@ class _LockIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 34.w,
-      height: 34.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFE4F1),
-        shape: BoxShape.circle,
+    return SizedBox(
+      width: 44.w,
+      height: 44.w,
+      child: Center(
+        child: Image.asset(
+          'assets/Mask group (10).png',
+          width: 40.w,
+          height: 40.w,
+          fit: BoxFit.contain,
+        ),
       ),
-      child: Icon(Icons.lock_outline, size: 18.sp, color: const Color(0xFFFE019A)),
     );
   }
 }
@@ -832,14 +916,48 @@ class _PowerRingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 34.w,
-      height: 34.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFFEAFBF2),
-        shape: BoxShape.circle,
+    return SizedBox(
+      width: 44.w,
+      height: 44.w,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Ring
+          Container(
+            width: 44.w,
+            height: 44.w,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: SweepGradient(
+                colors: [
+                  Color(0xFF22C55E), // green
+                  Color(0xFF38BDF8), // light blue
+                  Color(0xFF3B82F6), // blue
+                  Color(0xFF22C55E), // back to green
+                ],
+              ),
+            ),
+          ),
+
+          // inner cut (makes ring)
+          Container(
+            width: 34.w,
+            height: 34.w,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+
+          // Power glyph (looks like screenshot)
+          Image.asset(
+            'assets/Mask group (11).png',
+            width: 22.sp,
+            height: 22.sp,
+            fit: BoxFit.contain,
+          ),
+        ],
       ),
-      child: Icon(Icons.power_settings_new, size: 18.sp, color: const Color(0xFF10B981)),
     );
   }
 }
@@ -849,14 +967,34 @@ class _BlindGreenIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 34.w,
       height: 34.w,
+      child: Center(
+        child: Image.asset(
+          'assets/Mask group (12).png',
+          width: 34.w,
+          height: 34.w,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
       decoration: const BoxDecoration(
-        color: Color(0xFFEAFBF2),
+        color: Color(0xFFFBBF24),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.blinds_outlined, size: 18.sp, color: const Color(0xFF84CC16)),
     );
   }
 }
@@ -866,14 +1004,17 @@ class _PlayCircleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 34.w,
       height: 34.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFFEAF1FF),
-        shape: BoxShape.circle,
+      child: Center(
+        child: Image.asset(
+          'assets/Mask group (14).png',
+          width: 34.w,
+          height: 34.w,
+          fit: BoxFit.contain,
+        ),
       ),
-      child: Icon(Icons.play_arrow, size: 18.sp, color: const Color(0xFF0088FE)),
     );
   }
 }
@@ -883,14 +1024,17 @@ class _SunIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 34.w,
       height: 34.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFFBEB),
-        shape: BoxShape.circle,
+      child: Center(
+        child: Image.asset(
+          'assets/Mask group (5).png',
+          width: 34.w,
+          height: 34.w,
+          fit: BoxFit.contain,
+        ),
       ),
-      child: Icon(Icons.wb_sunny_outlined, size: 18.sp, color: const Color(0xFFFBBF24)),
     );
   }
 }
@@ -921,18 +1065,139 @@ class _BlindStatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const _ModeDot(text: 'A', filled: false),
-        SizedBox(width: 10.w),
-        Icon(Icons.arrow_downward, size: 14.sp, color: const Color(0xFF111827)),
-        SizedBox(width: 4.w),
-        Text('0%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
-        SizedBox(width: 12.w),
-        Icon(Icons.arrow_upward, size: 14.sp, color: const Color(0xFF111827)),
-        SizedBox(width: 4.w),
-        Text('50%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
+        // A badge (light grey circle)
+        Container(
+          width: 40.w,
+          height: 40.w,
+          decoration: const BoxDecoration(
+            color: Color(0xFFE5E7EB),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            'A',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF6B7280),
+              height: 1.0,
+            ),
+          ),
+        ),
+        SizedBox(width: 14.w),
+
+        // icon + 0%
+        Image.asset(
+          'assets/Group 32.jpg',
+          width: 22.w,
+          height: 28.h,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          '0%',
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+            height: 1.0,
+          ),
+        ),
+
+        SizedBox(width: 18.w),
+
+        // icon + 50%
+        Image.asset(
+          'assets/Vector 4.jpg',
+          width: 18.w,
+          height: 28.h,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          '50%',
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+            height: 1.0,
+          ),
+        ),
       ],
     );
   }
+}
+
+/// black “up/down triangles” icon
+class _DoubleTriangleIcon extends StatelessWidget {
+  const _DoubleTriangleIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 22.w,
+      height: 28.h,
+      child: CustomPaint(painter: _DoubleTrianglePainter()),
+    );
+  }
+}
+
+class _DoubleTrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()..color = const Color(0xFF111827);
+
+    // up triangle
+    final up = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height / 2 - 2)
+      ..lineTo(0, size.height / 2 - 2)
+      ..close();
+
+    // down triangle
+    final down = Path()
+      ..moveTo(0, size.height / 2 + 2)
+      ..lineTo(size.width, size.height / 2 + 2)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+
+    canvas.drawPath(up, p);
+    canvas.drawPath(down, p);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// black wedge icon (like screenshot)
+class _WedgeIcon extends StatelessWidget {
+  const _WedgeIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 18.w,
+      height: 28.h,
+      child: CustomPaint(painter: _WedgePainter()),
+    );
+  }
+}
+
+class _WedgePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()..color = const Color(0xFF111827);
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, size.height * 0.25)
+      ..lineTo(size.width, size.height * 0.75)
+      ..lineTo(0, size.height)
+      ..close();
+    canvas.drawPath(path, p);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /* ---------------- Brightness pill slider ---------------- */
@@ -974,15 +1239,17 @@ class _BrightnessPill extends StatelessWidget {
 
 class _ControlUnitRow extends StatelessWidget {
   const _ControlUnitRow({
-    required this.icon,
-    required this.iconColor,
+    this.icon,
+    this.iconColor,
+    this.imagePath,
     required this.title,
     required this.sub,
     this.sub2,
-  });
+  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
 
-  final IconData icon;
-  final Color iconColor;
+  final IconData? icon;
+  final Color? iconColor;
+  final String? imagePath;
   final String title;
   final String sub;
   final String? sub2;
@@ -1001,7 +1268,14 @@ class _ControlUnitRow extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Icon(icon, size: 18.sp, color: iconColor),
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: 18.sp,
+                    height: 18.sp,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: 18.sp, color: iconColor!),
           ),
           SizedBox(width: 10.w),
           Expanded(

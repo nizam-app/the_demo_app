@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // Index 0: Devices
         RepaintBoundary(
-          child: _DevicesBody(),
+          child: DevicesScreen(),
         ),
         // Index 1: Analytics
         RepaintBoundary(
@@ -1054,10 +1054,10 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = size ?? 35.w;
+    final s = size ?? 35;
     return Container(
-      width: s,
-      height: s,
+      width: s.w,
+      height: s.h,
       decoration: const BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
@@ -1330,7 +1330,14 @@ class _BlindCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _CircleBtn(child: Icon(Icons.keyboard_arrow_down, size: 18.sp)),
+                      _CircleBtn(
+                        child: Image.asset(
+                          'assets/Mask group (17).png',
+                          width: 13.sp,
+                          height: 13.sp,
+                          fit: BoxFit.contain,
+                        ),size: 35,
+                      ),
                       SizedBox(width: 6.w),
                       Image.asset(
                         'assets/Group 32.jpg',
@@ -1356,7 +1363,14 @@ class _BlindCard extends StatelessWidget {
                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                       ),
                       SizedBox(width: 6.w),
-                      _CircleBtn(child: Icon(Icons.keyboard_arrow_up, size: 18.sp)),
+                      _CircleBtn(
+                        child: Image.asset(
+                          'assets/Mask group (16).png',
+                          width: 13.sp,
+                          height: 13.sp,
+                          fit: BoxFit.contain,
+                        ),size: 35,
+                      ),
                     ],
                   ),
                 ),
@@ -1418,12 +1432,19 @@ class _ToggleCard extends StatelessWidget {
                     isOn ? 'On' : 'Off',
                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                   ),
-                  Switch(
-                    value: isOn,
-                    onChanged: (_) {},
-                    activeColor: Colors.white,
-                    activeTrackColor: const Color(0xFF0088FE),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  SizedBox(
+                    width: 60.w,
+                    height: 35.h,
+                    child: Transform.scale(
+                      scale: 1.17, // Scale to fit 60w x 35h (35/30 ≈ 1.17)
+                      child: Switch(
+                        value: isOn,
+                        onChanged: (_) {},
+                        activeColor: Colors.white,
+                        activeTrackColor: const Color(0xFF0088FE),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1930,285 +1951,285 @@ class _CircularProgressPainter extends CustomPainter {
 }
 
 // Screen body widgets for CustomBottomNavBar
-class _DevicesBody extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 18.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // -------- Header (top bar) ----------
-              Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          'Devices',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                          ),
-                        ),
-                      ),
-                    ),
-                    _CircleIconButton(
-                      icon: Icons.more_horiz,
-                      onTap: () {},
-                    ),
-                    SizedBox(width: 10.w),
-                    _CircleIconButton(
-                      icon: Icons.add,
-                      bg: const Color(0xFF0088FE),
-                      iconColor: Colors.white,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              ),
+// class _DevicesBody extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       body: SafeArea(
+//         child: SingleChildScrollView(
+//           padding: EdgeInsets.only(bottom: 18.h),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               // -------- Header (top bar) ----------
+//               Padding(
+//                 padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
+//                 child: Row(
+//                   children: [
+//                     Expanded(
+//                       child: Center(
+//                         child: Text(
+//                           'Devices',
+//                           style: TextStyle(
+//                             fontSize: 18.sp,
+//                             fontWeight: FontWeight.w600,
+//                             color: const Color(0xFF111827),
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                     _CircleIconButton(
+//                       icon: Icons.more_horiz,
+//                       onTap: () {},
+//                     ),
+//                     SizedBox(width: 10.w),
+//                     _CircleIconButton(
+//                       icon: Icons.add,
+//                       bg: const Color(0xFF0088FE),
+//                       iconColor: Colors.white,
+//                       onTap: () {},
+//                     ),
+//                   ],
+//                 ),
+//               ),
 
-              // -------- Search ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: _SearchBar(),
-              ),
+//               // -------- Search ----------
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
+//                 child: _SearchBar(),
+//               ),
 
-              SizedBox(height: 10.h),
+//               SizedBox(height: 10.h),
 
-              // -------- Filter chips ----------
-              SizedBox(
-                height: 34.h,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  children: const [
-                    _FilterChipPill(label: 'All', selected: true),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Favorites'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Smart'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Groups'),
-                    SizedBox(width: 8),
-                    _FilterChipPill(label: 'Category'),
-                  ],
-                ),
-              ),
+//               // -------- Filter chips ----------
+//               SizedBox(
+//                 height: 34.h,
+//                 child: ListView(
+//                   scrollDirection: Axis.horizontal,
+//                   padding: EdgeInsets.symmetric(horizontal: 14.w),
+//                   children: const [
+//                     _FilterChipPill(label: 'All', selected: true),
+//                     SizedBox(width: 8),
+//                     _FilterChipPill(label: 'Favorites'),
+//                     SizedBox(width: 8),
+//                     _FilterChipPill(label: 'Smart'),
+//                     SizedBox(width: 8),
+//                     _FilterChipPill(label: 'Groups'),
+//                     SizedBox(width: 8),
+//                     _FilterChipPill(label: 'Category'),
+//                   ],
+//                 ),
+//               ),
 
-              SizedBox(height: 12.h),
+//               SizedBox(height: 12.h),
 
-              // -------- Section Title ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Devices',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
+//               // -------- Section Title ----------
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
+//                 child: Text(
+//                   'Devices',
+//                   style: TextStyle(
+//                     fontSize: 16.sp,
+//                     fontWeight: FontWeight.w600,
+//                     color: const Color(0xFF111827),
+//                   ),
+//                 ),
+//               ),
 
-              SizedBox(height: 8.h),
+//               SizedBox(height: 8.h),
 
-              // -------- List (rows) ----------
-              _DeviceListCard(
-                children: [
-                  // RGBW
-                  _DeviceRow(
-                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-                    leading: const _GradientCircleIcon(size: 34),
-                    title: 'RGBW',
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            _ModeDot(text: 'A', filled: false),
-                            SizedBox(width: 6),
-                            _SmallText('Off'),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        const _TinyGreyText('LCD0C12'),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: const [
-                            _TagChip(text: 'Lighting', bg: Color(0xFF0088FE)),
-                            SizedBox(width: 6),
-                            _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 10.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                        SizedBox(width: 10.w),
-                        const _ToggleSwitch(isOn: true),
-                      ],
-                    ),
-                  ),
+//               // -------- List (rows) ----------
+//               _DeviceListCard(
+//                 children: [
+//                   // RGBW
+//                   _DeviceRow(
+//                     topRight: const _TimeTag(text: '18:32', blueIcon: true),
+//                     leading: const _GradientCircleIcon(size: 34),
+//                     title: 'RGBW',
+//                     subtitle: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           children: const [
+//                             _ModeDot(text: 'A', filled: false),
+//                             SizedBox(width: 6),
+//                             _SmallText('Off'),
+//                           ],
+//                         ),
+//                         const SizedBox(height: 2),
+//                         const _TinyGreyText('LCD0C12'),
+//                         const SizedBox(height: 6),
+//                         Row(
+//                           children: const [
+//                             _TagChip(text: 'Lighting', bg: Color(0xFF0088FE)),
+//                             SizedBox(width: 6),
+//                             _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A)),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                     trailing: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         const _CircleMiniBtn(icon: Icons.remove),
+//                         SizedBox(width: 10.w),
+//                         const _CircleMiniBtn(icon: Icons.add),
+//                         SizedBox(width: 10.w),
+//                         const _ToggleSwitch(isOn: true),
+//                       ],
+//                     ),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Alarm
-                  _DeviceRow(
-                    leading: const _LockIcon(),
-                    title: 'Alarm',
-                    subtitle: const _SmallText('Disarmed'),
-                    trailing: const _CircleActionBlue(icon: Icons.power_settings_new),
-                  ),
+//                   // Alarm
+//                   _DeviceRow(
+//                     leading: const _LockIcon(),
+//                     title: 'Alarm',
+//                     subtitle: const _SmallText('Disarmed'),
+//                     trailing: const _CircleActionBlue(icon: Icons.power_settings_new),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Bathroom
-                  _DeviceRow(
-                    leading: const _PowerRingIcon(),
-                    title: 'Bathroom',
-                    subtitle: Row(
-                      children: const [
-                        _ModeDot(text: 'M', filled: true),
-                        SizedBox(width: 8),
-                        Text(
-                          '24.6°c',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111827),
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 10.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                      ],
-                    ),
-                  ),
+//                   // Bathroom
+//                   _DeviceRow(
+//                     leading: const _PowerRingIcon(),
+//                     title: 'Bathroom',
+//                     subtitle: Row(
+//                       children: const [
+//                         _ModeDot(text: 'M', filled: true),
+//                         SizedBox(width: 8),
+//                         Text(
+//                           '24.6°c',
+//                           style: TextStyle(
+//                             fontSize: 13,
+//                             fontWeight: FontWeight.w600,
+//                             color: Color(0xFF111827),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     trailing: Row(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         const _CircleMiniBtn(icon: Icons.remove),
+//                         SizedBox(width: 10.w),
+//                         const _CircleMiniBtn(icon: Icons.add),
+//                       ],
+//                     ),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Blind Living Room (selected highlight row)
-                  _DeviceRow(
-                    selected: true,
-                    topRight: const _StarTimeTag(time: '20:36'),
-                    leading: const _BlindGreenIcon(),
-                    title: 'Blind Living Room',
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        SizedBox(height: 2),
-                        _BlindStatsRow(),
-                        SizedBox(height: 3),
-                        _TinyGreyText('D012U12'),
-                      ],
-                    ),
-                    trailing: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                        SizedBox(height: 10),
-                        _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-                      ],
-                    ),
-                  ),
+//                   // Blind Living Room (selected highlight row)
+//                   _DeviceRow(
+//                     selected: true,
+//                     topRight: const _StarTimeTag(time: '20:36'),
+//                     leading: const _BlindGreenIcon(),
+//                     title: 'Blind Living Room',
+//                     subtitle: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: const [
+//                         SizedBox(height: 2),
+//                         _BlindStatsRow(),
+//                         SizedBox(height: 3),
+//                         _TinyGreyText('D012U12'),
+//                       ],
+//                     ),
+//                     trailing: Column(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: const [
+//                         _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
+//                         SizedBox(height: 10),
+//                         _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
+//                       ],
+//                     ),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Block Irrigation Schedule (blue play row)
-                  _DeviceRow(
-                    leading: const _PlayCircleIcon(),
-                    title: 'Block Irrigation Schedule',
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: const _CircleActionBlue(icon: Icons.play_arrow),
-                  ),
+//                   // Block Irrigation Schedule (blue play row)
+//                   _DeviceRow(
+//                     leading: const _PlayCircleIcon(),
+//                     title: 'Block Irrigation Schedule',
+//                     subtitle: const _SmallText('Blocked'),
+//                     trailing: const _CircleActionBlue(icon: Icons.play_arrow),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Brightness (with pill slider)
-                  _DeviceRow(
-                    topRight: const _StarOnly(),
-                    leading: const _SunIcon(),
-                    title: 'Brightness',
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        _BoldSmall('54%'),
-                        SizedBox(height: 2),
-                        _TinyGreyText('W5BT'),
-                      ],
-                    ),
-                    trailing: const _BrightnessPill(),
-                  ),
+//                   // Brightness (with pill slider)
+//                   _DeviceRow(
+//                     topRight: const _StarOnly(),
+//                     leading: const _SunIcon(),
+//                     title: 'Brightness',
+//                     subtitle: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: const [
+//                         _BoldSmall('54%'),
+//                         SizedBox(height: 2),
+//                         _TinyGreyText('W5BT'),
+//                       ],
+//                     ),
+//                     trailing: const _BrightnessPill(),
+//                   ),
 
-                  const _RowDivider(),
+//                   const _RowDivider(),
 
-                  // Card Reader(s)
-                  _DeviceRow(
-                    leading: const _BulbIcon(),
-                    title: 'Card Reader(s)',
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: const _ToggleSwitch(isOn: false),
-                  ),
-                ],
-              ),
+//                   // Card Reader(s)
+//                   _DeviceRow(
+//                     leading: const _BulbIcon(),
+//                     title: 'Card Reader(s)',
+//                     subtitle: const _SmallText('Blocked'),
+//                     trailing: const _ToggleSwitch(isOn: false),
+//                   ),
+//                 ],
+//               ),
 
-              SizedBox(height: 18.h),
+//               SizedBox(height: 18.h),
 
-              // -------- Control units ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Control units',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
+//               // -------- Control units ----------
+//               Padding(
+//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
+//                 child: Text(
+//                   'Control units',
+//                   style: TextStyle(
+//                     fontSize: 16.sp,
+//                     fontWeight: FontWeight.w600,
+//                     color: const Color(0xFF111827),
+//                   ),
+//                 ),
+//               ),
 
-              SizedBox(height: 8.h),
+//               SizedBox(height: 8.h),
 
-              _DeviceListCard(
-                children: const [
-                  _ControlUnitRow(
-                    icon: Icons.memory,
-                    iconColor: Color(0xFF0088FE),
-                    title: 'CORE20',
-                    sub: 'CORE20-4B37-3419-363A',
-                  ),
-                  _RowDivider(),
-                  _ControlUnitRow(
-                    icon: Icons.warning_amber_rounded,
-                    iconColor: Color(0xFFFE019A),
-                    title: 'D012',
-                    sub: '11 Devices',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//               _DeviceListCard(
+//                 children: const [
+//                   _ControlUnitRow(
+//                     icon: Icons.memory,
+//                     iconColor: Color(0xFF0088FE),
+//                     title: 'CORE20',
+//                     sub: 'CORE20-4B37-3419-363A',
+//                   ),
+//                   _RowDivider(),
+//                   _ControlUnitRow(
+//                     icon: Icons.warning_amber_rounded,
+//                     iconColor: Color(0xFFFE019A),
+//                     title: 'D012',
+//                     sub: '11 Devices',
+//                     sub2: 'CORE20-4B37-3419-363A',
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class _AnalyticsBody extends StatelessWidget {
   @override
@@ -2538,8 +2559,8 @@ class _ToggleSwitch extends StatelessWidget {
       child: Align(
         alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 26.w,
-          height: 26.w,
+          width: 30.86.w,
+          height: 30.86.w,
           decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
         ),
       ),
