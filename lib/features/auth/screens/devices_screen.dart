@@ -14,6 +14,8 @@ class DevicesScreen extends StatefulWidget {
 
 class _DevicesScreenState extends State<DevicesScreen> {
   int _selectedNavIndex = 0; // Devices is index 0
+  String? _selectedDeviceTitle = 'Blind Living Room'; // Track selected device, initially "Blind Living Room"
+  String _selectedFilter = 'All'; // Track selected filter chip
 
   void _onNavItemTapped(int index) {
     final routes = [
@@ -109,16 +111,36 @@ class _DevicesScreenState extends State<DevicesScreen> {
   child: ListView(
     scrollDirection: Axis.horizontal,
     padding: EdgeInsets.symmetric(horizontal: 14.w),
-    children: const [
-      _FilterChipPill(label: 'All', selected: true),
+    children: [
+      _FilterChipPill(
+        label: 'All',
+        selected: _selectedFilter == 'All',
+        onTap: () => setState(() => _selectedFilter = 'All'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Favorites'),
+      _FilterChipPill(
+        label: 'Favorites',
+        selected: _selectedFilter == 'Favorites',
+        onTap: () => setState(() => _selectedFilter = 'Favorites'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Smart'),
+      _FilterChipPill(
+        label: 'Smart',
+        selected: _selectedFilter == 'Smart',
+        onTap: () => setState(() => _selectedFilter = 'Smart'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Groups'),
+      _FilterChipPill(
+        label: 'Groups',
+        selected: _selectedFilter == 'Groups',
+        onTap: () => setState(() => _selectedFilter = 'Groups'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Category'),
+      _FilterChipPill(
+        label: 'Category',
+        selected: _selectedFilter == 'Category',
+        onTap: () => setState(() => _selectedFilter = 'Category'),
+      ),
     ],
   ),
 ),
@@ -133,7 +155,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   'Devices',
                   style: TextStyle(
                     fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                   ),
                 ),
@@ -147,15 +169,18 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   // RGBW
               // RGBW
 _DeviceRow(
+  outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
   topRight: const _TimeTag(text: '18:32', blueIcon: true),
   leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
   title: 'RGBW',
+  selected: _selectedDeviceTitle == 'RGBW',
+  onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
   subtitle: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Row(
         children: [
-          const _ModeDot(text: 'A', filled: false),
+          const _ModeDot(text: 'A', filledA: false),
           SizedBox(width: 6.w),
           const _SmallText('Off'),
         ],
@@ -163,13 +188,13 @@ _DeviceRow(
       SizedBox(height: 2.h),
       const _TinyGreyText('LCD0C12'),
       SizedBox(height: 6.h),
-
+  
       // ✅ Row -> Wrap (fix overflow)
       Wrap(
         spacing: 6.w,
         runSpacing: 6.h,
         children: const [
-          _TagChip(text: 'Lighting', bg: Color(0xFF0088FE), outlined: true),
+          _TagChip(text: 'Lighting', bg: Color(0xFF0088fe), outlined: true),
           _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
         ],
       ),
@@ -182,7 +207,10 @@ _DeviceRow(
       SizedBox(width: 8.w),
       const _CircleMiniBtn(icon: Icons.add),
       SizedBox(width: 8.w),
-      const _ToggleSwitch(isOn: true),
+      Padding(
+         padding:  EdgeInsets.only( right: 2.w),
+        child: const _ToggleColorswitch(isOn: true),
+      ),
     ],
   ),
 ),
@@ -191,69 +219,92 @@ _DeviceRow(
 
                   // Alarm
                   _DeviceRow(
-                    topRight: const _PinOnly(),
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 1.w),
+                    topRight: 
+                    const _PinOnly(),
                     leading: const _LockIcon(),
                     title: 'Alarm',
+                    selected: _selectedDeviceTitle == 'Alarm',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
                     subtitle: const _SmallText('Disarmed'),
-                    trailing: const _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
+                    trailing: Padding(
+                      padding:  EdgeInsets.only(right: 10.w),
+                      child: Padding(
+                          padding:  EdgeInsets.only( right: 8.w),
+                        child:  _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
+                      ),
+                    ),
                   ),
 
                   const _RowDivider(),
 
                   // Bathroom
             _DeviceRow(
-  leading: const _PowerRingIcon(),
-  title: 'Bathroom',
-  subtitle: Row(
-    children: const [
-      _ModeDot(text: 'M', filled: true),
-      SizedBox(width: 10),
-      Icon(Icons.thermostat, size: 18, color: Color(0xFF38BDF8)), // চাইলে image asset দিন
-      SizedBox(width: 6),
-      Text(
-        '24.6°C',
-        style: TextStyle(
-          fontSize: 20, // screenshot vibe
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF111827),
-        ),
-      ),
-    ],
-  ),
-  trailing: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      const _CircleMiniBtn(icon: Icons.remove),
-      SizedBox(width: 14.w),
-      const _CircleMiniBtn(icon: Icons.add),
-    ],
-  ),
-),
+              outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
+              leading: const _PowerRingIcon(),
+              title: 'Bathroom',
+              selected: _selectedDeviceTitle == 'Bathroom',
+              onTap: () => setState(() => _selectedDeviceTitle = 'Bathroom'),
+              subtitle: Row(
+                children: [
+                  const _ModeDot(text: 'M', filledA: true),
+                  const SizedBox(width: 10),
+                  Image.asset(
+                    'assets/low-temperature 1.png',
+                    width: 9.w,
+                    height: 19.h,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    '24.6°C',
+                    style: TextStyle(
+                      fontSize: 14, // screenshot vibe
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _CircleMiniBtn(icon: Icons.remove),
+                  SizedBox(width: 14.w),
+                  const _CircleMiniBtn(icon: Icons.add),
+                ],
+              ),
+            ),
 
-                  const _RowDivider(),
+                       const _RowDivider(),
 
                   // Blind Living Room (selected highlight row)
                   _DeviceRow(
-                    selected: true,
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 5.h),
+                    selected: _selectedDeviceTitle == 'Blind Living Room',
                     topRight: const _StarTimeTag(time: '20:36'),
                     leading: const _BlindGreenIcon(),
                     title: 'Blind Living Room',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Blind Living Room'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         SizedBox(height: 2),
                         _BlindStatsRow(),
-                        SizedBox(height: 3),
+                
                         _TinyGreyText('D012U12'),
                       ],
                     ),
-                    trailing: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                        SizedBox(height: 10),
-                        _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-                      ],
+                    trailing: Padding(
+                     padding:  EdgeInsets.only( right: 4.w, top: 10.h),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children:  [
+                          _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
+                          SizedBox(width: 10.w),
+                          _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -261,19 +312,26 @@ _DeviceRow(
 
                   // Block Irrigation Schedule (blue play row)
                   _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w,bottom: 5.h),
                     leading: const _PlayCircleIcon(),
                     title: 'Block Irrigation Schedule',
+                    selected: _selectedDeviceTitle == 'Block Irrigation Schedule',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Block Irrigation Schedule'),
                     subtitle: const _SmallText('Blocked'),
-                    trailing: const _CircleActionBlue(imagePath: 'assets/play.png'),
+                    trailing:  _CircleActionBlue(imagePath: 'assets/play.png',isPlay: true,),
                   ),
 
                   const _RowDivider(),
 
                   // Brightness (with pill slider)
                   _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 1.h, right: 8.w,bottom: 5.h),
+                    brightness: true,
                     topRight: const _StarOnly(),
                     leading: const _SunIcon(),
                     title: 'Brightness',
+                    selected: _selectedDeviceTitle == 'Brightness',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Brightness'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
@@ -282,22 +340,30 @@ _DeviceRow(
                         _TinyGreyText('W5BT'),
                       ],
                     ),
-                    trailing: const _BrightnessPill(),
+                    trailing: Padding(
+                       padding:  EdgeInsets.only(top: 7.h, right: 8.w),
+                      child: const _BrightnessPill(),
+                    ),
                   ),
 
                   const _RowDivider(),
 
                   // Card Reader(s)
                   _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 10.h, right: 8.w,bottom: 5.h),
                     leading: const _BulbIcon(),
                     title: 'Card Reader(s)',
+                    selected: _selectedDeviceTitle == 'Card Reader(s)',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
                     subtitle: const _SmallText('Blocked'),
                     trailing: const _ToggleSwitch(isOn: false),
                   ),
                 ],
               ),
+              
+                  const _RowDivider(),
 
-              SizedBox(height: 18.h),
+              SizedBox(height: 20.h),
 
               // -------- Control units ----------
               Padding(
@@ -319,7 +385,8 @@ _DeviceRow(
                   _ControlUnitRow(
                     imagePath: 'assets/image 124.png',
                     title: 'CORE20',
-                    sub: 'CORE20-4B37-3419-363A',
+
+                    sub2: 'CORE20-4B37-3419-363A',
                   ),
                   _RowDivider(),
                   _ControlUnitRow(
@@ -361,13 +428,16 @@ class _DeviceListCard extends StatelessWidget {
 }
 
 class _DeviceRow extends StatelessWidget {
-  const _DeviceRow({
+   _DeviceRow({
     required this.leading,
     required this.title,
     required this.subtitle,
     required this.trailing,
     this.topRight,
     this.selected = false,
+    this.onTap,
+    this.brightness=false,
+    this.outerPadding,
   });
 
   final Widget leading;
@@ -376,13 +446,28 @@ class _DeviceRow extends StatelessWidget {
   final Widget trailing;
   final Widget? topRight;
   final bool selected;
+  final VoidCallback? onTap;
+  final bool brightness;
+  final EdgeInsets? outerPadding;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h), // ✅ Image-1 padding
-      child: Stack(
+    final basePadding = EdgeInsets.fromLTRB(16.w, 0.h, 0.w, 5.h);
+    final finalPadding = outerPadding != null
+        ? EdgeInsets.fromLTRB(
+            basePadding.left + outerPadding!.left,
+            basePadding.top + outerPadding!.top,
+            basePadding.right + outerPadding!.right,
+            basePadding.bottom + outerPadding!.bottom,
+          )
+        : basePadding;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: selected ? const Color(0xFFEAF1FF) : Colors.white,
+        padding: finalPadding,
+        child: Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -400,13 +485,16 @@ class _DeviceRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF111827),
-                        height: 1.05,
+                    Padding(
+                      padding: EdgeInsets.only(top: brightness? 11.h : 0.h),
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF111827),
+                          height: 1.05,
+                        ),
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -427,6 +515,7 @@ class _DeviceRow extends StatelessWidget {
               child: topRight!,
             ),
         ],
+      ),
       ),
     );
   }
@@ -478,10 +567,12 @@ class _FilterChipPill extends StatelessWidget {
   const _FilterChipPill({
     required this.label,
     this.selected = false,
+    this.onTap,
   });
 
   final String label;
   final bool selected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -491,25 +582,29 @@ class _FilterChipPill extends StatelessWidget {
     final textColor =
         selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
 
-    return Container(
-      height: 36.h, // ✅ exact pill height
-      padding: EdgeInsets.symmetric(horizontal: 18.w),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
-        border: Border.all(
-          color: borderColor,
-          width: 1.5, // ✅ thicker border like image
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 32.h, // ✅ exact pill height
+  
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
+          border: Border.all(
+            color: borderColor,
+            width: 1.5, // ✅ thicker border like image
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 14.sp,          // ✅ slightly bigger text
-          fontWeight: FontWeight.w600,
-          color: textColor,
-          height: 1,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 20.sp,          // ✅ slightly bigger text
+            fontWeight:selected?  FontWeight.w600:FontWeight.w400,
+            color: textColor,
+            height: 1,
+          ),
         ),
       ),
     );
@@ -577,8 +672,8 @@ class _CircleMiniBtn extends StatelessWidget {
         icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
 
     return Container(
-      width: 44.w, // ✅ closer to Image-1
-      height: 44.w,
+      width: 35.w, // ✅ closer to Image-1
+      height: 35.w,
       decoration: const BoxDecoration(
         color: Color(0xFFF3F4F6),
         shape: BoxShape.circle,
@@ -594,20 +689,22 @@ class _CircleMiniBtn extends StatelessWidget {
 }
 
 class _CircleActionBlue extends StatelessWidget {
-  const _CircleActionBlue({
+   _CircleActionBlue({
     this.icon,
     this.imagePath,
+    this.isPlay = false,
   }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
 
   final IconData? icon;
   final String? imagePath;
+  bool isPlay;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       // ✅ Screenshot-এর real size (56 ❌)
-      width: 40.w,
-      height: 40.w,
+      width: 44.w,
+      height: 44.w,
       decoration: const BoxDecoration(
         color: Color(0xFF0088FE),
         shape: BoxShape.circle,
@@ -616,8 +713,8 @@ class _CircleActionBlue extends StatelessWidget {
       child: imagePath != null
           ? Image.asset(
               imagePath!,
-              width: 20.sp,
-              height: 20.sp,
+              width: isPlay ? 27.sp : 21.sp,
+              height: isPlay ? 24.sp : 20.sp,
               fit: BoxFit.contain,
             )
           : Icon(icon!, size: 20.sp, color: Colors.white),
@@ -632,8 +729,38 @@ class _ToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 62.w,  // ✅ closer to iOS toggle size
-      height: 32.h,
+      width: 60.w,  // ✅ closer to iOS toggle size
+      height: 35.h,
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Align(
+        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          width: 28.w,
+          height: 28.w,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class _ToggleColorswitch extends StatelessWidget {
+  const _ToggleColorswitch({required this.isOn});
+  final bool isOn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60.w,  // ✅ closer to iOS toggle size
+      height: 35.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
         color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
@@ -666,7 +793,7 @@ class _SmallText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: isStrong ? 16.sp : 12.sp,
+        fontSize: isStrong ? 14.sp : 14.sp,
         fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
         color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
@@ -701,8 +828,8 @@ class _BoldSmall extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 12.sp,
-        fontWeight: FontWeight.w700,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w400,
         color: const Color(0xFF111827),
       ),
     );
@@ -719,8 +846,8 @@ class _TinyGreyText extends StatelessWidget {
       text,
       style: TextStyle(
         // ✅ Screenshot: id/text খুব ছোট (18 ❌)
-        fontSize: 10.sp,
-        fontWeight: FontWeight.w500,
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w400,
         color: const Color(0xFF6B7280),
         height: 1.05,
       ),
@@ -730,30 +857,30 @@ class _TinyGreyText extends StatelessWidget {
 /* ---------------- Badges / Tags ---------------- */
 
 class _ModeDot extends StatelessWidget {
-  const _ModeDot({required this.text, required this.filled});
+  const _ModeDot({required this.text, required this.filledA});
   final String text;
-  final bool filled;
+  final bool filledA;
 
   @override
   Widget build(BuildContext context) {
     // ✅ A ছোট, M বড় (same call, no structure change)
-    final isBig = filled; // M row filled=true => bigger
-    final s = (isBig ? 34 : 26).w;
+    final isBig = filledA; // M row filled=true => bigger
+    final s = (isBig ? 26 : 26);
 
     return Container(
-      width: s,
-      height: s,
+      width: s.w,
+      height: s.h,
       decoration: BoxDecoration(
-        color: filled ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
+        color: filledA ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
       child: Text(
         text,
         style: TextStyle(
-          fontSize: (isBig ? 18 : 14).sp,
+          fontSize: (isBig ? 14 : 14).sp,
           fontWeight: FontWeight.w700,
-          color: filled ? Colors.white : const Color(0xFF6B7280),
+          color: filledA ? Colors.white : const Color(0xFF6b7280),
           height: 1.0,
         ),
       ),
@@ -774,10 +901,13 @@ class _TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+      height: 22.h,
+      width: 70.w,
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: outlined ? Colors.white : bg,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(4.r),
         border: outlined ? Border.all(color: bg, width: 1.5) : null,
       ),
       child: Text(
@@ -805,28 +935,31 @@ class _TimeTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          'assets/image 81 (1).png', // pin
-          width: 14.sp,
-          height: 14.sp,
-          fit: BoxFit.contain,
-          color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
-          colorBlendMode: BlendMode.srcIn,
-        ),
-        SizedBox(width: 6.w),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 10.sp, // ✅ screenshot small
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-            height: 1.0,
+    return Padding(
+      padding:  EdgeInsets.only(top: 9.h),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/image 81 (1).png', // pin
+            width: 16.sp,
+            height: 16.sp,
+            fit: BoxFit.contain,
+            color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
+            colorBlendMode: BlendMode.srcIn,
           ),
-        ),
-      ],
+          SizedBox(width: 6.w),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 13.sp, // ✅ screenshot small
+              color: const Color(0xFF111827),
+              fontWeight: FontWeight.w400,
+              height: 1.0,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -839,14 +972,14 @@ class _StarTimeTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24)),
+        Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24)),
         SizedBox(width: 6.w),
         Text(
           time,
           style: TextStyle(
-            fontSize: 10.sp, // ✅ screenshot small
+            fontSize: 13.sp, // ✅ screenshot small
             color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             height: 1.0,
           ),
         ),
@@ -859,7 +992,7 @@ class _StarOnly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.star_rounded, size: 14.sp, color: const Color(0xFFFBBF24));
+    return Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24));
   }
 }
 
@@ -867,14 +1000,14 @@ class _StarOnly extends StatelessWidget {
 /* ---------------- Leading icons (approx same) ---------------- */
 
 class _GradientCircleIcon extends StatelessWidget {
-  const _GradientCircleIcon({this.size = 34});
+  const _GradientCircleIcon({this.size = 36});
   final double size;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size.w,
-      height: size.w,
+      height: size.h,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         gradient: SweepGradient(
@@ -897,13 +1030,13 @@ class _LockIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 44.w,
-      height: 44.w,
+      width: 39.w,
+      height: 39.h,
       child: Center(
         child: Image.asset(
           'assets/Mask group (10).png',
-          width: 40.w,
-          height: 40.w,
+          width: 39.w,
+          height: 39.h,
           fit: BoxFit.contain,
         ),
       ),
@@ -916,49 +1049,23 @@ class _PowerRingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 44.w,
-      height: 44.w,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Ring
-          Container(
-            width: 44.w,
-            height: 44.w,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: SweepGradient(
-                colors: [
-                  Color(0xFF22C55E), // green
-                  Color(0xFF38BDF8), // light blue
-                  Color(0xFF3B82F6), // blue
-                  Color(0xFF22C55E), // back to green
-                ],
-              ),
-            ),
+    return 
+     Container(
+          width: 36.w,
+          height: 36.h,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
           ),
-
-          // inner cut (makes ring)
-          Container(
-            width: 34.w,
-            height: 34.w,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
-
-          // Power glyph (looks like screenshot)
-          Image.asset(
-            'assets/Mask group (11).png',
-            width: 22.sp,
-            height: 22.sp,
-            fit: BoxFit.contain,
-          ),
-        ],
-      ),
-    );
+      child: 
+        // Power glyph (looks like screenshot)
+        Image.asset(
+          'assets/Mask group (11).png',
+          width: 22.sp,
+          height: 22.sp,
+          fit: BoxFit.contain,
+       
+    ));
   }
 }
 
@@ -967,20 +1074,58 @@ class _BlindGreenIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final base = 44.w;     // ✅ main icon size
+    final badge = 20;    // ✅ blue check badge size
+
     return SizedBox(
-      width: 34.w,
-      height: 34.w,
-      child: Center(
-        child: Image.asset(
-          'assets/Mask group (12).png',
-          width: 34.w,
-          height: 34.w,
-          fit: BoxFit.contain,
-        ),
+      width: base,
+      height: base,
+      child: Stack(
+        clipBehavior: Clip.none, // ✅ allow badge to sit outside a bit
+        children: [
+          Center(
+            child: Image.asset(
+              'assets/Mask group (12).png',
+              width: base,
+              height: base,
+              fit: BoxFit.contain,
+            ),
+          ),
+
+          // ✅ Blue check badge (bottom-right)
+          Positioned(
+            right: -2.w,
+            bottom: -2.w,
+            child: Container(
+              width: badge.w,
+              height: badge.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0088FE),
+                shape: BoxShape.circle,
+            
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.check_rounded,
+                  size: 14.sp,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
 
 class _Dot extends StatelessWidget {
   const _Dot({required this.size});
@@ -1005,13 +1150,13 @@ class _PlayCircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 34.w,
-      height: 34.w,
+      width: 36.w,
+      height: 36.w,
       child: Center(
         child: Image.asset(
-          'assets/Mask group (14).png',
-          width: 34.w,
-          height: 34.w,
+          'assets/Mask group (13).png',
+          width: 36.w,
+          height: 36.w,
           fit: BoxFit.contain,
         ),
       ),
@@ -1025,13 +1170,13 @@ class _SunIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 34.w,
-      height: 34.w,
+      width: 39.w,
+      height: 39.w,
       child: Center(
         child: Image.asset(
-          'assets/Mask group (5).png',
-          width: 34.w,
-          height: 34.w,
+          'assets/Mask group (14).png',
+          width: 39.w,
+          height: 39.w,
           fit: BoxFit.contain,
         ),
       ),
@@ -1044,14 +1189,17 @@ class _BulbIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 34.w,
-      height: 34.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        shape: BoxShape.circle,
+    return SizedBox(
+      width: 39.w,
+      height: 39.w,
+      child: Center(
+        child: Image.asset(
+          'assets/Mask group (5).png',
+          width: 39.w,
+          height: 39.w,
+          fit: BoxFit.contain,
+        ),
       ),
-      child: Icon(Icons.lightbulb_outline, size: 18.sp, color: const Color(0xFF84CC16)),
     );
   }
 }
@@ -1067,8 +1215,8 @@ class _BlindStatsRow extends StatelessWidget {
       children: [
         // A badge (light grey circle)
         Container(
-          width: 40.w,
-          height: 40.w,
+          width: 26.w,
+          height: 26.w,
           decoration: const BoxDecoration(
             color: Color(0xFFE5E7EB),
             shape: BoxShape.circle,
@@ -1077,51 +1225,47 @@ class _BlindStatsRow extends StatelessWidget {
           child: Text(
             'A',
             style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF6B7280),
               height: 1.0,
             ),
           ),
         ),
-        SizedBox(width: 14.w),
+        SizedBox(width: 10.w),
 
-        // icon + 0%
-        Image.asset(
-          'assets/Group 32.jpg',
-          width: 22.w,
-          height: 28.h,
-          fit: BoxFit.contain,
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          '0%',
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
-            height: 1.0,
-          ),
-        ),
+                  Image.asset(
+                    'assets/Group 32.jpg', // down icon
+                    width: 12.w,
+                    height: 19.h,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    '0%',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF111827),
+                    ),
+                  ),
 
-        SizedBox(width: 18.w),
+                  SizedBox(width: 14.w),
 
-        // icon + 50%
-        Image.asset(
-          'assets/Vector 4.jpg',
-          width: 18.w,
-          height: 28.h,
-          fit: BoxFit.contain,
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          '50%',
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
-            height: 1.0,
-          ),
+                  Image.asset(
+                    'assets/Vector 4.jpg', // up icon
+                    width: 10.w,
+                    height: 19.h,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    '50%',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF111827),
+                    ),
         ),
       ],
     );
@@ -1203,33 +1347,62 @@ class _WedgePainter extends CustomPainter {
 /* ---------------- Brightness pill slider ---------------- */
 
 class _BrightnessPill extends StatelessWidget {
-  const _BrightnessPill();
+  const _BrightnessPill({this.leftFactor = 0.52});
+
+  /// left side width ratio (0.0 - 1.0)
+  final double leftFactor;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 150.w,
-      height: 30.h,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Row(
-        children: [
-          // left active (white block)
-          Container(
-            width: 95.w,
-            height: 30.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(99),
+      height: 34.h, // ছবির মতো একটু বেশি height
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999.r),
+        child: Stack(
+          children: [
+            // Right (darker) background
+            Container(color: const Color(0xFFE5E7EB)),
+
+            // Left (lighter) section
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: leftFactor.clamp(0.0, 1.0),
+                child: Container(color: const Color(0xFFF3F4F6)),
+              ),
             ),
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.only(left: 10.w),
-            child: Icon(Icons.wb_sunny_outlined, size: 16.sp, color: const Color(0xFF111827)),
-          ),
-          Expanded(child: Container()),
-        ],
+
+            // Middle divider (subtle)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: leftFactor.clamp(0.0, 1.0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: 1.w,
+                    height: double.infinity,
+                    color: const Color(0xFFD1D5DB), // subtle line
+                  ),
+                ),
+              ),
+            ),
+
+            // Sun icon on left
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 14.w),
+                child: Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 20.sp,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1243,16 +1416,16 @@ class _ControlUnitRow extends StatelessWidget {
     this.iconColor,
     this.imagePath,
     required this.title,
-    required this.sub,
-    this.sub2,
+     this.sub,
+    required this.sub2,
   }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
 
   final IconData? icon;
   final Color? iconColor;
   final String? imagePath;
   final String title;
-  final String sub;
-  final String? sub2;
+  final String? sub;
+  final String sub2;
 
   @override
   Widget build(BuildContext context) {
@@ -1260,23 +1433,14 @@ class _ControlUnitRow extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
       child: Row(
         children: [
-          Container(
-            width: 34.w,
-            height: 34.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: imagePath != null
-                ? Image.asset(
-                    imagePath!,
-                    width: 18.sp,
-                    height: 18.sp,
-                    fit: BoxFit.contain,
-                  )
-                : Icon(icon!, size: 18.sp, color: iconColor!),
-          ),
+          imagePath != null
+              ? Image.asset(
+                  'assets/image 125.png',
+                  width: 34.sp,
+                  height: 34.sp,
+                  fit: BoxFit.contain,
+                )
+              : Icon(icon!, size: 18.sp, color: iconColor!),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -1285,31 +1449,43 @@ class _ControlUnitRow extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
                   ),
-                ),
+                ), if (sub != null) ...[
                 SizedBox(height: 2.h),
-                Text(
-                  sub,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: const Color(0xFF6B7280),
-                  ),
+                Row(
+                  children: [
+                     Image.asset(
+                        'assets/Mask group (18).png',
+                        width: 14.sp,
+                        height: 14.sp,
+                        fit: BoxFit.contain,
+                      ),                    Text(
+                      sub!,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
                 ),
-                if (sub2 != null) ...[
+                    ],
+               
                   SizedBox(height: 2.h),
-                  Text(
+                  if (sub2 != null) ...[ Text(
                     sub2!,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
                       color: const Color(0xFF9CA3AF),
                     ),
-                  ),
-                ],
-              ],
-            ),
+                  )
+            
+              ],]
+            )
           ),
         ],
       ),
