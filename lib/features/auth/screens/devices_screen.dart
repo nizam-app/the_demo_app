@@ -15,6 +15,7 @@ class DevicesScreen extends StatefulWidget {
 class _DevicesScreenState extends State<DevicesScreen> {
   int _selectedNavIndex = 0; // Devices is index 0
   String? _selectedDeviceTitle = 'Blind Living Room'; // Track selected device, initially "Blind Living Room"
+  String _selectedFilter = 'All'; // Track selected filter chip
 
   void _onNavItemTapped(int index) {
     final routes = [
@@ -110,16 +111,36 @@ class _DevicesScreenState extends State<DevicesScreen> {
   child: ListView(
     scrollDirection: Axis.horizontal,
     padding: EdgeInsets.symmetric(horizontal: 14.w),
-    children: const [
-      _FilterChipPill(label: 'All', selected: true),
+    children: [
+      _FilterChipPill(
+        label: 'All',
+        selected: _selectedFilter == 'All',
+        onTap: () => setState(() => _selectedFilter = 'All'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Favorites'),
+      _FilterChipPill(
+        label: 'Favorites',
+        selected: _selectedFilter == 'Favorites',
+        onTap: () => setState(() => _selectedFilter = 'Favorites'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Smart'),
+      _FilterChipPill(
+        label: 'Smart',
+        selected: _selectedFilter == 'Smart',
+        onTap: () => setState(() => _selectedFilter = 'Smart'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Groups'),
+      _FilterChipPill(
+        label: 'Groups',
+        selected: _selectedFilter == 'Groups',
+        onTap: () => setState(() => _selectedFilter = 'Groups'),
+      ),
       SizedBox(width: 10),
-      _FilterChipPill(label: 'Category'),
+      _FilterChipPill(
+        label: 'Category',
+        selected: _selectedFilter == 'Category',
+        onTap: () => setState(() => _selectedFilter = 'Category'),
+      ),
     ],
   ),
 ),
@@ -147,74 +168,70 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 children: [
                   // RGBW
               // RGBW
-Padding(
-  padding:  EdgeInsets.only(top: 7.h, right: 8.w),
-  child: _DeviceRow(
-    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-    leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
-    title: 'RGBW',
-    selected: _selectedDeviceTitle == 'RGBW',
-    onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
-    subtitle: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const _ModeDot(text: 'A', filledA: false),
-            SizedBox(width: 6.w),
-            const _SmallText('Off'),
-          ],
-        ),
-        SizedBox(height: 2.h),
-        const _TinyGreyText('LCD0C12'),
-        SizedBox(height: 6.h),
+_DeviceRow(
+  outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
+  topRight: const _TimeTag(text: '18:32', blueIcon: true),
+  leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
+  title: 'RGBW',
+  selected: _selectedDeviceTitle == 'RGBW',
+  onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
+  subtitle: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          const _ModeDot(text: 'A', filledA: false),
+          SizedBox(width: 6.w),
+          const _SmallText('Off'),
+        ],
+      ),
+      SizedBox(height: 2.h),
+      const _TinyGreyText('LCD0C12'),
+      SizedBox(height: 6.h),
   
-        // ✅ Row -> Wrap (fix overflow)
-        Wrap(
-          spacing: 6.w,
-          runSpacing: 6.h,
-          children: const [
-            _TagChip(text: 'Lighting', bg: Color(0xFF0088fe), outlined: true),
-            _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
-          ],
-        ),
-      ],
-    ),
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const _CircleMiniBtn(icon: Icons.remove),
-        SizedBox(width: 8.w),
-        const _CircleMiniBtn(icon: Icons.add),
-        SizedBox(width: 8.w),
-        Padding(
-           padding:  EdgeInsets.only( right: 2.w),
-          child: const _ToggleColorswitch(isOn: true),
-        ),
-      ],
-    ),
+      // ✅ Row -> Wrap (fix overflow)
+      Wrap(
+        spacing: 6.w,
+        runSpacing: 6.h,
+        children: const [
+          _TagChip(text: 'Lighting', bg: Color(0xFF0088fe), outlined: true),
+          _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
+        ],
+      ),
+    ],
+  ),
+  trailing: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const _CircleMiniBtn(icon: Icons.remove),
+      SizedBox(width: 8.w),
+      const _CircleMiniBtn(icon: Icons.add),
+      SizedBox(width: 8.w),
+      Padding(
+         padding:  EdgeInsets.only( right: 2.w),
+        child: const _ToggleColorswitch(isOn: true),
+      ),
+    ],
   ),
 ),
 
                   const _RowDivider(),
 
                   // Alarm
-                  Padding(
-                      padding:  EdgeInsets.only(top: 7.h, right: 1.w),
-                    child: _DeviceRow(
-                      topRight: 
-                      const _PinOnly(),
-                      leading: const _LockIcon(),
-                      title: 'Alarm',
-                      selected: _selectedDeviceTitle == 'Alarm',
-                      onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
-                      subtitle: const _SmallText('Disarmed'),
-                      trailing: Padding(
-                        padding:  EdgeInsets.only(right: 10.w),
-                        child: Padding(
-                            padding:  EdgeInsets.only( right: 8.w),
-                          child:  _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
-                        ),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 1.w),
+                    topRight: 
+                    const _PinOnly(),
+                    leading: const _LockIcon(),
+                    title: 'Alarm',
+                    selected: _selectedDeviceTitle == 'Alarm',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
+                    subtitle: const _SmallText('Disarmed'),
+                    trailing: Padding(
+                      padding:  EdgeInsets.only(right: 10.w),
+                      child: Padding(
+                          padding:  EdgeInsets.only( right: 8.w),
+                        child:  _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
                       ),
                     ),
                   ),
@@ -222,75 +239,71 @@ Padding(
                   const _RowDivider(),
 
                   // Bathroom
-            Padding(
-            padding:  EdgeInsets.only(top: 7.h, right: 8.w),
-              child: _DeviceRow(
-                leading: const _PowerRingIcon(),
-                title: 'Bathroom',
-                selected: _selectedDeviceTitle == 'Bathroom',
-                onTap: () => setState(() => _selectedDeviceTitle = 'Bathroom'),
-                subtitle: Row(
-                  children: [
-                    const _ModeDot(text: 'M', filledA: true),
-                    const SizedBox(width: 10),
-                    Image.asset(
-                      'assets/low-temperature 1.png',
-                      width: 9.w,
-                      height: 19.h,
-                      fit: BoxFit.contain,
+            _DeviceRow(
+              outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
+              leading: const _PowerRingIcon(),
+              title: 'Bathroom',
+              selected: _selectedDeviceTitle == 'Bathroom',
+              onTap: () => setState(() => _selectedDeviceTitle = 'Bathroom'),
+              subtitle: Row(
+                children: [
+                  const _ModeDot(text: 'M', filledA: true),
+                  const SizedBox(width: 10),
+                  Image.asset(
+                    'assets/low-temperature 1.png',
+                    width: 9.w,
+                    height: 19.h,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    '24.6°C',
+                    style: TextStyle(
+                      fontSize: 14, // screenshot vibe
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF111827),
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      '24.6°C',
-                      style: TextStyle(
-                        fontSize: 14, // screenshot vibe
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF111827),
-                      ),
-                    ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _CircleMiniBtn(icon: Icons.remove),
-                    SizedBox(width: 14.w),
-                    const _CircleMiniBtn(icon: Icons.add),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _CircleMiniBtn(icon: Icons.remove),
+                  SizedBox(width: 14.w),
+                  const _CircleMiniBtn(icon: Icons.add),
+                ],
               ),
             ),
 
                        const _RowDivider(),
 
                   // Blind Living Room (selected highlight row)
-                  Padding(
-                 padding:  EdgeInsets.only(top: 7.h, right: 8.w, bottom: 5.h),
-                    child: _DeviceRow(
-                      selected: _selectedDeviceTitle == 'Blind Living Room',
-                      topRight: const _StarTimeTag(time: '20:36'),
-                      leading: const _BlindGreenIcon(),
-                      title: 'Blind Living Room',
-                      onTap: () => setState(() => _selectedDeviceTitle = 'Blind Living Room'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          SizedBox(height: 2),
-                          _BlindStatsRow(),
-                  
-                          _TinyGreyText('D012U12'),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 5.h),
+                    selected: _selectedDeviceTitle == 'Blind Living Room',
+                    topRight: const _StarTimeTag(time: '20:36'),
+                    leading: const _BlindGreenIcon(),
+                    title: 'Blind Living Room',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Blind Living Room'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        SizedBox(height: 2),
+                        _BlindStatsRow(),
+                
+                        _TinyGreyText('D012U12'),
+                      ],
+                    ),
+                    trailing: Padding(
+                     padding:  EdgeInsets.only( right: 4.w, top: 10.h),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children:  [
+                          _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
+                          SizedBox(width: 10.w),
+                          _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
                         ],
-                      ),
-                      trailing: Padding(
-                       padding:  EdgeInsets.only( right: 4.w, top: 10.h),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children:  [
-                            _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                            SizedBox(width: 10.w),
-                            _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-                          ],
-                        ),
                       ),
                     ),
                   ),
@@ -298,58 +311,52 @@ Padding(
                   const _RowDivider(),
 
                   // Block Irrigation Schedule (blue play row)
-                  Padding(
-                  padding:  EdgeInsets.only(top: 7.h, right: 8.w,bottom: 5.h),
-                    child: _DeviceRow(
-                      leading: const _PlayCircleIcon(),
-                      title: 'Block Irrigation Schedule',
-                      selected: _selectedDeviceTitle == 'Block Irrigation Schedule',
-                      onTap: () => setState(() => _selectedDeviceTitle = 'Block Irrigation Schedule'),
-                      subtitle: const _SmallText('Blocked'),
-                      trailing:  _CircleActionBlue(imagePath: 'assets/play.png',isPlay: true,),
-                    ),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w,bottom: 5.h),
+                    leading: const _PlayCircleIcon(),
+                    title: 'Block Irrigation Schedule',
+                    selected: _selectedDeviceTitle == 'Block Irrigation Schedule',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Block Irrigation Schedule'),
+                    subtitle: const _SmallText('Blocked'),
+                    trailing:  _CircleActionBlue(imagePath: 'assets/play.png',isPlay: true,),
                   ),
 
                   const _RowDivider(),
 
                   // Brightness (with pill slider)
-                  Padding(
-                      padding:  EdgeInsets.only(top: 1.h, right: 8.w,bottom: 5.h),
-                    child: _DeviceRow(
-                      brightness: true,
-                      topRight: const _StarOnly(),
-                      leading: const _SunIcon(),
-                      title: 'Brightness',
-                      selected: _selectedDeviceTitle == 'Brightness',
-                      onTap: () => setState(() => _selectedDeviceTitle = 'Brightness'),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          _BoldSmall('54%'),
-                          SizedBox(height: 2),
-                          _TinyGreyText('W5BT'),
-                        ],
-                      ),
-                      trailing: Padding(
-                         padding:  EdgeInsets.only(top: 7.h, right: 8.w),
-                        child: const _BrightnessPill(),
-                      ),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 1.h, right: 8.w,bottom: 5.h),
+                    brightness: true,
+                    topRight: const _StarOnly(),
+                    leading: const _SunIcon(),
+                    title: 'Brightness',
+                    selected: _selectedDeviceTitle == 'Brightness',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Brightness'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        _BoldSmall('54%'),
+                        SizedBox(height: 2),
+                        _TinyGreyText('W5BT'),
+                      ],
+                    ),
+                    trailing: Padding(
+                       padding:  EdgeInsets.only(top: 7.h, right: 8.w),
+                      child: const _BrightnessPill(),
                     ),
                   ),
 
                   const _RowDivider(),
 
                   // Card Reader(s)
-                  Padding(
-              padding:  EdgeInsets.only(top: 10.h, right: 8.w,bottom: 5.h),
-                    child: _DeviceRow(
-                      leading: const _BulbIcon(),
-                      title: 'Card Reader(s)',
-                      selected: _selectedDeviceTitle == 'Card Reader(s)',
-                      onTap: () => setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
-                      subtitle: const _SmallText('Blocked'),
-                      trailing: const _ToggleSwitch(isOn: false),
-                    ),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 10.h, right: 8.w,bottom: 5.h),
+                    leading: const _BulbIcon(),
+                    title: 'Card Reader(s)',
+                    selected: _selectedDeviceTitle == 'Card Reader(s)',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
+                    subtitle: const _SmallText('Blocked'),
+                    trailing: const _ToggleSwitch(isOn: false),
                   ),
                 ],
               ),
@@ -430,6 +437,7 @@ class _DeviceRow extends StatelessWidget {
     this.selected = false,
     this.onTap,
     this.brightness=false,
+    this.outerPadding,
   });
 
   final Widget leading;
@@ -439,15 +447,26 @@ class _DeviceRow extends StatelessWidget {
   final Widget? topRight;
   final bool selected;
   final VoidCallback? onTap;
-   bool brightness;
+  final bool brightness;
+  final EdgeInsets? outerPadding;
 
   @override
   Widget build(BuildContext context) {
+    final basePadding = EdgeInsets.fromLTRB(16.w, 0.h, 0.w, 5.h);
+    final finalPadding = outerPadding != null
+        ? EdgeInsets.fromLTRB(
+            basePadding.left + outerPadding!.left,
+            basePadding.top + outerPadding!.top,
+            basePadding.right + outerPadding!.right,
+            basePadding.bottom + outerPadding!.bottom,
+          )
+        : basePadding;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-        padding: EdgeInsets.fromLTRB(16.w, 0.h, 0.w, 5.h), // ✅ Image-1 padding
+        padding: finalPadding,
         child: Stack(
         children: [
           Row(
@@ -548,10 +567,12 @@ class _FilterChipPill extends StatelessWidget {
   const _FilterChipPill({
     required this.label,
     this.selected = false,
+    this.onTap,
   });
 
   final String label;
   final bool selected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -561,26 +582,29 @@ class _FilterChipPill extends StatelessWidget {
     final textColor =
         selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
 
-    return Container(
-      height: 32.h, // ✅ exact pill height
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 32.h, // ✅ exact pill height
   
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
-        border: Border.all(
-          color: borderColor,
-          width: 1.5, // ✅ thicker border like image
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
+          border: Border.all(
+            color: borderColor,
+            width: 1.5, // ✅ thicker border like image
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 20.sp,          // ✅ slightly bigger text
-          fontWeight:selected?  FontWeight.w600:FontWeight.w400,
-          color: textColor,
-          height: 1,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 20.sp,          // ✅ slightly bigger text
+            fontWeight:selected?  FontWeight.w600:FontWeight.w400,
+            color: textColor,
+            height: 1,
+          ),
         ),
       ),
     );
