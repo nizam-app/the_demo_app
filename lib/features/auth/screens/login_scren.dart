@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   static final routeName = "/login";
@@ -16,11 +15,26 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _emailFocusNode.addListener(() {
+      setState(() {});
+    });
+    _passwordFocusNode.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -36,16 +50,12 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 60.h),
-                
+
                 // Logo at top left
-                Image.asset(
-                  ImagePath.loginLogo,
-                  width: 50.w,
-                  height: 50.h,
-                ),
-                
+                Image.asset(ImagePath.loginLogo, width: 50.w, height: 50.h),
+
                 SizedBox(height: 40.h),
-                
+
                 // Title "Welcome to Aican"
                 Text(
                   'Welcome to Aican',
@@ -56,9 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontFamily: 'Inter',
                   ),
                 ),
-                
+
                 SizedBox(height: 12.h),
-                
+
                 // Subtitle
                 Text(
                   'Please enter your registration email and password.',
@@ -69,9 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontFamily: 'Inter',
                   ),
                 ),
-                
+
                 SizedBox(height: 48.h),
-                
+
                 // Email input field with light blue border
                 Container(
                   width: double.infinity,
@@ -79,19 +89,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(26.r),
-                    border: Border.all(
-                      color: const Color(0xFF0088FE),
-                      width: 1,
-                    ),
+                    border: _emailFocusNode.hasFocus
+                        ? Border.all(
+                            color: const Color(0xFF0088FE),
+                            width: 1,
+                          )
+                        : null,
                   ),
                   child: TextField(
                     controller: _emailController,
+                    focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'Email',
                       hintStyle: TextStyle(
                         fontSize: 16.sp,
-                        color: const Color(0xFF0088FE),
+                        color: _emailFocusNode.hasFocus
+                            ? const Color(0xFF0088FE)
+                            : const Color(0xFF6B7280),
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Inter',
                       ),
@@ -109,9 +124,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 20.h),
-                
+
                 // Password input field
                 Container(
                   width: double.infinity,
@@ -119,15 +134,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(26.r),
+                    border: _passwordFocusNode.hasFocus
+                        ? Border.all(
+                            color: const Color(0xFF0088FE),
+                            width: 1,
+                          )
+                        : null,
                   ),
                   child: TextField(
                     controller: _passwordController,
+                    focusNode: _passwordFocusNode,
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Password',
                       hintStyle: TextStyle(
                         fontSize: 16.sp,
-                        color: const Color(0xFF6B7280),
+                        color: _passwordFocusNode.hasFocus
+                            ? const Color(0xFF0088FE)
+                            : const Color(0xFF6B7280),
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Inter',
                       ),
@@ -145,13 +169,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 32.h),
-                
+
                 // Login button with gradient
                 GestureDetector(
                   onTap: () {
-                 context.go(HomeScreen.routeName);
+                    context.go(HomeScreen.routeName);
                   },
                   child: Container(
                     width: double.infinity,
@@ -161,10 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       gradient: const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
-                        colors: [
-                          Color(0xFF0088FE),
-                          Color(0xFF15DFFE),
-                        ],
+                        colors: [Color(0xFF0088FE), Color(0xFF15DFFE)],
                       ),
                     ),
                     child: Center(
@@ -175,15 +196,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                           fontFamily: 'Inter',
-                          
                         ),
                       ),
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 20.h),
-                
+
                 // "Or via social networks" text
                 Center(
                   child: Text(
@@ -196,9 +216,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 20.h),
-                
+
                 // Social login buttons - Apple first, then Google
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,9 +262,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    
+
                     SizedBox(width: 12.w),
-                    
+
                     // Google login button
                     Expanded(
                       child: GestureDetector(
@@ -286,9 +306,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: 40.h),
-                
+
                 // "Forgot Password ?" link at bottom center
                 Center(
                   child: GestureDetector(
@@ -306,9 +326,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: 130.h),
-                
+
                 // "Don't have an account? Register" text
                 Center(
                   child: Row(
@@ -340,7 +360,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                
+
                 SizedBox(height: 40.h),
               ],
             ),

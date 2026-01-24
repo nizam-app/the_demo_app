@@ -53,7 +53,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       size: 32,                // image-like
       bg: const Color(0xFFE5E7EB),
       iconColor: Colors.black87,
-      iconSize: 14,
+      iconSize: 16,
     ),
 
     // ✅ Keep title perfectly centered by reserving equal space on both sides

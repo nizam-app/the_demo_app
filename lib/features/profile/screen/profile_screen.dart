@@ -35,7 +35,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _CircleIconBtn(
-                        icon: Icons.chevron_left,
+                        child: Image.asset(
+                          'assets/aro.png',
+                          width: 16.w,
+                          height: 16.h,
+                        ),
                         onTap: () => Navigator.maybePop(context),
                       ),
                       Text(
@@ -49,8 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _CircleIconBtn(
                         child: Image.asset(
                           'assets/image 89 (1).png',
-                          width: 16.w,
-                          height: 16.w,
+                          width: 22.w,
+                          height: 22.w,
                           fit: BoxFit.contain,
                         ),
                         onTap: () {},
@@ -191,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(26.r),
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _ConnectItem(
                           label: 'Apple',

@@ -366,12 +366,25 @@ Widget _buildShadingControl({
       children: [
         _CircleBtn(
           size: 35.w,
-          child: Icon(Icons.expand_more, size: 19.sp, color: const Color(0xFF111827)),
+          child: Image.asset(
+            'assets/Mask group (17).png',
+            width: 13.w,
+            height: 13.h,
+            color: const Color(0xFF111827),
+          ),
         ),
-        SizedBox(width: 14.w),
+        SizedBox(width: 17.w),
         _CircleBtn(
           size: 35.w,
-          child: Icon(Icons.expand_less, size: 19.sp, color: const Color(0xFF111827)),
+          child: Transform.rotate(
+            angle: math.pi,
+            child: Image.asset(
+              'assets/Mask group (17).png',
+              width: 13.w,
+              height: 13.h,
+              color: const Color(0xFF111827),
+            ),
+          ),
         ),
       ],
     ),
@@ -812,8 +825,8 @@ class _Header extends StatelessWidget {
             child: Center(
               child: Image.asset(
                 'assets/Group 35 (1).png',
-                width: 22.w,
-                height: 22.w,
+                width: 26.w,
+                height: 17.w,
                 fit: BoxFit.contain,
               ),
             ),
@@ -824,7 +837,7 @@ class _Header extends StatelessWidget {
             child: Text(
               'Dashboard',
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 22.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF111827),
               ),
@@ -835,8 +848,8 @@ class _Header extends StatelessWidget {
           onTap: onEditTap,
           borderRadius: BorderRadius.circular(999),
           child: Container(
-            width: 36.w,
-            height: 36.w,
+            width: 32.w,
+            height: 32.w,
             decoration: const BoxDecoration(
               color: Color(0xFFF3F4F6),
               shape: BoxShape.circle,
@@ -844,8 +857,8 @@ class _Header extends StatelessWidget {
             child: Center(
               child: Image.asset(
                 'assets/image 89.png',
-                width: 18.w,
-                height: 18.w,
+                width: 22.w,
+                height: 22.w,
                 fit: BoxFit.contain,
               ),
             ),
@@ -1027,8 +1040,8 @@ class _ModeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 32.w,
-      height: 32.w,
+      width: 26.w,
+      height: 26.w,
       decoration: BoxDecoration(
         color: filled ? const Color(0xFF6B7280) : const Color(0xFFE1E1E1),
         shape: BoxShape.circle,
