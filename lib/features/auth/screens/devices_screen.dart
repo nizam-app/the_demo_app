@@ -53,7 +53,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       size: 32,                // image-like
       bg: const Color(0xFFE5E7EB),
       iconColor: Colors.black87,
-      iconSize: 14,
+      iconSize: 15,
     ),
 
     // ✅ Keep title perfectly centered by reserving equal space on both sides
@@ -65,6 +65,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
             fontSize: 22.sp,     // image-like (bigger)
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
+            fontFamily: 'Inter',
           ),
         ),
       ),
@@ -157,6 +158,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),
@@ -240,7 +242,7 @@ _DeviceRow(
 
                   // Bathroom
             _DeviceRow(
-              outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
+              outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 7.h),
               leading: const _PowerRingIcon(),
               title: 'Bathroom',
               selected: _selectedDeviceTitle == 'Bathroom',
@@ -262,6 +264,7 @@ _DeviceRow(
                       fontSize: 14, // screenshot vibe
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF111827),
+                      fontFamily: 'Inter',
                     ),
                   ),
                 ],
@@ -282,7 +285,10 @@ _DeviceRow(
                   _DeviceRow(
                     outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 5.h),
                     selected: _selectedDeviceTitle == 'Blind Living Room',
-                    topRight: const _StarTimeTag(time: '20:36'),
+                    topRight: Padding(
+                      padding:  EdgeInsets.only(bottom: 10.h, ),
+                      child: const _StarTimeTag(time: '20:36'),
+                    ),
                     leading: const _BlindGreenIcon(),
                     title: 'Blind Living Room',
                     onTap: () => setState(() => _selectedDeviceTitle = 'Blind Living Room'),
@@ -296,7 +302,7 @@ _DeviceRow(
                       ],
                     ),
                     trailing: Padding(
-                     padding:  EdgeInsets.only( right: 4.w, top: 10.h),
+                     padding:  EdgeInsets.only( right: 4.w, top: 20.h),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children:  [
@@ -371,9 +377,10 @@ _DeviceRow(
                 child: Text(
                   'Control units',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),
@@ -494,6 +501,7 @@ class _DeviceRow extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                           color: const Color(0xFF111827),
                           height: 1.05,
+                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
@@ -555,6 +563,7 @@ class _SearchBar extends StatelessWidget {
               fontSize: 16.sp,
               color: const Color(0xFF9CA3AF),
               fontWeight: FontWeight.w400,
+              fontFamily: 'Inter',
             ),
           ),
         ],
@@ -576,36 +585,76 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
+    const unselectedBorder = Color(0xFFE1E1E1);
 
-    final textColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
+    // ✅ Figma gradient: #0088FE (Blue) -> #EB0FFD (Purple)
+    const gradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        Color(0xFF0088FE), // Blue (left)
+        Color(0xFFEB0FFD), // Purple (right)
+      ],
+    );
+
+    final textColor = selected ? const Color(0xFF111827) : const Color(0xFF111827);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 32.h, // ✅ exact pill height
-  
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        alignment: Alignment.center,
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
           color: Colors.white,
-          borderRadius: BorderRadius.circular(999), // ✅ fully rounded pill
-          border: Border.all(
-            color: borderColor,
-            width: 1.5, // ✅ thicker border like image
-          ),
+          border: selected
+              ? null
+              : Border.all(
+                  color: unselectedBorder,
+                  width: 1.5,
+                ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 20.sp,          // ✅ slightly bigger text
-            fontWeight:selected?  FontWeight.w600:FontWeight.w400,
-            color: textColor,
-            height: 1,
-          ),
-        ),
+        child: selected
+            ? Container(
+                // ✅ outer gradient stroke
+                decoration: BoxDecoration(
+                  gradient: gradient,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                padding: EdgeInsets.all(1.5), // ✅ stroke thickness (change if needed)
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                      height: 1,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              )
+            : Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      // fontWeight: FontWeight.w400,
+                      color: textColor,
+                      height: 1,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -647,8 +696,8 @@ class _CircleIconButton extends StatelessWidget {
           child: imagePath != null
               ? Image.asset(
                   imagePath!,
-                  width: iconSize.sp,
-                  height: iconSize.sp,
+                  width: iconSize.w,
+                  height: iconSize.h,
                   fit: BoxFit.contain,
                 )
               : Icon(
@@ -797,6 +846,7 @@ class _SmallText extends StatelessWidget {
         fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
         color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
+        fontFamily: 'Inter',
       ),
     );
   }
@@ -829,8 +879,9 @@ class _BoldSmall extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 14.sp,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w700,
         color: const Color(0xFF111827),
+        fontFamily: 'Inter',
       ),
     );
   }
@@ -850,6 +901,7 @@ class _TinyGreyText extends StatelessWidget {
         fontWeight: FontWeight.w400,
         color: const Color(0xFF6B7280),
         height: 1.05,
+        fontFamily: 'Inter',
       ),
     );
   }
@@ -882,6 +934,7 @@ class _ModeDot extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: filledA ? Colors.white : const Color(0xFF6b7280),
           height: 1.0,
+          fontFamily: 'Inter',
         ),
       ),
     );
@@ -917,6 +970,7 @@ class _TagChip extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: outlined ? bg : Colors.white,
           height: 1.0,
+          fontFamily: 'Inter',
         ),
       ),
     );
@@ -956,6 +1010,7 @@ class _TimeTag extends StatelessWidget {
               color: const Color(0xFF111827),
               fontWeight: FontWeight.w400,
               height: 1.0,
+              fontFamily: 'Inter',
             ),
           ),
         ],
@@ -981,6 +1036,7 @@ class _StarTimeTag extends StatelessWidget {
             color: const Color(0xFF111827),
             fontWeight: FontWeight.w400,
             height: 1.0,
+            fontFamily: 'Inter',
           ),
         ),
       ],
@@ -1229,6 +1285,7 @@ class _BlindStatsRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: const Color(0xFF6B7280),
               height: 1.0,
+              fontFamily: 'Inter',
             ),
           ),
         ),
@@ -1247,6 +1304,7 @@ class _BlindStatsRow extends StatelessWidget {
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF111827),
+                      fontFamily: 'Inter',
                     ),
                   ),
 
@@ -1265,8 +1323,9 @@ class _BlindStatsRow extends StatelessWidget {
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF111827),
+                      fontFamily: 'Inter',
                     ),
-        ),
+                  ),
       ],
     );
   }
@@ -1450,8 +1509,9 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    // fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
                   ),
                 ), if (sub != null) ...[
                 SizedBox(height: 2.h),
@@ -1466,8 +1526,9 @@ class _ControlUnitRow extends StatelessWidget {
                       sub!,
                       style: TextStyle(
                         fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
+                        // fontWeight: FontWeight.w400,
                         color: const Color(0xFF6B7280),
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ],
@@ -1479,8 +1540,9 @@ class _ControlUnitRow extends StatelessWidget {
                     sub2!,
                     style: TextStyle(
                       fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
+                      // fontWeight: FontWeight.w400,
                       color: const Color(0xFF9CA3AF),
+                      fontFamily: 'Inter',
                     ),
                   )
             

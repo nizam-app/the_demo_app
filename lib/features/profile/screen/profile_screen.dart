@@ -35,7 +35,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _CircleIconBtn(
-                        icon: Icons.chevron_left,
+                        child: Image.asset(
+                          'assets/aro.png',
+                          width: 16.w,
+                          height: 16.h,
+                        ),
                         onTap: () => Navigator.maybePop(context),
                       ),
                       Text(
@@ -49,8 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _CircleIconBtn(
                         child: Image.asset(
                           'assets/image 89 (1).png',
-                          width: 16.w,
-                          height: 16.w,
+                          width: 22.w,
+                          height: 22.w,
                           fit: BoxFit.contain,
                         ),
                         onTap: () {},
@@ -167,9 +171,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: 'Roles',
                         enabled: rolesEnabled,
                         onTap: () => setState(() => rolesEnabled = !rolesEnabled),
-                        image1: 'assets/Mask group (10).png',
-                        image2: 'assets/Mask group (11).png',
-                        image3: 'assets/Mask group (12).png',
+                        image1: 'assets/persion.png',
+                        image2: 'assets/key.png',
+                        image3: 'assets/seting.png',
                       ),
                       const _DividerLine(),
                       _RemoteAccessRow(
@@ -185,12 +189,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: 'Connect',
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
+                         padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 16.h),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(26.r),
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _ConnectItem(
                           label: 'Apple',
