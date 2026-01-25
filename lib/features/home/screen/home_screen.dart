@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 63.h,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        // padding: EdgeInsets.symmetric(horizontal: 12.w),
         children: [
           _CategoryPill(
             label: 'Light',
@@ -365,7 +365,7 @@ Widget _buildShadingControl({
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35.w,
+          size: 35,
           child: Image.asset(
             'assets/Mask group (17).png',
             width: 13.w,
@@ -375,7 +375,7 @@ Widget _buildShadingControl({
         ),
         SizedBox(width: 17.w),
         _CircleBtn(
-          size: 35.w,
+          size: 35,
           child: Transform.rotate(
             angle: math.pi,
             child: Image.asset(
@@ -570,7 +570,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
 
             Row(
               children: [
-                _CircleBtn(child: Icon(Icons.remove, size: 20.sp)),
+                _CircleBtn(child: Icon(Icons.remove, size: 20.sp),size: 35,),
                 Expanded(
                   child: Center(
                     child: Text(
@@ -583,7 +583,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
                     ),
                   ),
                 ),
-                _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
+                _CircleBtn(child: Icon(Icons.add, size: 20.sp),size: 35,),
               ],
             ),
           ],
@@ -1067,7 +1067,7 @@ class _CircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = size ?? 35;
+    final s = size ?? 32;
     return Container(
       width: s.w,
       height: s.h,
@@ -1351,31 +1351,31 @@ class _BlindCard extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),size: 35,
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 7.w),
                       Image.asset(
                         'assets/Group 32.jpg',
-                        width: 12.w,
-                        height: 19.h,
+                        width: 10.w,
+                        height: 17.h,
                         fit: BoxFit.contain,
                       ),
                       SizedBox(width: 3.w),
                       Text(
                         '$downPercent%',
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 8.w),
                       Image.asset(
                         'assets/Vector 4.jpg',
-                        width: 11.w,
-                        height: 10.h,
+                        width: 8.w,
+                        height: 17.h,
                         fit: BoxFit.contain,
                       ),
                       SizedBox(width: 3.w),
                       Text(
                         '$upPercent%',
-                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 7.w),
                       _CircleBtn(
                         child: Image.asset(
                           'assets/Mask group (16).png',
@@ -1428,7 +1428,7 @@ class _ToggleCard extends StatelessWidget {
                       fit: BoxFit.contain,
                     )
                   : Icon(Icons.water_drop_outlined, size: 42.sp, color: const Color(0xFF00C2FF)),
-              SizedBox(height: 10.h),
+              SizedBox(height: 17.h),
               Expanded(
                 child: Text(
                   title,
@@ -1437,7 +1437,7 @@ class _ToggleCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              SizedBox(height: 6.h),
+              // SizedBox(height: 4.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -1445,20 +1445,7 @@ class _ToggleCard extends StatelessWidget {
                     isOn ? 'On' : 'Off',
                     style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
                   ),
-                  SizedBox(
-                    width: 60.w,
-                    height: 35.h,
-                    child: Transform.scale(
-                      scale: 1.17, // Scale to fit 60w x 35h (35/30 ≈ 1.17)
-                      child: Switch(
-                        value: isOn,
-                        onChanged: (_) {},
-                        activeColor: Colors.white,
-                        activeTrackColor: const Color(0xFF0088FE),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
-                  ),
+                  _ToggleColorswitch(isOn: isOn),
                 ],
               ),
             ],
@@ -1610,7 +1597,7 @@ class _FavoritesRow extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _CircleBtn(child: Icon(Icons.remove, size: 20.sp)),
+                        _CircleBtn(child: Icon(Icons.remove, size: 20.sp),size: 35,),
                         Text('24.6°c', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
                         _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
                       ],
@@ -2992,6 +2979,35 @@ class _ControlUnitRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ToggleColorswitch extends StatelessWidget {
+  const _ToggleColorswitch({required this.isOn});
+  final bool isOn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 60.w,  // ✅ closer to iOS toggle size
+      height: 35.h,
+      padding: EdgeInsets.all(2.w),
+      decoration: BoxDecoration(
+        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Align(
+        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          width: 28.w,
+          height: 28.w,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+        ),
       ),
     );
   }

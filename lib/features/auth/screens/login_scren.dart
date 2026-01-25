@@ -12,6 +12,45 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+// ✅ Gradient stroke painter (no padding trick, no double border)
+class _GradientRRectBorderPainter extends CustomPainter {
+  _GradientRRectBorderPainter({
+    required this.radius,
+    required this.strokeWidth,
+    required this.gradient,
+  });
+
+  final double radius;
+  final double strokeWidth;
+  final Gradient gradient;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    // Draw stroke fully inside the widget (avoid dark/extra edge)
+    final rrect = RRect.fromRectAndRadius(
+      rect.deflate(strokeWidth / 2),
+      Radius.circular(radius),
+    );
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..isAntiAlias = true
+      ..shader = gradient.createShader(rect);
+
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GradientRRectBorderPainter oldDelegate) {
+    return oldDelegate.radius != radius ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.gradient != gradient;
+  }
+}
+
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -21,12 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _emailFocusNode.addListener(() {
-      setState(() {});
-    });
-    _passwordFocusNode.addListener(() {
-      setState(() {});
-    });
+    _emailFocusNode.addListener(() => setState(() {}));
+    _passwordFocusNode.addListener(() => setState(() {}));
   }
 
   @override
@@ -38,10 +73,93 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // ✅ Field that matches Image-1:
+  // - Focus হলে: only thin gradient stroke
+  // - Extra border/shadow/black edge নাই
+  // - Fill সবসময় same grey (Image-1 এর মতো)
+// ✅ Field that matches Image-1:
+// - Default: NO border, fill #F2F3F5
+// - Focus: thin gradient stroke only
+Widget _pillField({
+  required TextEditingController controller,
+  required FocusNode focusNode,
+  required String hint,
+  bool obscureText = false,
+  TextInputType keyboardType = TextInputType.text,
+}) {
+  final bool isFocus = focusNode.hasFocus;
+
+  // ✅ required fill color
+  final Color fill = Colors.grey.shade300;
+
+  const LinearGradient focusGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      Color(0xFF0088FE),
+      Color(0xFF00D1FF),
+    ],
+  );
+
+  final double radius = 26.r;
+
+  return CustomPaint(
+    foregroundPainter: isFocus
+        ? _GradientRRectBorderPainter(
+            radius: radius,
+            strokeWidth: 0.8, // ✅ thinner (no bold look)
+            gradient: focusGradient,
+          )
+        : null,
+    child: ClipRRect(
+       clipBehavior: Clip.antiAlias,
+      borderRadius: BorderRadius.circular(radius),
+      child: Container(
+        width: double.infinity,
+        height: 52.h,
+        decoration: BoxDecoration(
+          color: fill,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              fontSize: 16.sp,
+              color:
+                  isFocus ? const Color(0xFF0088FE) : const Color(0xFF6B7280),
+              fontWeight: FontWeight.w400,
+              fontFamily: 'Inter',
+            ),
+            // ✅ ensure no default border at all
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 20.w,
+              vertical: 16.h,
+            ),
+          ),
+          style: TextStyle(
+            fontSize: 16.sp,
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Inter',
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFffffff),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -82,92 +200,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 48.h),
 
-                // Email input field with light blue border
-                Container(
-                  width: double.infinity,
-                  height: 52.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(26.r),
-                    border: _emailFocusNode.hasFocus
-                        ? Border.all(
-                            color: const Color(0xFF0088FE),
-                            width: 1,
-                          )
-                        : null,
-                  ),
-                  child: TextField(
-                    controller: _emailController,
-                    focusNode: _emailFocusNode,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Email',
-                      hintStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: _emailFocusNode.hasFocus
-                            ? const Color(0xFF0088FE)
-                            : const Color(0xFF6B7280),
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Inter',
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 16.h,
-                      ),
-                    ),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: const Color(0xFF111827),
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
+                // ✅ Email (only changed field container logic)
+                _pillField(
+                  controller: _emailController,
+                  focusNode: _emailFocusNode,
+                  hint: 'Email',
+                  keyboardType: TextInputType.emailAddress,
                 ),
 
                 SizedBox(height: 20.h),
 
-                // Password input field
-                Container(
-                  width: double.infinity,
-                  height: 52.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(26.r),
-                    border: _passwordFocusNode.hasFocus
-                        ? Border.all(
-                            color: const Color(0xFF0088FE),
-                            width: 1,
-                          )
-                        : null,
-                  ),
-                  child: TextField(
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      hintStyle: TextStyle(
-                        fontSize: 16.sp,
-                        color: _passwordFocusNode.hasFocus
-                            ? const Color(0xFF0088FE)
-                            : const Color(0xFF6B7280),
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Inter',
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 16.h,
-                      ),
-                    ),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: const Color(0xFF111827),
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
+                // ✅ Password (only changed field container logic)
+                _pillField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  hint: 'Password',
+                  obscureText: true,
                 ),
 
                 SizedBox(height: 32.h),
@@ -226,9 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Apple login button
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          // Handle Apple login
-                        },
+                        onTap: () {},
                         child: Container(
                           height: 54.h,
                           decoration: BoxDecoration(
@@ -268,9 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Google login button
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          // Handle Google login
-                        },
+                        onTap: () {},
                         child: Container(
                           height: 54.h,
                           decoration: BoxDecoration(
@@ -312,9 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // "Forgot Password ?" link at bottom center
                 Center(
                   child: GestureDetector(
-                    onTap: () {
-                      // Handle forgot password
-                    },
+                    onTap: () {},
                     child: Text(
                       'Forgot Password ?',
                       style: TextStyle(
@@ -344,9 +386,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          // context.go(RegisterScreen.routeName);
-                        },
+                        onTap: () {},
                         child: Text(
                           'Register',
                           style: TextStyle(

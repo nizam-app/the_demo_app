@@ -171,9 +171,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: 'Roles',
                         enabled: rolesEnabled,
                         onTap: () => setState(() => rolesEnabled = !rolesEnabled),
-                        image1: 'assets/Mask group (10).png',
-                        image2: 'assets/Mask group (11).png',
-                        image3: 'assets/Mask group (12).png',
+                        image1: 'assets/persion.png',
+                        image2: 'assets/key.png',
+                        image3: 'assets/seting.png',
                       ),
                       const _DividerLine(),
                       _RemoteAccessRow(
@@ -189,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: 'Connect',
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
+                         padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 16.h),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(26.r),
