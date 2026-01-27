@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
 
@@ -14,7 +13,8 @@ class DevicesScreen extends StatefulWidget {
 
 class _DevicesScreenState extends State<DevicesScreen> {
   int _selectedNavIndex = 0; // Devices is index 0
-  String? _selectedDeviceTitle = 'Blind Living Room'; // Track selected device, initially "Blind Living Room"
+  String? _selectedDeviceTitle =
+      'Blind Living Room'; // Track selected device, initially "Blind Living Room"
   String _selectedFilter = 'All'; // Track selected filter chip
 
   void _onNavItemTapped(int index) {
@@ -46,106 +46,105 @@ class _DevicesScreenState extends State<DevicesScreen> {
               Padding(
                 padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
                 child: Row(
-  children: [
-    _CircleIconButton(
-      imagePath: 'assets/aro.png',
-      onTap: () => Navigator.maybePop(context),
-      size: 32,                // image-like
-      bg: const Color(0xFFE5E7EB),
-      iconColor: Colors.black87,
-      iconSize: 15,
-    ),
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.maybePop(context),
+                      child: Icon(
+                        Icons.chevron_left,
+                        size: 24.sp,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
 
-    // ✅ Keep title perfectly centered by reserving equal space on both sides
-    Expanded(
-      child: Center(
-        child: Text(
-          'Devices',
-          style: TextStyle(
-            fontSize: 22.sp,     // image-like (bigger)
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
-            fontFamily: 'Inter',
-          ),
-        ),
-      ),
-    ),
+                    // ✅ Keep title perfectly centered by reserving equal space on both sides
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'Devices',
+                          style: TextStyle(
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ),
 
-    Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _CircleIconButton(
-          icon: Icons.more_horiz_rounded,
-          onTap: () {},
-          size: 32,
-          bg: const Color(0xFFF3F4F6),
-          iconColor: const Color(0xFF111827),
-          iconSize: 22,
-        ),
-        SizedBox(width: 10.w),
-        _CircleIconButton(
-          icon: Icons.add_rounded,
-          onTap: () {},
-          size: 32,
-          bg: const Color(0xFF0088FE),
-          iconColor: Colors.white,   // ✅ fix
-          iconSize: 23,
-        ),
-      ],
-    ),
-  ],
-)
-
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _CircleIconButton(
+                          icon: Icons.more_horiz_rounded,
+                          onTap: () {},
+                          size: 32,
+                          bg: const Color(0xFFF3F4F6),
+                          iconColor: const Color(0xFF111827),
+                          iconSize: 22,
+                        ),
+                        SizedBox(width: 10.w),
+                        _CircleIconButton(
+                          icon: Icons.add_rounded,
+                          onTap: () {},
+                          size: 32,
+                          bg: const Color(0xFF0088FE),
+                          iconColor: Colors.white,
+                          iconSize: 23,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
               // -------- Search ----------
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h  ),
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
                 child: _SearchBar(),
               ),
 
               SizedBox(height: 10.h),
 
               // -------- Filter chips ----------
-             SizedBox(
-  height: 40.h,
-  child: ListView(
-    scrollDirection: Axis.horizontal,
-    padding: EdgeInsets.symmetric(horizontal: 14.w),
-    children: [
-      _FilterChipPill(
-        label: 'All',
-        selected: _selectedFilter == 'All',
-        onTap: () => setState(() => _selectedFilter = 'All'),
-      ),
-      SizedBox(width: 10),
-      _FilterChipPill(
-        label: 'Favorites',
-        selected: _selectedFilter == 'Favorites',
-        onTap: () => setState(() => _selectedFilter = 'Favorites'),
-      ),
-      SizedBox(width: 10),
-      _FilterChipPill(
-        label: 'Smart',
-        selected: _selectedFilter == 'Smart',
-        onTap: () => setState(() => _selectedFilter = 'Smart'),
-      ),
-      SizedBox(width: 10),
-      _FilterChipPill(
-        label: 'Groups',
-        selected: _selectedFilter == 'Groups',
-        onTap: () => setState(() => _selectedFilter = 'Groups'),
-      ),
-      SizedBox(width: 10),
-      _FilterChipPill(
-        label: 'Category',
-        selected: _selectedFilter == 'Category',
-        onTap: () => setState(() => _selectedFilter = 'Category'),
-      ),
-    ],
-  ),
-),
-
+              SizedBox(
+                height: 40.h,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: 14.w),
+                  children: [
+                    _FilterChipPill(
+                      label: 'All',
+                      selected: _selectedFilter == 'All',
+                      onTap: () => setState(() => _selectedFilter = 'All'),
+                    ),
+                    SizedBox(width: 10),
+                    _FilterChipPill(
+                      label: 'Favorites',
+                      selected: _selectedFilter == 'Favorites',
+                      onTap: () =>
+                          setState(() => _selectedFilter = 'Favorites'),
+                    ),
+                    SizedBox(width: 10),
+                    _FilterChipPill(
+                      label: 'Smart',
+                      selected: _selectedFilter == 'Smart',
+                      onTap: () => setState(() => _selectedFilter = 'Smart'),
+                    ),
+                    SizedBox(width: 10),
+                    _FilterChipPill(
+                      label: 'Groups',
+                      selected: _selectedFilter == 'Groups',
+                      onTap: () => setState(() => _selectedFilter = 'Groups'),
+                    ),
+                    SizedBox(width: 10),
+                    _FilterChipPill(
+                      label: 'Category',
+                      selected: _selectedFilter == 'Category',
+                      onTap: () => setState(() => _selectedFilter = 'Category'),
+                    ),
+                  ],
+                ),
+              ),
 
               SizedBox(height: 12.h),
 
@@ -156,7 +155,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   'Devices',
                   style: TextStyle(
                     fontSize: 20.sp,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),
@@ -169,71 +168,71 @@ class _DevicesScreenState extends State<DevicesScreen> {
               _DeviceListCard(
                 children: [
                   // RGBW
-              // RGBW
-_DeviceRow(
-  outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
-  topRight: const _TimeTag(text: '18:32', blueIcon: true),
-  leading: const _GradientCircleIcon(size: 34), // ✅ Image-1 like color wheel
-  title: 'RGBW',
-  selected: _selectedDeviceTitle == 'RGBW',
-  onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
-  subtitle: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: [
-          const _ModeDot(text: 'A', filledA: false),
-          SizedBox(width: 6.w),
-          const _SmallText('Off'),
-        ],
-      ),
-      SizedBox(height: 2.h),
-      const _TinyGreyText('LCD0C12'),
-      SizedBox(height: 6.h),
-  
-      // ✅ Row -> Wrap (fix overflow)
-      Wrap(
-        spacing: 6.w,
-        runSpacing: 6.h,
-        children: const [
-          _TagChip(text: 'Lighting', bg: Color(0xFF0088fe), outlined: true),
-          _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A), outlined: false),
-        ],
-      ),
-    ],
-  ),
-  trailing: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      const _CircleMiniBtn(icon: Icons.remove),
-      SizedBox(width: 8.w),
-      const _CircleMiniBtn(icon: Icons.add),
-      SizedBox(width: 8.w),
-      Padding(
-         padding:  EdgeInsets.only( right: 2.w),
-        child: const _ToggleColorswitch(isOn: true),
-      ),
-    ],
-  ),
-),
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w),
+                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
+                    leading: const _GradientCircleIcon(size: 34),
+                    title: 'RGBW',
+                    selected: _selectedDeviceTitle == 'RGBW',
+                    onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const _ModeDot(text: 'A', filledA: false),
+                            SizedBox(width: 6.w),
+                            const _SmallText('Off'),
+                          ],
+                        ),
+                        SizedBox(height: 2.h),
+                        const _TinyGreyText('LCD0C12'),
+                        SizedBox(height: 6.h),
+                        Wrap(
+                          spacing: 6.w,
+                          runSpacing: 6.h,
+                          children: const [
+                            _TagChip(
+                              text: 'Lighting',
+                              bg: Color(0xFF0088fe),
+                              outlined: true,
+                            ),
+                            _TagChip(
+                              text: 'Bathroom',
+                              bg: Color(0xFFFE019A),
+                              outlined: false,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _CircleMiniBtn(icon: Icons.remove),
+                        SizedBox(width: 8.w),
+                        const _CircleMiniBtn(icon: Icons.add),
+                        SizedBox(width: 8.w),
+                        const _ToggleColorswitch(isOn: true),
+                      ],
+                    ),
+                  ),
 
                   const _RowDivider(),
 
                   // Alarm
                   _DeviceRow(
                     outerPadding: EdgeInsets.only(top: 7.h, right: 1.w),
-                    topRight: 
-                    const _PinOnly(),
+                    topRight: const _PinOnly(),
                     leading: const _LockIcon(),
                     title: 'Alarm',
                     selected: _selectedDeviceTitle == 'Alarm',
                     onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
                     subtitle: const _SmallText('Disarmed'),
                     trailing: Padding(
-                      padding:  EdgeInsets.only(right: 10.w),
-                      child: Padding(
-                          padding:  EdgeInsets.only( right: 8.w),
-                        child:  _CircleActionBlue(imagePath: 'assets/Mask group (15).png'),
+                      padding: EdgeInsets.only(right: 8.w),
+                      child: _CircleActionBlue(
+                        imagePath: 'assets/Mask group (15).png',
                       ),
                     ),
                   ),
@@ -241,71 +240,78 @@ _DeviceRow(
                   const _RowDivider(),
 
                   // Bathroom
-            _DeviceRow(
-              outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 7.h),
-              leading: const _PowerRingIcon(),
-              title: 'Bathroom',
-              selected: _selectedDeviceTitle == 'Bathroom',
-              onTap: () => setState(() => _selectedDeviceTitle = 'Bathroom'),
-              subtitle: Row(
-                children: [
-                  const _ModeDot(text: 'M', filledA: true),
-                  const SizedBox(width: 10),
-                  Image.asset(
-                    'assets/low-temperature 1.png',
-                    width: 9.w,
-                    height: 19.h,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    '24.6°C',
-                    style: TextStyle(
-                      fontSize: 14, // screenshot vibe
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827),
-                      fontFamily: 'Inter',
+                  _DeviceRow(
+                    outerPadding: EdgeInsets.only(
+                      top: 7.h,
+                      right: 8.w,
+                      bottom: 7.h,
+                    ),
+                    leading: const _PowerRingIcon(),
+                    title: 'Bathroom',
+                    selected: _selectedDeviceTitle == 'Bathroom',
+                    onTap: () =>
+                        setState(() => _selectedDeviceTitle = 'Bathroom'),
+                    subtitle: Row(
+                      children: [
+                        const _ModeDot(text: 'M', filledA: true),
+                        const SizedBox(width: 10),
+                        Image.asset(
+                          'assets/low-temperature 1.png',
+                          width: 9.w,
+                          height: 19.h,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          '24.6°C',
+                          style: TextStyle(
+                            fontSize: 14, // screenshot vibe
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF111827),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _CircleMiniBtn(icon: Icons.remove),
+                        SizedBox(width: 14.w),
+                        const _CircleMiniBtn(icon: Icons.add),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const _CircleMiniBtn(icon: Icons.remove),
-                  SizedBox(width: 14.w),
-                  const _CircleMiniBtn(icon: Icons.add),
-                ],
-              ),
-            ),
 
-                       const _RowDivider(),
+                  const _RowDivider(),
 
                   // Blind Living Room (selected highlight row)
                   _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w, bottom: 5.h),
-                    selected: _selectedDeviceTitle == 'Blind Living Room',
-                    topRight: Padding(
-                      padding:  EdgeInsets.only(bottom: 10.h, ),
-                      child: const _StarTimeTag(time: '20:36'),
+                    outerPadding: EdgeInsets.only(
+                      top: 7.h,
+                      right: 8.w,
+                      bottom: 5.h,
                     ),
+                    selected: _selectedDeviceTitle == 'Blind Living Room',
+                    topRight: const _StarTimeTag(time: '20:36'),
                     leading: const _BlindGreenIcon(),
                     title: 'Blind Living Room',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Blind Living Room'),
+                    onTap: () => setState(
+                      () => _selectedDeviceTitle = 'Blind Living Room',
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         SizedBox(height: 2),
                         _BlindStatsRow(),
-                
                         _TinyGreyText('D012U12'),
                       ],
                     ),
                     trailing: Padding(
-                     padding:  EdgeInsets.only( right: 4.w, top: 20.h),
+                      padding: EdgeInsets.only(right: 4.w, top: 10.h),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children:  [
+                        children: [
                           _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
                           SizedBox(width: 10.w),
                           _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
@@ -318,26 +324,41 @@ _DeviceRow(
 
                   // Block Irrigation Schedule (blue play row)
                   _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 8.w,bottom: 5.h),
+                    outerPadding: EdgeInsets.only(
+                      top: 7.h,
+                      right: 8.w,
+                      bottom: 5.h,
+                    ),
                     leading: const _PlayCircleIcon(),
                     title: 'Block Irrigation Schedule',
-                    selected: _selectedDeviceTitle == 'Block Irrigation Schedule',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Block Irrigation Schedule'),
+                    selected:
+                        _selectedDeviceTitle == 'Block Irrigation Schedule',
+                    onTap: () => setState(
+                      () => _selectedDeviceTitle = 'Block Irrigation Schedule',
+                    ),
                     subtitle: const _SmallText('Blocked'),
-                    trailing:  _CircleActionBlue(imagePath: 'assets/play.png',isPlay: true,),
+                    trailing: _CircleActionBlue(
+                      imagePath: 'assets/play.png',
+                      isPlay: true,
+                    ),
                   ),
 
                   const _RowDivider(),
 
                   // Brightness (with pill slider)
                   _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 1.h, right: 8.w,bottom: 5.h),
+                    outerPadding: EdgeInsets.only(
+                      top: 1.h,
+                      right: 8.w,
+                      bottom: 5.h,
+                    ),
                     brightness: true,
                     topRight: const _StarOnly(),
                     leading: const _SunIcon(),
                     title: 'Brightness',
                     selected: _selectedDeviceTitle == 'Brightness',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Brightness'),
+                    onTap: () =>
+                        setState(() => _selectedDeviceTitle = 'Brightness'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
@@ -347,7 +368,7 @@ _DeviceRow(
                       ],
                     ),
                     trailing: Padding(
-                       padding:  EdgeInsets.only(top: 7.h, right: 8.w),
+                      padding: EdgeInsets.only(top: 7.h, right: 0.w),
                       child: const _BrightnessPill(),
                     ),
                   ),
@@ -356,18 +377,23 @@ _DeviceRow(
 
                   // Card Reader(s)
                   _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 10.h, right: 8.w,bottom: 5.h),
+                    outerPadding: EdgeInsets.only(
+                      top: 10.h,
+                      right: 8.w,
+                      bottom: 5.h,
+                    ),
                     leading: const _BulbIcon(),
                     title: 'Card Reader(s)',
                     selected: _selectedDeviceTitle == 'Card Reader(s)',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
+                    onTap: () =>
+                        setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
                     subtitle: const _SmallText('Blocked'),
                     trailing: const _ToggleSwitch(isOn: false),
                   ),
                 ],
               ),
-              
-                  const _RowDivider(),
+
+              const _RowDivider(),
 
               SizedBox(height: 20.h),
 
@@ -388,15 +414,14 @@ _DeviceRow(
               SizedBox(height: 8.h),
 
               _DeviceListCard(
-                children: const [
-                  _ControlUnitRow(
+                children: [
+                  const _ControlUnitRow(
                     imagePath: 'assets/image 124.png',
                     title: 'CORE20',
-
                     sub2: 'CORE20-4B37-3419-363A',
                   ),
-                  _RowDivider(),
-                  _ControlUnitRow(
+                  _RowDivider(leftMargin: 56.w), // 12 (padding) + 34 (icon) + 10 (spacing)
+                  const _ControlUnitRow(
                     imagePath: 'assets/image 124.png',
                     title: 'D012',
                     sub: '11 Devices',
@@ -408,9 +433,7 @@ _DeviceRow(
           ),
         ),
       ),
-      
     );
-    
   }
 }
 
@@ -435,7 +458,7 @@ class _DeviceListCard extends StatelessWidget {
 }
 
 class _DeviceRow extends StatelessWidget {
-   _DeviceRow({
+  _DeviceRow({
     required this.leading,
     required this.title,
     required this.subtitle,
@@ -443,7 +466,7 @@ class _DeviceRow extends StatelessWidget {
     this.topRight,
     this.selected = false,
     this.onTap,
-    this.brightness=false,
+    this.brightness = false,
     this.outerPadding,
   });
 
@@ -475,68 +498,70 @@ class _DeviceRow extends StatelessWidget {
         color: selected ? const Color(0xFFEAF1FF) : Colors.white,
         padding: finalPadding,
         child: Stack(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // ✅ bigger leading slot like Image-1
-              SizedBox(
-                width: 46.w,
-                height: 46.w,
-                child: Center(child: leading),
-              ),
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ✅ bigger leading slot like Image-1
+                SizedBox(
+                  width: 46.w,
+                  height: 46.w,
+                  child: Center(child: leading),
+                ),
 
-              SizedBox(width: 12.w),
+                SizedBox(width: 12.w),
 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: brightness? 11.h : 0.h),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF111827),
-                          height: 1.05,
-                          fontFamily: 'Inter',
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: brightness ? 11.h : 0.h),
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF111827),
+                            height: 1.05,
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 4.h),
-                    subtitle,
-                  ],
+                      SizedBox(height: 4.h),
+                      subtitle,
+                    ],
+                  ),
                 ),
-              ),
 
-              SizedBox(width: 12.w),
-              trailing,
-            ],
-          ),
-
-          if (topRight != null)
-            Positioned(
-              right: 0,
-              top: -2.h, // ✅ lifts like Image-1
-              child: topRight!,
+                SizedBox(width: 12.w),
+                trailing,
+              ],
             ),
-        ],
-      ),
+
+            if (topRight != null)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: topRight!,
+              ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class _RowDivider extends StatelessWidget {
-  const _RowDivider();
+  const _RowDivider({this.leftMargin});
+
+  final double? leftMargin;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(left: 74.w), // ✅ 16 + 46 + 12
+      margin: EdgeInsets.only(left: leftMargin ?? 74.w), // Default: 16 + 46 + 12 for device rows
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -585,76 +610,35 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const unselectedBorder = Color(0xFFE1E1E1);
-
-    // ✅ Figma gradient: #0088FE (Blue) -> #EB0FFD (Purple)
-    const gradient = LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [
-        Color(0xFF0088FE), // Blue (left)
-        Color(0xFFEB0FFD), // Purple (right)
-      ],
-    );
-
-    final textColor = selected ? const Color(0xFF111827) : const Color(0xFF111827);
+    final borderColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
+    final textColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
+    final bgColor = selected ? Colors.white : const Color(0xFFF3F4F6);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 32.h, // ✅ exact pill height
+        height: 32.h,
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
+          color: bgColor,
           borderRadius: BorderRadius.circular(999),
-          color: Colors.white,
           border: selected
-              ? null
-              : Border.all(
-                  color: unselectedBorder,
-                  width: 1.5,
-                ),
+              ? Border.all(color: borderColor, width: 1.5)
+              : null,
         ),
-        child: selected
-            ? Container(
-                // ✅ outer gradient stroke
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                padding: EdgeInsets.all(1.5), // ✅ stroke thickness (change if needed)
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                      height: 1,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ),
-              )
-            : Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      // fontWeight: FontWeight.w400,
-                      color: textColor,
-                      height: 1,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ),
-              ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            color: textColor,
+            height: 1,
+            fontFamily: 'Inter',
+          ),
+        ),
       ),
     );
   }
@@ -671,7 +655,10 @@ class _CircleIconButton extends StatelessWidget {
     this.bg = const Color(0xFFF3F4F6),
     this.iconColor = const Color(0xFF111827),
     this.iconSize = 22,
-  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   final IconData? icon;
   final String? imagePath;
@@ -688,10 +675,7 @@ class _CircleIconButton extends StatelessWidget {
       child: Container(
         width: size.w,
         height: size.w,
-        decoration: BoxDecoration(
-          color: bg,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
         child: Center(
           child: imagePath != null
               ? Image.asset(
@@ -700,11 +684,7 @@ class _CircleIconButton extends StatelessWidget {
                   height: iconSize.h,
                   fit: BoxFit.contain,
                 )
-              : Icon(
-                  icon!,
-                  size: iconSize.sp,
-                  color: iconColor,
-                ),
+              : Icon(icon!, size: iconSize.sp, color: iconColor),
         ),
       ),
     );
@@ -738,15 +718,15 @@ class _CircleMiniBtn extends StatelessWidget {
 }
 
 class _CircleActionBlue extends StatelessWidget {
-   _CircleActionBlue({
-    this.icon,
-    this.imagePath,
-    this.isPlay = false,
-  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
+  _CircleActionBlue({this.icon, this.imagePath, this.isPlay = false})
+    : assert(
+        icon != null || imagePath != null,
+        'Either icon or imagePath must be provided',
+      );
 
   final IconData? icon;
   final String? imagePath;
-  bool isPlay;
+  final bool isPlay;
 
   @override
   Widget build(BuildContext context) {
@@ -778,7 +758,7 @@ class _ToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60.w,  // ✅ closer to iOS toggle size
+      width: 60.w, // ✅ closer to iOS toggle size
       height: 35.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
@@ -800,7 +780,6 @@ class _ToggleSwitch extends StatelessWidget {
   }
 }
 
-
 class _ToggleColorswitch extends StatelessWidget {
   const _ToggleColorswitch({required this.isOn});
   final bool isOn;
@@ -808,7 +787,7 @@ class _ToggleColorswitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60.w,  // ✅ closer to iOS toggle size
+      width: 60.w, // ✅ closer to iOS toggle size
       height: 35.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
@@ -837,12 +816,12 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked' || v == 'off';
+    final isStrong = v == 'disarmed' || v == 'blocked';
 
     return Text(
       text,
       style: TextStyle(
-        fontSize: isStrong ? 14.sp : 14.sp,
+        fontSize: 14.sp,
         fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
         color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
@@ -867,7 +846,6 @@ class _PinOnly extends StatelessWidget {
     );
   }
 }
-
 
 class _BoldSmall extends StatelessWidget {
   const _BoldSmall(this.text);
@@ -942,11 +920,7 @@ class _ModeDot extends StatelessWidget {
 }
 
 class _TagChip extends StatelessWidget {
-  const _TagChip({
-    required this.text,
-    required this.bg,
-    this.outlined = false,
-  });
+  const _TagChip({required this.text, required this.bg, this.outlined = false});
   final String text;
   final Color bg;
   final bool outlined;
@@ -979,10 +953,7 @@ class _TagChip extends StatelessWidget {
 /* ---------------- Top right tags (time/star) ---------------- */
 
 class _TimeTag extends StatelessWidget {
-  const _TimeTag({
-    required this.text,
-    this.blueIcon = true,
-  });
+  const _TimeTag({required this.text, this.blueIcon = true});
 
   final String text;
   final bool blueIcon;
@@ -990,7 +961,7 @@ class _TimeTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.only(top: 9.h),
+      padding: EdgeInsets.only(top: 2.h),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1006,7 +977,7 @@ class _TimeTag extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              fontSize: 13.sp, // ✅ screenshot small
+              fontSize: 13.sp,
               color: const Color(0xFF111827),
               fontWeight: FontWeight.w400,
               height: 1.0,
@@ -1018,6 +989,7 @@ class _TimeTag extends StatelessWidget {
     );
   }
 }
+
 class _StarTimeTag extends StatelessWidget {
   const _StarTimeTag({required this.time});
   final String time;
@@ -1043,15 +1015,19 @@ class _StarTimeTag extends StatelessWidget {
     );
   }
 }
+
 class _StarOnly extends StatelessWidget {
   const _StarOnly();
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24));
+    return Icon(
+      Icons.star_rounded,
+      size: 24.sp,
+      color: const Color(0xFFFBBF24),
+    );
   }
 }
-
 
 /* ---------------- Leading icons (approx same) ---------------- */
 
@@ -1105,23 +1081,22 @@ class _PowerRingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return 
-     Container(
-          width: 36.w,
-          height: 36.h,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
+    return Container(
+      width: 36.w,
+      height: 36.h,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      child:
+          // Power glyph (looks like screenshot)
+          Image.asset(
+            'assets/Mask group (11).png',
+            width: 22.sp,
+            height: 22.sp,
+            fit: BoxFit.contain,
           ),
-      child: 
-        // Power glyph (looks like screenshot)
-        Image.asset(
-          'assets/Mask group (11).png',
-          width: 22.sp,
-          height: 22.sp,
-          fit: BoxFit.contain,
-       
-    ));
+    );
   }
 }
 
@@ -1130,8 +1105,8 @@ class _BlindGreenIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = 44.w;     // ✅ main icon size
-    final badge = 20;    // ✅ blue check badge size
+    final base = 44.w; // ✅ main icon size
+    final badge = 20; // ✅ blue check badge size
 
     return SizedBox(
       width: base,
@@ -1158,7 +1133,7 @@ class _BlindGreenIcon extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF0088FE),
                 shape: BoxShape.circle,
-            
+
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.12),
@@ -1181,7 +1156,6 @@ class _BlindGreenIcon extends StatelessWidget {
     );
   }
 }
-
 
 class _Dot extends StatelessWidget {
   const _Dot({required this.size});
@@ -1291,41 +1265,41 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 10.w),
 
-                  Image.asset(
-                    'assets/Group 32.jpg', // down icon
-                    width: 12.w,
-                    height: 19.h,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '0%',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
-                      fontFamily: 'Inter',
-                    ),
-                  ),
+        Image.asset(
+          'assets/Group 32.jpg', // down icon
+          width: 12.w,
+          height: 19.h,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(width: 4.w),
+        Text(
+          '0%',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+            fontFamily: 'Inter',
+          ),
+        ),
 
-                  SizedBox(width: 14.w),
+        SizedBox(width: 14.w),
 
-                  Image.asset(
-                    'assets/Vector 4.jpg', // up icon
-                    width: 10.w,
-                    height: 19.h,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '50%',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
-                      fontFamily: 'Inter',
-                    ),
-                  ),
+        Image.asset(
+          'assets/Vector 4.jpg', // up icon
+          width: 10.w,
+          height: 19.h,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(width: 4.w),
+        Text(
+          '50%',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+            fontFamily: 'Inter',
+          ),
+        ),
       ],
     );
   }
@@ -1475,9 +1449,12 @@ class _ControlUnitRow extends StatelessWidget {
     this.iconColor,
     this.imagePath,
     required this.title,
-     this.sub,
+    this.sub,
     required this.sub2,
-  }) : assert(icon != null || imagePath != null, 'Either icon or imagePath must be provided');
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   final IconData? icon;
   final Color? iconColor;
@@ -1509,45 +1486,47 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    // fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),
-                ), if (sub != null) ...[
-                SizedBox(height: 2.h),
-                Row(
-                  children: [
-                     Image.asset(
+                ),
+                if (sub != null) ...[
+                  SizedBox(height: 2.h),
+                  Row(
+                    children: [
+                      Image.asset(
                         'assets/Mask group (18).png',
                         width: 14.sp,
                         height: 14.sp,
                         fit: BoxFit.contain,
-                      ),                    Text(
-                      sub!,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        // fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
-                        fontFamily: 'Inter',
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        sub!,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF6B7280),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
                     ],
-               
-                  SizedBox(height: 2.h),
-                  if (sub2 != null) ...[ Text(
-                    sub2!,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      // fontWeight: FontWeight.w400,
-                      color: const Color(0xFF9CA3AF),
-                      fontFamily: 'Inter',
-                    ),
-                  )
-            
-              ],]
-            )
+                  ),
+                ],
+
+                SizedBox(height: 2.h),
+                Text(
+                  sub2,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF9CA3AF),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
