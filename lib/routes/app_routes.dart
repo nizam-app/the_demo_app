@@ -8,6 +8,7 @@ import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/automations/screen/automations_screen.dart';
+import 'package:workpleis/features/menu/screen/menu_screen.dart';
 
 
 
@@ -44,6 +45,11 @@ class AppRouter {
             path: DevicesScreen.routeName,
             name: DevicesScreen.routeName,
             builder: (context, state) => const DevicesScreen(),
+          ),
+          GoRoute(
+            path: MenuScreen.routeName,
+            name: MenuScreen.routeName,
+            builder: (context, state) => const MenuScreen(),
           ),
           GoRoute(
             path: AnalyticsScreen.routeName,

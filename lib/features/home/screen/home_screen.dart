@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../profile/screen/profile_screen.dart';
 import '../../auth/screens/devices_screen.dart';
+import '../../menu/screen/menu_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -186,6 +187,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.menu, color: Color(0xFF111827)),
+                title: Text(
+                  'Menu',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push(MenuScreen.routeName);
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.person_outline, color: Color(0xFF111827)),
                 title: Text(
