@@ -63,8 +63,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 flutter_native_splash:
-    android: true
-    ios: true
+    android: false
+    ios: false
     color: "#ffffff"
     image: assets/image 66.png
     # branding: assets/image 66.png
