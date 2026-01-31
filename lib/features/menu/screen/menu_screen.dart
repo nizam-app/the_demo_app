@@ -51,7 +51,7 @@ class MenuScreen extends StatelessWidget {
                         'Menu',
                         style: TextStyle(
                           fontSize: 22.sp,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: _primary,
                           fontFamily: 'Inter',
                         ),
@@ -116,8 +116,8 @@ class MenuScreen extends StatelessWidget {
                                     'Automate your home',
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF111827),
+                                      fontWeight: FontWeight.w500,
+                                      color: _primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -126,10 +126,10 @@ class MenuScreen extends StatelessWidget {
                                     'Let your home play automatically with Aican '
                                     'you can relax in your home, Please contact with us now!',
                                     style: TextStyle(
-                                      fontSize: 13.sp,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.w400,
                                       height: 1.3,
-                                      color: Color(0xFF6B7280),
+                                      color: _primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -147,9 +147,9 @@ class MenuScreen extends StatelessWidget {
                                         child: Text(
                                           'Get started',
                                           style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFF2563EB),
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF0088FE),
                                             fontFamily: 'Inter',
                                           ),
                                         ),
@@ -215,9 +215,10 @@ class MenuScreen extends StatelessWidget {
                           title: 'Automations',
                         ),
                         const _InnerDivider(indent: 50),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/images/setting.png',
                           title: 'Settings',
+                          onTap: () => context.go('/settings'),
                         ),
                       ],
                     ),
@@ -377,7 +378,7 @@ class _SectionTitle extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: 20.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: _primary,
           fontFamily: 'Inter',
         ),
@@ -563,8 +564,8 @@ class _MenuItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget leading = Image.asset(
       imagePath!,
-      width: 22.w,
-      height: 22.w,
+      width: 18.w,
+      // height: 22.w,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
     );
@@ -598,7 +599,7 @@ class _MenuItemRow extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   color: titleColor ?? _primary,
                   fontFamily: 'Inter',
                 ),
@@ -608,7 +609,7 @@ class _MenuItemRow extends StatelessWidget {
             // Devices blue circle
             if (pillText != null) ...[
               Container(
-                width: 30.w,
+                width: 36.w,
                 height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -632,8 +633,8 @@ class _MenuItemRow extends StatelessWidget {
             // Notifications pink circle
             if (badgeText != null) ...[
               Container(
-                width: 34.w,
-                height: 34.w,
+                width: 38.w,
+                height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: _pink,
@@ -642,7 +643,7 @@ class _MenuItemRow extends StatelessWidget {
                 child: Text(
                   badgeText!,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                     fontFamily: 'Inter',

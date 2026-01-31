@@ -1,0 +1,359 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  static const String routeName = '/settings';
+
+  // Colors (match design)
+  static const _bg = Color(0xFFF3F4F6);
+  static const _card = Colors.white;
+  static const _primary = Color(0xFF111827);
+  static const _secondary = Color(0xFF6B7280);
+  static const _divider = Color(0xFFE5E7EB);
+  static const _pink = Color(0xFFFF2D92);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(context),
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: 22.h),
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.h),
+                    // Account Information Card
+                    _buildAccountCard(),
+                    SizedBox(height: 16.h),
+                    // General Settings Card
+                    _buildGeneralSettingsCard(),
+                    SizedBox(height: 16.h),
+                    // Assistance and Preferences Card
+                    _buildAssistanceCard(),
+                    SizedBox(height: 16.h),
+                    // Sign Out Card
+                    _buildSignOutCard(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.maybePop(context),
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chevron_left_rounded,
+                size: 24.sp,
+                color: _primary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Settings',
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: _primary,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 36.w),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: Column(
+        children: [
+          // Account Info Section
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Row(
+              children: [
+                // Profile Picture
+                Container(
+                  width: 56.w,
+                  height: 56.w,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFF3F4F6),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/profileimage.png',
+                      width: 56.w,
+                      height: 56.w,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 32.sp,
+                          color: _secondary,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                // Account Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Demo Account',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: _primary,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'demo@aican.com',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: _secondary,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Divider
+          Container(
+            height: 1.h,
+            margin: EdgeInsets.symmetric(horizontal: 16.w),
+            color: _divider,
+          ),
+          // Profile Option
+          _SettingsRow(
+            icon: Icons.person_outline_rounded,
+            title: 'Profile',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGeneralSettingsCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: Column(
+        children: [
+          _SettingsRow(
+            icon: Icons.settings_outlined,
+            title: 'Core',
+            onTap: () {},
+          ),
+          _Divider(),
+          _SettingsRow(
+            icon: Icons.share_outlined,
+            title: 'Interfaces',
+            onTap: () {},
+          ),
+          _Divider(),
+          _SettingsRow(
+            icon: Icons.integration_instructions_outlined,
+            title: 'Integrations',
+            onTap: () {},
+          ),
+          _Divider(),
+          _SettingsRow(
+            icon: Icons.people_outline_rounded,
+            title: 'User Management',
+            badge: '1',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAssistanceCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: Column(
+        children: [
+          _SettingsRow(
+            icon: Icons.mic_outlined,
+            title: 'Voice Assistance',
+            onTap: () {},
+          ),
+          _Divider(),
+          _SettingsRow(
+            icon: Icons.list_outlined,
+            title: 'App Preferences',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignOutCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: _card,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: _SettingsRow(
+        icon: Icons.exit_to_app_rounded,
+        title: 'Sign Out',
+        titleColor: _pink,
+        iconColor: _pink,
+        onTap: () {
+          // Handle sign out
+        },
+      ),
+    );
+  }
+}
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.icon,
+    required this.title,
+    this.onTap,
+    this.badge,
+    this.titleColor,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+  final String? badge;
+  final Color? titleColor;
+  final Color? iconColor;
+
+  static const _primary = Color(0xFF111827);
+  static const _secondary = Color(0xFF6B7280);
+  static const _blue = Color(0xFF0088FE);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      highlightColor: Colors.transparent,
+      splashColor: _primary.withOpacity(0.04),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 22.sp,
+              color: iconColor ?? _secondary,
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: titleColor ?? _primary,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            if (badge != null) ...[
+              Container(
+                width: 24.w,
+                height: 24.w,
+                decoration: const BoxDecoration(
+                  color: _blue,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    badge!,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontFamily: 'Inter',
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+            ],
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22.sp,
+              color: _secondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  static const _divider = Color(0xFFE5E7EB);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 1.h,
+      margin: EdgeInsets.only(left: 50.w, right: 16.w),
+      color: _divider,
+    );
+  }
+}

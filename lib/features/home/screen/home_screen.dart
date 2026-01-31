@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
-import '../../profile/screen/profile_screen.dart';
+
 import '../../auth/screens/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
+import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
+import '../../profile/screen/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,148 +23,147 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeBody() {
     return SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8.h),
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 8.h),
 
-                    // ✅ Header
-                    Builder(
-                      builder: (context) => _Header(
-                        onMenuTap: () {
-                          CustomBottomNavBar.of(context)?.openDrawer();
-                        },
-                        onEditTap: () {},
-                      ),
+                  // ✅ Header
+                  Builder(
+                    builder: (context) => _Header(
+                      onMenuTap: () {
+                        CustomBottomNavBar.of(context)?.openDrawer();
+                      },
+                      onEditTap: () {},
                     ),
+                  ),
 
-                    SizedBox(height: 16.h),
+                  SizedBox(height: 16.h),
 
-                    // ✅ Category pills (Light selected)
-                    SizedBox(
-      height: 63.h,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        // padding: EdgeInsets.symmetric(horizontal: 12.w),
-        children: [
-          _CategoryPill(
-            label: 'Light',
-            isSelected: true,
-            icon: Icons.lightbulb_outline,
-            imagePath: 'assets/Mask group (3).png',
-            onTap: () {},
-          ),
-          SizedBox(width: 12.w),
-          _CategoryPill(
-            label: 'Shading',
-            isSelected: false,
-            icon: Icons.blinds_outlined,
-            imagePath: 'assets/Mask group (2).png',
-            onTap: () {},
-          ),
-          SizedBox(width: 12.w),
-          _CategoryPill(
-            label: 'HVAC',
-            isSelected: false,
-            icon: Icons.ac_unit_outlined,
-            imagePath: 'assets/Mask group (4).png',
-            onTap: () {},
-          ),
-              SizedBox(width: 12.w),
-            _CategoryPill(
-            label: 'Security',
-            isSelected: false,
-            icon: Icons.ac_unit_outlined,
-            imagePath: 'assets/securety.png',
-            onTap: () {},
-          ),
-        ],
-      ),
-    ),
-
-
-                    SizedBox(height: 18.h),
-
-                    const _SectionTitle('Light'),
-                    SizedBox(height: 12.h),
-
-                    // ✅ Light section grid 2x2
-                    GridView(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 2,
-  crossAxisSpacing: 12.w,
-  mainAxisSpacing: 12.h,
-  childAspectRatio: 195 / 185, // ✅ FIX: image-1 ratio
-),
-                      children: const [
-                        _LightDimmerCard(
-                          title: 'Bedroom spot light\nsmall patio blue light',
-                          percent: 0.72,
-                          mode: 'A',
-                          modeFilled: false,
-                          imagePath: 'assets/Mask group (5).png',
+                  // ✅ Category pills (Light selected)
+                  SizedBox(
+                    height: 63.h,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      // padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      children: [
+                        _CategoryPill(
+                          label: 'Light',
+                          isSelected: true,
+                          icon: Icons.lightbulb_outline,
+                          imagePath: 'assets/Mask group (3).png',
+                          onTap: () {},
                         ),
-                        _ThermostatCard(
-                          title: 'Bathroom heating and boiler thermostat',
-                          value: 24.6,
-                          mode: 'M',
-                          modeFilled: true,
-                          imagePath: 'assets/Mask group (6).png',
+                        SizedBox(width: 12.w),
+                        _CategoryPill(
+                          label: 'Shading',
+                          isSelected: false,
+                          icon: Icons.blinds_outlined,
+                          imagePath: 'assets/Mask group (2).png',
+                          onTap: () {},
                         ),
-                        _BlindCard(
-                          title: 'Blind Living Room\nnorth window',
-                          downPercent: 0,
-                          upPercent: 72,
-                          mode: 'M',
-                          modeFilled: true,
-                          imagePath: 'assets/Rectangle 823.png',
+                        SizedBox(width: 12.w),
+                        _CategoryPill(
+                          label: 'HVAC',
+                          isSelected: false,
+                          icon: Icons.ac_unit_outlined,
+                          imagePath: 'assets/Mask group (4).png',
+                          onTap: () {},
                         ),
-                        _ToggleCard(
-                          title: 'Irrigation entry and front home two valve',
-                          isOn: true,
-                          mode: 'A',
-                          modeFilled: false,
-                          imagePath: 'assets/Mask group (7).png',
+                        SizedBox(width: 12.w),
+                        _CategoryPill(
+                          label: 'Security',
+                          isSelected: false,
+                          icon: Icons.ac_unit_outlined,
+                          imagePath: 'assets/securety.png',
+                          onTap: () {},
                         ),
                       ],
                     ),
+                  ),
 
-                    SizedBox(height: 18.h),
+                  SizedBox(height: 18.h),
 
-                    const _SectionTitle('Lighting'),
-                    SizedBox(height: 12.h),
+                  const _SectionTitle('Light'),
+                  SizedBox(height: 12.h),
 
-                     _buildLightingSectionCards(),
-               
-                    SizedBox(height: 18.h),
+                  // ✅ Light section grid 2x2
+                  GridView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
+                      childAspectRatio: 195 / 185, // ✅ FIX: image-1 ratio
+                    ),
+                    children: const [
+                      _LightDimmerCard(
+                        title: 'Bedroom spot light\nsmall patio blue light',
+                        percent: 0.72,
+                        mode: 'A',
+                        modeFilled: false,
+                        imagePath: 'assets/Mask group (5).png',
+                      ),
+                      _ThermostatCard(
+                        title: 'Bathroom heating and boiler thermostat',
+                        value: 24.6,
+                        mode: 'M',
+                        modeFilled: true,
+                        imagePath: 'assets/Mask group (6).png',
+                      ),
+                      _BlindCard(
+                        title: 'Blind Living Room\nnorth window',
+                        downPercent: 0,
+                        upPercent: 72,
+                        mode: 'M',
+                        modeFilled: true,
+                        imagePath: 'assets/Rectangle 823.png',
+                      ),
+                      _ToggleCard(
+                        title: 'Irrigation entry and front home two valve',
+                        isOn: true,
+                        mode: 'A',
+                        modeFilled: false,
+                        imagePath: 'assets/Mask group (7).png',
+                      ),
+                    ],
+                  ),
 
-                    _buildFavoritesSection(),
-                    SizedBox(height: 18.h),
+                  SizedBox(height: 18.h),
 
-                   _buildShadingSection(),
+                  const _SectionTitle('Lighting'),
+                  SizedBox(height: 12.h),
 
-                    SizedBox(height: 18.h),
+                  _buildLightingSectionCards(),
 
-                    const _SectionTitle('Chart Section'),
-                    SizedBox(height: 12.h),
+                  SizedBox(height: 18.h),
 
-                    // ✅ Chart card
-                    _ChartCard(),
+                  _buildFavoritesSection(),
+                  SizedBox(height: 18.h),
 
-                    SizedBox(height: 24.h),
-                  ],
-                ),
+                  _buildShadingSection(),
+
+                  SizedBox(height: 18.h),
+
+                  const _SectionTitle('Chart Section'),
+                  SizedBox(height: 12.h),
+
+                  // ✅ Chart card
+                  _ChartCard(),
+
+                  SizedBox(height: 24.h),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -203,7 +204,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.person_outline, color: Color(0xFF111827)),
+                leading: const Icon(
+                  Icons.person_outline,
+                  color: Color(0xFF111827),
+                ),
                 title: Text(
                   'Profile',
                   style: TextStyle(
@@ -223,28 +227,19 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       children: [
         // Index 0: Devices
-        RepaintBoundary(
-          child: DevicesScreen(),
-        ),
+        RepaintBoundary(child: DevicesScreen()),
         // Index 1: Analytics
-        RepaintBoundary(
-          child: _AnalyticsBody(),
-        ),
+        RepaintBoundary(child: _AnalyticsBody()),
         // Index 2: Home/Voice
-        RepaintBoundary(
-          child: _buildHomeBody(),
-        ),
+        RepaintBoundary(child: _buildHomeBody()),
         // Index 3: Notifications
-        RepaintBoundary(
-          child: _NotificationsBody(),
-        ),
+        RepaintBoundary(child: _NotificationsBody()),
         // Index 4: Automations
-        RepaintBoundary(
-          child: _AutomationsBody(),
-        ),
+        RepaintBoundary(child: _AutomationsBody()),
       ],
     );
   }
+
   Widget _buildShadingSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,137 +275,140 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-Widget _buildShadingControl({
-  required String deviceName,
-  required String mode,
-  required bool modeFilled,
-  required int downPercent,
-  required int upPercent,
-}) {
-  return Container(
-    height: 90.h, // ✅ slimmer like image
-    decoration: BoxDecoration(
-      color: const Color(0xFFF3F4F6),
-      borderRadius: BorderRadius.circular(26.r),
-    ),
-    padding: EdgeInsets.only(left: 8.w, top: 10.h,),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // ✅ Left icon (smaller & centered)
-        Image.asset(
-          'assets/Rectangle 823.png',
-          width: 70.w,
-          height: 75.w,
-          fit: BoxFit.contain,
-        ),
-        SizedBox(width: 14.w),
+  Widget _buildShadingControl({
+    required String deviceName,
+    required String mode,
+    required bool modeFilled,
+    required int downPercent,
+    required int upPercent,
+  }) {
+    return Container(
+      height: 90.h, // ✅ slimmer like image
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(26.r),
+      ),
+      padding: EdgeInsets.only(left: 8.w, top: 10.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ✅ Left icon (smaller & centered)
+          Image.asset(
+            'assets/Rectangle 823.png',
+            width: 70.w,
+            height: 75.w,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(width: 14.w),
 
-        // ✅ Middle (2 lines title + indicators)
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                deviceName,
-                style: TextStyle(
-                  fontSize: 16.sp, // ✅ bigger like image
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF111827),
-                  height: 1.08,
-                ),
-                maxLines: 2, // ✅ 2 lines
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: 8.h),
-
-              // ✅ Indicators row (M + down% + up%)
-              Row(
-                children: [
-                  _ModeBadge(mode: mode, filled: modeFilled),
-                  SizedBox(width: 10.w),
-
-                  Image.asset(
-                    'assets/Group 32.jpg', // down icon
-                    width: 12.w,
-                    height: 19.h,
-                    fit: BoxFit.contain,
+          // ✅ Middle (2 lines title + indicators)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  deviceName,
+                  style: TextStyle(
+                    fontSize: 16.sp, // ✅ bigger like image
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111827),
+                    height: 1.08,
                   ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '$downPercent%',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
+                  maxLines: 2, // ✅ 2 lines
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 8.h),
+
+                // ✅ Indicators row (M + down% + up%)
+                Row(
+                  children: [
+                    _ModeBadge(mode: mode, filled: modeFilled),
+                    SizedBox(width: 10.w),
+
+                    Image.asset(
+                      'assets/Group 32.jpg', // down icon
+                      width: 12.w,
+                      height: 19.h,
+                      fit: BoxFit.contain,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '$downPercent%',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+
+                    SizedBox(width: 14.w),
+
+                    Image.asset(
+                      'assets/Vector 4.jpg', // up icon
+                      width: 10.w,
+                      height: 19.h,
+                      fit: BoxFit.contain,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '$upPercent%',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(width: 10.w),
+
+          // ✅ Right controls (same row, 2 circles)
+          Align(
+            alignment:
+                Alignment.bottomCenter, // ✅ moves circles to bottom like image
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: 6.h,
+                right: 10.w,
+              ), // ✅ fine-tune bottom position
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _CircleBtn(
+                    size: 35,
+                    child: Image.asset(
+                      'assets/Mask group (17).png',
+                      width: 13.w,
+                      height: 13.h,
                       color: const Color(0xFF111827),
                     ),
                   ),
-
-                  SizedBox(width: 14.w),
-
-                  Image.asset(
-                    'assets/Vector 4.jpg', // up icon
-                    width: 10.w,
-                    height: 19.h,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '$upPercent%',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                  SizedBox(width: 17.w),
+                  _CircleBtn(
+                    size: 35,
+                    child: Transform.rotate(
+                      angle: math.pi,
+                      child: Image.asset(
+                        'assets/Mask group (17).png',
+                        width: 13.w,
+                        height: 13.h,
+                        color: const Color(0xFF111827),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-
-        SizedBox(width: 10.w),
-
-        // ✅ Right controls (same row, 2 circles)
-      Align(
-  alignment: Alignment.bottomCenter, // ✅ moves circles to bottom like image
-  child: Padding(
-    padding: EdgeInsets.only(bottom: 6.h,right: 10.w), // ✅ fine-tune bottom position
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _CircleBtn(
-          size: 35,
-          child: Image.asset(
-            'assets/Mask group (17).png',
-            width: 13.w,
-            height: 13.h,
-            color: const Color(0xFF111827),
-          ),
-        ),
-        SizedBox(width: 17.w),
-        _CircleBtn(
-          size: 35,
-          child: Transform.rotate(
-            angle: math.pi,
-            child: Image.asset(
-              'assets/Mask group (17).png',
-              width: 13.w,
-              height: 13.h,
-              color: const Color(0xFF111827),
             ),
           ),
-        ),
-      ],
-    ),
-  ),
-),
-
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildTemperatureSetPointCard() {
     return Container(
@@ -438,7 +436,10 @@ Widget _buildShadingControl({
                   ),
                   SizedBox(height: 16.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF0088FE),
                       borderRadius: BorderRadius.circular(5.r),
@@ -471,149 +472,148 @@ Widget _buildShadingControl({
     );
   }
 
-Widget _buildFavoritesSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const _SectionTitle('Favorites'),
-      SizedBox(height: 12.h),
+  Widget _buildFavoritesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle('Favorites'),
+        SizedBox(height: 12.h),
 
-     // Row 1
-Row(
-  children: [
-    Expanded(child: _buildCameraCard()), // ✅ equal
-    SizedBox(width: 12.w),
-    Expanded(child: _buildThermostatCard(mode: 'M', filled: true)),
-  ],
-),
-
-SizedBox(height: 12.h),
-
-// Row 2
-Row(
-  children: [
-    Expanded(child: _buildCameraCard()),
-    SizedBox(width: 12.w),
-    Expanded(child: _buildThermostatCard(mode: 'A', filled: false)),
-  ],
-),
-
-    ],
-  );
-}
-
-Widget _buildCameraCard() {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(26.r),
-    child: SizedBox(
-      height: 144.h,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/328a2c5e933681916f5ce64c1952942a7ea4e97e.png',
-            fit: BoxFit.cover,
-          ),
-
-          // Blue overlay with 40% opacity
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF0175F0).withOpacity(0.4),
-              borderRadius: BorderRadius.circular(26.r),
-            ),
-          ),
-
-          Positioned(
-            left: 16.w,
-            top: 18.h,
-            child: Text(
-              'Front Door\nCamera',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-                height: 1.05,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildThermostatCard({required String mode, required bool filled}) {
-  return Stack(
-    children: [
-      Container(
-        height: 144.h,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(26.r),
+        // Row 1
+        Row(
+          children: [
+            Expanded(child: _buildCameraCard()), // ✅ equal
+            SizedBox(width: 12.w),
+            Expanded(child: _buildThermostatCard(mode: 'M', filled: true)),
+          ],
         ),
-        padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h), // ✅ tighter
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+
+        SizedBox(height: 12.h),
+
+        // Row 2
+        Row(
+          children: [
+            Expanded(child: _buildCameraCard()),
+            SizedBox(width: 12.w),
+            Expanded(child: _buildThermostatCard(mode: 'A', filled: false)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCameraCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26.r),
+      child: SizedBox(
+        height: 144.h,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
             Image.asset(
-              'assets/IMG_0274 1.png',
-              width: 34.w, // ✅ smaller
-              height: 34.w,
-              fit: BoxFit.contain,
+              'assets/images/328a2c5e933681916f5ce64c1952942a7ea4e97e.png',
+              fit: BoxFit.cover,
             ),
-            SizedBox(height: 8.h), // ✅ smaller
 
-            Text(
-              'Bedroom Thermostat\nparents room',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF111827),
-                height: 1.12,
+            // Blue overlay with 40% opacity
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF0175F0).withOpacity(0.4),
+                borderRadius: BorderRadius.circular(26.r),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
 
-            const Spacer(),
-
-            Row(
-              children: [
-                _CircleBtn(child: Icon(Icons.remove, size: 20.sp),size: 35,),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      '24.6°c',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
-                      ),
+            Positioned(
+              left: 16.w,
+              top: 18.h,
+              child: Text(
+                'Front Door\nCamera',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  height: 1.05,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
+                  ],
                 ),
-                _CircleBtn(child: Icon(Icons.add, size: 20.sp),size: 35,),
-              ],
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
 
-      Positioned(
-        right: 12.w,
-        top: 12.w,
-        child: _ModeBadge(mode: mode, filled: filled),
-      ),
-    ],
-  );
-}
+  Widget _buildThermostatCard({required String mode, required bool filled}) {
+    return Stack(
+      children: [
+        Container(
+          height: 144.h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(26.r),
+          ),
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h), // ✅ tighter
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(
+                'assets/IMG_0274 1.png',
+                width: 34.w, // ✅ smaller
+                height: 34.w,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(height: 8.h), // ✅ smaller
+
+              Text(
+                'Bedroom Thermostat\nparents room',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF111827),
+                  height: 1.12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const Spacer(),
+
+              Row(
+                children: [
+                  _CircleBtn(child: Icon(Icons.remove, size: 20.sp), size: 35),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        '24.6°c',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                  ),
+                  _CircleBtn(child: Icon(Icons.add, size: 20.sp), size: 35),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(mode: mode, filled: filled),
+        ),
+      ],
+    );
+  }
 
   Widget _buildLightingSectionCards() {
     return Column(
@@ -625,7 +625,8 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
               child: _buildLightingCard(
                 deviceName: 'Light Scene child room',
                 status: 'All On',
-                iconImage: 'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                iconImage:
+                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -633,37 +634,36 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
               child: _buildLightingCard(
                 deviceName: 'RGBW light patio entry',
                 status: '100%',
-                iconImage: 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                iconImage:
+                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
               ),
             ),
             SizedBox(width: 12.w),
-         Expanded(
-  child:Stack(
-  clipBehavior: Clip.none,
-  children: [
-    Row(
-      children: [
-        Expanded(
-          child: _buildLightingCard(
-            deviceName: 'LED Dimmer living room',
-            status: '100%',
-            iconImage: 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-            progressCircle: true,
-          ),
-        ),
-      ],
-    ),
-    Positioned(
-      right: 7.w, // ✅ outside, but doesn't shrink the card
-      top: 7.h,
-      child: _ModeBadge(mode: 'A', filled: false),
-    ),
-  ],
-),
-
-),
-
-
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'LED Dimmer living room',
+                          status: '100%',
+                          iconImage:
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 7.w, // ✅ outside, but doesn't shrink the card
+                    top: 7.h,
+                    child: _ModeBadge(mode: 'A', filled: false),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         SizedBox(height: 12.h),
@@ -674,7 +674,8 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
               child: _buildLightingCard(
                 deviceName: 'Light Scene child room',
                 status: 'All On',
-                iconImage: 'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                iconImage:
+                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -682,41 +683,42 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
               child: _buildLightingCard(
                 deviceName: 'RGBW light\npatio entry',
                 status: '100%',
-                iconImage: 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                iconImage:
+                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
               ),
             ),
             SizedBox(width: 12.w),
-           Expanded(
-  child: Stack(
-  clipBehavior: Clip.none,
-  children: [
-    Row(
-      children: [
-        Expanded(
-          child: _buildLightingCard(
-            deviceName: 'LED Dimmer living room',
-            status: '100%',
-            iconImage: 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-            progressCircle: true,
-          ),
-        ),
-      ],
-    ),
-    Positioned(
-      right: 7.w,
-      top: 7.h,
-      child: _ModeBadge(mode: 'M', filled: true),
-    ),
-  ],
-),
-
-),
-
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'LED Dimmer living room',
+                          status: '100%',
+                          iconImage:
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 7.w,
+                    top: 7.h,
+                    child: _ModeBadge(mode: 'M', filled: true),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ],
     );
   }
+
   Widget _buildLightingCard({
     required String deviceName,
     required String status,
@@ -772,6 +774,7 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
+              fontFamily: "Inter",
             ),
           ),
         ],
@@ -815,8 +818,6 @@ Widget _buildThermostatCard({required String mode, required bool filled}) {
       ),
     );
   }
-
-
 }
 
 // ---------------------------
@@ -856,6 +857,7 @@ class _Header extends StatelessWidget {
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF111827),
+                fontFamily: 'Inter',
               ),
             ),
           ),
@@ -912,8 +914,8 @@ class _CategoryPill extends StatelessWidget {
       return IntrinsicWidth(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            minWidth: 0,       // ✅ no extra forced width
-            maxWidth: 220.w,   // ✅ prevent too wide pills
+            minWidth: 0, // ✅ no extra forced width
+            maxWidth: 220.w, // ✅ prevent too wide pills
           ),
           child: child,
         ),
@@ -999,7 +1001,10 @@ class _CategoryPill extends StatelessWidget {
                 height: 63.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(color: const Color(0xFFE1E1E1), width: 1.5),
+                  border: Border.all(
+                    color: const Color(0xFFE1E1E1),
+                    width: 1.5,
+                  ),
                   borderRadius: radius,
                 ),
                 child: innerRow(selected: false),
@@ -1008,6 +1013,7 @@ class _CategoryPill extends StatelessWidget {
     );
   }
 }
+
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle(this.title);
 
@@ -1018,9 +1024,10 @@ class _SectionTitle extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 20.sp,
+        fontSize: 22.sp,
         fontWeight: FontWeight.w600,
         color: const Color(0xFF111827),
+        fontFamily: 'Inter',
       ),
     );
   }
@@ -1045,7 +1052,6 @@ class _CardShell extends StatelessWidget {
     );
   }
 }
-
 
 class _ModeBadge extends StatelessWidget {
   const _ModeBadge({required this.mode, required this.filled});
@@ -1125,8 +1131,17 @@ class _LightDimmerCard extends StatelessWidget {
             children: [
               // ✅ icon size like image-1
               imagePath != null
-                  ? Image.asset(imagePath!, width: 52.w, height: 52.w, fit: BoxFit.contain)
-                  : Icon(Icons.lightbulb_outline, size: 52.sp, color: const Color(0xFF15DFFE)),
+                  ? Image.asset(
+                      imagePath!,
+                      width: 52.w,
+                      height: 52.w,
+                      fit: BoxFit.contain,
+                    )
+                  : Icon(
+                      Icons.lightbulb_outline,
+                      size: 52.sp,
+                      color: const Color(0xFF15DFFE),
+                    ),
 
               SizedBox(height: 10.h),
 
@@ -1134,7 +1149,7 @@ class _LightDimmerCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF111827),
                   height: 1.18,
@@ -1225,7 +1240,6 @@ class _DimmerPill extends StatelessWidget {
   }
 }
 
-
 class _ThermostatCard extends StatelessWidget {
   const _ThermostatCard({
     required this.title,
@@ -1256,7 +1270,11 @@ class _ThermostatCard extends StatelessWidget {
                       height: 52.w,
                       fit: BoxFit.contain,
                     )
-                  : Icon(Icons.thermostat_outlined, size: 44.sp, color: const Color(0xFF0088FE)),
+                  : Icon(
+                      Icons.thermostat_outlined,
+                      size: 44.sp,
+                      color: const Color(0xFF0088FE),
+                    ),
               SizedBox(height: 10.h),
               Expanded(
                 child: Row(
@@ -1264,8 +1282,14 @@ class _ThermostatCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
-                        style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                        title.split('\n').isNotEmpty
+                            ? title.split('\n')[0]
+                            : title,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: const Color(0xFF111827),
+                          height: 1.15,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1274,8 +1298,14 @@ class _ThermostatCard extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
-                          title.split('\n').length > 1 ? title.split('\n')[1] : '',
-                          style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                          title.split('\n').length > 1
+                              ? title.split('\n')[1]
+                              : '',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: const Color(0xFF111827),
+                            height: 1.15,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1291,7 +1321,11 @@ class _ThermostatCard extends StatelessWidget {
                   _CircleBtn(child: Icon(Icons.remove, size: 18.sp)),
                   Text(
                     '${value.toStringAsFixed(1)}°c',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF111827),
+                    ),
                   ),
                   _CircleBtn(child: Icon(Icons.add, size: 18.sp)),
                 ],
@@ -1299,7 +1333,11 @@ class _ThermostatCard extends StatelessWidget {
             ],
           ),
         ),
-        Positioned(right: 12.w, top: 12.w, child: _ModeBadge(mode: mode, filled: modeFilled)),
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(mode: mode, filled: modeFilled),
+        ),
       ],
     );
   }
@@ -1365,7 +1403,8 @@ class _BlindCard extends StatelessWidget {
                           width: 13.sp,
                           height: 13.sp,
                           fit: BoxFit.contain,
-                        ),size: 35,
+                        ),
+                        size: 35,
                       ),
                       SizedBox(width: 7.w),
                       Image.asset(
@@ -1377,7 +1416,11 @@ class _BlindCard extends StatelessWidget {
                       SizedBox(width: 3.w),
                       Text(
                         '$downPercent%',
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                        ),
                       ),
                       SizedBox(width: 8.w),
                       Image.asset(
@@ -1389,7 +1432,11 @@ class _BlindCard extends StatelessWidget {
                       SizedBox(width: 3.w),
                       Text(
                         '$upPercent%',
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                        ),
                       ),
                       SizedBox(width: 7.w),
                       _CircleBtn(
@@ -1398,7 +1445,8 @@ class _BlindCard extends StatelessWidget {
                           width: 13.sp,
                           height: 13.sp,
                           fit: BoxFit.contain,
-                        ),size: 35,
+                        ),
+                        size: 35,
                       ),
                     ],
                   ),
@@ -1407,7 +1455,11 @@ class _BlindCard extends StatelessWidget {
             ],
           ),
         ),
-        Positioned(right: 12.w, top: 12.w, child: _ModeBadge(mode: mode, filled: modeFilled)),
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(mode: mode, filled: modeFilled),
+        ),
       ],
     );
   }
@@ -1443,12 +1495,20 @@ class _ToggleCard extends StatelessWidget {
                       height: 52.w,
                       fit: BoxFit.contain,
                     )
-                  : Icon(Icons.water_drop_outlined, size: 42.sp, color: const Color(0xFF00C2FF)),
+                  : Icon(
+                      Icons.water_drop_outlined,
+                      size: 42.sp,
+                      color: const Color(0xFF00C2FF),
+                    ),
               SizedBox(height: 17.h),
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF111827),
+                    height: 1.15,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1459,7 +1519,11 @@ class _ToggleCard extends StatelessWidget {
                 children: [
                   Text(
                     isOn ? 'On' : 'Off',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: const Color(0xFF111827)),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF111827),
+                    ),
                   ),
                   _ToggleColorswitch(isOn: isOn),
                 ],
@@ -1467,7 +1531,11 @@ class _ToggleCard extends StatelessWidget {
             ],
           ),
         ),
-        Positioned(right: 12.w, top: 12.w, child: _ModeBadge(mode: mode, filled: modeFilled)),
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(mode: mode, filled: modeFilled),
+        ),
       ],
     );
   }
@@ -1506,7 +1574,11 @@ class _MiniLightingCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(fontSize: 13.sp, color: const Color(0xFF111827), height: 1.15),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF111827),
+                      height: 1.15,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1514,7 +1586,11 @@ class _MiniLightingCard extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Text(
                   status,
-                  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF111827)),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111827),
+                  ),
                 ),
               ],
             ),
@@ -1528,9 +1604,18 @@ class _MiniLightingCard extends StatelessWidget {
                 width: 46.w,
                 height: 46.w,
                 child: CustomPaint(
-                  painter: _CircularProgressPainter(progress: 1, strokeWidth: 3),
+                  painter: _CircularProgressPainter(
+                    progress: 1,
+                    strokeWidth: 3,
+                  ),
                   child: Center(
-                    child: Text('100%', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF111827))),
+                    child: Text(
+                      '100%',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1581,11 +1666,20 @@ class _FavoritesRow extends StatelessWidget {
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
-                    shadows: [Shadow(color: Colors.black.withOpacity(0.35), blurRadius: 10)],
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.35),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Positioned(right: 10.w, top: 10.w, child: _ModeBadge(mode: mode, filled: modeFilled)),
+              Positioned(
+                right: 10.w,
+                top: 10.w,
+                child: _ModeBadge(mode: mode, filled: modeFilled),
+              ),
             ],
           ),
         ),
@@ -1605,7 +1699,11 @@ class _FavoritesRow extends StatelessWidget {
                   children: [
                     Text(
                       'Bedroom Thermostat\nparents room',
-                      style: TextStyle(fontSize: 16.sp, color: const Color(0xFF111827), height: 1.15),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: const Color(0xFF111827),
+                        height: 1.15,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -1613,15 +1711,28 @@ class _FavoritesRow extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _CircleBtn(child: Icon(Icons.remove, size: 20.sp),size: 35,),
-                        Text('24.6°c', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700)),
+                        _CircleBtn(
+                          child: Icon(Icons.remove, size: 20.sp),
+                          size: 35,
+                        ),
+                        Text(
+                          '24.6°c',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
                       ],
                     ),
                   ],
                 ),
               ),
-              Positioned(right: 10.w, top: 10.w, child: _ModeBadge(mode: mode, filled: modeFilled)),
+              Positioned(
+                right: 10.w,
+                top: 10.w,
+                child: _ModeBadge(mode: mode, filled: modeFilled),
+              ),
             ],
           ),
         ),
@@ -1655,12 +1766,48 @@ class _ChartCardState extends State<_ChartCard> {
     _rng = math.Random();
 
     _main = <double>[
-      0.18, 0.24, 0.40, 0.34, 0.55, 0.78, 0.46, 0.30, 0.64, 0.52,
-      0.45, 0.36, 0.42, 0.54, 0.60, 0.58, 0.62, 0.70, 0.74, 0.68,
+      0.18,
+      0.24,
+      0.40,
+      0.34,
+      0.55,
+      0.78,
+      0.46,
+      0.30,
+      0.64,
+      0.52,
+      0.45,
+      0.36,
+      0.42,
+      0.54,
+      0.60,
+      0.58,
+      0.62,
+      0.70,
+      0.74,
+      0.68,
     ];
     _secondary = <double>[
-      0.22, 0.48, 0.62, 0.44, 0.40, 0.72, 0.58, 0.50, 0.82, 0.66,
-      0.54, 0.40, 0.52, 0.70, 0.80, 0.62, 0.72, 0.58, 0.66, 0.60,
+      0.22,
+      0.48,
+      0.62,
+      0.44,
+      0.40,
+      0.72,
+      0.58,
+      0.50,
+      0.82,
+      0.66,
+      0.54,
+      0.40,
+      0.52,
+      0.70,
+      0.80,
+      0.62,
+      0.72,
+      0.58,
+      0.66,
+      0.60,
     ];
 
     // Safety: if someone changes the lists above, keep lengths consistent.
@@ -1679,7 +1826,10 @@ class _ChartCardState extends State<_ChartCard> {
       if (_marker > 1.0) _marker = 0.0;
 
       _main = _shiftAdd(_main, _nextValue(_main.last, maxDelta: 0.12));
-      _secondary = _shiftAdd(_secondary, _nextValue(_secondary.last, maxDelta: 0.10));
+      _secondary = _shiftAdd(
+        _secondary,
+        _nextValue(_secondary.last, maxDelta: 0.10),
+      );
 
       if (mounted) setState(() {});
     });
@@ -1763,8 +1913,8 @@ class _WaveChartPainter extends CustomPainter {
     final blue = const Color(0xFF0088FE);
     final lightBlue = const Color(0xFF9DBDFF);
 
-   final chartTop = 0.0;
-final chartBottom = size.height - 0.5;
+    final chartTop = 0.0;
+    final chartBottom = size.height - 0.5;
     final chartHeight = chartBottom - chartTop;
 
     List<Offset> toPoints(List<double> series) {
@@ -1924,7 +2074,6 @@ final chartBottom = size.height - 0.5;
   }
 }
 
-
 // ---------------------------
 // Circular progress painter
 // ---------------------------
@@ -1962,7 +2111,8 @@ class _CircularProgressPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.progress != progress ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
 
@@ -2389,7 +2539,11 @@ class _DeviceRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(width: 6.w),
-              SizedBox(width: 34.w, height: 34.w, child: Center(child: leading)),
+              SizedBox(
+                width: 34.w,
+                height: 34.w,
+                child: Center(child: leading),
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Column(
@@ -2413,12 +2567,7 @@ class _DeviceRow extends StatelessWidget {
               SizedBox(width: 4.w),
             ],
           ),
-          if (topRight != null)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: topRight!,
-            ),
+          if (topRight != null) Positioned(right: 0, top: 0, child: topRight!),
         ],
       ),
     );
@@ -2485,7 +2634,11 @@ class _FilterChipPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 12.sp, color: text, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: text,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -2577,7 +2730,10 @@ class _ToggleSwitch extends StatelessWidget {
         child: Container(
           width: 30.86.w,
           height: 30.86.w,
-          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
@@ -2786,7 +2942,11 @@ class _LockIcon extends StatelessWidget {
         color: Color(0xFFFFE4F1),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.lock_outline, size: 18.sp, color: const Color(0xFFFE019A)),
+      child: Icon(
+        Icons.lock_outline,
+        size: 18.sp,
+        color: const Color(0xFFFE019A),
+      ),
     );
   }
 }
@@ -2803,7 +2963,11 @@ class _PowerRingIcon extends StatelessWidget {
         color: Color(0xFFEAFBF2),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.power_settings_new, size: 18.sp, color: const Color(0xFF10B981)),
+      child: Icon(
+        Icons.power_settings_new,
+        size: 18.sp,
+        color: const Color(0xFF10B981),
+      ),
     );
   }
 }
@@ -2820,7 +2984,11 @@ class _BlindGreenIcon extends StatelessWidget {
         color: Color(0xFFEAFBF2),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.blinds_outlined, size: 18.sp, color: const Color(0xFF84CC16)),
+      child: Icon(
+        Icons.blinds_outlined,
+        size: 18.sp,
+        color: const Color(0xFF84CC16),
+      ),
     );
   }
 }
@@ -2837,7 +3005,11 @@ class _PlayCircleIcon extends StatelessWidget {
         color: Color(0xFFEAF1FF),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.play_arrow, size: 18.sp, color: const Color(0xFF0088FE)),
+      child: Icon(
+        Icons.play_arrow,
+        size: 18.sp,
+        color: const Color(0xFF0088FE),
+      ),
     );
   }
 }
@@ -2854,7 +3026,11 @@ class _SunIcon extends StatelessWidget {
         color: Color(0xFFFFFBEB),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.wb_sunny_outlined, size: 18.sp, color: const Color(0xFFFBBF24)),
+      child: Icon(
+        Icons.wb_sunny_outlined,
+        size: 18.sp,
+        color: const Color(0xFFFBBF24),
+      ),
     );
   }
 }
@@ -2871,7 +3047,11 @@ class _BulbIcon extends StatelessWidget {
         color: Color(0xFFF3F4F6),
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.lightbulb_outline, size: 18.sp, color: const Color(0xFF84CC16)),
+      child: Icon(
+        Icons.lightbulb_outline,
+        size: 18.sp,
+        color: const Color(0xFF84CC16),
+      ),
     );
   }
 }
@@ -2887,11 +3067,25 @@ class _BlindStatsRow extends StatelessWidget {
         SizedBox(width: 10.w),
         Icon(Icons.arrow_downward, size: 14.sp, color: const Color(0xFF111827)),
         SizedBox(width: 4.w),
-        Text('0%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
+        Text(
+          '0%',
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+          ),
+        ),
         SizedBox(width: 12.w),
         Icon(Icons.arrow_upward, size: 14.sp, color: const Color(0xFF111827)),
         SizedBox(width: 4.w),
-        Text('50%', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: const Color(0xFF111827))),
+        Text(
+          '50%',
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+          ),
+        ),
       ],
     );
   }
@@ -2920,7 +3114,11 @@ class _BrightnessPill extends StatelessWidget {
             ),
             alignment: Alignment.centerLeft,
             padding: EdgeInsets.only(left: 10.w),
-            child: Icon(Icons.wb_sunny_outlined, size: 16.sp, color: const Color(0xFF111827)),
+            child: Icon(
+              Icons.wb_sunny_outlined,
+              size: 16.sp,
+              color: const Color(0xFF111827),
+            ),
           ),
           Expanded(child: Container()),
         ],
@@ -3007,7 +3205,7 @@ class _ToggleColorswitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 60.w,  // ✅ closer to iOS toggle size
+      width: 60.w, // ✅ closer to iOS toggle size
       height: 35.h,
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
