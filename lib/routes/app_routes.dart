@@ -9,6 +9,7 @@ import 'package:workpleis/features/menu/screen/menu_screen.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/profile/screen/profile_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/smart_device/presentation/smart_devices_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
 
@@ -86,6 +87,11 @@ class AppRouter {
         path: SettingsScreen.routeName,
         name: SettingsScreen.routeName,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: CoresScreen.routeName,
+        name: CoresScreen.routeName,
+        builder: (context, state) => const CoresScreen(),
       ),
       GoRoute(
         path: LoginScreen.routeName,

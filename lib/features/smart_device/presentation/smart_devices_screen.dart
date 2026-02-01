@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class SmartDevicesScreen extends StatefulWidget {
   const SmartDevicesScreen({super.key});
@@ -69,7 +70,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.maybePop(context),
+            onTap: () => context.pop(),
             child: Container(
               width: 36.w,
               height: 36.w,

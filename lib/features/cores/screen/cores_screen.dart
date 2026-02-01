@@ -1,0 +1,368 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+
+class CoresScreen extends StatefulWidget {
+  const CoresScreen({super.key});
+
+  static const String routeName = '/cores';
+
+  @override
+  State<CoresScreen> createState() => _CoresScreenState();
+}
+
+class _CoresScreenState extends State<CoresScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedCoreId = 'aican_demo';
+
+  static const _bg = Color(0xFFF2F4F7);
+  static const _cardBg = Color(0xFFFFFFFF);
+  static const _primary = Color(0xFF111827);
+  static const _secondary = Color(0xFF6B7280);
+  static const _searchBorder = Color(0xFF61A3FF);
+  static const _selectedBg = Color(0xFFE8F0FF);
+  static const _pillBg = Color(0xFFE5E7EB);
+  static const _pillText = Color(0xFF6B7280);
+  static const _atomIcon = Color(0xFF4FC3F7);
+  static const _fabIcon = Color(0xFF0088FE);
+  static const _checkGreen = Color(0xFF10B981);
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _bg,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: 100.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  //  SizedBox(height: 10.h),
+                    _buildSearchBar(),
+                    SizedBox(height: 16.h),
+                    _buildSectionTitle('Local access'),
+                    SizedBox(height: 12.h),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(26.r),
+                          color: Colors.white,
+                        ),
+                        child: _buildCoreCard(
+                          id: 'node24',
+                          name: 'Node 24',
+                          pillText: '*KX5Z',
+                          timeText: 'Today 12:25',
+                          isSelected: _selectedCoreId == 'node24',
+                          onTap: () => setState(() => _selectedCoreId = 'node24'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    _buildSectionTitle('Remote access'),
+                    SizedBox(height: 12.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(26.r),
+                          color: Colors.white
+                        ),
+                        child: Column(
+                          children: [
+                            _buildCoreCard(
+                              id: 'rd_suta',
+                              name: 'RD Suta',
+                              pillText: '*KX5Z',
+                              timeText: 'Yesterday 13:26',
+                              isSelected: _selectedCoreId == 'rd_suta',
+                              onTap: () => setState(() => _selectedCoreId = 'rd_suta'),
+                            ),
+                            _buildCoreCard(
+                              id: 'aican_demo',
+                              name: 'Aican Demo Account',
+                              pillText: '*KX5Z',
+                              timeText: 'Before 10 days',
+                              isSelected: _selectedCoreId == 'aican_demo',
+                              showCheckmark: true,
+                              onTap: () =>
+                                  setState(() => _selectedCoreId = 'aican_demo'),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _buildFAB(context),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: const BoxDecoration(
+                color: _cardBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chevron_left_rounded,
+                size: 24.sp,
+                color: _primary,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                'Cores',
+                style: TextStyle(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _primary,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 36.w),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      child: Container(
+        padding: EdgeInsets.all(1.5.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26.r),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        child: Container(
+          height: 46.h,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(22.r),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
+              SizedBox(width: 8.w),
+              Text(
+                'Search',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: const Color(0xFF9CA3AF),
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 20.sp,
+          fontWeight: FontWeight.w600,
+          color: _primary,
+          fontFamily: 'Inter',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoreCard({
+    required String id,
+    required String name,
+    required String pillText,
+    required String timeText,
+    required bool isSelected,
+    bool showCheckmark = false,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: isSelected ? _selectedBg : _cardBg,
+      borderRadius: BorderRadius.circular(26.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          child: Row(
+            children: [
+              _buildAtomIcon(showCheckmark: showCheckmark && isSelected),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: _primary,
+                          fontFamily: 'Inter',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _pillBg,
+                        borderRadius: BorderRadius.circular(3.r),
+                      ),
+                      child: Text(
+                        pillText,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: _pillText,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                  timeText,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: _secondary,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  SizedBox(height: 14.h),
+                  if (isSelected)
+                    Icon(
+                      Icons.check,
+                      size: 26.sp,
+                      color:_fabIcon,
+                    )
+                  else
+                    SizedBox(height: 22.sp),
+                ],
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAtomIcon({bool showCheckmark = false}) {
+    return SizedBox(
+      width: 40.w,
+      height: 40.w,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+           Center(child: Image.asset("assets/images/rd_suta.png", height: 24.h,)),
+          if (showCheckmark)
+            Positioned(
+              right: -2.w,
+              bottom: -2.w,
+              child: Container(
+                width: 18.w,
+                height: 18.w,
+                decoration: const BoxDecoration(
+                  color: _checkGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_rounded,
+                  size: 12.sp,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFAB(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+         shape: BoxShape.circle,
+        //borderRadius: BorderRadius.all(Radius.circular(100)),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.08),
+        //     blurRadius: 12,
+        //     offset: const Offset(0, 4),
+        //   ),
+        // ],
+      ),
+      child: FloatingActionButton(
+        onPressed: () {
+          // Add new core
+        },
+        backgroundColor: _cardBg,
+        elevation: 0,
+        child: Icon(
+          Icons.add_rounded,
+          size: 28.sp,
+          color: _fabIcon,
+        ),
+      ),
+    );
+  }
+}
+
+
