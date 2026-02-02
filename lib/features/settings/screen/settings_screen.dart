@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/cores/screen/cores_screen.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
@@ -38,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
                     _buildAccountCard(),
                     SizedBox(height: 16.h),
                     // General Settings Card
-                    _buildGeneralSettingsCard(),
+                    _buildGeneralSettingsCard(context),
                     SizedBox(height: 16.h),
                     // Assistance and Preferences Card
                     _buildAssistanceCard(),
@@ -202,7 +203,7 @@ class SettingsScreen extends StatelessWidget {
 
                 Icon(
                   Icons.chevron_right_rounded,
-                  size: 22.sp,
+                  size: 30.sp,
                   color:  _secondary,
                 ),
               ],
@@ -213,7 +214,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGeneralSettingsCard() {
+  Widget _buildGeneralSettingsCard(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -225,18 +226,24 @@ class SettingsScreen extends StatelessWidget {
           _SettingsRow(
             imagePath: 'assets/images/core.png',
             title: 'Core',
-            onTap: () {},
+            iconWidth: 22,
+            iconHeight: 22,
+            onTap: () => context.push(CoresScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
             imagePath: 'assets/images/interface.png',
             title: 'Interfaces',
+            iconWidth: 20,
+            iconHeight: 20,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
             imagePath: 'assets/images/itegrations.png',
             title: 'Integrations',
+            iconWidth: 20,
+            iconHeight: 20,
             onTap: () {},
           ),
           _Divider(),
@@ -244,6 +251,8 @@ class SettingsScreen extends StatelessWidget {
             imagePath: 'assets/images/user.png',
             title: 'User Management',
             badge: '1',
+            iconWidth: 22,
+            iconHeight: 22,
             onTap: () {},
           ),
         ],
@@ -263,6 +272,8 @@ class SettingsScreen extends StatelessWidget {
           _SettingsRow(
             imagePath: 'assets/images/voice.png',
             title: 'Voice Assistance',
+            iconWidth: 14,
+            iconHeight: 21,
             onTap: () {},
           ),
           _Divider(),
@@ -272,8 +283,8 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Image.asset(
                   "assets/images/apps.png",
-                  width: 25.w,
-                  height: 25.h,
+                  width: 30.w,
+                  height: 30.h,
                   fit: BoxFit.contain,
                 ),
                 SizedBox(width: 12.w),
@@ -291,7 +302,7 @@ class SettingsScreen extends StatelessWidget {
 
                 Icon(
                   Icons.chevron_right_rounded,
-                  size: 22.sp,
+                  size: 30.sp,
                   color:  _secondary,
                 ),
               ],
@@ -314,6 +325,8 @@ class SettingsScreen extends StatelessWidget {
         title: 'Sign Out',
         titleColor: _pink,
         showTrailingIcon: false,
+        iconWidth: 25,
+        iconHeight: 25,
         onTap: () {
           // Handle sign out
         },
@@ -330,6 +343,8 @@ class _SettingsRow extends StatelessWidget {
     this.badge,
     this.titleColor,
     this.showTrailingIcon = true,
+    this.iconWidth,
+    this.iconHeight,
   });
 
   final String? imagePath;
@@ -338,6 +353,8 @@ class _SettingsRow extends StatelessWidget {
   final String? badge;
   final Color? titleColor;
   final bool showTrailingIcon;
+  final double? iconWidth;
+  final double? iconHeight;
 
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -345,6 +362,9 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imgW = (iconWidth ?? _settingsIconSize).w;
+    final imgH = (iconHeight ?? _settingsIconSize).h;
+    
     return InkWell(
       onTap: onTap,
       highlightColor: Colors.transparent,
@@ -356,12 +376,12 @@ class _SettingsRow extends StatelessWidget {
             if (imagePath != null) ...[
               SizedBox(
                 width: _settingsIconSize.w,
-                height: _settingsIconSize.w,
+                height: _settingsIconSize.h,
                 child: Center(
                   child: Image.asset(
                     imagePath!,
-                    width: _settingsIconSize.w,
-                    height: _settingsIconSize.w,
+                    width: imgW,
+                    height: imgH,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
@@ -407,7 +427,7 @@ class _SettingsRow extends StatelessWidget {
             if (showTrailingIcon)
               Icon(
                 Icons.chevron_right_rounded,
-                size: 22.sp,
+                size: 30.sp,
                 color: _secondary,
               ),
           ],

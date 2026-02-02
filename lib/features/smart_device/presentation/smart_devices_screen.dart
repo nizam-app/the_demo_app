@@ -182,7 +182,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           'Smart devices',
           style: TextStyle(
             fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: _primary,
             fontFamily: 'Inter',
           ),
@@ -205,19 +205,23 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     required String imagePath,
     required Color ringColor,
     IconData? fallbackIcon,
+    double? iconWidth,
+    double? iconHeight,
   }) {
+    final w = (iconWidth ?? 39).w;
+    final h = (iconHeight ?? 39).h;
     return Center(
       child: Image.asset(
         imagePath,
-        width: 39.w,
-        height: 39.w,
+        width: w,
+        height: h,
         fit: BoxFit.contain,
         // filterQuality: FilterQuality.high,
         errorBuilder: (context, error, stackTrace) {
           // Fallback to icon if image fails to load
           return Icon(
             fallbackIcon ?? Icons.devices_rounded,
-            size: 39.sp,
+            size: w,
             color: ringColor,
           );
         },
@@ -249,7 +253,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w400,
-                    color: _primary,
+                    color: Colors.black,
                     fontFamily: 'Inter',
                   ),
                 ),
@@ -392,6 +396,8 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             imagePath: _icPlay,
             ringColor: const Color(0xFF0EA5E9),
             fallbackIcon: Icons.play_circle_outline_rounded,
+            iconWidth: 36,
+            iconHeight: 36,
           ),
           title: 'Block Irrigation Schedule',
           subtitle: const _InlineText('Active', bold: true),
@@ -413,6 +419,8 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             imagePath: _icFan,
             ringColor: const Color(0xFF0EA5E9),
             fallbackIcon: Icons.ac_unit_rounded,
+            iconWidth: 36,
+            iconHeight: 36,
           ),
           title: 'Fan(3 levels)',
           subtitle: Row(
@@ -423,6 +431,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 'Off',
                 style: TextStyle(
                   fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black,
                   fontFamily: 'Inter',
                 ),
@@ -474,10 +483,34 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
         // 5) Heating & Cooling (selected)
         _buildDeviceRow(
           backgroundColor: const Color(0xFFEAF1FF),
-          leading: _leftIconAsset(
-            imagePath: _icHeatCool,
-            ringColor: _blue,
-            fallbackIcon: Icons.thermostat_rounded,
+          leading: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _leftIconAsset(
+                imagePath: _icHeatCool,
+                ringColor: _blue,
+                fallbackIcon: Icons.thermostat_rounded,
+                iconWidth: 39,
+                iconHeight: 36,
+              ),
+              Positioned(
+                right: -4.w,
+                bottom: -2.h,
+                child: Container(
+                  width: 22.w,
+                  height: 22.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF0088FE),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check_rounded,
+                    size: 16.sp,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
           title: 'Heating & Cooling',
           subtitle: const _InlineText('Heating', bold: true),
@@ -535,6 +568,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: _primary,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'Inter',
                 ),
               ),
@@ -545,6 +579,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 '35%',
                 style: TextStyle(
                   fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
                   color: _primary,
                   fontFamily: 'Inter',
                 ),
@@ -582,8 +617,8 @@ class _InlineText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 14.sp,
-        fontWeight: bold ? FontWeight.w600 : FontWeight.w600,
-        color: bold ? _primary : _secondary,
+        fontWeight: bold ? FontWeight.w700 : FontWeight.w700,
+        color: Colors.black,
         fontFamily: 'Inter',
       ),
     );
@@ -625,20 +660,23 @@ class _SmallCircleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = text == 'A' ? const Color(0xFFE1E1E1) : const Color(0xFF6B7280);
+    final textColor = text == 'A' ? const Color(0xFF6B7280) : Colors.white;
+    
     return Container(
       width: 26.w,
       height: 26.w,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F6),
+      decoration: BoxDecoration(
+        color: bgColor,
         shape: BoxShape.circle,
       ),
       child: Text(
         text,
         style: TextStyle(
           fontSize: 16.sp,
-          fontWeight: FontWeight.w700,
-          color: const Color(0xFF6B7280),
+          fontWeight: FontWeight.w500,
+          color: textColor,
           fontFamily: 'Inter',
           height: 1.0,
         ),
@@ -655,17 +693,25 @@ class _CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine icon size based on icon type
+    double iconSize = 30.sp;
+    if (icon == Icons.remove_rounded || icon == Icons.remove) {
+      iconSize = 20.sp;
+    } else if (icon == Icons.add_rounded || icon == Icons.add) {
+      iconSize = 25.sp;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40.w,
-        height: 40.w,
+        width: 35.w,
+        height: 35.w,
         decoration: const BoxDecoration(
           color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 35.sp, color: const Color(0xFF111827)),
-      ),
+        child: Icon(icon, size: iconSize, color:  Colors.black),
+     ),
     );
   }
 }
