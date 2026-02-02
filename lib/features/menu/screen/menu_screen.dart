@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/cores/screen/cores_screen.dart';
+
+/// Single source of truth for all menu section card icon dimensions.
+/// Ensures every icon has the same container size, alignment, and fit.
+const double _kMenuIconContainerSize = 28;
+const double _kMenuIconImageSize = 24;
+const double _kMenuIconGap = 14;
+const double _kMenuRowPaddingH = 16;
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -51,7 +59,7 @@ class MenuScreen extends StatelessWidget {
                         'Menu',
                         style: TextStyle(
                           fontSize: 22.sp,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: _primary,
                           fontFamily: 'Inter',
                         ),
@@ -87,25 +95,12 @@ class MenuScreen extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Icon Circle
-                            Container(
-                              width: 48.w,
-                              height: 48.w,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Image.asset(
-                                  'assets/images/hand_maick.png', // megaphone icon
-                                  width: 24.w,
-                                  height: 24.w,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
+                            _MenuIcon(
+                              'assets/images/hand_maick.png',
+                              iconBg: const Color(0xFFF3F4F6),
+                              isCircle: true,
                             ),
-
-                            SizedBox(width: 12.w),
+                            SizedBox(width: _kMenuIconGap.w),
 
                             // Text Section
                             Expanded(
@@ -116,8 +111,8 @@ class MenuScreen extends StatelessWidget {
                                     'Automate your home',
                                     style: TextStyle(
                                       fontSize: 16.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF111827),
+                                      fontWeight: FontWeight.w500,
+                                      color: _primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -126,10 +121,10 @@ class MenuScreen extends StatelessWidget {
                                     'Let your home play automatically with Aican '
                                     'you can relax in your home, Please contact with us now!',
                                     style: TextStyle(
-                                      fontSize: 13.sp,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.w400,
                                       height: 1.3,
-                                      color: Color(0xFF6B7280),
+                                      color: _primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -147,9 +142,9 @@ class MenuScreen extends StatelessWidget {
                                         child: Text(
                                           'Get started',
                                           style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFF2563EB),
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF0088FE),
                                             fontFamily: 'Inter',
                                           ),
                                         ),
@@ -163,7 +158,6 @@ class MenuScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 16.h),
 
                     // ✅ Overview
@@ -174,17 +168,19 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/images/dashboard.png',
                           title: 'Dashboard',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/analiytics.png',
                           title: 'Analytics',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
+
+                        //size
                         _MenuItemRow(
                           imagePath: 'assets/images/weather.png',
                           title: 'Weather',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/notification.png',
                           title: 'Notifications',
@@ -203,21 +199,22 @@ class MenuScreen extends StatelessWidget {
                           pillText: '12',
                           onTap: () => context.go('/devices'),
                         ),
-                        const _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/smar_devices.png',
                           title: 'Smart Devices',
-                          onTap: () => context.go('/smart-devices'),
+                          onTap: () => context.push('/smart-devices'),
                         ),
-                        const _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         const _MenuItemRow(
                           imagePath: 'assets/images/automations.png',
                           title: 'Automations',
                         ),
-                        const _InnerDivider(indent: 50),
-                        const _MenuItemRow(
+                        const _InnerDivider(),
+                        _MenuItemRow(
                           imagePath: 'assets/images/setting.png',
                           title: 'Settings',
+                          onTap: () => context.push('/settings'),
                         ),
                       ],
                     ),
@@ -232,42 +229,42 @@ class MenuScreen extends StatelessWidget {
                           title: 'Lighting',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/shading.png',
                           iconBg: Color(0xFFE5F2FF),
                           title: 'Shading',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/heating.png',
                           iconBg: Color(0xFFEFF6FF),
                           title: 'Heating/Cooling',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/ventilation.png',
                           iconBg: Color(0xFFE0F2FE),
                           title: 'Ventilation',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/security.png',
                           iconBg: Color(0xFFEFF6FF),
                           title: 'Security',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/irrigation.png',
                           iconBg: Color(0xFFE0F2FE),
                           title: 'Irrigation',
                           iconWrap: true,
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/all_categories.png',
                           title: 'All Categories',
@@ -285,32 +282,32 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/images/whole_house.png',
                           title: 'Whole house',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/living_room.png',
                           title: 'Living room',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/kitchen.png',
                           title: 'Kitchen',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/bedroom.png',
                           title: 'Bedroom',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/kids_room.png',
                           title: 'Kids room',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/garden.png',
                           title: 'Garden',
                         ),
-                        _InnerDivider(indent: 50),
+                        const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/all_categories.png',
                           title: 'All Zones',
@@ -323,33 +320,34 @@ class MenuScreen extends StatelessWidget {
                     // ✅ Cores
                     const _SectionTitle(title: 'Cores'),
                     _CardBlock(
-                      children: const [
-                        _CoreRow(
+                      children: [
+                        const _CoreRow(
                           name: 'Rd Suta',
                           isOnline: true,
                           imagePath: 'assets/images/rd_suta.png',
                         ),
-                        _InnerDivider(indent: 50),
-                        _CoreRow(
+                        const _InnerDivider(),
+                        const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
                           imagePath: 'assets/images/aicon_demo.png',
                         ),
-                        _InnerDivider(indent: 50),
-                        _CoreRow(
+                        const _InnerDivider(),
+                        const _CoreRow(
                           name: 'Rd Suta',
                           isOnline: false,
                           imagePath: 'assets/images/rd_suta.png',
                         ),
-                        _InnerDivider(indent: 50),
-                        _CoreRow(
+                        const _InnerDivider(),
+                        const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
-                          imagePath:
-                              'assets/images/aicon_demo.png', // ⚠️ empty string দিও না
+                          imagePath: 'assets/images/aicon_demo.png',
                         ),
-                        _InnerDivider(indent: 50),
-                        _AllCoresRow(),
+                        const _InnerDivider(),
+                        _AllCoresRow(
+                          onTap: () => context.push(CoresScreen.routeName),
+                        ),
                       ],
                     ),
                   ],
@@ -377,9 +375,55 @@ class _SectionTitle extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: 20.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: _primary,
           fontFamily: 'Inter',
+        ),
+      ),
+    );
+  }
+}
+
+/// Reusable menu icon: fixed-size container, centered image, BoxFit.contain.
+/// All section card icons use this for consistent size, shape, and alignment.
+class _MenuIcon extends StatelessWidget {
+  const _MenuIcon(
+    this.imagePath, {
+    this.iconBg,
+    this.borderRadius,
+    this.isCircle = false,
+  });
+
+  final String imagePath;
+  final Color? iconBg;
+  final BorderRadius? borderRadius;
+  final bool isCircle;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = _kMenuIconContainerSize.w;
+    final hasBackground = iconBg != null || isCircle;
+    final decoration = BoxDecoration(
+      color: hasBackground ? (iconBg ?? const Color(0xFFF3F4F6)) : Colors.transparent,
+      borderRadius: isCircle ? null : (borderRadius ?? BorderRadius.circular(10.r)),
+      shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
+    );
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Container(
+        decoration: decoration,
+        alignment: Alignment.center,
+        child: Image.asset(
+          imagePath,
+          width: _kMenuIconImageSize.w,
+          height: _kMenuIconImageSize.w,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          errorBuilder: (_, __, ___) => SizedBox(
+            width: _kMenuIconImageSize.w,
+            height: _kMenuIconImageSize.w,
+          ),
         ),
       ),
     );
@@ -409,32 +453,11 @@ class _CoreRow extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: primary.withOpacity(0.04),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
           children: [
-            SizedBox(
-              width: 28.w,
-              height: 28.w,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // ✅ Core icon (no bg)
-                  Align(
-                    alignment: Alignment.center,
-                    child: Image.asset(
-                      imagePath,
-                      width: 24.w,
-                      height: 24.w,
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.high,
-                    ),
-                  ),
-                  // ✅ Online dot (bottom-right)
-                ],
-              ),
-            ),
-
-            SizedBox(width: 12.w),
+            _MenuIcon(imagePath),
+            SizedBox(width: _kMenuIconGap.w),
 
             Expanded(
               child: Text(
@@ -469,15 +492,11 @@ class _AllCoresRow extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: blue.withOpacity(0.05),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
           children: [
-            Image.asset(
-              'assets/images/all_categories.png',
-              height: 24.h,
-              width: 24.w,
-            ),
-            SizedBox(width: 12.w),
+            _MenuIcon('assets/images/all_categories.png'),
+            SizedBox(width: _kMenuIconGap.w),
             Text(
               'All Cores',
               style: TextStyle(
@@ -515,14 +534,15 @@ class _CardBlock extends StatelessWidget {
 }
 
 class _InnerDivider extends StatelessWidget {
-  const _InnerDivider({this.indent = 56});
-  final double indent;
+  const _InnerDivider();
 
   @override
   Widget build(BuildContext context) {
+    final left =
+        _kMenuRowPaddingH.w + _kMenuIconContainerSize.w + _kMenuIconGap.w;
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: indent.w, right: 16.w),
+      margin: EdgeInsets.only(left: left, right: _kMenuRowPaddingH.w),
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -561,44 +581,28 @@ class _MenuItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget leading = Image.asset(
+    final leading = _MenuIcon(
       imagePath!,
-      width: 22.w,
-      height: 22.w,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
+      iconBg: iconWrap ? (iconBg ?? const Color(0xFFF3F4F6)) : null,
+      borderRadius: iconWrap ? BorderRadius.circular(10.r) : null,
     );
-
-    if (iconWrap) {
-      leading;
-      // leading = Container(
-      //   width: 34.w,
-      //   height: 34.w,
-      //   alignment: Alignment.center,
-      //   decoration: BoxDecoration(
-      //     color: iconBg ?? const Color(0xFFF3F4F6),
-      //     borderRadius: BorderRadius.circular(10.r),
-      //   ),
-      //   child: leading,
-      // );
-    }
 
     return InkWell(
       onTap: onTap,
       highlightColor: Colors.transparent,
       splashColor: _primary.withOpacity(0.04),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
           children: [
             leading,
-            SizedBox(width: 12.w),
+            SizedBox(width: _kMenuIconGap.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   color: titleColor ?? _primary,
                   fontFamily: 'Inter',
                 ),
@@ -608,7 +612,7 @@ class _MenuItemRow extends StatelessWidget {
             // Devices blue circle
             if (pillText != null) ...[
               Container(
-                width: 30.w,
+                width: 36.w,
                 height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -632,8 +636,8 @@ class _MenuItemRow extends StatelessWidget {
             // Notifications pink circle
             if (badgeText != null) ...[
               Container(
-                width: 34.w,
-                height: 34.w,
+                width: 38.w,
+                height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: _pink,
@@ -642,7 +646,7 @@ class _MenuItemRow extends StatelessWidget {
                 child: Text(
                   badgeText!,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                     fontFamily: 'Inter',

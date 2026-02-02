@@ -49,10 +49,18 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.maybePop(context),
-                      child: Icon(
-                        Icons.chevron_left,
-                        size: 24.sp,
-                        color: const Color(0xFF111827),
+                      child: Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.chevron_left_rounded,
+                          size: 24.sp,
+                          color: const Color(0xFF111827),
+                        ),
                       ),
                     ),
 
@@ -63,7 +71,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           'Devices',
                           style: TextStyle(
                             fontSize: 22.sp,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                             color: const Color(0xFF111827),
                             fontFamily: 'Inter',
                           ),
@@ -155,7 +163,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   'Devices',
                   style: TextStyle(
                     fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),
@@ -230,7 +238,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
                     subtitle: const _SmallText('Disarmed'),
                     trailing: Padding(
-                      padding: EdgeInsets.only(right: 8.w),
+                      padding: EdgeInsets.only(right: 20.w),
                       child: _CircleActionBlue(
                         imagePath: 'assets/Mask group (15).png',
                       ),
@@ -395,11 +403,11 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
               const _RowDivider(),
 
-              SizedBox(height: 20.h),
+              SizedBox(height: 30.h),
 
               // -------- Control units ----------
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
                 child: Text(
                   'Control units',
                   style: TextStyle(
@@ -413,21 +421,26 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
               SizedBox(height: 8.h),
 
-              _DeviceListCard(
-                children: [
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'CORE20',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                  _RowDivider(leftMargin: 56.w), // 12 (padding) + 34 (icon) + 10 (spacing)
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'D012',
-                    sub: '11 Devices',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                ],
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
+                child: _DeviceListCard(
+                  children: [
+                    const _ControlUnitRow(
+                      imagePath: 'assets/image 124.png',
+                      title: 'CORE20',
+                      sub2: 'CORE20-4B37-3419-363A',
+                    ),
+                    _RowDivider(
+                      leftMargin: 56.w,
+                    ), // 12 (padding) + 34 (icon) + 10 (spacing)
+                    const _ControlUnitRow(
+                      imagePath: 'assets/image 124.png',
+                      title: 'D012',
+                      sub: '11 Devices',
+                      sub2: 'CORE20-4B37-3419-363A',
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -528,23 +541,20 @@ class _DeviceRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 10.h),
                       subtitle,
+                      SizedBox(height: 10.h),
                     ],
                   ),
                 ),
 
-                SizedBox(width: 12.w),
+                SizedBox(width: 30.w),
                 trailing,
               ],
             ),
 
             if (topRight != null)
-              Positioned(
-                right: 0,
-                top: 0,
-                child: topRight!,
-              ),
+              Positioned(right: 0, top: 0, child: topRight!),
           ],
         ),
       ),
@@ -561,7 +571,9 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(left: leftMargin ?? 74.w), // Default: 16 + 46 + 12 for device rows
+      margin: EdgeInsets.only(
+        left: leftMargin ?? 74.w,
+      ), // Default: 16 + 46 + 12 for device rows
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -610,10 +622,12 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
-    final textColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
+    final borderColor = selected
+        ? const Color(0xFF0088FE)
+        : const Color(0xFFE1E1E1);
+    final textColor = selected
+        ? const Color(0xFF0088FE)
+        : const Color(0xFF111827);
     final bgColor = selected ? Colors.white : const Color(0xFFF3F4F6);
 
     return GestureDetector(
@@ -625,9 +639,7 @@ class _FilterChipPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(999),
-          border: selected
-              ? Border.all(color: borderColor, width: 1.5)
-              : null,
+          border: selected ? Border.all(color: borderColor, width: 1.5) : null,
         ),
         child: Text(
           label,
@@ -929,7 +941,7 @@ class _TagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 22.h,
-      width: 70.w,
+      width: 75.w,
       alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
       decoration: BoxDecoration(
@@ -1000,7 +1012,7 @@ class _StarTimeTag extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24)),
-        SizedBox(width: 6.w),
+        SizedBox(width: 10.w),
         Text(
           time,
           style: TextStyle(

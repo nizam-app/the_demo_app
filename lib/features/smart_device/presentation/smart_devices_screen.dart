@@ -134,7 +134,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   // ✅ Search (gradient border only)
   Widget _buildSearchBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       child: Container(
         padding: EdgeInsets.all(1.5.w),
         decoration: BoxDecoration(
@@ -146,28 +146,26 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           ),
         ),
         child: Container(
-          height: 44.h,
+          height: 46.h,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
-            borderRadius: BorderRadius.circular(24.r),
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(22.r),
           ),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search',
-              hintStyle: TextStyle(
-                fontSize: 16.sp,
-                color: _muted,
-                fontFamily: 'Inter',
+          child: Row(
+            children: [
+              Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
+              SizedBox(width: 8.w),
+              Text(
+                'Search',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: const Color(0xFF9CA3AF),
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                ),
               ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                size: 22.sp,
-                color: _muted,
-              ),
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-            ),
+            ],
           ),
         ),
       ),
@@ -250,7 +248,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     color: _primary,
                     fontFamily: 'Inter',
                   ),
@@ -285,10 +283,16 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               SizedBox(height: 5.h),
               Row(
                 children: [
-                  _TagChip(
-                    label: 'Lighting',
-                    bg: Color(0xFFE0F2FE),
-                    fg: _primary,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: Color(0xFF0088FE)),
+                    ),
+                    child: _TagChip(
+                      label: 'Lighting',
+                      bg: Color(0xFFFFFFFF),
+                      fg: _primary,
+                    ),
                   ),
                   SizedBox(width: 5.w),
                   _TagChip(label: 'Bathroom', bg: _pink, fg: Colors.white),
@@ -301,12 +305,18 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.push_pin_rounded, size: 18.sp, color: _blue),
+                  Image.asset(
+                    'assets/images/pin.png',
+                    width: 16.w,
+                    height: 16.w,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  ),
                   SizedBox(width: 8.w),
                   Text(
                     '18:32',
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 16.sp,
                       color: _muted,
                       fontFamily: 'Inter',
                     ),
@@ -356,6 +366,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: Colors.black,
+                  fontWeight: FontWeight.w600,
                   fontFamily: 'Inter',
                 ),
               ),
@@ -364,7 +375,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: Container(
             width: 152.w,
             height: 39.h,
-            padding: EdgeInsets.only(left: 26.w),
+            padding: EdgeInsets.only(left: 16.w),
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(999.r),
@@ -391,7 +402,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               color: _green,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.bolt_rounded, size: 22.sp, color: Colors.white),
+            child: Image.asset("assets/images/charge.png", height: 22.h),
           ),
         ),
         _buildDivider(),
@@ -419,7 +430,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             ],
           ),
           trailing: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Row(
                 children: [
@@ -445,6 +456,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 children: [
                   _CircleButton(
                     icon: Icons.keyboard_arrow_up_rounded,
+
                     onTap: () {},
                   ),
                   SizedBox(width: 8.w),
@@ -527,11 +539,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 ),
               ),
               SizedBox(width: 10.w),
-              Icon(
-                Icons.whatshot_rounded,
-                size: 16.sp,
-                color: const Color(0xFFF97316),
-              ),
+              Image.asset("assets/images/fire.png"),
               SizedBox(width: 4.w),
               Text(
                 '35%',
@@ -574,7 +582,7 @@ class _InlineText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 14.sp,
-        fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
+        fontWeight: bold ? FontWeight.w600 : FontWeight.w600,
         color: bold ? _primary : _secondary,
         fontFamily: 'Inter',
       ),
@@ -600,7 +608,7 @@ class _TagChip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: fg,
           fontFamily: 'Inter',
@@ -618,8 +626,8 @@ class _SmallCircleText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 22.w,
-      height: 22.w,
+      width: 26.w,
+      height: 26.w,
       alignment: Alignment.center,
       decoration: const BoxDecoration(
         color: Color(0xFFF3F4F6),
@@ -628,7 +636,7 @@ class _SmallCircleText extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w700,
           color: const Color(0xFF6B7280),
           fontFamily: 'Inter',
@@ -656,7 +664,7 @@ class _CircleButton extends StatelessWidget {
           color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 22.sp, color: const Color(0xFF111827)),
+        child: Icon(icon, size: 35.sp, color: const Color(0xFF111827)),
       ),
     );
   }
