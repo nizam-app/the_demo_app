@@ -363,16 +363,23 @@ class _CoresScreenState extends State<CoresScreen> {
         //   ),
         // ],
       ),
-      child: FloatingActionButton(
-        onPressed: () {
-          // Add new core
-        },
-        backgroundColor: _cardBg,
-        elevation: 0,
-        child: Icon(
-          Icons.add_rounded,
-          size: 28.sp,
-          color: _fabIcon,
+      child: Material(
+        color: _cardBg,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: () {
+            // Add new core
+          },
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 46.w,
+            height: 46.h,
+            child: Icon(
+              Icons.add_rounded,
+              size: 30.sp,
+              color: _fabIcon,
+            ),
+          ),
         ),
       ),
     );
