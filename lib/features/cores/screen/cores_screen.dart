@@ -75,13 +75,14 @@ class _CoresScreenState extends State<CoresScreen> {
                     _buildSectionTitle('Remote access'),
                     SizedBox(height: 12.h),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(26.r),
                           color: Colors.white
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildCoreCard(
                               id: 'rd_suta',
@@ -90,6 +91,14 @@ class _CoresScreenState extends State<CoresScreen> {
                               timeText: 'Yesterday 13:26',
                               isSelected: _selectedCoreId == 'rd_suta',
                               onTap: () => setState(() => _selectedCoreId = 'rd_suta'),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(26.r),
+                                topRight: Radius.circular(26.r),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 0.h),
+                              child: const _InnerDivider(),
                             ),
                             _buildCoreCard(
                               id: 'aican_demo',
@@ -100,6 +109,10 @@ class _CoresScreenState extends State<CoresScreen> {
                               showCheckmark: true,
                               onTap: () =>
                                   setState(() => _selectedCoreId = 'aican_demo'),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(26.r),
+                                bottomRight: Radius.circular(26.r),
+                              ),
                             ),
 
                           ],
@@ -205,7 +218,7 @@ class _CoresScreenState extends State<CoresScreen> {
         title,
         style: TextStyle(
           fontSize: 20.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: _primary,
           fontFamily: 'Inter',
         ),
@@ -221,18 +234,20 @@ class _CoresScreenState extends State<CoresScreen> {
     required bool isSelected,
     bool showCheckmark = false,
     required VoidCallback onTap,
+    BorderRadius? borderRadius,
   }) {
+    final radius = borderRadius ?? BorderRadius.circular(26.r);
     return Material(
       color: isSelected ? _selectedBg : _cardBg,
-      borderRadius: BorderRadius.circular(26.r),
+      borderRadius: radius,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: radius,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
           child: Row(
             children: [
-              _buildAtomIcon(showCheckmark: showCheckmark && isSelected),
+              _buildAtomIcon(showCheckmark: showCheckmark),
               SizedBox(width: 12.w),
               Expanded(
                 child: Row(
@@ -251,12 +266,11 @@ class _CoresScreenState extends State<CoresScreen> {
                     ),
                     SizedBox(width: 8.w),
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 4.h,
-                      ),
+                      width: 60.w,
+                      height: 23.h,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: _pillBg,
+                        color: Color(0xFFDAE0E8),
                         borderRadius: BorderRadius.circular(3.r),
                       ),
                       child: Text(
@@ -264,7 +278,7 @@ class _CoresScreenState extends State<CoresScreen> {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: _pillText,
+                          color: Colors.black,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -280,7 +294,7 @@ class _CoresScreenState extends State<CoresScreen> {
                   Text(
                   timeText,
                     style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
                       color: _secondary,
                       fontFamily: 'Inter',
@@ -312,7 +326,7 @@ class _CoresScreenState extends State<CoresScreen> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-           Center(child: Image.asset("assets/images/rd_suta.png", height: 24.h,)),
+           Center(child: Image.asset("assets/images/rd_suta.png", height: 20.h, width: 20.w,)),
           if (showCheckmark)
             Positioned(
               right: -2.w,
@@ -366,3 +380,18 @@ class _CoresScreenState extends State<CoresScreen> {
 }
 
 
+
+class _InnerDivider extends StatelessWidget {
+  const _InnerDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    // Icon size (40) + gap (12) + left padding (14)
+    final left = 40.w + 12.w + 14.w;
+    return Container(
+      height: 1.h,
+      margin: EdgeInsets.only(left: left, right: 14.w),
+      color: const Color(0xFFE5E7EB),
+    );
+  }
+}

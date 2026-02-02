@@ -83,7 +83,7 @@ class MenuScreen extends StatelessWidget {
                         padding: EdgeInsets.all(14.w),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.r),
+                          borderRadius: BorderRadius.circular(26.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.04),
@@ -167,24 +167,26 @@ class MenuScreen extends StatelessWidget {
                         _MenuItemRow(
                           imagePath: 'assets/images/dashboard.png',
                           title: 'Dashboard',
+                          iconSize: 18,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/analiytics.png',
                           title: 'Analytics',
+                          iconSize: 18,
                         ),
                         const _InnerDivider(),
-
-                        //size
                         _MenuItemRow(
                           imagePath: 'assets/images/weather.png',
                           title: 'Weather',
+                          iconSize: 24,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/notification.png',
                           title: 'Notifications',
                           badgeText: '12',
+                          iconSize: 22,
                         ),
                       ],
                     ),
@@ -198,23 +200,28 @@ class MenuScreen extends StatelessWidget {
                           title: 'Devices',
                           pillText: '12',
                           onTap: () => context.go('/devices'),
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/smar_devices.png',
                           title: 'Smart Devices',
                           onTap: () => context.push('/smart-devices'),
+                          iconWidth: 19,
+                          iconHeight: 20,
                         ),
                         const _InnerDivider(),
                         const _MenuItemRow(
                           imagePath: 'assets/images/automations.png',
                           title: 'Automations',
+                          iconSize: 22,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/setting.png',
                           title: 'Settings',
                           onTap: () => context.push('/settings'),
+                          iconSize: 18,
                         ),
                       ],
                     ),
@@ -228,6 +235,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFFFF7E6),
                           title: 'Lighting',
                           iconWrap: true,
+                          iconSize: 22,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -235,6 +243,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFE5F2FF),
                           title: 'Shading',
                           iconWrap: true,
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -242,6 +251,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFEFF6FF),
                           title: 'Heating/Cooling',
                           iconWrap: true,
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -249,6 +259,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFE0F2FE),
                           title: 'Ventilation',
                           iconWrap: true,
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -256,6 +267,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFEFF6FF),
                           title: 'Security',
                           iconWrap: true,
+                          iconSize: 23,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -263,6 +275,7 @@ class MenuScreen extends StatelessWidget {
                           iconBg: Color(0xFFE0F2FE),
                           title: 'Irrigation',
                           iconWrap: true,
+                          iconSize: 24,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -270,6 +283,7 @@ class MenuScreen extends StatelessWidget {
                           title: 'All Categories',
                           titleColor: _blue,
                           showChevron: false,
+                          iconSize: 20,
                         ),
                       ],
                     ),
@@ -281,31 +295,37 @@ class MenuScreen extends StatelessWidget {
                         _MenuItemRow(
                           imagePath: 'assets/images/whole_house.png',
                           title: 'Whole house',
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/living_room.png',
                           title: 'Living room',
+                          iconSize: 22,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/kitchen.png',
                           title: 'Kitchen',
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/bedroom.png',
                           title: 'Bedroom',
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/kids_room.png',
                           title: 'Kids room',
+                          iconSize: 23,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/images/garden.png',
                           title: 'Garden',
+                          iconSize: 24,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -313,6 +333,7 @@ class MenuScreen extends StatelessWidget {
                           title: 'All Zones',
                           titleColor: _blue,
                           showChevron: false,
+                          iconSize: 20,
                         ),
                       ],
                     ),
@@ -325,24 +346,30 @@ class MenuScreen extends StatelessWidget {
                           name: 'Rd Suta',
                           isOnline: true,
                           imagePath: 'assets/images/rd_suta.png',
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
                           imagePath: 'assets/images/aicon_demo.png',
+                          iconWidth: 25,
+                          iconHeight: 21,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
                           name: 'Rd Suta',
                           isOnline: false,
                           imagePath: 'assets/images/rd_suta.png',
+                          iconSize: 20,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
                           imagePath: 'assets/images/aicon_demo.png',
+                          iconWidth: 25,
+                          iconHeight: 21,
                         ),
                         const _InnerDivider(),
                         _AllCoresRow(
@@ -386,22 +413,29 @@ class _SectionTitle extends StatelessWidget {
 
 /// Reusable menu icon: fixed-size container, centered image, BoxFit.contain.
 /// All section card icons use this for consistent size, shape, and alignment.
+/// Optional iconWidth/iconHeight override image size (in logical units, uses .w/.h).
 class _MenuIcon extends StatelessWidget {
   const _MenuIcon(
     this.imagePath, {
     this.iconBg,
     this.borderRadius,
     this.isCircle = false,
+    this.iconWidth,
+    this.iconHeight,
   });
 
   final String imagePath;
   final Color? iconBg;
   final BorderRadius? borderRadius;
   final bool isCircle;
+  final double? iconWidth;
+  final double? iconHeight;
 
   @override
   Widget build(BuildContext context) {
     final size = _kMenuIconContainerSize.w;
+    final imgW = (iconWidth ?? _kMenuIconImageSize).w;
+    final imgH = (iconHeight ?? _kMenuIconImageSize).h;
     final hasBackground = iconBg != null || isCircle;
     final decoration = BoxDecoration(
       color: hasBackground ? (iconBg ?? const Color(0xFFF3F4F6)) : Colors.transparent,
@@ -416,13 +450,13 @@ class _MenuIcon extends StatelessWidget {
         alignment: Alignment.center,
         child: Image.asset(
           imagePath,
-          width: _kMenuIconImageSize.w,
-          height: _kMenuIconImageSize.w,
+          width: imgW,
+          height: imgH,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
           errorBuilder: (_, __, ___) => SizedBox(
-            width: _kMenuIconImageSize.w,
-            height: _kMenuIconImageSize.w,
+            width: imgW,
+            height: imgH,
           ),
         ),
       ),
@@ -436,12 +470,18 @@ class _CoreRow extends StatelessWidget {
     required this.isOnline,
     required this.imagePath,
     this.onTap,
+    this.iconSize,
+    this.iconWidth,
+    this.iconHeight,
   });
 
   final String name;
   final bool isOnline;
   final String imagePath;
   final VoidCallback? onTap;
+  final double? iconSize;
+  final double? iconWidth;
+  final double? iconHeight;
 
   static const primary = Color(0xFF111827);
   static const secondary = Color(0xFF6B7280);
@@ -455,8 +495,12 @@ class _CoreRow extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
-          children: [
-            _MenuIcon(imagePath),
+            children: [
+            _MenuIcon(
+              imagePath,
+              iconWidth: iconWidth ?? iconSize,
+              iconHeight: iconHeight ?? iconSize,
+            ),
             SizedBox(width: _kMenuIconGap.w),
 
             Expanded(
@@ -495,7 +539,7 @@ class _AllCoresRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
           children: [
-            _MenuIcon('assets/images/all_categories.png'),
+            _MenuIcon('assets/images/all_categories.png', iconWidth: 20, iconHeight: 20),
             SizedBox(width: _kMenuIconGap.w),
             Text(
               'All Cores',
@@ -559,6 +603,9 @@ class _MenuItemRow extends StatelessWidget {
     this.titleColor,
     this.showChevron = true,
     this.iconWrap = false,
+    this.iconSize,
+    this.iconWidth,
+    this.iconHeight,
   }) : assert(imagePath != null);
 
   final String title;
@@ -574,6 +621,11 @@ class _MenuItemRow extends StatelessWidget {
   /// Categories style: small rounded square background
   final bool iconWrap;
 
+  /// Icon size (square: iconSize x iconSize). Use iconWidth/iconHeight for non-square.
+  final double? iconSize;
+  final double? iconWidth;
+  final double? iconHeight;
+
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
   static const _blue = Color(0xFF0088FE);
@@ -585,6 +637,8 @@ class _MenuItemRow extends StatelessWidget {
       imagePath!,
       iconBg: iconWrap ? (iconBg ?? const Color(0xFFF3F4F6)) : null,
       borderRadius: iconWrap ? BorderRadius.circular(10.r) : null,
+      iconWidth: iconWidth ?? iconSize,
+      iconHeight: iconHeight ?? iconSize,
     );
 
     return InkWell(
@@ -612,7 +666,7 @@ class _MenuItemRow extends StatelessWidget {
             // Devices blue circle
             if (pillText != null) ...[
               Container(
-                width: 36.w,
+                width: 39.w,
                 height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -636,7 +690,7 @@ class _MenuItemRow extends StatelessWidget {
             // Notifications pink circle
             if (badgeText != null) ...[
               Container(
-                width: 38.w,
+                width: 39.w,
                 height: 30.w,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
