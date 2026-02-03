@@ -45,28 +45,31 @@ class _DevicesScreenState extends State<DevicesScreen> {
               // -------- Header (top bar) ----------
               Padding(
                 padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.maybePop(context),
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.chevron_left_rounded,
-                          size: 24.sp,
-                          color: const Color(0xFF111827),
+                child: SizedBox(
+                  height: 36.w,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: GestureDetector(
+                          onTap: () => Navigator.maybePop(context),
+                          child: Container(
+                            width: 36.w,
+                            height: 36.w,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF3F4F6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.chevron_left_rounded,
+                              size: 24.sp,
+                              color: const Color(0xFF111827),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-
-                    // ✅ Keep title perfectly centered by reserving equal space on both sides
-                    Expanded(
-                      child: Center(
+                      Center(
                         child: Text(
                           'Devices',
                           style: TextStyle(
@@ -77,31 +80,33 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           ),
                         ),
                       ),
-                    ),
-
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _CircleIconButton(
-                          icon: Icons.more_horiz_rounded,
-                          onTap: () {},
-                          size: 32,
-                          bg: const Color(0xFFF3F4F6),
-                          iconColor: const Color(0xFF111827),
-                          iconSize: 22,
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _CircleIconButton(
+                              icon: Icons.more_horiz_rounded,
+                              onTap: () {},
+                              size: 32,
+                              bg: const Color(0xFFF3F4F6),
+                              iconColor: const Color(0xFF111827),
+                              iconSize: 22,
+                            ),
+                            SizedBox(width: 10.w),
+                            _CircleIconButton(
+                              icon: Icons.add_rounded,
+                              onTap: () {},
+                              size: 32,
+                              bg: const Color(0xFF0088FE),
+                              iconColor: Colors.white,
+                              iconSize: 23,
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 10.w),
-                        _CircleIconButton(
-                          icon: Icons.add_rounded,
-                          onTap: () {},
-                          size: 32,
-                          bg: const Color(0xFF0088FE),
-                          iconColor: Colors.white,
-                          iconSize: 23,
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -828,7 +833,7 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked';
+    final isStrong = v == 'disarmed' || v == 'blocked'|| v == 'off';
 
     return Text(
       text,
@@ -1478,7 +1483,7 @@ class _ControlUnitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+      padding: EdgeInsets.fromLTRB(5.w, 12.h, 12.w, 12.h),
       child: Row(
         children: [
           imagePath != null
@@ -1498,7 +1503,7 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),

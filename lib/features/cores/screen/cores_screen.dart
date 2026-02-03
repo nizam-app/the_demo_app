@@ -15,7 +15,7 @@ class _CoresScreenState extends State<CoresScreen> {
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCoreId = 'aican_demo';
 
-  static const _bg = Color(0xFFF2F4F7);
+  static const _bg = Color(0xFFF3F4F6);
   static const _cardBg = Color(0xFFFFFFFF);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -96,10 +96,8 @@ class _CoresScreenState extends State<CoresScreen> {
                                 topRight: Radius.circular(26.r),
                               ),
                             ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 0.h),
-                              child: const _InnerDivider(),
-                            ),
+                          _InnerDivider(),
+                    
                             _buildCoreCard(
                               id: 'aican_demo',
                               name: 'Aican Demo Account',
@@ -329,11 +327,11 @@ class _CoresScreenState extends State<CoresScreen> {
            Center(child: Image.asset("assets/images/rd_suta.png", height: 20.h, width: 20.w,)),
           if (showCheckmark)
             Positioned(
-              right: -2.w,
-              bottom: -2.w,
+              right: 6.w,
+              bottom: 6.h,
               child: Container(
-                width: 18.w,
-                height: 18.w,
+                width: 12.w,
+                height: 12.h,
                 decoration: const BoxDecoration(
                   color: _checkGreen,
                   shape: BoxShape.circle,
@@ -397,7 +395,7 @@ class _InnerDivider extends StatelessWidget {
     final left = 40.w + 12.w + 14.w;
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: left, right: 14.w),
+      margin: EdgeInsets.only(left: left, ),
       color: const Color(0xFFE5E7EB),
     );
   }

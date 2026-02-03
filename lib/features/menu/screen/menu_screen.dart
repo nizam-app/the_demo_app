@@ -10,6 +10,10 @@ const double _kMenuIconImageSize = 24;
 const double _kMenuIconGap = 14;
 const double _kMenuRowPaddingH = 16;
 
+/// Shared badge/pill dimensions for Devices & Notifications.
+const double _kMenuBadgeWidth = 39;
+const double _kMenuBadgeHeight = 30;
+
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
 
@@ -165,25 +169,26 @@ class MenuScreen extends StatelessWidget {
                     _CardBlock(
                       children: const [
                         _MenuItemRow(
-                          imagePath: 'assets/images/dashboard.png',
+                          imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',
-                          iconSize: 18,
+                          iconSize: 17.5,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/analiytics.png',
+                          imagePath: 'assets/bar 5 copy.png',
                           title: 'Analytics',
-                          iconSize: 18,
+                          iconSize: 17.5,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/weather.png',
+                          imagePath: 'assets/image 65.png',
                           title: 'Weather',
-                          iconSize: 24,
+                          iconWidth: 22,
+                          iconHeight: 23.5,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/notification.png',
+                          imagePath: 'assets/Group 43.png',
                           title: 'Notifications',
                           badgeText: '12',
                           iconSize: 22,
@@ -204,11 +209,11 @@ class MenuScreen extends StatelessWidget {
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/smar_devices.png',
+                          imagePath: 'assets/Mask group copy 2.png',
                           title: 'Smart Devices',
                           onTap: () => context.push('/smart-devices'),
-                          iconWidth: 19,
-                          iconHeight: 20,
+                          iconWidth: 18,
+                          iconHeight: 19,
                         ),
                         const _InnerDivider(),
                         const _MenuItemRow(
@@ -231,50 +236,38 @@ class MenuScreen extends StatelessWidget {
                     _CardBlock(
                       children: const [
                         _MenuItemRow(
-                          imagePath: 'assets/images/lighting.png',
-                          iconBg: Color(0xFFFFF7E6),
+                          imagePath: 'assets/Mask group.png',
                           title: 'Lighting',
-                          iconWrap: true,
                           iconSize: 22,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/shading.png',
-                          iconBg: Color(0xFFE5F2FF),
+                          imagePath: 'assets/Mask g.png',
                           title: 'Shading',
-                          iconWrap: true,
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/heating.png',
-                          iconBg: Color(0xFFEFF6FF),
+                          imagePath: 'assets/Mask gr.png',
                           title: 'Heating/Cooling',
-                          iconWrap: true,
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/ventilation.png',
-                          iconBg: Color(0xFFE0F2FE),
+                          imagePath: 'assets/make.png',
                           title: 'Ventilation',
-                          iconWrap: true,
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/security.png',
-                          iconBg: Color(0xFFEFF6FF),
+                          imagePath: 'assets/Mask group (.png',
                           title: 'Security',
-                          iconWrap: true,
                           iconSize: 23,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/irrigation.png',
-                          iconBg: Color(0xFFE0F2FE),
+                          imagePath: 'assets/Mask group (5) copy.png',
                           title: 'Irrigation',
-                          iconWrap: true,
                           iconSize: 24,
                         ),
                         const _InnerDivider(),
@@ -352,9 +345,9 @@ class MenuScreen extends StatelessWidget {
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
-                          imagePath: 'assets/images/aicon_demo.png',
-                          iconWidth: 25,
-                          iconHeight: 21,
+                          imagePath: 'assets/images/rd_suta.png',
+                          iconSize: 20,
+                          showStatusBadge: true,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
@@ -367,9 +360,9 @@ class MenuScreen extends StatelessWidget {
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
-                          imagePath: 'assets/images/aicon_demo.png',
-                          iconWidth: 25,
-                          iconHeight: 21,
+                          imagePath: 'assets/images/rd_suta.png',
+                          iconSize: 20,
+                          showStatusBadge: true,
                         ),
                         const _InnerDivider(),
                         _AllCoresRow(
@@ -442,10 +435,7 @@ class _MenuIcon extends StatelessWidget {
       borderRadius: isCircle ? null : (borderRadius ?? BorderRadius.circular(10.r)),
       shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
     );
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Container(
+    return Container(
         decoration: decoration,
         alignment: Alignment.center,
         child: Image.asset(
@@ -459,7 +449,7 @@ class _MenuIcon extends StatelessWidget {
             height: imgH,
           ),
         ),
-      ),
+   
     );
   }
 }
@@ -473,6 +463,7 @@ class _CoreRow extends StatelessWidget {
     this.iconSize,
     this.iconWidth,
     this.iconHeight,
+    this.showStatusBadge = false,
   });
 
   final String name;
@@ -482,6 +473,7 @@ class _CoreRow extends StatelessWidget {
   final double? iconSize;
   final double? iconWidth;
   final double? iconHeight;
+  final bool showStatusBadge;
 
   static const primary = Color(0xFF111827);
   static const secondary = Color(0xFF6B7280);
@@ -495,11 +487,36 @@ class _CoreRow extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
-            children: [
-            _MenuIcon(
-              imagePath,
-              iconWidth: iconWidth ?? iconSize,
-              iconHeight: iconHeight ?? iconSize,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _MenuIcon(
+                  imagePath,
+                  iconWidth: iconWidth ?? iconSize,
+                  iconHeight: iconHeight ?? iconSize,
+                ),
+                if (showStatusBadge)
+                  Positioned(
+                    right: -3.w,
+                    bottom: 1.h,
+                    child: Container(
+                      width: 12.w,
+                      height: 12.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF22C55E),
+                        shape: BoxShape.circle,
+                     
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 8.w,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(width: _kMenuIconGap.w),
 
@@ -577,6 +594,38 @@ class _CardBlock extends StatelessWidget {
   }
 }
 
+/// Shared badge/pill for Devices (blue) and Notifications (pink).
+/// Same container size and text style.
+class _MenuBadge extends StatelessWidget {
+  const _MenuBadge({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _kMenuBadgeWidth.w,
+      height: _kMenuBadgeHeight.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(999.r),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+          fontFamily: 'Inter',
+          height: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
 class _InnerDivider extends StatelessWidget {
   const _InnerDivider();
 
@@ -584,9 +633,14 @@ class _InnerDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     final left =
         _kMenuRowPaddingH.w + _kMenuIconContainerSize.w + _kMenuIconGap.w;
+    final leftInset =
+        (left - 7.w).clamp(0.0, double.infinity).toDouble();
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: left, right: _kMenuRowPaddingH.w),
+      margin: EdgeInsets.only(
+        left: leftInset,
+        // right: _kMenuRowPaddingH.w,
+      ),
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -665,49 +719,13 @@ class _MenuItemRow extends StatelessWidget {
 
             // Devices blue circle
             if (pillText != null) ...[
-              Container(
-                width: 39.w,
-                height: 30.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _blue,
-                  borderRadius: BorderRadius.circular(999.r),
-                ),
-                child: Text(
-                  pillText!,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Inter',
-                    height: 1.0,
-                  ),
-                ),
-              ),
+              _MenuBadge(text: pillText!, color: _blue),
               SizedBox(width: 10.w),
             ],
 
             // Notifications pink circle
             if (badgeText != null) ...[
-              Container(
-                width: 39.w,
-                height: 30.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _pink,
-                  borderRadius: BorderRadius.circular(999.r),
-                ),
-                child: Text(
-                  badgeText!,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Inter',
-                    height: 1.0,
-                  ),
-                ),
-              ),
+              _MenuBadge(text: badgeText!, color: _pink),
               SizedBox(width: 10.w),
             ],
 
