@@ -168,7 +168,7 @@ class SettingsScreen extends StatelessWidget {
           // Divider
           Container(
             height: 1.h,
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
+    
             color: _divider,
           ),
           // Profile Option
@@ -448,7 +448,7 @@ class _Divider extends StatelessWidget {
     final leftMargin = 16.w + _settingsIconSize.w + 12.w;
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: leftMargin, right: 16.w),
+      margin: EdgeInsets.only(left: leftMargin, ),
       color: _divider,
     );
   }

@@ -195,7 +195,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   Widget _buildDivider() {
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: 72.w, right: 16.w),
+      margin: EdgeInsets.only(left: 67.w,),
       color: _divider,
     );
   }
