@@ -61,9 +61,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               color: Color(0xFFF3F4F6),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
+                            child:
+                            Icon(
                               Icons.chevron_left_rounded,
-                              size: 24.sp,
+                              size: 29.sp,
                               color: const Color(0xFF111827),
                             ),
                           ),
@@ -1478,7 +1479,7 @@ class _ControlUnitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+      padding: EdgeInsets.fromLTRB(15.w, 12.h, 12.w, 12.h),
       child: Row(
         children: [
           imagePath != null
@@ -1498,7 +1499,7 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),
