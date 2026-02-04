@@ -829,7 +829,7 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked';
+    final isStrong = v == 'disarmed' || v == 'blocked' || v == "off";
 
     return Text(
       text,
