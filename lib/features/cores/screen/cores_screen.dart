@@ -216,7 +216,7 @@ class _CoresScreenState extends State<CoresScreen> {
         title,
         style: TextStyle(
           fontSize: 20.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: _primary,
           fontFamily: 'Inter',
         ),

@@ -272,7 +272,7 @@ class MenuScreen extends StatelessWidget {
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/all_categories.png',
+                          imagePath: 'assets/Mask group copy 3.png',
                           title: 'All Categories',
                           titleColor: _blue,
                           showChevron: false,
@@ -286,43 +286,43 @@ class MenuScreen extends StatelessWidget {
                     _CardBlock(
                       children: const [
                         _MenuItemRow(
-                          imagePath: 'assets/images/whole_house.png',
+                          imagePath: 'assets/room 1.png',
                           title: 'Whole house',
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/living_room.png',
+                          imagePath: 'assets/Mask group (1).png',
                           title: 'Living room',
                           iconSize: 22,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/kitchen.png',
+                          imagePath: 'assets/kitchen(1) 1.png',
                           title: 'Kitchen',
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/bedroom.png',
+                          imagePath: 'assets/image 108.png',
                           title: 'Bedroom',
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/kids_room.png',
+                          imagePath: 'assets/image 110.png',
                           title: 'Kids room',
                           iconSize: 23,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/garden.png',
+                          imagePath: 'assets/image 111.png',
                           title: 'Garden',
                           iconSize: 24,
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
-                          imagePath: 'assets/images/all_categories.png',
+                          imagePath: 'assets/Mask group copy 3.png',
                           title: 'All Zones',
                           titleColor: _blue,
                           showChevron: false,
@@ -338,14 +338,14 @@ class MenuScreen extends StatelessWidget {
                         const _CoreRow(
                           name: 'Rd Suta',
                           isOnline: true,
-                          imagePath: 'assets/images/rd_suta.png',
+                          imagePath: 'assets/image 66 copy.png',
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
-                          imagePath: 'assets/images/rd_suta.png',
+                          imagePath: 'assets/image 66 copy.png',
                           iconSize: 20,
                           showStatusBadge: true,
                         ),
@@ -353,14 +353,14 @@ class MenuScreen extends StatelessWidget {
                         const _CoreRow(
                           name: 'Rd Suta',
                           isOnline: false,
-                          imagePath: 'assets/images/rd_suta.png',
+                          imagePath: 'assets/image 66 copy.png',
                           iconSize: 20,
                         ),
                         const _InnerDivider(),
                         const _CoreRow(
                           name: 'Aican Demo Account',
                           isOnline: true,
-                          imagePath: 'assets/images/rd_suta.png',
+                          imagePath: 'assets/image 66 copy.png',
                           iconSize: 20,
                           showStatusBadge: true,
                         ),
@@ -525,7 +525,7 @@ class _CoreRow extends StatelessWidget {
                 name,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   color: primary,
                   fontFamily: 'Inter',
                 ),
@@ -556,13 +556,13 @@ class _AllCoresRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: _kMenuRowPaddingH.w, vertical: 14.h),
         child: Row(
           children: [
-            _MenuIcon('assets/images/all_categories.png', iconWidth: 20, iconHeight: 20),
+            _MenuIcon('assets/Mask group copy 3.png', iconWidth: 20, iconHeight: 20),
             SizedBox(width: _kMenuIconGap.w),
             Text(
               'All Cores',
               style: TextStyle(
                 fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 color: blue,
                 fontFamily: 'Inter',
               ),
