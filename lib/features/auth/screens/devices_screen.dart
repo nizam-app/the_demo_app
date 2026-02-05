@@ -61,9 +61,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               color: Color(0xFFF3F4F6),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
+                            child:
+                            Icon(
                               Icons.chevron_left_rounded,
-                              size: 24.sp,
+                              size: 29.sp,
                               color: const Color(0xFF111827),
                             ),
                           ),
@@ -234,7 +235,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   const _RowDivider(),
 
                   // Alarm
-                  _DeviceRow(
+             _DeviceRow(
                     outerPadding: EdgeInsets.only(top: 7.h, right: 1.w),
                     topRight: const _PinOnly(),
                     leading: const _LockIcon(),
@@ -381,11 +382,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                       ],
                     ),
                     trailing: Padding(
-                      padding: EdgeInsets.only(top: 7.h, right: 0.w),
+                      padding: EdgeInsets.only(top: 12.h, right: 5.w),
                       child: const _BrightnessPill(),
                     ),
                   ),
-
                   const _RowDivider(),
 
                   // Card Reader(s)
@@ -408,11 +408,11 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
               const _RowDivider(),
 
-              SizedBox(height: 30.h),
+              SizedBox(height: 20.h),
 
               // -------- Control units ----------
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18.w),
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
                 child: Text(
                   'Control units',
                   style: TextStyle(
@@ -426,26 +426,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
               SizedBox(height: 8.h),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18.w),
-                child: _DeviceListCard(
-                  children: [
-                    const _ControlUnitRow(
-                      imagePath: 'assets/image 124.png',
-                      title: 'CORE20',
-                      sub2: 'CORE20-4B37-3419-363A',
-                    ),
-                    _RowDivider(
-                      leftMargin: 56.w,
-                    ), // 12 (padding) + 34 (icon) + 10 (spacing)
-                    const _ControlUnitRow(
-                      imagePath: 'assets/image 124.png',
-                      title: 'D012',
-                      sub: '11 Devices',
-                      sub2: 'CORE20-4B37-3419-363A',
-                    ),
-                  ],
-                ),
+              _DeviceListCard(
+                children: [
+                  const _ControlUnitRow(
+                    imagePath: 'assets/image 124.png',
+                    title: 'CORE20',
+                    sub2: 'CORE20-4B37-3419-363A',
+                  ),
+                  _RowDivider(leftMargin: 56.w), // 12 (padding) + 34 (icon) + 10 (spacing)
+                  const _ControlUnitRow(
+                    imagePath: 'assets/image 124.png',
+                    title: 'D012',
+                    sub: '11 Devices',
+                    sub2: 'CORE20-4B37-3419-363A',
+                  ),
+                ],
               ),
             ],
           ),
@@ -546,20 +541,23 @@ class _DeviceRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 4.h),
                       subtitle,
-                      SizedBox(height: 10.h),
                     ],
                   ),
                 ),
 
-                SizedBox(width: 30.w),
+                SizedBox(width: 12.w),
                 trailing,
               ],
             ),
 
             if (topRight != null)
-              Positioned(right: 0, top: 0, child: topRight!),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: topRight!,
+              ),
           ],
         ),
       ),
@@ -576,9 +574,7 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(
-        left: leftMargin ?? 74.w,
-      ), // Default: 16 + 46 + 12 for device rows
+      margin: EdgeInsets.only(left: leftMargin ?? 74.w), // Default: 16 + 46 + 12 for device rows
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -627,12 +623,10 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = selected
-        ? const Color(0xFF0088FE)
-        : const Color(0xFFE1E1E1);
-    final textColor = selected
-        ? const Color(0xFF0088FE)
-        : const Color(0xFF111827);
+    final borderColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
+    final textColor =
+        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
     final bgColor = selected ? Colors.white : const Color(0xFFF3F4F6);
 
     return GestureDetector(
@@ -644,7 +638,9 @@ class _FilterChipPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(999),
-          border: selected ? Border.all(color: borderColor, width: 1.5) : null,
+          border: selected
+              ? Border.all(color: borderColor, width: 1.5)
+              : null,
         ),
         child: Text(
           label,
@@ -833,7 +829,7 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked'|| v == 'off';
+    final isStrong = v == 'disarmed' || v == 'blocked' || v == "off";
 
     return Text(
       text,
@@ -1017,7 +1013,7 @@ class _StarTimeTag extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24)),
-        SizedBox(width: 10.w),
+        SizedBox(width: 6.w),
         Text(
           time,
           style: TextStyle(
@@ -1483,7 +1479,7 @@ class _ControlUnitRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(5.w, 12.h, 12.w, 12.h),
+      padding: EdgeInsets.fromLTRB(15.w, 12.h, 12.w, 12.h),
       child: Row(
         children: [
           imagePath != null
