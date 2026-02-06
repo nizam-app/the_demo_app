@@ -5,8 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 
-import '../../auth/screens/devices_screen.dart';
+import '../../devices/screen/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../profile/screen/profile_screen.dart';
@@ -203,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context.push(MenuScreen.routeName);
                 },
               ),
+             
               ListTile(
                 leading: const Icon(
                   Icons.person_outline,
@@ -219,6 +221,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   context.push(ProfileScreen.routeName);
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.align_horizontal_center,
+                  color: Color(0xFF111827),
+                ),
+                title: Text(
+                  'Zones',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push(ZonesScreen.routeName);
                 },
               ),
             ],

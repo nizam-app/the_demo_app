@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 
 /// Single source of truth for all menu section card icon dimensions.
@@ -41,21 +42,13 @@ class MenuScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.maybePop(context),
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.chevron_left_rounded,
-                        size: 24.sp,
-                        color: _primary,
-                      ),
+                  GlobalCircleIconBtn(
+                    child: Image.asset(
+                      'assets/aro.png',
+                      width: 16.w,
+                      height: 16.h,
                     ),
+                    onTap: () => Navigator.maybePop(context),
                   ),
                   Expanded(
                     child: Center(

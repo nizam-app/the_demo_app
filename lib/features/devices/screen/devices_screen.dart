@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
@@ -52,22 +53,14 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     children: [
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: GestureDetector(
-                          onTap: () => Navigator.maybePop(context),
-                          child: Container(
-                            width: 36.w,
-                            height: 36.w,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF3F4F6),
-                              shape: BoxShape.circle,
-                            ),
-                            child:
-                            Icon(
-                              Icons.chevron_left_rounded,
-                              size: 29.sp,
-                              color: const Color(0xFF111827),
-                            ),
+                        child: GlobalCircleIconBtn(
+                          color: Color(0xFFF3F4F6),
+                          child: Image.asset(
+                            'assets/aro.png',
+                            width: 16.w,
+                            height: 16.h,
                           ),
+                          onTap: () => Navigator.maybePop(context),
                         ),
                       ),
                       Center(

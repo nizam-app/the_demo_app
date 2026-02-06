@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 // Optional (for exact svg icons)
 // import 'package:flutter_svg/flutter_svg.dart';
 
@@ -36,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _CircleIconBtn(
+                      GlobalCircleIconBtn(
                         child: Image.asset(
                           'assets/aro.png',
                           width: 16.w,
@@ -53,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontFamily: "Inter",
                         ),
                       ),
-                      _CircleIconBtn(
+                      GlobalCircleIconBtn(
                         child: Image.asset(
                           'assets/image 89 (1).png',
                           width: 22.w,
@@ -410,35 +411,6 @@ class EditableAvatar extends StatelessWidget {
 
 /* -------------------- Small Widgets -------------------- */
 
-class _CircleIconBtn extends StatelessWidget {
-  const _CircleIconBtn({this.icon, this.child, required this.onTap})
-    : assert(
-        icon != null || child != null,
-        'Either icon or child must be provided',
-      );
-
-  final IconData? icon;
-  final Widget? child;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: child ?? Icon(icon, size: 16.sp, color: const Color(0xFF111827)),
-      ),
-    );
-  }
-}
 
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});

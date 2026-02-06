@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
+import 'package:workpleis/features/auth/screens/forget_screen.dart';
+import 'package:workpleis/features/auth/screens/register_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -356,7 +358,7 @@ Widget _pillField({
                 // "Forgot Password ?" link at bottom center
                 Center(
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {context.push(ForgotPasswordScreen.routeName);},
                     child: Text(
                       'Forgot Password ?',
                       style: TextStyle(
@@ -386,7 +388,7 @@ Widget _pillField({
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {context.push(JoinAicanScreen.routeName);},
                         child: Text(
                           'Register',
                           style: TextStyle(

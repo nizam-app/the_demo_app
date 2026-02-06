@@ -1,8 +1,12 @@
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_snack_bar.dart';
+import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
-import 'package:workpleis/features/auth/screens/devices_screen.dart';
+import 'package:workpleis/features/devices/screen/devices_screen.dart';
+import 'package:workpleis/features/auth/screens/forget_screen.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
+import 'package:workpleis/features/auth/screens/register_screen.dart';
+import 'package:workpleis/features/auth/screens/splash_screen.dart';
 import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/menu/screen/menu_screen.dart';
@@ -16,7 +20,7 @@ import 'package:workpleis/features/voice/screen/voice_screen.dart';
 import 'error_screen.dart';
 
 class AppRouter {
-  static final String initial = LoginScreen.routeName;
+  static final String initial = SplashScreen.routeName;
   static final GoRouter appRouter = GoRouter(
     initialLocation: initial,
     errorBuilder: (context, state) {
@@ -41,6 +45,23 @@ class AppRouter {
         path: HomeScreen.routeName,
         name: HomeScreen.routeName,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: SplashScreen.routeName,
+        name: SplashScreen.routeName,
+        builder: (context, state) => const SplashScreen(),
+      ),  GoRoute(
+        path: ZonesScreen.routeName,
+        name: ZonesScreen.routeName,
+        builder: (context, state) => const ZonesScreen(),
+      ),  GoRoute(
+        path: ForgotPasswordScreen.routeName,
+        name: ForgotPasswordScreen.routeName,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),  GoRoute(
+        path: JoinAicanScreen.routeName,
+        name: JoinAicanScreen.routeName,
+        builder: (context, state) => const JoinAicanScreen(),
       ),
       GoRoute(
         path: ProfileScreen.routeName,

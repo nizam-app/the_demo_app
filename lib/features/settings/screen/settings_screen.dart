@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
@@ -61,21 +62,14 @@ class SettingsScreen extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => context.pop(),
-            child: Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.chevron_left_rounded,
-                size: 24.sp,
-                color: _primary,
-              ),
+          GlobalCircleIconBtn(
+            child: Image.asset(
+              'assets/aro.png',
+              width: 16.w,
+              height: 16.h,
             ),
+            onTap: () => Navigator.maybePop(context),
+            // color: Color(0xFFF3F4F6),
           ),
           Expanded(
             child: Center(
