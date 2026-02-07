@@ -3,68 +3,79 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 
-class ZonesScreen extends StatefulWidget {
-  const ZonesScreen({super.key});
+class CategoriesScreen extends StatefulWidget {
+  const CategoriesScreen({super.key});
 
-  static const routeName = "/zones";
+  static const routeName = "/categories";
 
   @override
-  State<ZonesScreen> createState() => _ZonesScreenState();
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
 }
 
-class _ZonesScreenState extends State<ZonesScreen> {
+class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     int _selectedIndex = 2;
     final zones = <ZoneItem>[
       ZoneItem(
-        title: "Whole House",
-        bg: "assets/98eb2684310ab18008ede377735225af3ef22101.png",
-        icon: "assets/4571bc2cde1beae6838435b553faf4e77efc01d1.png",
-        size: 50,
-
-      ),
-      ZoneItem(
-        title: "Living room",
-        bg: "assets/f1e17ad5dda594d0cc21fb5068b22bc5c22a2489.png",
-        icon: "assets/eec51f862769e6c37854c3412aff2118bb691d54.png",
+        title: "Lighting",
+        bg: "assets/1aeeb5ec5ac4820568ae0dce4df4a68ab62d6f58.png",
+        icon: "assets/9b9fcc20669add25b276a7b26a2200f48bd031bd.png",
         size: 50,
       ),
       ZoneItem(
-        title: "Kitchen",
-        bg: "assets/2ff95c96a8143b019b8e4ed8d69742b6df1d72ab.png",
-        icon: "assets/a5056e4a921f2da7d1cc6391346361e7a7d336ef.png",
-        size: 45
+        title: "Shading",
+        bg: "assets/e657980d521794ef1f85e260b198130e4ec1ea6b.png",
+        icon: "assets/5dca5635544663c8fd17c3cf1d56a4d8de63f6d6.png",
+        size: 50,
       ),
       ZoneItem(
-        title: "Parents Room",
-        bg: "assets/9bedd9c8bea97d3df5ad0147e6187f98cfd42cb2.png",
-        icon: "assets/58aa8be59342d3e6964753dd24cb65170c8e15d6.png",
-        size: 50
+        title: "HVAC",
+        bg: "assets/ee0292989521ad52a2b139b5dff551c6f430ac01.png",
+        icon: "assets/5ab649c1a8d50544230ab6f0f8679f2fc6e18b39.png",
+        size: 50,
       ),
       ZoneItem(
-        title: "Kids Room",
-        bg: "assets/52fac8eb06e8c352ab1393d69a7ae69b6fe1a9da.png",
-        icon: "assets/a3a03e471df0f73d577f8b37f964f75ceb49fe8f.png",
-        size: 50
+        title: "Ventilation",
+        bg: "assets/fbe765777be21f3cab3d70759d175a85efe3c94d.png",
+        icon: "assets/1aa82ef50e48067c3eaca981e77eb2d3a8935f6b.png",
+        size: 45,
       ),
       ZoneItem(
-        title: "Bathroom",
-        bg: "assets/7bf026095b9241a5afe48b828185f782f69cca92.png",
-        icon: "assets/529c89d71c4e0797f38a54e5d7e0b0096e56c216.png",
-        size: 45
+        title: "Gates",
+        bg: "assets/fbba4bc8829cd4ba8ffbcc27a3dc72eee9583373.png",
+        icon: "assets/deebfc84b3e475975c2dd0c64b11ad57e6a0e310.png",
+        size: 50,
       ),
       ZoneItem(
-        title: "Garden",
-        bg: "assets/7bba25d3aee68355dd57c88a16b17f66a79cfe7f.png",
-        icon: "assets/05368c1f8bdc752213d272196f7a9ff7256ae819.png",
-        size: 50
+        title: "Security",
+        bg: "assets/f44b41442550d4a74047e4cc25581dc3718cc164.png",
+        icon: "assets/0e4fe52feddd27f611de6b7da26b4c4838460225.png",
+        size: 50,
       ),
       ZoneItem(
-        title: "Garage",
-        bg: "assets/d15c22b1cfc0d0e08bc9b11cc2f23191dbc196a5 (1).png",
-        icon: "assets/2792d320e0174da3ed955218cabab43cd6a00781.png",
-        size: 50
+        title: "Irrigation",
+        bg: "assets/a887a69cc3442fd61ecb7c826fd19c1cbf36ad7b.png",
+        icon: "assets/c7b87d0743d1ea835acf70c6a0cf73355b7da2a0.png",
+        size: 50,
+      ),
+      ZoneItem(
+        title: "Machinery",
+        bg: "assets/7da142f72ec832d110ca3afafc705d04a0cde00a.png",
+        icon: "assets/b2a42c1635a509e66c28fb7b94dc8deaca4005cb.png",
+        size: 50,
+      ),
+      ZoneItem(
+        title: "Charging",
+        bg: "assets/f8d95301bf9b8390db5c783cfc38ae7cb62fa943.png",
+        icon: "assets/a67e242eb09b2e80330a045e988cc85c1c7a5da2.png",
+        size: 42,
+      ),
+      ZoneItem(
+        title: "Maintenance",
+        bg: "assets/257b1f9af2311962c8c6828977d0045421129ccb.png",
+        icon: "assets/c4635b394340a851e56aa3fe4fe3d9fa1953292a.png",
+        size: 50,
       ),
     ];
 
@@ -139,7 +150,7 @@ class _TopBar extends StatelessWidget {
         children: [
           // Center title
           Text(
-            "Zones",
+            "Categories",
             style: TextStyle(
               fontSize: 22.sp,
               fontWeight: FontWeight.w600,
@@ -247,7 +258,7 @@ class ZoneCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.onTap,
-  
+
   });
 
   final ZoneItem item;
@@ -339,7 +350,7 @@ class ZoneCard extends StatelessWidget {
                   "assets/Mask group copy 5.png"
                   ,width: 21.w,
                   height: 21.h,
-                 
+
                 ),
               ),
             ),

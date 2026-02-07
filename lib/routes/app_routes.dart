@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_snack_bar.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/auth/screens/forget_screen.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
@@ -50,6 +51,10 @@ class AppRouter {
         path: SplashScreen.routeName,
         name: SplashScreen.routeName,
         builder: (context, state) => const SplashScreen(),
+      ),GoRoute(
+        path: CategoriesScreen.routeName,
+        name: CategoriesScreen.routeName,
+        builder: (context, state) => const CategoriesScreen(),
       ),  GoRoute(
         path: ZonesScreen.routeName,
         name: ZonesScreen.routeName,

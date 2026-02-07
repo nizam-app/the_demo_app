@@ -38,13 +38,13 @@ class SettingsScreen extends StatelessWidget {
                     SizedBox(height: 16.h),
                     // Account Information Card
                     _buildAccountCard(),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 30.h),
                     // General Settings Card
                     _buildGeneralSettingsCard(context),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 30.h),
                     // Assistance and Preferences Card
                     _buildAssistanceCard(),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 30.h),
                     // Sign Out Card
                     _buildSignOutCard(),
                   ],
@@ -195,10 +195,11 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
 
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 30.sp,
-                  color:  _secondary,
+                Image.asset(
+                  "assets/Mask group copy 4.png",
+                  width: 13.sp,
+                  height: 13.sp,
+
                 ),
               ],
             ),
@@ -271,37 +272,45 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {},
           ),
           _Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Image.asset(
-                  "assets/images/apps.png",
-                  width: 30.w,
-                  height: 30.h,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    "App Preferences",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                      color:  _primary,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ),
-
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 30.sp,
-                  color:  _secondary,
-                ),
-              ],
-            ),
+          _SettingsRow(
+            imagePath: 'assets/images/apps.png',
+            title: 'App Preferences',
+            iconWidth: 29,
+            iconHeight: 30,
+            onTap: () {},
           ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          //   child: Row(
+          //     children: [
+          //       Image.asset(
+          //         "assets/images/apps.png",
+          //         width: 29.w,
+          //         height: 30.h,
+          //         fit: BoxFit.contain,
+          //       ),
+          //       SizedBox(width: 7.w),
+          //       Expanded(
+          //         child: Text(
+          //           "App Preferences",
+          //           style: TextStyle(
+          //             fontSize: 16.sp,
+          //             fontWeight: FontWeight.w400,
+          //             color:  _primary,
+          //             fontFamily: 'Inter',
+          //           ),
+          //         ),
+          //       ),
+          //
+          //       Image.asset(
+          //         "assets/Mask group copy 4.png",
+          //         width: 13.sp,
+          //         height: 13.sp,
+          //
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );
@@ -419,10 +428,11 @@ class _SettingsRow extends StatelessWidget {
               SizedBox(width: 10.w),
             ],
             if (showTrailingIcon)
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 30.sp,
-                color: _secondary,
+              Image.asset(
+                'assets/Mask group copy 4.png',
+                width: 13.w,
+                height: 13.h,
+
               ),
           ],
         ),
@@ -442,7 +452,7 @@ class _Divider extends StatelessWidget {
     final leftMargin = 16.w + _settingsIconSize.w + 12.w;
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: leftMargin, ),
+      margin: EdgeInsets.only(left: leftMargin, right: 17.w),
       color: _divider,
     );
   }

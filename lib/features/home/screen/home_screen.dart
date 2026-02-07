@@ -223,24 +223,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   context.push(ProfileScreen.routeName);
                 },
               ),
-              ListTile(
-                leading: const Icon(
-                  Icons.align_horizontal_center,
-                  color: Color(0xFF111827),
-                ),
-                title: Text(
-                  'Zones',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push(ZonesScreen.routeName);
-                },
-              ),
+              // ListTile(
+              //   leading: const Icon(
+              //     Icons.align_horizontal_center,
+              //     color: Color(0xFF111827),
+              //   ),
+              //   title: Text(
+              //     'Zones',
+              //     style: TextStyle(
+              //       fontSize: 16.sp,
+              //       fontWeight: FontWeight.w500,
+              //       color: const Color(0xFF111827),
+              //     ),
+              //   ),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //
+              //   },
+              // ),
             ],
           ),
         ),
@@ -465,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(5.r),
                     ),
                     child: Text(
-                      '24.6°C',
+                      '24.6°c',
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
@@ -1340,7 +1340,7 @@ class _ThermostatCard extends StatelessWidget {
                 children: [
                   _CircleBtn(child: Icon(Icons.remove, size: 18.sp)),
                   Text(
-                    '${value.toStringAsFixed(1)}°c',
+                    '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -2288,7 +2288,7 @@ class _CircularProgressPainter extends CustomPainter {
 //                         _ModeDot(text: 'M', filled: true),
 //                         SizedBox(width: 8),
 //                         Text(
-//                           '24.6°c',
+//                           '24.6°categories',
 //                           style: TextStyle(
 //                             fontSize: 13,
 //                             fontWeight: FontWeight.w600,
