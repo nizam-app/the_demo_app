@@ -14,10 +14,12 @@ class SmartDevicesScreen extends StatefulWidget {
 
 class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -64,105 +66,145 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
-  // ✅ Header (like screenshot)
+  // ✅ Header (like screenshot) – title centered on screen
   Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 8.h),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-         GlobalCircleIconBtn(
-                        child: Image.asset(
-                          'assets/aro.png',
-                          width: 16.w,
-                          height: 16.h,
-                        ),
-                        onTap: () => Navigator.maybePop(context),
-           color: Color(0xFFF3F4F6),
-                      ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Smart devices',
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w700,
-                  color: _primary,
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ),
-          ),
           Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
+              GlobalCircleIconBtn(
+                child: Image.asset(
+                  'assets/aro.png',
+                  width: 16.w,
+                  height: 16.h,
                 ),
-                child: Icon(
-                  Icons.more_horiz_rounded,
-                  size: 22.sp,
-                  color: _primary,
-                ),
+                onTap: () => Navigator.maybePop(context),
+                color: Color(0xFFF3F4F6),
               ),
-              SizedBox(width: 10.w),
-              Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset("assets/images/+.png"),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 22.sp,
+                      color: _primary,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Container(
+                padding: EdgeInsets.all(8.w),
+                                  width: 36.w,
+                    height: 36.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset("assets/images/+.png", fit: BoxFit.contain),
+                  ),
+                ],
               ),
             ],
+          ),
+          Center(
+            child: Text(
+              'Smart devices',
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: _primary,
+                fontFamily: 'Inter',
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ✅ Search (gradient border only)
+  // ✅ Search: gradient border only when focused, no border by default
   Widget _buildSearchBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      child: Container(
-        padding: EdgeInsets.all(1.5.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24.r),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        child: Container(
-          height: 46.h,
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(22.r),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
-              SizedBox(width: 8.w),
-              Text(
-                'Search',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: const Color(0xFF9CA3AF),
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Inter',
+    return ListenableBuilder(
+      listenable: _searchFocusNode,
+      builder: (context, _) {
+        final hasFocus = _searchFocusNode.hasFocus;
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          child: Container(
+            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+              gradient: hasFocus
+                  ? const LinearGradient(
+                      colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                height: 46.h,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+                    filled: false,
+                    prefixIcon: Image.asset(
+                      'assets/images/Mask group.png',
+                      width: 22.w,
+                      height: 22.w,
+                      fit: BoxFit.contain,
+                    ),
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 40.w,
+                      minHeight: 24.h,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 0,
+                    ),
+                    isDense: true,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _primary,
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -379,7 +421,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               borderRadius: BorderRadius.circular(999.r),
             ),
             alignment: Alignment.centerLeft,
-            child: Image.asset("assets/images/power.png"),
+            child: Image.asset("assets/images/Group 48 (1).png",width: 20.w, height: 20.h, fit: BoxFit.contain),
           ),
         ),
         _buildDivider(),

@@ -14,6 +14,7 @@ class CoresScreen extends StatefulWidget {
 
 class _CoresScreenState extends State<CoresScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String? _selectedCoreId = 'aican_demo';
 
   static const _bg = Color(0xFFF3F4F6);
@@ -31,6 +32,7 @@ class _CoresScreenState extends State<CoresScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -164,42 +166,77 @@ class _CoresScreenState extends State<CoresScreen> {
   }
 
   Widget _buildSearchBar() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-      child: Container(
-        padding: EdgeInsets.all(1.5.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26.r),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        child: Container(
-          height: 46.h,
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFFFF),
-            borderRadius: BorderRadius.circular(22.r),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
-              SizedBox(width: 8.w),
-              Text(
-                'Search',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: const Color(0xFF9CA3AF),
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Inter',
+    return ListenableBuilder(
+      listenable: _searchFocusNode,
+      builder: (context, _) {
+        final hasFocus = _searchFocusNode.hasFocus;
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          child: Container(
+            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26.r),
+              gradient: hasFocus
+                  ? const LinearGradient(
+                      colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                height: 46.h,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 26.r),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Color(0xFF6B7280), // 0xFF6B7280 - visible on white0xFF6B7280
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+                    filled: false,
+                    prefixIcon: Image.asset(
+                      'assets/images/Mask group.png',
+                      width: 22.w,
+                      height: 22.w,
+                      fit: BoxFit.contain,
+                    ),
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 40.w,
+                      minHeight: 24.h,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 0,
+                    ),
+                    isDense: true,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _primary,
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

@@ -574,31 +574,96 @@ class _RowDivider extends StatelessWidget {
 }
 /* ---------------- Search + Chips ---------------- */
 
-class _SearchBar extends StatelessWidget {
+class _SearchBar extends StatefulWidget {
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  static const _primary = Color(0xFF111827);
+  static const _secondary = Color(0xFF6B7280);
+  static const _muted = Color(0xFF9CA3AF);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 46.h,
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(22.r),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.search, size: 22.sp, color: const Color(0xFF6B7280)),
-          SizedBox(width: 8.w),
-          Text(
-            'Search',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: const Color(0xFF9CA3AF),
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Inter',
+    return ListenableBuilder(
+      listenable: _searchFocusNode,
+      builder: (context, _) {
+        final hasFocus = _searchFocusNode.hasFocus;
+        return Container(
+            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+              gradient: hasFocus
+                  ? const LinearGradient(
+                      colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
             ),
-          ),
-        ],
-      ),
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                height: 46.h,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Color(0xFF111827),
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+                    filled: false,
+                    prefixIcon: Image.asset(
+                      'assets/images/Mask group copy.png',
+                      width: 22.w,
+                      height: 22.w,
+                      fit: BoxFit.contain,
+
+                    prefixIconConstraints: BoxConstraints(
+                      minWidth: 40.w,
+                      minHeight: 24.h,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 12.h,
+                      horizontal: 0,
+                    ),
+                    isDense: true,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _primary,
+                  ),
+                ),
+              ),
+            ),
+          );
+      },
     );
   }
 }
@@ -620,7 +685,7 @@ class _FilterChipPill extends StatelessWidget {
         selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
     final textColor =
         selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
-    final bgColor = selected ? Colors.white : const Color(0xFFF3F4F6);
+    final bgColor = selected ? Color(0xFFF3F4F6) : const Color(0xFFF3F4F6);
 
     return GestureDetector(
       onTap: onTap,

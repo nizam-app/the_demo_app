@@ -169,10 +169,10 @@ Widget _pillField({
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 60.h),
+                SizedBox(height: 70.h),
 
                 // Logo at top left
-                Image.asset(ImagePath.loginLogo, width: 50.w, height: 50.h),
+                Image.asset(ImagePath.loginLogo, width: 39.w, height: 39.h),
 
                 SizedBox(height: 40.h),
 
@@ -357,15 +357,24 @@ Widget _pillField({
 
                 // "Forgot Password ?" link at bottom center
                 Center(
-                  child: GestureDetector(
-                    onTap: () {context.push(ForgotPasswordScreen.routeName);},
-                    child: Text(
-                      'Forgot Password ?',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF0088FE),
-                        fontFamily: 'Inter',
+                  child: InkWell(
+                    onTap: () {
+                      GoRouter.of(context).push(ForgotPasswordScreen.routeName);
+                    },
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 8.h,
+                      ),
+                      child: Text(
+                        'Forgot Password ?',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF0088FE),
+                          fontFamily: 'Inter',
+                        ),
                       ),
                     ),
                   ),

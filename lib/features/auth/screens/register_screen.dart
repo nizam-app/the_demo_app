@@ -181,10 +181,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 16.sp,
                   color: const Color(0xFF111827),
                   fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -236,8 +236,8 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                     Image.asset(
                       ImagePath.loginLogo, // আপনার logo path
                       width: 39.w,
-                      height: 39.w,
-                      fit: BoxFit.contain,
+                      height: 39.h,
+                      fit: BoxFit.cover,
                     ),
 
                     SizedBox(height: 25.h),
