@@ -197,7 +197,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFffffff),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -261,7 +261,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                       style: GoogleFonts.roboto(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
+                        color: const Color(0xFF111827),
 
                       ),
                     ),
@@ -386,7 +386,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                         'Or via social networks',
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: const Color(0xFF9CA3AF),
+                          color: const Color(0xFF6B7280),
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w400,
                         ),
@@ -424,7 +424,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                             'Already have an account ? ',
                             style: GoogleFonts.roboto(
                               fontSize: 16.sp,
-                              color: const Color(0xFF6B7280),
+                              color: const Color(0xFF111827),
 
                               fontWeight: FontWeight.w400,
                             ),

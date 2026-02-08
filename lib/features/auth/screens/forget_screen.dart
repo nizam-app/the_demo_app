@@ -195,7 +195,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   style: GoogleFonts.roboto(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
+                    color: const Color(0xFF111827),
 
                   ),
                 ),
@@ -259,7 +259,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       'Have password ? ',
                       style: GoogleFonts.roboto(
                         fontSize: 16.sp,
-                        color: const Color(0xFF6B7280),
+                        color: const Color(0xFF111827),
 
                         fontWeight: FontWeight.w400,
                       ),

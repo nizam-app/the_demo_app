@@ -14,15 +14,28 @@ class SplashScreen extends StatefulWidget {
 
 
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+
+  @override
   void initState() {
     super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
 
     Future.delayed(const Duration(seconds: 3), () {
       if (!mounted) return;
-
-context.go(LoginScreen.routeName);
+      context.go(LoginScreen.routeName);
     });
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -38,11 +51,14 @@ context.go(LoginScreen.routeName);
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/image 66 copy.png', // ✅ আপনার আসল path দিন
-                    width: 39.w,
-                    height: 39.w,
-                    fit: BoxFit.contain,
+                  RotationTransition(
+                    turns: _rotationController,
+                    child: Image.asset(
+                      'assets/image 66 copy.png', // ✅ আপনার আসল path দিন
+                      width: 39.w,
+                      height: 39.w,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   SizedBox(width: 10.w),
                   Column(
