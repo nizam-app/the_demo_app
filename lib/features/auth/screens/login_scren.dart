@@ -174,7 +174,7 @@ Widget _pillField({
                 // Logo at top left
                 Image.asset(ImagePath.loginLogo, width: 39.w, height: 39.h),
 
-                SizedBox(height: 40.h),
+                SizedBox(height: 25.h),
 
                 // Title "Welcome to Aican"
                 Text(
@@ -187,7 +187,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 10.h),
 
                 // Subtitle
                 Text(
@@ -200,7 +200,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 48.h),
+                SizedBox(height: 25.h),
 
                 // ✅ Email (only changed field container logic)
                 _pillField(

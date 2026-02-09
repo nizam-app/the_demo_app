@@ -106,8 +106,8 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 // Profile Picture
                 Container(
-                  width: 56.w,
-                  height: 56.w,
+                  width: 60.w,
+                  height: 60.w,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Color(0xFFF3F4F6),
@@ -115,8 +115,8 @@ class SettingsScreen extends StatelessWidget {
                   child: ClipOval(
                     child: Image.asset(
                       'assets/images/profileimage.png',
-                      width: 56.w,
-                      height: 56.w,
+                      width: 60.w,
+                      height: 60.w,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Icon(
@@ -153,6 +153,13 @@ class SettingsScreen extends StatelessWidget {
                           fontFamily: 'Inter',
                         ),
                       ),
+                      SizedBox(height: 15,),
+
+                      Container(
+                        height: 1.h,
+                        color: _divider,
+                      ),
+
                     ],
                   ),
                 ),
@@ -160,14 +167,9 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           // Divider
-          Container(
-            height: 1.h,
-    
-            color: _divider,
-          ),
           // Profile Option
          Padding(
-           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+           padding:  EdgeInsets.only(left: 22.w, right: 18.w,bottom: 18.w),
            child: Row(
               children: [
                   SizedBox(
@@ -176,9 +178,10 @@ class SettingsScreen extends StatelessWidget {
                     child: Center(
                       child: Image.asset(
                         "assets/images/profile_icon.png",
-                        width: 16.w,
-                        height: 16.h,
+                        width: 18.w,
+                        height: 18.h,
                         fit: BoxFit.contain,
+                        color: Color(0xFF111827),
                       ),
                     ),
                   ),
@@ -211,7 +214,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildGeneralSettingsCard(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      margin: EdgeInsets.symmetric(horizontal: 18.w),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -221,24 +224,24 @@ class SettingsScreen extends StatelessWidget {
           _SettingsRow(
             imagePath: 'assets/images/core.png',
             title: 'Core',
-            iconWidth: 22,
-            iconHeight: 22,
+            iconWidth: 22.w,
+            iconHeight: 22.h,
             onTap: () => context.push(CoresScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
             imagePath: 'assets/images/interface.png',
             title: 'Interfaces',
-            iconWidth: 20,
-            iconHeight: 20,
+            iconWidth: 20.w,
+            iconHeight: 20.h,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
             imagePath: 'assets/images/itegrations.png',
             title: 'Integrations',
-            iconWidth: 20,
-            iconHeight: 20,
+            iconWidth: 20.w,
+            iconHeight: 20.h,
             onTap: () {},
           ),
           _Divider(),
@@ -246,8 +249,8 @@ class SettingsScreen extends StatelessWidget {
             imagePath: 'assets/images/user.png',
             title: 'User Management',
             badge: '1',
-            iconWidth: 22,
-            iconHeight: 22,
+            iconWidth: 22.w,
+            iconHeight: 22.h,
             onTap: () {},
           ),
         ],
@@ -257,7 +260,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildAssistanceCard() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      margin: EdgeInsets.symmetric(horizontal: 18.w),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -267,50 +270,19 @@ class SettingsScreen extends StatelessWidget {
           _SettingsRow(
             imagePath: 'assets/images/voice.png',
             title: 'Voice Assistance',
-            iconWidth: 14,
-            iconHeight: 21,
+            iconWidth: 14.w,
+            iconHeight: 21.h,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
             imagePath: 'assets/images/apps.png',
             title: 'App Preferences',
-            iconWidth: 29,
-            iconHeight: 30,
+            iconWidth: 30.w,
+            iconHeight: 32.h,
             onTap: () {},
           ),
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          //   child: Row(
-          //     children: [
-          //       Image.asset(
-          //         "assets/images/apps.png",
-          //         width: 29.w,
-          //         height: 30.h,
-          //         fit: BoxFit.contain,
-          //       ),
-          //       SizedBox(width: 7.w),
-          //       Expanded(
-          //         child: Text(
-          //           "App Preferences",
-          //           style: TextStyle(
-          //             fontSize: 16.sp,
-          //             fontWeight: FontWeight.w400,
-          //             color:  _primary,
-          //             fontFamily: 'Inter',
-          //           ),
-          //         ),
-          //       ),
-          //
-          //       Image.asset(
-          //         "assets/Mask group copy 4.png",
-          //         width: 13.sp,
-          //         height: 13.sp,
-          //
-          //       ),
-          //     ],
-          //   ),
-          // ),
+
         ],
       ),
     );
@@ -318,7 +290,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildSignOutCard() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      margin: EdgeInsets.symmetric(horizontal: 18.w),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -328,8 +300,8 @@ class SettingsScreen extends StatelessWidget {
         title: 'Sign Out',
         titleColor: _pink,
         showTrailingIcon: false,
-        iconWidth: 25,
-        iconHeight: 25,
+        iconWidth: 25.w,
+        iconHeight: 25.h,
         onTap: () {
           // Handle sign out
         },
@@ -373,7 +345,7 @@ class _SettingsRow extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: _primary.withOpacity(0.04),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
         child: Row(
           children: [
             if (imagePath != null) ...[

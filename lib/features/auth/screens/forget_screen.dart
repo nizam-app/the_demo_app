@@ -133,124 +133,134 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              SizedBox(height: 20.h),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: 90.h), // ✅ bottom fixed text এর জন্য space
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20.h),
 
-          // ✅ Back button (circle)
-          Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 15.w),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  width: 32.w,
-                  height: 32.h,
-                  padding: EdgeInsets.all(9.r),
-                  decoration: BoxDecoration(
-                    color: Color(0xffF3F4F6),
-                    shape: BoxShape.circle,
-                    // border: Border.all(color: const Color(0xFFE6E8EE)),
-                  ),
-                  child: Image.asset("assets/aro.png",width: 16.w,height: 16.h,),
-                ),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding:  EdgeInsets.symmetric(horizontal: 25.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 35.h),
-                Image.asset(
-                  ImagePath.loginLogo, // আপনার logo path
-                  width: 39.w,
-                  height: 39.w,
-                  fit: BoxFit.contain,
-                ),
-
-                SizedBox(height: 25.h),
-
-                // ✅ Title
-                Text(
-                  'Forgot Password',
-                  style: GoogleFonts.roboto(
-                    fontSize: 26.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-
-                  ),
-                ),
-
-                SizedBox(height: 10.h),
-
-                // ✅ Subtitle
-                Text(
-                  'Your confirmation link will be sent to you.',
-                  style: GoogleFonts.roboto(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF111827),
-
-                  ),
-                ),
-
-                SizedBox(height: 25.h),
-
-                _pillField(controller: _emailC, focusNode: _emailF, hint: 'Email'),
-                SizedBox(height: 18.h),
-                    SizedBox(height: 14.h),
-
-                    // ✅ Send button (blue -> pink)
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: send reset email
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 54.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28.r),
-                          gradient: const LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFF0088FE),
-                              Color(0xFFB400FF),
-                              Color(0xFFFF2D8D),
-                            ],
+                  // ✅ Back button
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15.w),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: GestureDetector(
+                        onTap: () => context.pop(),
+                        child: Container(
+                          width: 32.w,
+                          height: 32.h,
+                          padding: EdgeInsets.all(9.r),
+                          decoration: const BoxDecoration(
+                            color: Color(0xffF3F4F6),
+                            shape: BoxShape.circle,
                           ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Send',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                              fontFamily: 'Inter',
-                            ),
+                          child: Image.asset(
+                            "assets/aro.png",
+                            width: 16.w,
+                            height: 16.h,
                           ),
                         ),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: 420.h), // bottom text space
-                  ],
-                ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 25.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 35.h),
+
+                        Image.asset(
+                          ImagePath.loginLogo,
+                          width: 39.w,
+                          height: 39.w,
+                          fit: BoxFit.contain,
+                        ),
+
+                        SizedBox(height: 25.h),
+
+                        Text(
+                          'Forgot Password',
+                          style: GoogleFonts.roboto(
+                            fontSize: 26.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+
+                        SizedBox(height: 10.h),
+
+                        Text(
+                          'Your confirmation link will be sent to you.',
+                          style: GoogleFonts.roboto(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+
+                        SizedBox(height: 25.h),
+
+                        _pillField(
+                          controller: _emailC,
+                          focusNode: _emailF,
+                          hint: 'Email',
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+
+                        SizedBox(height: 18.h),
+
+                        // ✅ Send button
+                        GestureDetector(
+                          onTap: () {
+                            // TODO: send reset email
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 54.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.r),
+                              gradient: const LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  Color(0xFF0088FE),
+                                  Color(0xFFB400FF),
+                                  Color(0xFFFF2D8D),
+                                ],
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Send',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 420.h),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            
+            ),
 
-            // ✅ Bottom: "Have password ? Login"
+            // ✅ Bottom fixed text (MUST be inside Stack)
             Positioned(
               left: 0,
               right: 0,
-              bottom: 2.h,
+              bottom: 12.h,
               child: Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -260,20 +270,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       style: GoogleFonts.roboto(
                         fontSize: 16.sp,
                         color: const Color(0xFF111827),
-
                         fontWeight: FontWeight.w400,
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        context.go('/login'); // ✅ আপনার login route দিন
-                      },
+                      onTap: () => context.go('/login'),
                       child: Text(
                         'Login',
                         style: GoogleFonts.roboto(
                           fontSize: 16.sp,
                           color: const Color(0xFF0088FE),
-                        
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -285,7 +291,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ],
         ),
       ),
-    ));
+    );
   }
 
   Widget _pillField({
@@ -297,7 +303,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }) {
     final isFocus = focusNode.hasFocus;
 
-    const fill = Color(0xFFF3F4F6);
+    const fill = Color(0xFFE1E1E1);
 
     const focusGradient = LinearGradient(
       begin: Alignment.centerLeft,

@@ -629,7 +629,7 @@ class _SearchBarState extends State<_SearchBar> {
                     hintText: 'Search',
                     hintStyle: TextStyle(
                       fontSize: 16.sp,
-                      color: Color(0xFF111827),
+                      color: Color(0xFF6B7280),
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
                     ),
@@ -639,7 +639,8 @@ class _SearchBarState extends State<_SearchBar> {
                       width: 22.w,
                       height: 22.w,
                       fit: BoxFit.contain,
-
+                      color: Color(0xFF6B7280),
+                    ),
                     prefixIconConstraints: BoxConstraints(
                       minWidth: 40.w,
                       minHeight: 24.h,

@@ -95,7 +95,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   }) {
     final isFocus = focusNode.hasFocus;
 
-    const fill = Color(0xFFF3F4F6);
+    const fill = Color(0xFFE1E1E1);
 
     const focusGradient = LinearGradient(
       begin: Alignment.centerLeft,
@@ -197,7 +197,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFffffff),
+      backgroundColor: Color(0xFFFFFFFF),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
