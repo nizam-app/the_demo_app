@@ -281,6 +281,7 @@ class SettingsScreen extends StatelessWidget {
             iconWidth: 30.w,
             iconHeight: 32.h,
             onTap: () {},
+            
           ),
 
         ],
