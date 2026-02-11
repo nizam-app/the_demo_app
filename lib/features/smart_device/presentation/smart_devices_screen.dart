@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 
+import '../widget/addSmartDevicesPopup.dart';
+import '../widget/menu_popup.dart';
+
 class SmartDevicesScreen extends StatefulWidget {
   const SmartDevicesScreen({super.key});
 
@@ -43,6 +46,56 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       'assets/images/heating_cooling.png'; // Using heating as alternative
   static const _icIrrigation = 'assets/images/irrigation.png';
   static const _icKitchen = 'assets/images/kitchen.png';
+
+
+
+  void showEditSmartDeviceSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: const EditDeviceSheetContent(),
+      ),
+    );
+  }
+
+  // void showAddSmartDeviceSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     isScrollControlled: true,
+  //     barrierColor: Colors.black.withOpacity(0.25),
+  //     builder: (context) => Padding(
+  //       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+  //       child: const AddSmartDeviceSheet(),
+  //     ),
+  //   );
+  // }
+
+
+  void showAddSmartDeviceBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useSafeArea: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.62, // screenshot like
+        minChildSize: 0.35,
+        maxChildSize: 0.92,
+        expand: false,
+        builder: (_, controller) => AddSmartDeviceSheet(scrollController: controller),
+      ),
+    );
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,29 +141,35 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.more_horiz_rounded,
-                      size: 22.sp,
-                      color: _primary,
+                  GestureDetector(
+                    onTap: ()=>showEditSmartDeviceSheet(context),
+                    child: Container(
+                      width: 36.w,
+                      height: 36.w,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.more_horiz_rounded,
+                        size: 22.sp,
+                        color: _primary,
+                      ),
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Container(
-                padding: EdgeInsets.all(8.w),
-                                  width: 36.w,
-                    height: 36.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
+                  GestureDetector(
+                    onTap: ()=>showAddSmartDeviceBottomSheet(context),
+                    child: Container(
+                                    padding: EdgeInsets.all(8.w),
+                                    width: 36.w,
+                      height: 36.w,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Image.asset("assets/images/+.png", fit: BoxFit.contain),
                     ),
-                    child: Image.asset("assets/images/+.png", fit: BoxFit.contain),
                   ),
                 ],
               ),

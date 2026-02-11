@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/devices/widget/popup.dart';
 
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
@@ -29,6 +30,19 @@ class _DevicesScreenState extends State<DevicesScreen> {
     if (index < routes.length) {
       context.go(routes[index]);
     }
+  }
+
+  void _showEditDeviceBottomSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: const EditDeviceSheetContent(),
+      ),
+    );
   }
 
   @override
@@ -81,7 +95,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           children: [
                             _CircleIconButton(
                               icon: Icons.more_horiz_rounded,
-                              onTap: () {},
+                              onTap: () => _showEditDeviceBottomSheet(context),
                               size: 32,
                               bg: const Color(0xFFF3F4F6),
                               iconColor: const Color(0xFF111827),
@@ -443,6 +457,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
   }
 }
 
+
 /* --------------------------- UI Pieces --------------------------- */
 
 class _DeviceListCard extends StatelessWidget {
@@ -462,6 +477,8 @@ class _DeviceListCard extends StatelessWidget {
     );
   }
 }
+
+/* --------------------------- Edit device bottom sheet --------------------------- */
 
 class _DeviceRow extends StatelessWidget {
   _DeviceRow({
@@ -572,6 +589,8 @@ class _RowDivider extends StatelessWidget {
     );
   }
 }
+
+
 /* ---------------- Search + Chips ---------------- */
 
 class _SearchBar extends StatefulWidget {
