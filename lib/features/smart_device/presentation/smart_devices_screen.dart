@@ -158,6 +158,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     ),
                   ),
                   SizedBox(width: 12.w),
+                  //new repo 
                   GestureDetector(
                     onTap: ()=>showAddSmartDeviceBottomSheet(context),
                     child: Container(
