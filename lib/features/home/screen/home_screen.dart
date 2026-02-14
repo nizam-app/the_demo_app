@@ -11,11 +11,40 @@ import '../../devices/screen/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../profile/screen/profile_screen.dart';
+import '../widget/Add_section.dart';
+import '../widget/editAddSectionSheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static const String routeName = '/home';
+
+  static void showEditAddSectionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: const EditAddSectionSheet(),
+      ),
+    );
+  }
+
+  static void showAddSectionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: const AddSectionSheet(),
+      ),
+    );
+  }
+
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -40,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onMenuTap: () {
                         CustomBottomNavBar.of(context)?.openDrawer();
                       },
-                      onEditTap: () {},
+                      onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
                     ),
                   ),
 
@@ -1041,14 +1070,29 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 22.sp,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF111827),
-        fontFamily: 'Inter',
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF111827),
+            fontFamily: 'Inter',
+          ),
+        ),
+        
+        GestureDetector(
+          onTap: () => HomeScreen.showAddSectionSheet(context),
+          child: Image.asset(
+            "assets/images/add_device.png",
+            height: 32.h,
+            width: 32.w,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ],
     );
   }
 }

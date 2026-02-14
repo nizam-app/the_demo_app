@@ -62,19 +62,6 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
-  // void showAddSmartDeviceSheet(BuildContext context) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     isScrollControlled: true,
-  //     barrierColor: Colors.black.withOpacity(0.25),
-  //     builder: (context) => Padding(
-  //       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-  //       child: const AddSmartDeviceSheet(),
-  //     ),
-  //   );
-  // }
-
 
   void showAddSmartDeviceBottomSheet(BuildContext context) {
     showModalBottomSheet(

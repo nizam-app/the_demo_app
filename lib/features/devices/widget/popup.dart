@@ -22,6 +22,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   bool _dashboardDropdownOpen = false;
   int _selectedDashboardIndex = 0;
+  bool _lastActivitiesOn = true;
 
   final List<String> _dashboards = const [
     'Lighting section name',
@@ -38,7 +39,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   static const Color _kTextSecondary = Color(0xFF6B7280);
   static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kCloseBtnBg = Colors.white;
-  static const Color _kDestructiveRed = Color(0xFFEF4444);
+  static const Color _kDestructiveRed = Color(0xFFFE019A);
+  static const Color _kBlue = Color(0xFF0088FE);
 
   @override
   void dispose() {
@@ -115,7 +117,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                         ),
                       ),
 
-                      SizedBox(height: 14.h),
+                      SizedBox(height: 10.h),
 
                       // -------- Actions card (with dropdown trigger) --------
                       Container(
@@ -162,6 +164,24 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconWidth: 20.w,
                               iconHeight: 20.h,
                               label: 'Category & zone',
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _ChipPill(
+                                    text: 'Light',
+                                    bg: Colors. white,
+                                    border: _kBlue,
+                                    textColor: _kBlue,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  _ChipPill(
+                                    text: 'Living room',
+                                    bg: _kDestructiveRed,
+                                    border: _kDestructiveRed,
+                                    textColor: Colors.white,
+                                  ),
+                                ],
+                              ),
                               onTap: () {},
                             ),
                             SizedBox(height: 14.h),
@@ -171,16 +191,33 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconWidth: 26.w,
                               label: 'Last activities',
                               onTap: () {},
+                              trailing: Transform.scale(
+                                scale: 1.05,
+                                child: SizedBox(
+                                  height: 35.h,
+                                  child: Switch(
+                                    value: _lastActivitiesOn,
+                                    onChanged: (v) =>
+                                        setState(() => _lastActivitiesOn = v),
+                                    activeColor: Colors.white,
+                                    activeTrackColor: _kBlue,
+                                    inactiveThumbColor: Colors.white,
+                                    inactiveTrackColor:
+                                    const Color(0xFFE5E7EB),
+                                  ),
+                                ),
+                              ),
+                              
                             ),
                           ],
                         ),
                       ),
 
-                      SizedBox(height: 9.h),
+                      SizedBox(height: 10.h),
 
                       // -------- Settings/Remove card --------
                       Container(
-                        padding: EdgeInsets.all(14.sp),
+                        padding: EdgeInsets.only(top: 5.h, right: 10.w, left: 14.w, bottom: 10.h),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(26.r),
                           color: _kCloseBtnBg,
@@ -315,7 +352,7 @@ class _EditSheetRow extends StatelessWidget {
 
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kIconGrey = Color(0xFF6B7280);
-  static const Color _kDestructiveRed = Color(0xFFEF4444);
+  static const Color _kDestructiveRed = Color(0xFFFE019A);
 
   @override
   Widget build(BuildContext context) {
@@ -485,6 +522,43 @@ class _DashboardDropdownMenu extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+
+class _ChipPill extends StatelessWidget {
+  const _ChipPill({
+    required this.text,
+    required this.bg,
+    required this.border,
+    required this.textColor,
+  });
+
+  final String text;
+  final Color bg;
+  final Color border;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: border, width: 1.2.w),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w400,
+          color: textColor,
+          fontFamily: 'Inter',
+          height: 1.0,
         ),
       ),
     );

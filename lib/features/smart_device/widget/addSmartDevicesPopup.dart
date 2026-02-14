@@ -205,7 +205,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 void showAddSmartDeviceBottomSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
-    backgroundColor: Colors.transparent,
+    backgroundColor: Colors.transparent,             
     isScrollControlled: true,
     useSafeArea: true,
     barrierColor: Colors.black.withOpacity(0.25),
@@ -341,7 +341,7 @@ class _AddSmartDeviceSheetState extends State<AddSmartDeviceSheet> {
                       onTap: () => Navigator.of(context).pop(),
                       child: Container(
                         width: 32.w,
-                        height: 32.w,
+                        height: 32.h,
                         decoration: const BoxDecoration(
                           color: _closeBg,
                           shape: BoxShape.circle,

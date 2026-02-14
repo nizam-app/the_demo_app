@@ -168,7 +168,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                 children: [
                                   _ChipPill(
                                     text: 'Light',
-                                    bg: Colors.white,
+                                    bg: Colors. white,
                                     border: _kBlue,
                                     textColor: _kBlue,
                                   ),
@@ -184,7 +184,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               onTap: () {},
                             ),
 
-                            SizedBox(height: 12.h),
+                            SizedBox(height: 10.h),
 
                             // Last activities (big switch)
                             _EditSheetRow(
@@ -194,15 +194,18 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               label: 'Last activities',
                               trailing: Transform.scale(
                                 scale: 1.05,
-                                child: Switch(
-                                  value: _lastActivitiesOn,
-                                  onChanged: (v) =>
-                                      setState(() => _lastActivitiesOn = v),
-                                  activeColor: Colors.white,
-                                  activeTrackColor: _kBlue,
-                                  inactiveThumbColor: Colors.white,
-                                  inactiveTrackColor:
-                                  const Color(0xFFE5E7EB),
+                                child: SizedBox(
+                                  height: 35.h,
+                                  child: Switch(
+                                    value: _lastActivitiesOn,
+                                    onChanged: (v) =>
+                                        setState(() => _lastActivitiesOn = v),
+                                    activeColor: Colors.white,
+                                    activeTrackColor: _kBlue,
+                                    inactiveThumbColor: Colors.white,
+                                    inactiveTrackColor:
+                                    const Color(0xFFE5E7EB),
+                                  ),
                                 ),
                               ),
                             ),
@@ -279,6 +282,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     return Padding(
       padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 10.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
             child: Center(
@@ -295,16 +300,18 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           ),
           // close
           Container(
-            width: 36.w,
-            height: 36.w,
+            width: 30.w,
+            height: 30.w,
             decoration: const BoxDecoration(
               color: Color(0xFFFFFFFF),
               shape: BoxShape.circle,
             ),
             child: IconButton(
               onPressed: () => Navigator.of(context).pop(),
-              icon: Icon(Icons.close_rounded,
-                  size: 20.sp, color: _kTextPrimary),
+              icon: Center(
+                child: Icon(Icons.close_rounded,
+                    size: 20.sp, color: _kTextPrimary),
+              ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -343,12 +350,14 @@ class _EditSheetRow extends StatelessWidget {
     this.iconHeight,
     this.iconWidth,
     this.trailing,
+    this.icon,
     this.isDestructive = false,
     this.onTap,
   });
 
   final String? imagePath;
   final String label;
+  final IconData? icon;
   final Widget? trailing;
   final bool isDestructive;
   final double? iconWidth;
@@ -357,32 +366,37 @@ class _EditSheetRow extends StatelessWidget {
 
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kIconGrey = Color(0xFF6B7280);
-  static const Color _kDestructiveRed = Color(0xFFFF2D92);
+  static const Color _kDestructiveRed = Color(0xFFFE019A);
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDestructive ? _kDestructiveRed : _kTextPrimary;
+    final color = isDestructive ? _kDestructiveRed : _kTextPrimary;
+    final iconColor = isDestructive ? _kDestructiveRed : _kIconGrey;
+
+    final Widget leading;
+    if (imagePath != null) {
+      leading = Image.asset(
+        imagePath!,
+        width: iconWidth ?? 20.w,
+        height: iconHeight ?? 20.w,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+      );
+    } else if (icon != null) {
+      leading = Icon(icon, size: iconWidth ?? 20.w, color: iconColor);
+    } else {
+      leading = SizedBox(width: 20.w, height: 20.w);
+    }
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(26.r),
+      borderRadius: BorderRadius.circular(12.r),
       child: Row(
         children: [
           SizedBox(
             width: 32.w,
             height: 32.w,
-            child: Center(
-              child: imagePath == null
-                  ? const SizedBox.shrink()
-                  : Image.asset(
-                imagePath!,
-                width: iconWidth ?? 20.w,
-                height: iconHeight ?? 20.w,
-                fit: BoxFit.contain,
-                color: isDestructive ? _kDestructiveRed : null,
-                filterQuality: FilterQuality.high,
-              ),
-            ),
+            child: Center(child: leading),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -393,20 +407,18 @@ class _EditSheetRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
-                color: textColor,
+                color: color,
                 fontFamily: 'Inter',
               ),
             ),
           ),
-          if (trailing != null) ...[
-            SizedBox(width: 10.w),
-            trailing!,
-          ],
+          if (trailing != null) trailing!,
         ],
       ),
     );
   }
 }
+
 
 class _DashboardDropdownTrigger extends StatelessWidget {
   const _DashboardDropdownTrigger({
