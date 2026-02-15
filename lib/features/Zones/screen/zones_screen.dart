@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/Zones/screen/widget/zonesMenuSheet.dart';
 
 class ZonesScreen extends StatefulWidget {
   const ZonesScreen({super.key});
@@ -13,6 +14,22 @@ class ZonesScreen extends StatefulWidget {
 }
 
 class _ZonesScreenState extends State<ZonesScreen> {
+
+
+
+  void showZonesMenuSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: const ZonesMenuSheet(),
+      ),
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     int _selectedIndex = 2;
@@ -85,7 +102,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
               // ✅ Top bar (same to same)
               _TopBar(
                 onBack: () => Navigator.pop(context),
-                onMenu: () {},
+                onMenu: () => showZonesMenuSheet(context),
                 onAdd: () {},
               ),
 
@@ -229,16 +246,16 @@ class ZoneItem {
   final String bg;
   final String icon;
   final double? size;
-  final double?  widht;
-  final double?  hight;
+  final double? width;
+  final double? height;
 
   const ZoneItem({
     required this.title,
     required this.bg,
     required this.icon,
     this.size,
-    this.widht,
-    this.hight,
+    this.width,
+    this.height,
   });
 }
 
@@ -257,8 +274,8 @@ class ZoneCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = 26.r;
-    final width = item.size != null ? item.size: item.widht;
-    final height = item.size != null ? item.size: item.hight;
+    final iconW = item.size ?? item.width;
+    final iconH = item.size ?? item.height;
 
     return GestureDetector(
       onTap: onTap,
@@ -301,8 +318,8 @@ class ZoneCard extends StatelessWidget {
                 size: 74,
                 child: Image.asset(
                   item.icon,
-                  width: width?.w,
-                  height: height?.h,
+                  width: iconW?.w,
+                  height: iconH?.h,
                   fit: BoxFit.contain,
                 ),
               ),

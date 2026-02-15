@@ -1069,7 +1069,7 @@ class _TimeTag extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 13.sp,
-              color: const Color(0xFF111827),
+              color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
               height: 1.0,
               fontFamily: 'Inter',
@@ -1090,13 +1090,13 @@ class _StarTimeTag extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFFBBF24)),
+        Icon(Icons.star_rounded, size: 24.sp, color: const Color(0xFFffda0b)),
         SizedBox(width: 6.w),
         Text(
           time,
           style: TextStyle(
             fontSize: 13.sp, // ✅ screenshot small
-            color: const Color(0xFF111827),
+            color: const Color(0xFF6B7280),
             fontWeight: FontWeight.w400,
             height: 1.0,
             fontFamily: 'Inter',
@@ -1115,7 +1115,8 @@ class _StarOnly extends StatelessWidget {
     return Icon(
       Icons.star_rounded,
       size: 24.sp,
-      color: const Color(0xFFFBBF24),
+      color: Color(0xFFffda0b),
+      //color: const Color(0xFFFBBF24),
     );
   }
 }

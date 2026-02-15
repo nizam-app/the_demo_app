@@ -49,7 +49,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             Expanded(
               child: Center(
                 child: Text(
-                  'Edit',
+                  'Edit Section',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -97,17 +97,20 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       imageHeight: 22.h, // custom image height
                     ),
                   ),
-                  
                   /// SLIDER WIDGET
                   _RowItem(
                     imagePath: 'assets/images/Slider.png',
                     title: 'Slider widget',
                     imageHeight: 22.h,
                     imageWidth: 22.w,
-                    trailing: CupertinoSwitch(
-                      value: _sliderWidget,
-                      onChanged: (v) => setState(() => _sliderWidget = v),
-                      activeColor: _blue,
+                    trailing: SizedBox(
+                      height: 35.h,
+                      width: 60.w,
+                      child: CupertinoSwitch(
+                        value: _sliderWidget,
+                        onChanged: (v) => setState(() => _sliderWidget = v),
+                        activeColor: _blue,
+                      ),
                     ),
                   ),
                 ],
@@ -236,7 +239,7 @@ class _RowItem extends StatelessWidget {
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 6.h, bottom: 6.h),
       child: Row(
         children: [
           leading,

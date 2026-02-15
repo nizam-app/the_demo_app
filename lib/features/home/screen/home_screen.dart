@@ -1087,8 +1087,8 @@ class _SectionTitle extends StatelessWidget {
           onTap: () => HomeScreen.showAddSectionSheet(context),
           child: Image.asset(
             "assets/images/add_device.png",
-            height: 32.h,
-            width: 32.w,
+            height: 22.h,
+            width: 22.w,
             fit: BoxFit.contain,
           ),
         ),
@@ -1115,7 +1115,7 @@ class _CardShell extends StatelessWidget {
       child: child,
     );
   }
-}
+}       
 
 class _ModeBadge extends StatelessWidget {
   const _ModeBadge({required this.mode, required this.filled});

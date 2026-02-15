@@ -92,7 +92,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                       // Rename Card
                       _Card(
                         child: _EditSheetRow(
-                          imagePath: 'assets/images/rename.png',
+                          imagePath: 'assets/images/Erename.png',
                           iconWidth: 22.w,
                           iconHeight: 22.h,
                           label: 'Rename',
@@ -103,7 +103,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.w400,
                                 color: _kTextSecondary,
                                 fontFamily: 'Inter',
@@ -193,9 +193,10 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconHeight: 26.h,
                               label: 'Last activities',
                               trailing: Transform.scale(
-                                scale: 1.05,
+                                scale: 1.00,
                                 child: SizedBox(
                                   height: 35.h,
+                                  width: 60.w,
                                   child: Switch(
                                     value: _lastActivitiesOn,
                                     onChanged: (v) =>
@@ -248,6 +249,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
             // ===== Outside tap closes dropdown =====
             if (_dashboardDropdownOpen)
+              
               Positioned.fill(
                 child: GestureDetector(
                   onTap: _closeDashboardMenu,
@@ -258,18 +260,22 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
             // ===== Dropdown overlay (on top, auto positioned under trigger) =====
             if (_dashboardDropdownOpen)
-              CompositedTransformFollower(
-                link: _dropdownLink,
-                showWhenUnlinked: false,
-                offset: Offset(-10.w, 36.h), // trigger এর নিচে
-                child: _DashboardDropdownMenu(
-                  width: 230.w,
-                  items: _dashboards,
-                  selectedIndex: _selectedDashboardIndex,
-                  onSelect: (index) => setState(() {
-                    _selectedDashboardIndex = index;
-                    _dashboardDropdownOpen = false;
-                  }),
+              Positioned(
+                top: 250.h,
+                right: 32.w,
+                child: CompositedTransformFollower(
+                  link: _dropdownLink,
+                  showWhenUnlinked: false,
+                  offset: Offset(-10.w, 36.h), // trigger এর নিচে
+                  child: _DashboardDropdownMenu(
+                    width: 220.w,
+                    items: _dashboards,
+                    selectedIndex: _selectedDashboardIndex,
+                    onSelect: (index) => setState(() {
+                      _selectedDashboardIndex = index;
+                      _dashboardDropdownOpen = false;
+                    }),
+                  ),
                 ),
               ),
           ],
@@ -488,10 +494,10 @@ class _DashboardDropdownMenu extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         width: width,
-        constraints: BoxConstraints(maxHeight: 220.h),
+        constraints: BoxConstraints(maxHeight: 195.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18.r),
+          borderRadius: BorderRadius.circular(26.r),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF111827).withOpacity(0.12),
@@ -501,7 +507,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
           ],
         ),
         child: ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
+          padding: EdgeInsets.symmetric(vertical: 20.h),
           shrinkWrap: true,
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox.shrink(),
@@ -519,7 +525,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
                           color: const Color(0xFF111827),
                           fontFamily: 'Inter',

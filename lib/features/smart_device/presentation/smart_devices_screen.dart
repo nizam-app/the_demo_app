@@ -30,7 +30,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   static const _bg = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
-  static const _muted = Color(0xFF9CA3AF);
+  static const _muted = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
   static const _blue = Color(0xFF0088FE);
   static const _pink = Color(0xFFFF2D92);
@@ -529,7 +529,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   Icon(
                     Icons.star_rounded,
                     size: 18.sp,
-                    color: const Color(0xFFFBBF24),
+                    color: const Color(0xFFffda0b),
                   ),
                   SizedBox(width: 8.w),
                   Text(
@@ -538,6 +538,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                       fontSize: 13.sp,
                       color: _muted,
                       fontFamily: 'Inter',
+                      
                     ),
                   ),
                 ],

@@ -93,8 +93,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     trailing: _SizeSegment(
                       value: _selectedSize,
                       onChanged: (v) => setState(() => _selectedSize = v),
-                      imageWidth: 22,
-                      imageHeight: 22,
+                      imageWidth: 22.w, // custom image width
+                      imageHeight: 22.h, // custom image height
                     ),
                   ),
 
@@ -102,8 +102,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   _RowItem(
                     imagePath: 'assets/images/Slider.png',
                     title: 'Slider widget',
-                    imageWidth: 22,
-                    imageHeight: 22,
+                    imageHeight: 22.h,
+                    imageWidth: 22.w,
                     trailing: CupertinoSwitch(
                       value: _sliderWidget,
                       onChanged: (v) => setState(() => _sliderWidget = v),
@@ -123,34 +123,37 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   _SimpleRow(
                     imagePath: 'assets/images/add_device.png',
                     title: 'Add device',
-                    imageWidth: 23,
-                    imageHeight: 23,
+                    imageWidth: 23.w,
+                    imageHeight: 23.h,
                   ),
+
                   _SimpleRow(
                     imagePath: 'assets/images/Rename.png',
                     title: 'Rename',
                     trailingText: 'Light',
-                    imageWidth: 26,
-                    imageHeight: 26,
+                    imageWidth: 26.w,
+                    imageHeight: 26.h,
                   ),
+
                   _SimpleRow(
                     imagePath: 'assets/images/move_up.png',
                     title: 'Move up',
-                    imageWidth: 22,
-                    imageHeight: 22,
+                    imageWidth: 22.w,
+                    imageHeight: 22.h,
                   ),
+
                   _SimpleRow(
-                    imagePath: 'assets/images/move_down.png',
                     title: 'Move down',
-                    imageWidth: 22,
-                    imageHeight: 22,
+                    imagePath: 'assets/images/move_down.png',
+                    imageWidth: 22.w,
+                    imageHeight: 22.h,
                   ),
                 ],
               ),
             ),
 
             SizedBox(height: 10.h),
-
+            /// REMOVE
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(16.h),
@@ -178,41 +181,6 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                 ],
               ),
             )
-            /// REMOVE
-            // GestureDetector(
-            //   onTap: () => Navigator.of(context).pop(),
-            //   child: Container(
-            //     width: double.infinity,
-            //     padding: EdgeInsets.symmetric(vertical: 16.h),
-            //     decoration: BoxDecoration(
-            //       color: Colors.white,
-            //       borderRadius: BorderRadius.circular(20.r),
-            //     ),
-            //     child: Row(
-            //
-            //       children: [
-            //         Image.asset(
-            //           'assets/images/cross.png',
-            //           width: 20.w,
-            //           height: 20.h,
-            //           fit: BoxFit.contain,
-            //           // color: _danger,
-            //           // colorBlendMode: BlendMode.srcIn,
-            //         ),
-            //         SizedBox(width: 8.w),
-            //         Text(
-            //           'Remove',
-            //           style: TextStyle(
-            //             color: _danger,
-            //             fontWeight: FontWeight.w600,
-            //             fontSize: 16.sp,
-            //             fontFamily: 'Inter',
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
 
           ],
         ),
@@ -268,7 +236,7 @@ class _RowItem extends StatelessWidget {
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 6.h, bottom: 6.h),
       child: Row(
         children: [
           leading,
@@ -376,7 +344,7 @@ class _SizeSegment extends StatelessWidget {
         onTap: () => onChanged(label),
         child: Container(
           width: 56.w,
-          height: 36.h,
+          height: 35.h,
           decoration: BoxDecoration(
             color: selected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(26.r),
@@ -390,7 +358,6 @@ class _SizeSegment extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter',
                   color: _textPrimary,
                 ),
               ),
@@ -409,7 +376,7 @@ class _SizeSegment extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.all(7.w),
+      padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
         color: const Color(0xFFE5E7EB),
         borderRadius: BorderRadius.circular(26.r),

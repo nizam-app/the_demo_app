@@ -57,6 +57,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       setState(() => _dashboardDropdownOpen = false);
     }
   }
+  final LayerLink _dropdownLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +94,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                           color: _kCloseBtnBg,
                         ),
                         child: _EditSheetRow(
-                          imagePath: 'assets/images/rename.png',
+                          imagePath: 'assets/images/Erename.png',
                           iconHeight: 22.h,
                           iconWidth: 22.w,
                           label: 'Rename',
@@ -145,18 +146,33 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                             ),
                             SizedBox(height: 14.h),
 
-                            // ✅ Add to dashboard (ONE LINE)
                             _EditSheetRow(
                               imagePath: 'assets/images/add_dashboard.png',
-                              iconHeight: 21.h,
                               iconWidth: 21.w,
+                              iconHeight: 21.h,
                               label: 'Add to dashboard',
-                              trailing: _DashboardDropdownTrigger(
-                                value: _dashboards[_selectedDashboardIndex],
-                                isOpen: _dashboardDropdownOpen,
-                                onTap: _toggleDashboardMenu,
+                              trailing: CompositedTransformTarget(
+                                link: _dropdownLink,
+                                child: _DashboardDropdownTrigger(
+                                  value: _dashboards[_selectedDashboardIndex],
+                                  isOpen: _dashboardDropdownOpen,
+                                  onTap: _toggleDashboardMenu,
+                                ),
                               ),
                             ),
+
+                            // ✅ Add to dashboard (ONE LINE)
+                            // _EditSheetRow(
+                            //   imagePath: 'assets/images/add_dashboard.png',
+                            //   iconHeight: 21.h,
+                            //   iconWidth: 21.w,
+                            //   label: 'Add to dashboard',
+                            //   trailing: _DashboardDropdownTrigger(
+                            //     value: _dashboards[_selectedDashboardIndex],
+                            //     isOpen: _dashboardDropdownOpen,
+                            //     onTap: _toggleDashboardMenu,
+                            //   ),
+                            // ),
 
                             SizedBox(height: 14.h),
                             _EditSheetRow(
@@ -192,9 +208,10 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               label: 'Last activities',
                               onTap: () {},
                               trailing: Transform.scale(
-                                scale: 1.05,
+                                scale: 1.00,
                                 child: SizedBox(
                                   height: 35.h,
+                                  width: 60.w,
                                   child: Switch(
                                     value: _lastActivitiesOn,
                                     onChanged: (v) =>
@@ -384,7 +401,7 @@ class _EditSheetRow extends StatelessWidget {
             height: 32.w,
             child: Center(child: leading),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               label,
@@ -432,7 +449,7 @@ class _DashboardDropdownTrigger extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 15.sp,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
                   color: const Color(0xFF6B7280),
                   fontFamily: 'Inter',
