@@ -148,16 +148,20 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   //new repo 
                   GestureDetector(
                     onTap: ()=>showAddSmartDeviceBottomSheet(context),
-                    child: Container(
-                                    padding: EdgeInsets.all(8.w),
-                                    width: 36.w,
-                      height: 36.w,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset("assets/images/+.png", fit: BoxFit.contain),
+                  child: Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF0088FE),
+                      shape: BoxShape.circle,
                     ),
+                    child: Icon(
+                      Icons.add,
+                      size: 32.sp,
+                      color: Color(0xFFFFFFFF),
+                    ),
+                  ),
+
                   ),
                 ],
               ),

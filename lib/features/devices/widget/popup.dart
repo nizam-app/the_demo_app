@@ -26,6 +26,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   final List<String> _dashboards = const [
     'Lighting section name',
+
     'Lighting section name',
     'Lighting section name',
     'Lighting section name',
@@ -37,7 +38,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   // --------- Fallback colors (যদি তোমার constants না থাকে) ----------
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
-  static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kCloseBtnBg = Colors.white;
   static const Color _kDestructiveRed = Color(0xFFFE019A);
   static const Color _kBlue = Color(0xFF0088FE);
@@ -521,7 +521,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF111827),
                           fontFamily: 'Inter',
@@ -562,20 +562,23 @@ class _ChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(6.r),
         border: Border.all(color: border, width: 1.2.w),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
-          color: textColor,
-          fontFamily: 'Inter',
-          height: 1.0,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+            fontFamily: 'Inter',
+            // height: 1.0,
+          ),
         ),
       ),
     );

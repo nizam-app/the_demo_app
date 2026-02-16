@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
 
+import '../widget/assign_category_zone.dart';
+
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
 
@@ -42,6 +44,17 @@ class _DevicesScreenState extends State<DevicesScreen> {
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: const EditDeviceSheetContent(),
       ),
+    );
+  }
+
+  void _showAssignCategoryPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return const AssignCategoryZoneSheet();
+      },
     );
   }
 
@@ -104,9 +117,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             SizedBox(width: 10.w),
                             _CircleIconButton(
                               icon: Icons.add_rounded,
-                              onTap: () {},
+                              onTap: ()=>_showAssignCategoryPopup(context),
                               size: 32,
-                              bg: const Color(0xFF0088FE),
+                              bg:const Color(0xFF0088FE),
+                              //bg: const Color(0xFF0088FE),
                               iconColor: Colors.white,
                               iconSize: 23,
                             ),
@@ -688,6 +702,7 @@ class _SearchBarState extends State<_SearchBar> {
   }
 }
 
+
 class _FilterChipPill extends StatelessWidget {
   const _FilterChipPill({
     required this.label,
@@ -701,32 +716,56 @@ class _FilterChipPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1);
-    final textColor =
-        selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
-    final bgColor = selected ? Color(0xFFF3F4F6) : const Color(0xFFF3F4F6);
-
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: 32.h,
+      child: selected
+          ? Container(
+        height: 36.h,
+        padding: EdgeInsets.all(1.5), // border thickness
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF2563EB), // blue
+              Color(0xFFEC4899), // pink
+            ],
+          ),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white, // inside color
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF111827),
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+      )
+          : Container(
+        height: 36.h,
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: bgColor,
+          color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(999),
-          border: selected
-              ? Border.all(color: borderColor, width: 1.5)
-              : null,
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+          ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-            color: textColor,
-            height: 1,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF111827),
             fontFamily: 'Inter',
           ),
         ),
@@ -734,6 +773,8 @@ class _FilterChipPill extends StatelessWidget {
     );
   }
 }
+
+
 
 /* ---------------- Buttons / Toggles ---------------- */
 

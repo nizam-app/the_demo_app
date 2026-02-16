@@ -481,7 +481,7 @@ class _KeyValueRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
               fontFamily: 'Inter',
             ),
           ),
@@ -492,7 +492,7 @@ class _KeyValueRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF111827),
+                color: const Color(0xFF6B7280),
                 fontFamily: 'Inter',
               ),
             ),
@@ -540,7 +540,9 @@ class _ToggleCircleRow extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
+      color: Color(0xFFFFFFFF),
       constraints: BoxConstraints(minHeight: 56.h),
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -550,7 +552,7 @@ class _ToggleCircleRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
             ),
           ),
           if (hasImages)
@@ -577,7 +579,8 @@ class _ToggleCircleRow extends StatelessWidget {
                 height: 32.w,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: enabled
+                    color:
+                     enabled
                         ? const Color(0xFF0088FE)
                         : const Color(0xFFE1E1E1),
                     shape: BoxShape.circle,
@@ -621,7 +624,7 @@ class _RoleIcon extends StatelessWidget {
         height: s,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          color: Color(0xFF0B84FF),
+          color: Color(0xFFE1E1E1),
         ),
         alignment: Alignment.center,
         child: Image.asset(
@@ -629,7 +632,7 @@ class _RoleIcon extends StatelessWidget {
           width: s * 0.50, // smaller icon inside
           height: s * 0.50,
           fit: BoxFit.contain,
-          color: Colors.white,
+          color: Color(0xFF6B7280),
           colorBlendMode: BlendMode.srcIn,
         ),
       );
@@ -674,7 +677,7 @@ class _RemoteAccessRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
             ),
           ),
           GestureDetector(

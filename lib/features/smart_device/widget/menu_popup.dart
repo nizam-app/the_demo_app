@@ -41,11 +41,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   // Colors
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
-  static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
   static const Color _kSheetBg = Color(0xFFF3F4F6);
-  static const Color _kCardBg = Colors.white;
-  static const Color _kDivider = Color(0xFFE5E7EB);
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
@@ -568,17 +565,19 @@ class _ChipPill extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(6.r),
         border: Border.all(color: border, width: 1.2.w),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w400,
-          color: textColor,
-          fontFamily: 'Inter',
-          height: 1.0,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+            fontFamily: 'Inter',
+            // height: 1.0,
+          ),
         ),
       ),
     );

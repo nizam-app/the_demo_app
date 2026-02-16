@@ -128,7 +128,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   ),
 
                   _SimpleRow(
-                    imagePath: 'assets/images/Rename.png',
+                    imagePath: 'assets/images/rename.png',
                     title: 'Rename',
                     trailingText: 'Light',
                     imageWidth: 26.w,

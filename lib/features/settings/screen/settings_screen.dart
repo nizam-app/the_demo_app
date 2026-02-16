@@ -279,7 +279,7 @@ class SettingsScreen extends StatelessWidget {
             imagePath: 'assets/images/apps.png',
             title: 'App Preferences',
             iconWidth: 30.w,
-            iconHeight: 32.h,
+            iconHeight: 30.h,
             onTap: () {},
             
           ),
@@ -346,7 +346,7 @@ class _SettingsRow extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: _primary.withOpacity(0.04),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         child: Row(
           children: [
             if (imagePath != null) ...[
@@ -378,8 +378,8 @@ class _SettingsRow extends StatelessWidget {
             ),
             if (badge != null) ...[
               Container(
-                width: 38.w,
-                height: 29.h,
+                width: 30.w,
+                height: 30.h,
                 decoration:  BoxDecoration(
                   color: _blue,
                  borderRadius: BorderRadius.circular(30.sp),
@@ -389,7 +389,7 @@ class _SettingsRow extends StatelessWidget {
                   child: Text(
                     badge!,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                       fontFamily: 'Inter',
