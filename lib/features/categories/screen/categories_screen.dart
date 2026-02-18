@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/widget/global_back_button.dart';
+import '../widget/categoryAddmenu.dart';
 import '../widget/categoryMenuSheet.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -28,6 +29,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
+  void showCategoryAddMenuSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.25),
+      isScrollControlled: true,
+      builder: (_) => const CategoryAddMenu (),
+    );
+  }
 
 
   @override
@@ -114,7 +124,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               _TopBar(
                 onBack: () => Navigator.pop(context),
                 onMenu: () =>showCategoryMenuSheet(context),
-                onAdd: () {},
+                onAdd: () =>showCategoryAddMenuSheet(context),
               ),
 
               SizedBox(height: 14.h),
@@ -203,13 +213,20 @@ class _TopBar extends StatelessWidget {
                   iconColor: const Color(0xFF111827),
                 ),
                 SizedBox(width: 15.w),
+
                 _CircleIconButton(
-                  image: "assets/6458ec77e1fc16af4bcfaa1f33295b2acb661edb.png",
                   icon: Icons.add,
                   onTap: onAdd,
-                  borderColor: const Color(0xFF0088FE),
-                  iconColor: const Color(0xFF0088FE),
+                  borderColor: const Color(0xFFE6E8EE),
+                  iconColor: const Color(0xFF111827),
                 ),
+                // _CircleIconButton(
+                //   image: "assets/6458ec77e1fc16af4bcfaa1f33295b2acb661edb.png",
+                //   icon: Icons.add,
+                //   onTap: onAdd,
+                //   borderColor: const Color(0xFF0088FE),
+                //   iconColor: const Color(0xFF0088FE),
+                // ),
               ],
             ),
           ),

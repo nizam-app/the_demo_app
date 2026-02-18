@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-const _bg = Color(0xFFF2F3F5);
+const _bg = Color(0xFFF3F4F6);
 const _cardBg = Colors.white;
 const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
@@ -27,11 +27,11 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
       padding: EdgeInsets.only(
         left: 16.w,
         right: 16.w,
-        top: 16.h,
-        bottom: 24.h,
+        top: 10.h,
+        bottom: 0.h,
       ),
       decoration: BoxDecoration(
-        color: _bg,
+        color: _bg.withOpacity(0.74),
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       child: SafeArea(
@@ -41,7 +41,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           children: [
 
         Padding(
-        padding: EdgeInsets.only(left: 14.w, right: 14.w, bottom: 10.h),
+        padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -117,7 +117,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               ),
             ),
 
-            SizedBox(height: 8.h),
+            SizedBox(height: 10.h),
 
             /// CARD 2
             _Card(
@@ -131,7 +131,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   ),
                 
                   _SimpleRow(
-                    imagePath: 'assets/images/Rename.png',
+                    imagePath: 'assets/images/rename.png',
                     title: 'Rename',
                     trailingText: 'Light',
                     imageWidth: 26.w,
@@ -162,7 +162,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               padding: EdgeInsets.all(16.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(26.r),
               ),
               child: Row(
                 children: [
@@ -173,7 +173,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Remove',
+                    'Remove section',
                     style: TextStyle(
                       color: _danger,
                       fontWeight: FontWeight.w400,
@@ -381,7 +381,7 @@ class _SizeSegment extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E7EB),
+        color: _bg,
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Row(

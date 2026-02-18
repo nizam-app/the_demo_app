@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/Zones/screen/widget/zoneAddMenut.dart';
 import 'package:workpleis/features/Zones/screen/widget/zonesMenuSheet.dart';
 
 class ZonesScreen extends StatefulWidget {
@@ -23,13 +24,20 @@ class _ZonesScreenState extends State<ZonesScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       barrierColor: Colors.black.withOpacity(0.25),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: const ZonesMenuSheet(),
-      ),
+      builder: (_) => const ZonesMenuSheet(),
     );
   }
-  
+
+
+  void showZonesAddMenuSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (_) => const ZoneAddMenu(),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     int _selectedIndex = 2;
@@ -103,7 +111,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
               _TopBar(
                 onBack: () => Navigator.pop(context),
                 onMenu: () => showZonesMenuSheet(context),
-                onAdd: () {},
+                onAdd: () =>showZonesAddMenuSheet(context),
               ),
 
               SizedBox(height: 14.h),
@@ -192,13 +200,20 @@ class _TopBar extends StatelessWidget {
                   iconColor: const Color(0xFF111827),
                 ),
                 SizedBox(width: 15.w),
+
                 _CircleIconButton(
-                  image: "assets/6458ec77e1fc16af4bcfaa1f33295b2acb661edb.png",
                   icon: Icons.add,
                   onTap: onAdd,
-                  borderColor: const Color(0xFF0088FE),
-                  iconColor: const Color(0xFF0088FE),
-                ),
+                  borderColor: const Color(0xFFE6E8EE),
+                  iconColor: const Color(0xFF111827),
+                ), 
+                // _CircleIconButton(
+                //   image: "assets/6458ec77e1fc16af4bcfaa1f33295b2acb661edb.png",
+                //   icon: Icons.add,
+                //   onTap: onAdd,
+                //   borderColor: const Color(0xFF0088FE),
+                //   iconColor: const Color(0xFF0088FE),
+                // ),
               ],
             ),
           ),

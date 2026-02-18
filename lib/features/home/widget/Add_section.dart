@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-const _bg = Color(0xFFF2F3F5);
+const _bg = Color(0xFFF3F4F6);
 const _cardBg = Colors.white;
 const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
@@ -27,11 +27,11 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
       padding: EdgeInsets.only(
         left: 16.w,
         right: 16.w,
-        top: 16.h,
-        bottom: 24.h,
+        top: 10.h,
+        bottom: 0.h,
       ),
       decoration: BoxDecoration(
-        color: _bg,
+        color: _bg.withOpacity(0.74),
         borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
       ),
       child: SafeArea(
@@ -41,7 +41,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
           children: [
 
             Padding(
-              padding: EdgeInsets.only(left: 14.w, right: 14.w, bottom: 10.h),
+              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 12.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +114,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
               ),
             ),
 
-            SizedBox(height: 8.h),
+            SizedBox(height: 10.h),
 
             /// CARD 2
             _Card(
@@ -159,21 +159,24 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
               padding: EdgeInsets.all(16.h),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(26.r),
+                border: Border.all(color: Color(0xFF0088FE),width: 1.w)
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/images/cross.png',
-                    width: 26.w,
-                    height: 26.h,
+                    'assets/images/+ (1).png',
+                 
+                    height: 14.h,
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Remove',
+                    'Add Section',
                     style: TextStyle(
-                      color: _danger,
-                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF0088FE),
+                      fontWeight: FontWeight.w600,
                       fontSize: 16.sp,
                       fontFamily: 'Inter',
                     ),
@@ -343,10 +346,12 @@ class _SizeSegment extends StatelessWidget {
       return GestureDetector(
         onTap: () => onChanged(label),
         child: Container(
+  
           width: 56.w,
           height: 35.h,
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
+            color: selected ? Colors.white :  Colors.transparent,
+            //Colors.transparent,
             borderRadius: BorderRadius.circular(26.r),
           ),
           child: Column(
@@ -378,7 +383,7 @@ class _SizeSegment extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E7EB),
+        color: _bg,
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Row(

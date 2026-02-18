@@ -406,7 +406,8 @@ class _CoresScreenState extends State<CoresScreen> {
             child: Icon(
               Icons.add_rounded,
               size: 30.sp,
-              color: _fabIcon,
+              color: _primary, 
+            
             ),
           ),
         ),

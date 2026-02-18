@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class ZonesMenuSheet extends StatelessWidget {
-  const ZonesMenuSheet({super.key});
+class ZoneAddMenu extends StatelessWidget {
+  const ZoneAddMenu({super.key});
 
   static const _bg = Color(0xFFF3F4F6);
   static final _bgTransparent = _bg.withOpacity(0.74);
@@ -28,52 +28,54 @@ class ZonesMenuSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Edit zone',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _textPrimary,
-                    fontFamily: 'Inter',
+
+            /// HEADER
+            Padding(
+              padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Add category',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _textPrimary,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  // close
+                  Container(
+                    width: 30.w,
+                    height: 30.h,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Center(
+                        child: Icon(Icons.close_rounded,
+                            size: 20.sp, color: _textPrimary),
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // close
-            Container(
-              width: 30.w,
-              height: 30.h,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFFFFF),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Center(
-                  child: Icon(Icons.close_rounded,
-                      size: 20.sp, color: _textPrimary),
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ),
-          ],
-        ),
-      ),
-       
 
             SizedBox(height: 14.h),
 
-            /// MAIN CARD
+
+
+            /// CARD
             Container(
               decoration: BoxDecoration(
                 color: _card,
@@ -91,12 +93,14 @@ class ZonesMenuSheet extends StatelessWidget {
                     trailing: Text(
                       'Living room',
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 16.sp,
                         color: _textSecondary,
                         fontFamily: 'Inter',
                       ),
                     ),
                   ),
+
+
 
                   /// Upload image
                   _ItemRow(
@@ -106,6 +110,8 @@ class ZonesMenuSheet extends StatelessWidget {
                     iconHeight: 18.h,
                   ),
 
+
+
                   /// Upload icon
                   _ItemRow(
                     iconPath: 'assets/images/Eupload.png',
@@ -114,17 +120,17 @@ class ZonesMenuSheet extends StatelessWidget {
                     iconHeight: 24.h,
                   ),
 
-            
 
-                  /// Remove
-                  _ItemRow(
-                    iconPath: 'assets/images/delete1.png',
-                    title: 'Delete category',
-                    iconWidth: 16.w,
-                    iconHeight: 19.h,
-                    titleColor: _destructive,
-                    iconColor: _destructive,
-                  ),
+                  //
+                  // /// Remove
+                  // _ItemRow(
+                  //   iconPath: 'assets/images/delete1.png',
+                  //   title: 'Delete category',
+                  //   iconWidth: 16.w,
+                  //   iconHeight: 19.h,
+                  //   titleColor: _destructive,
+                  //   iconColor: _destructive,
+                  // ),
 
                   SizedBox(height: 30.h,),
                   InkWell(
@@ -139,16 +145,24 @@ class ZonesMenuSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(26.r),
                           border: Border.all(width: 1.w, color: Color(0xFF0088FE))
                       ),
-                      child: Center(
-                        child: Text(
-                          "Save changes", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+
+                        children: [
+                          Image.asset(
+                            'assets/images/+ (1).png',
+
+                            height: 14.h,
+                          ),
+                          SizedBox(width: 5.w,),
+                          Text(
+                            "Add zone", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                          ),
+                        ],
                       ),
                     ),
                   )
-
-
-                  
                 ],
               ),
             ),
@@ -190,10 +204,9 @@ class _ItemRow extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
 
-            /// ICON (Manual Size Supported)
+            /// ICON AREA (Fixed width for alignment stability)
             SizedBox(
               width: 28.w,
               child: Center(
@@ -202,7 +215,7 @@ class _ItemRow extends StatelessWidget {
                   width: iconWidth ?? 22.w,
                   height: iconHeight ?? 22.w,
                   fit: BoxFit.contain,
-                  //color: iconColor,
+                  color: iconColor,
                 ),
               ),
             ),

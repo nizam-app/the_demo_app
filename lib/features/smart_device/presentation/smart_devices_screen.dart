@@ -80,10 +80,6 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,17 +148,26 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     width: 36.w,
                     height: 36.w,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF0088FE),
+                      color: Color(0xFF111827),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.add,
-                      size: 32.sp,
-                      color: Color(0xFFFFFFFF),
+                      Icons.add_rounded,
+                      size: 23,
+                      color: Colors.white,
                     ),
                   ),
 
                   ),
+                  // _CircleIconButton(
+                  //   icon: Icons.add_rounded,
+                  //   onTap: ()=>_showAssignCategoryPopup(context),
+                  //   size: 32,
+                  //   bg:const Color(0xFF111827),
+                  //   //bg: const Color(0xFF0088FE),
+                  //   iconColor: Colors.white,
+                  //   iconSize: 23,
+                  // ),
                 ],
               ),
             ],
@@ -326,7 +331,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   }) {
     return Container(
       color: backgroundColor ?? Colors.white,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       child: Row(
         children: [
           leading,
@@ -407,8 +412,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   Text(
                     '18:32',
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 13.sp,
                       color: _muted,
+                      fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
                     ),
                   ),
@@ -464,9 +470,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             ],
           ),
           trailing: Container(
+            margin: EdgeInsets.only(right: 8.w),
             width: 152.w,
             height: 39.h,
-            padding: EdgeInsets.only(left: 16.w),
+            padding: EdgeInsets.only(left: 16.w,),
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(999.r),
@@ -475,6 +482,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             child: Image.asset("assets/images/Group 48 (1).png",width: 20.w, height: 20.h, fit: BoxFit.contain),
           ),
         ),
+       
         _buildDivider(),
 
         // 3) Block Irrigation Schedule
@@ -488,14 +496,17 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           ),
           title: 'Block Irrigation Schedule',
           subtitle: const _InlineText('Active', bold: true),
-          trailing: Container(
-            width: 42.w,
-            height: 42.w,
-            decoration: const BoxDecoration(
-              color: _green,
-              shape: BoxShape.circle,
+          trailing: Padding(
+            padding:  EdgeInsets.only(right: 10.w),
+            child: Container(
+              width: 42.w,
+              height: 42.w,
+              decoration: const BoxDecoration(
+                color: _green,
+                shape: BoxShape.circle,
+              ),
+              child: Image.asset("assets/images/charge.png", height: 22.h),
             ),
-            child: Image.asset("assets/images/charge.png", height: 22.h),
           ),
         ),
         _buildDivider(),
@@ -532,15 +543,16 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 children: [
                   Icon(
                     Icons.star_rounded,
-                    size: 18.sp,
-                    color: const Color(0xFFffda0b),
+                    size: 24.sp,
+                    color: const Color(0xFFFFDA0B),
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 5.w),
                   Text(
                     '20:36',
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: _muted,
+                      fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
                       
                     ),
@@ -556,11 +568,12 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
 
                     onTap: () {},
                   ),
-                  SizedBox(width: 8.w),
+                  SizedBox(width: 19.w),
                   _CircleButton(
                     icon: Icons.keyboard_arrow_down_rounded,
                     onTap: () {},
                   ),
+                  SizedBox(width: 10.w),
                 ],
               ),
             ],
@@ -608,6 +621,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _CircleButton(icon: Icons.remove_rounded, onTap: () {}),
               SizedBox(width: 10.w),
               _CircleButton(icon: Icons.add_rounded, onTap: () {}),
+              SizedBox(width: 10.w),
             ],
           ),
         ),
@@ -628,6 +642,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _CircleButton(icon: Icons.chevron_left_rounded, onTap: () {}),
               SizedBox(width: 10.w),
               _CircleButton(icon: Icons.chevron_right_rounded, onTap: () {}),
+              SizedBox(width: 10.w),
             ],
           ),
         ),
@@ -680,6 +695,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _CircleButton(icon: Icons.remove_rounded, onTap: () {}),
               SizedBox(width: 10.w),
               _CircleButton(icon: Icons.add_rounded, onTap: () {}),
+              SizedBox(width: 10.w),
             ],
           ),
         ),

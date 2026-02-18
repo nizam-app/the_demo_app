@@ -5,6 +5,7 @@ class CategoryMenuSheet extends StatelessWidget {
   const CategoryMenuSheet({super.key});
 
   static const _bg = Color(0xFFF3F4F6);
+  static final _bgTransparent = _bg.withOpacity(0.74);
   static const _card = Colors.white;
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
@@ -15,21 +16,22 @@ class CategoryMenuSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
+      bottom: false,
       child: Container(
         decoration: BoxDecoration(
-          color: _bg,
+          color: _bgTransparent,
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(26.r),
           ),
         ),
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+        padding: EdgeInsets.only(left: 16.w, right: 16.w),
         child: Column(
          mainAxisSize: MainAxisSize.min,
           children: [
 
             /// HEADER
             Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 6.h),
+              padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -37,7 +39,7 @@ class CategoryMenuSheet extends StatelessWidget {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Edit smart device',
+                        'Edit category',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -50,7 +52,7 @@ class CategoryMenuSheet extends StatelessWidget {
                   // close
                   Container(
                     width: 30.w,
-                    height: 30.w,
+                    height: 30.h,
                     decoration: const BoxDecoration(
                       color: Color(0xFFFFFFFF),
                       shape: BoxShape.circle,
@@ -72,7 +74,7 @@ class CategoryMenuSheet extends StatelessWidget {
             SizedBox(height: 14.h),
 
           
-
+            
             /// CARD
             Container(
               decoration: BoxDecoration(
@@ -114,26 +116,47 @@ class CategoryMenuSheet extends StatelessWidget {
                   _ItemRow(
                     iconPath: 'assets/images/Eupload.png',
                     title: 'Upload icon',
-                    iconWidth: 26.w,
-                    iconHeight: 26.h,
+                    iconWidth: 24.w,
+                    iconHeight: 24.h,
                   ),
 
           
 
                   /// Remove
                   _ItemRow(
-                    iconPath: 'assets/images/crsss_re.png',
-                    title: 'Remove',
-                    iconWidth: 24.w,
-                    iconHeight: 18.h,
+                    iconPath: 'assets/images/delete1.png',
+                    title: 'Delete category',
+                    iconWidth: 16.w,
+                    iconHeight: 19.h,
                     titleColor: _destructive,
                     iconColor: _destructive,
                   ),
+
+                  SizedBox(height: 30.h,),
+                  InkWell(
+                    onTap: (){
+                      
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 20.w, right: 16.w, bottom: 27.h),
+                      height: 55.h,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(26.r), 
+                        border: Border.all(width: 1.w, color: Color(0xFF0088FE))
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Save changes", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
 
-            SizedBox(height: 10.h),
+            SizedBox(height: 15.h),
           ],
         ),
       ),
@@ -181,7 +204,7 @@ class _ItemRow extends StatelessWidget {
                   width: iconWidth ?? 22.w,
                   height: iconHeight ?? 22.w,
                   fit: BoxFit.contain,
-                  color: iconColor,
+                 // color: iconColor,
                 ),
               ),
             ),

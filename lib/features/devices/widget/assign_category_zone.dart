@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 const _bgOverlay = Color(0x99000000);
 const _sheetBg = Color(0xFFF2F3F5);
 const _cardBg = Colors.white;
-const _primaryBlue = Color(0xFF1D9BF0);
+const _primaryBlue = Color(0xFF0088FE);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 
@@ -70,7 +70,7 @@ class _AssignCategoryZoneSheetState
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.9,
                 ),
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
                 decoration: BoxDecoration(
                   color: _sheetBg,
                   borderRadius:
@@ -81,51 +81,50 @@ class _AssignCategoryZoneSheetState
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      
                       children: [
                         /// HEADER
-                        SizedBox(
-                          height: 56.h,
-                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              Center(
-                                                child: Text(
-                          'Assign category & zone',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: _textPrimary,
-                            fontFamily: 'Inter',
-                          ),
-                                                ),
-                                              ),
-
-                                              Positioned(
-                                                right: 20.w,
-                                                child: GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            width: 30.w,
-                            height: 30.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF111827).withOpacity(0.06),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 0.h),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    'Assign category & zone',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: _textPrimary,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(Icons.close, size: 20.sp, color: _textPrimary),
+                              ),
+                              // close
+                              Container(
+                                width: 30.w,
+                                height: 30.h,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFFFFF),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  icon: Center(
+                                    child: Icon(Icons.close_rounded,
+                                        size: 20.sp, color: _textPrimary),
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ),
+                            ],
                           ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                         ),
+                     
 
                 SizedBox(height: 20.h),
 
@@ -214,9 +213,11 @@ class _Card extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
+              fontFamily: 'Inter',
               fontSize: 16.sp, // Section title
               fontWeight: FontWeight.w600,
               color: _textPrimary,
+              
             ),
           ),
           SizedBox(height: 12.h),
@@ -248,8 +249,8 @@ class _RadioRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 22.w,
-              height: 22.w,
+              width: 20.w,
+              height: 20.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -275,6 +276,7 @@ class _RadioRow extends StatelessWidget {
                 fontSize: 16.sp, // Name/Main text
                 fontWeight: FontWeight.w400,
                 color: _textPrimary,
+                fontFamily: 'Inter'
               ),
             ),
           ],
@@ -328,6 +330,7 @@ class _CheckboxRow extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
+                fontFamily: 'Inter' ,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: _textPrimary,
@@ -352,7 +355,7 @@ class _AddRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(Icons.add_circle_outline,
-              color: _primaryBlue, size: 20.sp),
+              color: _primaryBlue, size: 22.sp),
           SizedBox(width: 10.w),
           Text(
             label,
@@ -360,6 +363,7 @@ class _AddRow extends StatelessWidget {
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
               color: _primaryBlue,
+              fontFamily: 'Inter'
             ),
           ),
         ],
@@ -367,6 +371,3 @@ class _AddRow extends StatelessWidget {
     );
   }
 }
-
-
-

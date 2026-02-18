@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         CustomBottomNavBar.of(context)?.openDrawer();
                       },
                       onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
+                      
                     ),
                   ),
 
@@ -911,25 +912,46 @@ class _Header extends StatelessWidget {
             ),
           ),
         ),
-        InkWell(
-          onTap: onEditTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            width: 32.w,
-            height: 32.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Image.asset(
-                'assets/image 89.png',
-                width: 22.w,
-                height: 22.w,
-                fit: BoxFit.contain,
+        Row(
+          children: [
+            InkWell(
+              onTap: onEditTap,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF3F4F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Image.asset(
+                    'assets/image 89.png',
+                    width: 22.w,
+                    height: 22.w,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
-          ),
+            SizedBox(width: 13.w,), 
+            InkWell(
+              onTap: () => HomeScreen.showAddSectionSheet(context),
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF3F4F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(Icons.add_rounded, color: Color(0xFF111827), size: 23.sp,)
+                ),
+              ),
+            ),
+            
+          ],
         ),
       ],
     );
@@ -1085,12 +1107,20 @@ class _SectionTitle extends StatelessWidget {
         
         GestureDetector(
           onTap: () => HomeScreen.showAddSectionSheet(context),
-          child: Image.asset(
-            "assets/images/add_device.png",
-            height: 22.h,
-            width: 22.w,
-            fit: BoxFit.contain,
-          ),
+          child: 
+            Row(
+              children: [
+                Text("Edit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16.sp, fontFamily: "Inter", color: Color(0xFf0088FE)),),
+                Image.asset(
+                  "assets/images/back_arro.png",
+                  height: 11.h,
+                  width: 11.w,
+                  fit: BoxFit.contain,
+                  color: Color(0xFf0088FE),
+                ),
+              ],
+            ),
+          
         ),
       ],
     );
@@ -1776,7 +1806,7 @@ class _FavoritesRow extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _CircleBtn(
-                          child: Icon(Icons.remove, size: 20.sp),
+                          child: Icon(Icons.remove, size: 20.sp, ),
                           size: 35,
                         ),
                         Text(
@@ -1786,7 +1816,7 @@ class _FavoritesRow extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        _CircleBtn(child: Icon(Icons.add, size: 20.sp)),
+                        _CircleBtn(child: Icon(Icons.add, size: 20.sp,)),
                       ],
                     ),
                   ],

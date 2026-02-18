@@ -209,20 +209,51 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               onTap: () {},
                               trailing: Transform.scale(
                                 scale: 1.00,
-                                child: SizedBox(
-                                  height: 35.h,
-                                  width: 60.w,
-                                  child: Switch(
-                                    value: _lastActivitiesOn,
-                                    onChanged: (v) =>
-                                        setState(() => _lastActivitiesOn = v),
-                                    activeColor: Colors.white,
-                                    activeTrackColor: _kBlue,
-                                    inactiveThumbColor: Colors.white,
-                                    inactiveTrackColor:
-                                    const Color(0xFFE5E7EB),
+                                child:   GestureDetector(
+                                  onTap: () => setState(() => _lastActivitiesOn = !_lastActivitiesOn),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 180),
+                                    width: 60.w,
+                                    height: 35.h,
+                                    padding: EdgeInsets.all(2.w),
+                                    decoration: BoxDecoration(
+                                      color:   _lastActivitiesOn
+                                          ? const Color(0xFF0088FE)
+                                          : const Color(0xFFE1E1E1),
+                                      borderRadius: BorderRadius.circular(30.r),
+                                    ),
+                                    child: AnimatedAlign(
+                                      duration: const Duration(milliseconds: 180),
+                                      curve: Curves.easeOut,
+                                      alignment:  _lastActivitiesOn
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      child: Container(
+                                        width: 31.w,
+                                        height: 31.w,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
+
+                                // SizedBox(
+                                //   height: 35.h,
+                                //   width: 60.w,
+                                //   child: Switch(
+                                //     value: _lastActivitiesOn,
+                                //     onChanged: (v) =>
+                                //         setState(() => _lastActivitiesOn = v),
+                                //     activeColor: Colors.white,
+                                //     activeTrackColor: _kBlue,
+                                //     inactiveThumbColor: Colors.white,
+                                //     inactiveTrackColor:
+                                //     const Color(0xFFE5E7EB),
+                                //   ),
+                                // ),
                               ),
                               
                             ),
@@ -254,7 +285,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               imagePath: 'assets/images/delete1.png',
                               iconWidth: 16.w,
                               iconHeight: 19.h,
-                              label: 'Remove',
+                              label: 'Delete device',
                               isDestructive: true,
                               onTap: () {},
                             ),

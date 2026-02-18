@@ -169,7 +169,7 @@ class SettingsScreen extends StatelessWidget {
           // Divider
           // Profile Option
          Padding(
-           padding:  EdgeInsets.only(left: 22.w, right: 18.w,bottom: 18.w),
+           padding:  EdgeInsets.only(left: 22.w, right: 20.w,bottom: 18.h, top: 12.h),
            child: Row(
               children: [
                   SizedBox(
@@ -180,7 +180,7 @@ class SettingsScreen extends StatelessWidget {
                         "assets/images/profile_icon.png",
                         width: 18.w,
                         height: 18.h,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         color: Color(0xFF111827),
                       ),
                     ),
@@ -214,7 +214,8 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildGeneralSettingsCard(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 18.w),
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
+     // padding: EdgeInsets.only(left: 22.w, top: 17.h, right: 22.w, bottom: 16.h),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -260,7 +261,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildAssistanceCard() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 18.w),
+      margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -346,7 +347,7 @@ class _SettingsRow extends StatelessWidget {
       highlightColor: Colors.transparent,
       splashColor: _primary.withOpacity(0.04),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+        padding:EdgeInsets.only(left: 20.w, right: 22.w, top: 17.h , bottom: 16.h),
         child: Row(
           children: [
             if (imagePath != null) ...[
@@ -358,7 +359,7 @@ class _SettingsRow extends StatelessWidget {
                     imagePath!,
                     width: imgW,
                     height: imgH,
-                    fit: BoxFit.contain,
+                    fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                 ),
