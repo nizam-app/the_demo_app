@@ -43,7 +43,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
       ZoneItem(
         title: "Whole House",
         image: "assets/f42caf20d96bf050fe012c258152cc1bc4bdd276 (1).png",
-                imageWidth: 183.w,
+        imageWidth: 183.w,
         imageHeight: 117.h,
       ),
       ZoneItem(
