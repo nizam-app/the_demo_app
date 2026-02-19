@@ -104,6 +104,7 @@ flutter:
   assets:
     - assets/images/
     - assets/
+    - assets/01a044e88ece6e3467fef4423e24694544bf5c73.png
 
   # An images asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

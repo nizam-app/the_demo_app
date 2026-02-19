@@ -177,7 +177,7 @@ class SettingsScreen extends StatelessWidget {
                     height: 18.h,
                     child: Center(
                       child: Image.asset(
-                        "assets/images/profile_icon.png",
+                        "assets/Mask group (1) copy 2.png",
                         width: 18.w,
                         height: 18.h,
                         fit: BoxFit.cover,
@@ -223,35 +223,35 @@ class SettingsScreen extends StatelessWidget {
       child: Column(
         children: [
           _SettingsRow(
-            imagePath: 'assets/images/core.png',
+            imagePath: 'assets/6d8cb801eb7b704a96ce78719e97598494a20842.png',
             title: 'Core',
-            iconWidth: 22.w,
-            iconHeight: 22.h,
+            iconWidth: 22,
+            iconHeight: 22,
             onTap: () => context.push(CoresScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
-            imagePath: 'assets/images/interface.png',
+            imagePath: 'assets/7f46080b19ab45d496048edbccbfeca52aeb9b06.png',
             title: 'Interfaces',
-            iconWidth: 20.w,
-            iconHeight: 20.h,
+            iconWidth: 20,
+            iconHeight: 20,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
-            imagePath: 'assets/images/itegrations.png',
+            imagePath: 'assets/615dda95a29b06e4a85ea5edfc7b0c5857b9235a.png',
             title: 'Integrations',
-            iconWidth: 20.w,
-            iconHeight: 20.h,
+            iconWidth: 20,
+            iconHeight: 20,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
-            imagePath: 'assets/images/user.png',
+            imagePath: 'assets/Mask group copy 7.png',
             title: 'User Management',
             badge: '1',
-            iconWidth: 22.w,
-            iconHeight: 22.h,
+            iconWidth: 22,
+            iconHeight: 22,
             onTap: () {},
           ),
         ],
@@ -269,18 +269,18 @@ class SettingsScreen extends StatelessWidget {
       child: Column(
         children: [
           _SettingsRow(
-            imagePath: 'assets/images/voice.png',
+            imagePath: 'assets/bca9d59f0b51988d60e2b2bf4f1d3a11863c2f95.png',
             title: 'Voice Assistance',
-            iconWidth: 14.w,
-            iconHeight: 21.h,
+            iconWidth: 14,
+            iconHeight: 21,
             onTap: () {},
           ),
           _Divider(),
           _SettingsRow(
-            imagePath: 'assets/images/apps.png',
+            imagePath: 'assets/Mask group (1) copy.png',
             title: 'App Preferences',
-            iconWidth: 30.w,
-            iconHeight: 30.h,
+            iconWidth: 30,
+            iconHeight: 30,
             onTap: () {},
             
           ),
@@ -298,7 +298,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: _SettingsRow(
-        imagePath: 'assets/images/sign-out.png',
+        imagePath: 'assets/Mask group (2) copy.png',
         title: 'Sign Out',
         titleColor: _pink,
         showTrailingIcon: false,
@@ -339,8 +339,8 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imgW = (iconWidth ?? _settingsIconSize).w;
-    final imgH = (iconHeight ?? _settingsIconSize).h;
+    final imgW = (iconWidth ?? _settingsIconSize);
+    final imgH = (iconHeight ?? _settingsIconSize);
     
     return InkWell(
       onTap: onTap,
@@ -357,8 +357,8 @@ class _SettingsRow extends StatelessWidget {
                 child: Center(
                   child: Image.asset(
                     imagePath!,
-                    width: imgW,
-                    height: imgH,
+                    width: imgW.w,
+                    height: imgH.h,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),

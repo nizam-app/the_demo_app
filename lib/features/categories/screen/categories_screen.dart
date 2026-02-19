@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  
   void showCategoryMenuSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -35,10 +33,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withOpacity(0.25),
       isScrollControlled: true,
-      builder: (_) => const CategoryAddMenu (),
+      builder: (_) => const CategoryAddMenu(),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +61,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       ZoneItem(
         title: "Ventilation",
-        bg: "assets/fbe765777be21f3cab3d70759d175a85efe3c94d.png",
-        icon: "assets/1aa82ef50e48067c3eaca981e77eb2d3a8935f6b.png",
+        bg: "assets/6fb05cbd1a02649d4ceeb7fa85429b78c62fd20d.png",
+        icon: "assets/6fb05cbd1a02649d4ceeb7fa85429b78c62fd20d.png",
         size: 45,
       ),
       ZoneItem(
         title: "Gates",
-        bg: "assets/fbba4bc8829cd4ba8ffbcc27a3dc72eee9583373.png",
-        icon: "assets/deebfc84b3e475975c2dd0c64b11ad57e6a0e310.png",
+        bg: "assets/01a044e88ece6e3467fef4423e24694544bf5c73.png",
+        icon: "assets/01a044e88ece6e3467fef4423e24694544bf5c73.png",
         size: 50,
       ),
       ZoneItem(
@@ -123,8 +120,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               // ✅ Top bar (same to same)
               _TopBar(
                 onBack: () => Navigator.pop(context),
-                onMenu: () =>showCategoryMenuSheet(context),
-                onAdd: () =>showCategoryAddMenuSheet(context),
+                onMenu: () => showCategoryMenuSheet(context),
+                onAdd: () => showCategoryAddMenuSheet(context),
               ),
 
               SizedBox(height: 14.h),
@@ -142,10 +139,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     childAspectRatio: 1.13, // ✅ screenshot-like
                   ),
                   itemBuilder: (_, i) {
-                    return ZoneCard(
-                      item: zones[i],
-                      onTap: () {},
-                    );
+                    return ZoneCard(item: zones[i], onTap: () {});
                   },
                 ),
               ),
@@ -189,12 +183,8 @@ class _TopBar extends StatelessWidget {
           // Left back
           Align(
             alignment: Alignment.centerLeft,
-            child:   GlobalCircleIconBtn(
-              child: Image.asset(
-                'assets/aro.png',
-                width: 16.w,
-                height: 16.h,
-              ),
+            child: GlobalCircleIconBtn(
+              child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
               onTap: () => Navigator.maybePop(context),
               color: const Color(0xFFF3F4F6),
             ),
@@ -242,7 +232,7 @@ class _CircleIconButton extends StatelessWidget {
     required this.onTap,
     required this.borderColor,
     required this.iconColor,
-    this.image  ,
+    this.image,
   });
 
   final IconData icon;
@@ -263,7 +253,9 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           // border: Border.all(color: borderColor, width: 1),
         ),
-        child: image != null ? Image.asset(image!, width: 22.w, height: 22.h) : Icon(icon, size: 22.sp, color: iconColor),
+        child: image != null
+            ? Image.asset(image!, width: 22.w, height: 22.h)
+            : Icon(icon, size: 22.sp, color: iconColor),
       ),
     );
   }
@@ -288,104 +280,57 @@ class ZoneItem {
 }
 
 class ZoneCard extends StatelessWidget {
-  const ZoneCard({
-    super.key,
-    required this.item,
-    required this.onTap,
-
-  });
+  const ZoneCard({super.key, required this.item, required this.onTap});
 
   final ZoneItem item;
   final VoidCallback onTap;
 
-
   @override
   Widget build(BuildContext context) {
-    final radius = 26.r;
-    final iconW = item.size ?? item.width;
-    final iconH = item.size ?? item.height;
+    final iconH = item.size != null ? item.size!.h : 90.h;
+    final iconW = item.width != null ? item.width!.w : null;
 
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Stack(
+      borderRadius: BorderRadius.circular(26.r),
+      child: Container(
+        width: 195.w,
+        height: 183.h,
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(26.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Background image with blur (same vibe)
-            Positioned.fill(
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
-                child: Image.asset(
-                  item.bg,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-
-            // ✅ Soft overlay (to match screenshot)
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.10),
-                      Colors.black.withOpacity(0.40),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // ✅ top-left icon bubble
-            Positioned(
-              top: 12.h,
-              left: 12.w,
-              child: FrostCircle(
-                size: 74,
+            Expanded(
+              child: Center(
                 child: Image.asset(
                   item.icon,
-                  width: iconW?.w,
-                  height: iconH?.h,
+                  width: iconW,
+                  height: iconH,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-
-            // ✅ bottom-left title
-            Positioned(
-              left: 12.w,
-              bottom: 35.h,
-              child: Text(
-                item.title,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  fontFamily: "Inter",
-                ),
-              ),
-            ),
-
-            // ✅ bottom-right arrow bubble
-            Positioned(
-              right: 10.w,
-              bottom: 10.h,
-              child: Container(
-                width: 32.w,
-                height: 32.h,
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: Colors.white30.withOpacity(0.35),
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset(
-                  "assets/Mask group copy 5.png"
-                  ,width: 21.w,
-                  height: 21.h,
-
-                ),
+            SizedBox(height: 6.h),
+            Text(
+              item.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF111111),
+                fontFamily: "Inter",
               ),
             ),
           ],
@@ -394,7 +339,6 @@ class ZoneCard extends StatelessWidget {
     );
   }
 }
-
 
 class FrostCircle extends StatelessWidget {
   const FrostCircle({
@@ -434,7 +378,8 @@ class FrostCircle extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: RadialGradient( // ✅ radialGradient না, gradient হবে
+                    gradient: RadialGradient(
+                      // ✅ radialGradient না, gradient হবে
                       center: Alignment.topLeft,
                       radius: 1.05,
                       colors: [
@@ -448,7 +393,6 @@ class FrostCircle extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-
                 ),
               ),
 
@@ -508,7 +452,9 @@ class _BottomNav extends StatelessWidget {
       height: 72.h,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.74),
-        border: const Border(top: BorderSide(color: Color(0xFFE1E1E1), width: 1)),
+        border: const Border(
+          top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
+        ),
       ),
       child: LayoutBuilder(
         builder: (context, c) {
@@ -547,8 +493,14 @@ class _BottomNav extends StatelessWidget {
                           Stack(
                             clipBehavior: Clip.none,
                             children: [
-                              Image.asset(item.icon, width: 26.sp, height: 26.sp, color: color),
-                              if (item.label == "Notifications" && notificationCount > 0)
+                              Image.asset(
+                                item.icon,
+                                width: 26.sp,
+                                height: 26.sp,
+                                color: color,
+                              ),
+                              if (item.label == "Notifications" &&
+                                  notificationCount > 0)
                                 Positioned(
                                   right: -10.w,
                                   top: -6.h,
@@ -556,7 +508,9 @@ class _BottomNav extends StatelessWidget {
                                     width: 19.w,
                                     height: 15.h,
                                     alignment: Alignment.center,
-                                    padding: EdgeInsets.symmetric(horizontal: 2.w, ),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 2.w,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFE019A),
                                       borderRadius: BorderRadius.circular(18.r),

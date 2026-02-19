@@ -58,7 +58,7 @@ class AppRouter {
       ),  GoRoute(
         path: ZonesScreen.routeName,
         name: ZonesScreen.routeName,
-        builder: (context, state) => const ZonesScreen(),
+        builder: (context, state) =>  ZonesScreen(),
       ),  GoRoute(
         path: ForgotPasswordScreen.routeName,
         name: ForgotPasswordScreen.routeName,
