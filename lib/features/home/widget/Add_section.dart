@@ -8,12 +8,12 @@ const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _danger = Color(0xFFFE019A);
-const _blue = Color(0xFF1D9BF0);
-
+const _blue = Color(0xFF0088FE);
+                          //0xFF1D9BF0
 class AddSectionSheet extends StatefulWidget {
   const AddSectionSheet({super.key});
 
-  @override
+  @override                         
   State<AddSectionSheet> createState() => _AddSectionSheetState();
 }
 
@@ -39,17 +39,19 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             Padding(
-              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 12.h),
+              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Left spacer (same size as close button)
+                  SizedBox(width: 30.w, height: 30.w),
+
                   Expanded(
                     child: Center(
                       child: Text(
                         'Add Section',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -59,7 +61,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       ),
                     ),
                   ),
-                  // close
+
+                  // Close button (right)
                   Container(
                     width: 30.w,
                     height: 30.w,
@@ -69,17 +72,19 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     ),
                     child: IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: Center(
-                        child: Icon(Icons.close_rounded,
-                            size: 20.sp, color: _textPrimary),
-                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 20.sp,
+                        color: _textPrimary,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+            
 
             /// CARD 1
             _Card(
@@ -87,16 +92,16 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                 children: [
 
                   /// WIDGET SIZE
-                  _RowItem(
-                    imagePath: 'assets/images/widget_size.png',
-                    title: 'Widget size',
-                    trailing: _SizeSegment(
-                      value: _selectedSize,
-                      onChanged: (v) => setState(() => _selectedSize = v),
-                      imageWidth: 22.w, // custom image width
-                      imageHeight: 22.h, // custom image height
-                    ),
-                  ),
+                  // _RowItem(
+                  //   imagePath: 'assets/images/widget_size.png',
+                  //   title: 'Widget size',
+                  //   trailing: _SizeSegment(
+                  //     value: _selectedSize,
+                  //     onChanged: (v) => setState(() => _selectedSize = v),
+                  //     imageWidth: 22.w, // custom image width
+                  //     imageHeight: 22.h, // custom image height
+                  //   ),
+                  // ),
 
                   /// SLIDER WIDGET
                   _RowItem(
@@ -110,6 +115,17 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       activeColor: _blue,
                     ),
                   ),
+
+                  _RowItem(
+                    imagePath: 'assets/images/widget_size.png',
+                    title: 'Widget size',
+                    trailing: _SizeSegment(
+                      value: _selectedSize,
+                      onChanged: (v) => setState(() => _selectedSize = v),
+                      imageWidth: 22.w, // custom image width
+                      imageHeight: 22.h, // custom image height
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -120,12 +136,12 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             _Card(
               child: Column(
                 children: [
-                  _SimpleRow(
-                    imagePath: 'assets/images/add_device.png',
-                    title: 'Add device',
-                    imageWidth: 23.w,
-                    imageHeight: 23.h,
-                  ),
+                  // _SimpleRow(
+                  //   imagePath: 'assets/images/add_device.png',
+                  //   title: 'Add device',
+                  //   imageWidth: 23.w,
+                  //   imageHeight: 23.h,
+                  // ),
 
                   _SimpleRow(
                     imagePath: 'assets/images/rename.png',
@@ -136,52 +152,63 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   ),
 
                   _SimpleRow(
-                    imagePath: 'assets/images/move_up.png',
-                    title: 'Move up',
-                    imageWidth: 22.w,
-                    imageHeight: 22.h,
+                    imagePath: 'assets/images/add_device.png',
+                    title: 'Add device',
+                    imageWidth: 23.w,
+                    imageHeight: 23.h,
                   ),
 
-                  _SimpleRow(
-                    title: 'Move down',
-                    imagePath: 'assets/images/move_down.png',
-                    imageWidth: 22.w,
-                    imageHeight: 22.h,
-                  ),
+                  // _SimpleRow(
+                  //   imagePath: 'assets/images/move_up.png',
+                  //   title: 'Move up',
+                  //   imageWidth: 22.w,
+                  //   imageHeight: 22.h,
+                  // ),
+                  //
+                  // _SimpleRow(
+                  //   title: 'Move down',
+                  //   imagePath: 'assets/images/move_down.png',
+                  //   imageWidth: 22.w,
+                  //   imageHeight: 22.h,
+                  // ),
                 ],
               ),
             ),
 
-            SizedBox(height: 10.h),
+            SizedBox(height: 18.h),
             /// REMOVE
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(26.r),
-                border: Border.all(color: Color(0xFF0088FE),width: 1.w)
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/+ (1).png',
-                 
-                    height: 14.h,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Add Section',
-                    style: TextStyle(
-                      color: Color(0xFF0088FE),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16.sp,
-                      fontFamily: 'Inter',
+            Padding(
+              padding:  EdgeInsets.only(left: 18.w, right: 17.w, bottom: 41.h),
+              child: Container(
+                height: 55.h,
+                width: double.infinity,
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(color: Color(0xFF0088FE),width: 1.w)
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/+ (1).png',
+
+                      height: 14.h,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Add Section',
+                      style: TextStyle(
+                        color: Color(0xFF0088FE),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16.sp,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
 
@@ -292,7 +319,8 @@ class _SimpleRow extends StatelessWidget {
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      // padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      padding: EdgeInsets.only(left: 12.w, right: 17.w, top: 14.h, bottom: 17.h),
       child: Row(
         children: [
           leading,

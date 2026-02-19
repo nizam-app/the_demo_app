@@ -168,13 +168,9 @@ class _TopBar extends StatelessWidget {
                 children: [
                   _CircleIconButton(icon: Icons.more_horiz, onTap: onMenu),
                   SizedBox(width: 8.w),
-                  IconButton(
-                    onPressed: onAdd,
-                    icon: Icon(Icons.add, size: 26.sp, color: const Color(0xFF111111)),
-                    splashRadius: 22,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
-                  ),
+                  _CircleIconButton(icon: Icons.add_rounded, onTap: onAdd),
+                  
+                  
                 ],
               ),
             ],
@@ -213,7 +209,7 @@ class _CircleIconButton extends StatelessWidget {
           color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 22.sp, color: const Color(0xFF111111)),
+        child: Icon(icon, size: 22.sp, color: const Color(0xFF111827)),
       ),
     );
   }
@@ -271,7 +267,7 @@ class ZoneCard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 6.h),
+           SizedBox(height: 6.h),
             Text(
               item.title,
               maxLines: 1,
@@ -279,7 +275,7 @@ class ZoneCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF111111),
+                color: const Color(0xFF111827),
                 fontFamily: "Inter",
               ),
             ),

@@ -39,7 +39,7 @@ class ZoneAddMenu extends StatelessWidget {
                   Expanded(
                     child: Center(
                       child: Text(
-                        'Add category',
+                        'Add zone',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,

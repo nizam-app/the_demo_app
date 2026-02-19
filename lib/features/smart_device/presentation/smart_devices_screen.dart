@@ -29,7 +29,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   // Colors (match screenshot)
   static const _bg = Colors.white;
   static const _primary = Color(0xFF111827);
-  static const _secondary = Color(0xFF6B7280);
+
   static const _muted = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
   static const _blue = Color(0xFF0088FE);
@@ -432,7 +432,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 child: Icon(
                   Icons.pause_rounded,
                   size: 20.sp,
-                  color: _secondary,
+                  color: _muted,
                 ),
               ),
             ],
@@ -479,7 +479,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               borderRadius: BorderRadius.circular(999.r),
             ),
             alignment: Alignment.centerLeft,
-            child: Image.asset("assets/images/Group 48 (1).png",width: 20.w, height: 20.h, fit: BoxFit.contain),
+            child: Image.asset("assets/images/Group 48 (1).png",width: 20.w, height: 20.h, fit: BoxFit.contain,color: _muted,),
           ),
         ),
        
@@ -814,7 +814,7 @@ class _CircleButton extends StatelessWidget {
           color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: iconSize, color:  Colors.black),
+        child: Icon(icon, size: iconSize, color:Color(0xFF6B7280)),
      ),
     );
   }

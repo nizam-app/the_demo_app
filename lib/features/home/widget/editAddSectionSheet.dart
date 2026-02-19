@@ -8,7 +8,7 @@ const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _danger = Color(0xFFFE019A);
-const _blue = Color(0xFF1D9BF0);
+const _blue = Color(0xFF007AFF);
 
 class EditAddSectionSheet extends StatefulWidget {
   const EditAddSectionSheet({super.key});
@@ -40,46 +40,51 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-        Padding(
-        padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Edit Section',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _textPrimary,
-                    fontFamily: 'Inter',
+            Padding(
+              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Left spacer (same size as close button)
+                  SizedBox(width: 30.w, height: 30.w),
+
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        'Edit Section',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _textPrimary,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+
+                  // Close button (right)
+                  Container(
+                    width: 30.w,
+                    height: 30.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 20.sp,
+                        color: _textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            // close
-            Container(
-              width: 30.w,
-              height: 30.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFFFFF),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Center(
-                  child: Icon(Icons.close_rounded,
-                      size: 20.sp, color: _textPrimary),
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ),
-          ],
-        ),
-      ),
 
             /// CARD 1
             _Card(
@@ -87,16 +92,16 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                 children: [
 
                   /// WIDGET SIZE
-                  _RowItem(
-                    imagePath: 'assets/images/widget_size.png',
-                    title: 'Widget size',
-                    trailing: _SizeSegment(
-                      value: _selectedSize,
-                      onChanged: (v) => setState(() => _selectedSize = v),
-                      imageWidth: 22.w, // custom image width
-                      imageHeight: 22.h, // custom image height
-                    ),
-                  ),
+                  // _RowItem(
+                  //   imagePath: 'assets/images/widget_size.png',
+                  //   title: 'Widget size',
+                  //   trailing: _SizeSegment(
+                  //     value: _selectedSize,
+                  //     onChanged: (v) => setState(() => _selectedSize = v),
+                  //     imageWidth: 22.w, // custom image width
+                  //     imageHeight: 22.h, // custom image height
+                  //   ),
+                  // ),
                   /// SLIDER WIDGET
                   _RowItem(
                     imagePath: 'assets/images/Slider.png',
@@ -113,6 +118,17 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       ),
                     ),
                   ),
+
+                  _RowItem(
+                    imagePath: 'assets/images/widget_size.png',
+                    title: 'Widget size',
+                    trailing: _SizeSegment(
+                      value: _selectedSize,
+                      onChanged: (v) => setState(() => _selectedSize = v),
+                      imageWidth: 22.w, // custom image width
+                      imageHeight: 22.h, // custom image height
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -123,12 +139,12 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             _Card(
               child: Column(
                 children: [
-                  _SimpleRow(
-                    imagePath: 'assets/images/add_device.png',
-                    title: 'Add device',
-                    imageWidth: 23.w,
-                    imageHeight: 23.h,
-                  ),
+                  // _SimpleRow(
+                  //   imagePath: 'assets/images/add_device.png',
+                  //   title: 'Add device',
+                  //   imageWidth: 23.w,
+                  //   imageHeight: 23.h,
+                  // ),
                 
                   _SimpleRow(
                     imagePath: 'assets/images/rename.png',
@@ -136,6 +152,13 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     trailingText: 'Light',
                     imageWidth: 26.w,
                     imageHeight: 26.h,
+                  ),
+
+                  _SimpleRow(
+                    imagePath: 'assets/images/add_device.png',
+                    title: 'Add device',
+                    imageWidth: 23.w,
+                    imageHeight: 23.h,
                   ),
             
                   _SimpleRow(

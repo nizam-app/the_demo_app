@@ -221,7 +221,8 @@ class _AddDeviceRow extends StatelessWidget {
   final int? selectionOrder;
 
   static const _textPrimary = Color(0xFF111827);
-  static const _selectedBg = Color(0xFFEDF7FE);
+  //0xFFEDF7FE
+  static const _selectedBg = Color(0xFFEAF1FF);
   static const _badgeBlue = Color(0xFF007AFF);
 
   @override

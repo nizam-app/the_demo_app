@@ -244,7 +244,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
+                        const _CircleMiniBtn(icon: Icons.remove,),
                         SizedBox(width: 8.w),
                         const _CircleMiniBtn(icon: Icons.add),
                         SizedBox(width: 8.w),
@@ -846,7 +846,7 @@ class _CircleMiniBtn extends StatelessWidget {
       child: Icon(
         icon,
         size: (isArrow ? 26 : 22).sp,
-        color: const Color(0xFF111827),
+        color: Color(0xFF6B7280),
       ),
     );
   }
@@ -1579,7 +1579,7 @@ class _BrightnessPill extends StatelessWidget {
                 child: Icon(
                   Icons.wb_sunny_outlined,
                   size: 20.sp,
-                  color: const Color(0xFF111827),
+                  color: Color(0xFF6B7280),
                 ),
               ),
             ),

@@ -80,7 +80,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       child: SafeArea(
         top: false,
         child: Stack(
-          clipBehavior: Clip.none,
+          alignment: Alignment.center,
           children: [
             // ===== Main content =====
             Column(
@@ -89,7 +89,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 _buildHeader(context),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 18.w),
+                  padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
                     children: [
                       // Rename Card
@@ -320,15 +320,18 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 10.h),
+      padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Left spacer (same as close button) => title becomes truly centered
+          SizedBox(width: 30.w, height: 30.w),
+
           Expanded(
             child: Center(
               child: Text(
                 'Edit smart device',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -338,7 +341,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
               ),
             ),
           ),
-          // close
+
+          // Close button (right)
           Container(
             width: 30.w,
             height: 30.w,
@@ -348,18 +352,65 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
             ),
             child: IconButton(
               onPressed: () => Navigator.of(context).pop(),
-              icon: Center(
-                child: Icon(Icons.close_rounded,
-                    size: 20.sp, color: _kTextPrimary),
-              ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
+              icon: Icon(
+                Icons.close_rounded,
+                size: 20.sp,
+                color: _kTextPrimary,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
+
+  // Widget _buildHeader(BuildContext context) {
+  //   return Padding(
+  //     padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
+  //
+  //     child: Row(
+  //        crossAxisAlignment: CrossAxisAlignment.center,
+  //        mainAxisAlignment: MainAxisAlignment.center,
+  //       children: [
+  //         Expanded(
+  //           child: Center(
+  //             child: Text(
+  //               'Edit smart device',
+  //               style: TextStyle(
+  //                 fontSize: 16.sp,
+  //                 fontWeight: FontWeight.w600,
+  //                 color: _kTextPrimary,
+  //                 fontFamily: 'Inter',
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //         // close
+  //
+  //         Container(
+  //           width: 30.w,
+  //           height: 30.w,
+  //           decoration: const BoxDecoration(
+  //             color: Color(0xFFFFFFFF),
+  //             shape: BoxShape.circle,
+  //           ),
+  //           child: IconButton(
+  //             onPressed: () => Navigator.of(context).pop(),
+  //             icon: Center(
+  //               child: Icon(Icons.close_rounded,
+  //                   size: 20.sp, color: _kTextPrimary),
+  //             ),
+  //             padding: EdgeInsets.zero,
+  //             constraints: const BoxConstraints(),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
 // ====================== UI PARTS ======================

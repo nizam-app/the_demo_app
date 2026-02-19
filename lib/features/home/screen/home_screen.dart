@@ -435,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       'assets/Mask group (17).png',
                       width: 13.w,
                       height: 13.h,
-                      color: const Color(0xFF111827),
+                      color: Color(0xFF6B7280),
                     ),
                   ),
                   SizedBox(width: 17.w),
@@ -447,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         'assets/Mask group (17).png',
                         width: 13.w,
                         height: 13.h,
-                        color: const Color(0xFF111827),
+                          color: Color(0xFF6B7280),
                       ),
                     ),
                   ),
@@ -636,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Row(
                 children: [
-                  _CircleBtn(child: Icon(Icons.remove, size: 20.sp), size: 35),
+                  _CircleBtn(child: Icon(Icons.remove, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
                   Expanded(
                     child: Center(
                       child: Text(
@@ -649,7 +649,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  _CircleBtn(child: Icon(Icons.add, size: 20.sp), size: 35),
+                  _CircleBtn(child: Icon(Icons.add, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
                 ],
               ),
             ],
@@ -872,7 +872,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // ---------------------------
 // Header
-// ---------------------------
+
+
+
 class _Header extends StatelessWidget {
   const _Header({required this.onMenuTap, required this.onEditTap});
 
@@ -881,28 +883,40 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double rightWidth = 32.w + 13.w + 32.w; // = 77.w
+
     return Row(
       children: [
-        InkWell(
-          onTap: onMenuTap,
-          borderRadius: BorderRadius.circular(12.r),
-          child: SizedBox(
-            width: 44.w,
-            height: 44.w,
-            child: Center(
-              child: Image.asset(
-                'assets/Group 35 (1).png',
-                width: 26.w,
-                height: 17.w,
-                fit: BoxFit.contain,
+        // Left area (match right width)
+        SizedBox(
+          width: rightWidth,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: InkWell(
+              onTap: onMenuTap,
+              borderRadius: BorderRadius.circular(12.r),
+              child: SizedBox(
+                width: 44.w,
+                height: 44.w,
+                child: Center(
+                  child: Image.asset(
+                    'assets/Group 35 (1).png',
+                    width: 26.w,
+                    height: 17.w,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             ),
           ),
         ),
+
+        // Title (now truly centered)
         Expanded(
           child: Center(
             child: Text(
               'Dashboard',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w600,
@@ -912,51 +926,149 @@ class _Header extends StatelessWidget {
             ),
           ),
         ),
-        Row(
-          children: [
-            InkWell(
-              onTap: onEditTap,
-              borderRadius: BorderRadius.circular(999),
-              child: Container(
-                width: 32.w,
-                height: 32.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/image 89.png',
-                    width: 22.w,
-                    height: 22.w,
-                    fit: BoxFit.contain,
+
+        // Right area
+        SizedBox(
+          width: rightWidth,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InkWell(
+                  onTap: onEditTap,
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/image 89.png',
+                        width: 22.w,
+                        height: 22.w,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SizedBox(width: 13.w,), 
-            InkWell(
-              onTap: () => HomeScreen.showAddSectionSheet(context),
-              borderRadius: BorderRadius.circular(999),
-              child: Container(
-                width: 32.w,
-                height: 32.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
+                SizedBox(width: 13.w),
+                InkWell(
+                  onTap: () => HomeScreen.showAddSectionSheet(context),
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.add_rounded,
+                        color: const Color(0xFF111827),
+                        size: 23.sp,
+                      ),
+                    ),
+                  ),
                 ),
-                child: Center(
-                  child: Icon(Icons.add_rounded, color: Color(0xFF111827), size: 23.sp,)
-                ),
-              ),
+              ],
             ),
-            
-          ],
+          ),
         ),
       ],
     );
   }
 }
+
+// ---------------------------
+// class _Header extends StatelessWidget {
+//   const _Header({required this.onMenuTap, required this.onEditTap});
+//
+//   final VoidCallback onMenuTap;
+//   final VoidCallback onEditTap;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         InkWell(
+//           onTap: onMenuTap,
+//           borderRadius: BorderRadius.circular(12.r),
+//           child: SizedBox(
+//             width: 44.w,
+//             height: 44.w,
+//             child: Center(
+//               child: Image.asset(
+//                 'assets/Group 35 (1).png',
+//                 width: 26.w,
+//                 height: 17.w,
+//                 fit: BoxFit.contain,
+//               ),
+//             ),
+//           ),
+//         ),
+//         Expanded(
+//           child: Center(
+//             child: Text(
+//               'Dashboard',
+//               style: TextStyle(
+//                 fontSize: 22.sp,
+//                 fontWeight: FontWeight.w600,
+//                 color: const Color(0xFF111827),
+//                 fontFamily: 'Inter',
+//               ),
+//             ),
+//           ),
+//         ),
+//         Row(
+//           children: [
+//             InkWell(
+//               onTap: onEditTap,
+//               borderRadius: BorderRadius.circular(999),
+//               child: Container(
+//                 width: 32.w,
+//                 height: 32.w,
+//                 decoration: const BoxDecoration(
+//                   color: Color(0xFFF3F4F6),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 child: Center(
+//                   child: Image.asset(
+//                     'assets/image 89.png',
+//                     width: 22.w,
+//                     height: 22.w,
+//                     fit: BoxFit.contain,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//             SizedBox(width: 13.w,), 
+//             InkWell(
+//               onTap: () => HomeScreen.showAddSectionSheet(context),
+//               borderRadius: BorderRadius.circular(999),
+//               child: Container(
+//                 width: 32.w,
+//                 height: 32.w,
+//                 decoration: const BoxDecoration(
+//                   color: Color(0xFFF3F4F6),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 child: Center(
+//                   child: Icon(Icons.add_rounded, color: Color(0xFF111827), size: 23.sp,)
+//                 ),
+//               ),
+//             ),
+//            
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 // ---------------------------
 // Category pill
@@ -1324,7 +1436,7 @@ class _DimmerPill extends StatelessWidget {
               child: Icon(
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
-                color: const Color(0xFF111827),
+                color: Color(0xFF6B7280),
               ),
             ),
           ),
@@ -1412,7 +1524,7 @@ class _ThermostatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _CircleBtn(child: Icon(Icons.remove, size: 18.sp)),
+                  _CircleBtn(child: Icon(Icons.remove, size: 18.sp, color: Color(0xFF6B7280),)),
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
@@ -1421,7 +1533,7 @@ class _ThermostatCard extends StatelessWidget {
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  _CircleBtn(child: Icon(Icons.add, size: 18.sp)),
+                  _CircleBtn(child: Icon(Icons.add, size: 18.sp, color: Color(0xFF6B7280),), ),
                 ],
               ),
             ],
@@ -1497,6 +1609,7 @@ class _BlindCard extends StatelessWidget {
                           width: 13.sp,
                           height: 13.sp,
                           fit: BoxFit.contain,
+                            color: Color(0xFF6B7280),
                         ),
                         size: 35,
                       ),
@@ -1539,6 +1652,7 @@ class _BlindCard extends StatelessWidget {
                           width: 13.sp,
                           height: 13.sp,
                           fit: BoxFit.contain,
+                          color: Color(0xFF6B7280),
                         ),
                         size: 35,
                       ),
@@ -1806,7 +1920,7 @@ class _FavoritesRow extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _CircleBtn(
-                          child: Icon(Icons.remove, size: 20.sp, ),
+                          child: Icon(Icons.remove, size: 20.sp,color: Color(0xFF6B7280), ),
                           size: 35,
                         ),
                         Text(
@@ -1816,7 +1930,7 @@ class _FavoritesRow extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        _CircleBtn(child: Icon(Icons.add, size: 20.sp,)),
+                        _CircleBtn(child: Icon(Icons.add, size: 20.sp,color: Color(0xFF6B7280),)),
                       ],
                     ),
                   ],

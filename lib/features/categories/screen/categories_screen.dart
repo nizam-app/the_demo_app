@@ -74,32 +74,32 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ZoneItem(
         title: "Security",
         image: "assets/security.png",
-        imageHeight: 130,
-        imageWidth: 130.h,
+        imageHeight: 130.h,
+        imageWidth: 130.w,
       ),
       ZoneItem(
         title: "Irrigation",
         image: "assets/irrigation.png",
-        imageHeight: 143,
-        imageWidth: 143.h,
+        imageHeight: 143.h,
+        imageWidth: 143.w,
       ),
       ZoneItem(
         title: "Machines",
         image: "assets/machines.png",
-        imageHeight: 109,
-        imageWidth: 169.h,
+        imageHeight: 109.h,
+        imageWidth: 169.w,
       ),
       ZoneItem(
         title: "Charging",                   
         image: "assets/charging.png",
-        imageHeight: 139,
-        imageWidth: 139.h,
+        imageHeight: 139.h,
+        imageWidth: 139.w,
       ),
       ZoneItem(
         title: "Maintenance",
         image: "assets/maintenance.png",
-        imageHeight: 146,
-        imageWidth: 169.h,
+        imageHeight: 146.h,
+        imageWidth: 169.w,
       ),
     ];
 
@@ -290,7 +290,7 @@ class ZoneCard extends StatelessWidget {
       child: Container(
         width: 195.w,
         height: 183.h,
-        padding: EdgeInsets.all(12.w),
+        padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(26.r),
@@ -315,7 +315,7 @@ class ZoneCard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 8.h),
             Text(
               item.title,
               maxLines: 1,
@@ -323,7 +323,7 @@ class ZoneCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF111111),
+                color: const Color(0xFF111827),
                 fontFamily: "Inter",
               ),
             ),
