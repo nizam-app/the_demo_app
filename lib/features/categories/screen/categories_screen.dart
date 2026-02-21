@@ -334,84 +334,6 @@ class ZoneCard extends StatelessWidget {
   }
 }
 
-// class ZoneItem {
-//   final String title;
-//   final String bg;
-//   final String icon;
-//   final double? size;
-//   final double? width;
-//   final double? height;
-//
-//   const ZoneItem({
-//     required this.title,
-//     required this.bg,
-//     required this.icon,
-//     this.size,
-//     this.width,
-//     this.height,
-//   });
-// }
-//
-// class ZoneCard extends StatelessWidget {
-//   const ZoneCard({super.key, required this.item, required this.onTap});
-//
-//   final ZoneItem item;
-//   final VoidCallback onTap;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final iconH = item.size != null ? item.size!.h : 90.h;
-//     final iconW = item.width != null ? item.width!.w : null;
-//
-//     return InkWell(
-//       onTap: onTap,
-//       borderRadius: BorderRadius.circular(26.r),
-//       child: Container(
-//         width: 195.w,
-//         height: 183.h,
-//         padding: EdgeInsets.all(12.w),
-//         decoration: BoxDecoration(
-//           color: const Color(0xFFF3F4F6),
-//           borderRadius: BorderRadius.circular(26.r),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black.withOpacity(0.03),
-//               blurRadius: 10,
-//               offset: const Offset(0, 6),
-//             ),
-//           ],
-//         ),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Expanded(
-//               child: Center(
-//                 child: Image.asset(
-//                   item.icon,
-//                   width: iconW,
-//                   height: iconH,
-//                   fit: BoxFit.contain,
-//                 ),
-//               ),
-//             ),
-//             SizedBox(height: 6.h),
-//             Text(
-//               item.title,
-//               maxLines: 1,
-//               overflow: TextOverflow.ellipsis,
-//               style: TextStyle(
-//                 fontSize: 18.sp,
-//                 fontWeight: FontWeight.w600,
-//                 color: const Color(0xFF111111),
-//                 fontFamily: "Inter",
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 
 class FrostCircle extends StatelessWidget {
@@ -517,7 +439,8 @@ class _BottomNav extends StatelessWidget {
     final items = <_NavItem>[
       const _NavItem(label: "Devices", icon: "assets/Group 28.png"),
       const _NavItem(label: "Analytics", icon: "assets/bar 5.png"),
-      const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
+      // const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
+      const _NavItem(label: "Voice", icon: "assets/image 98.png"),
       const _NavItem(label: "Notifications", icon: "assets/Group 43.png"),
       const _NavItem(label: "Automations", icon: "assets/Mask group (8).png"),
     ];

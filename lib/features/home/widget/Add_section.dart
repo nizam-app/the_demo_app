@@ -178,7 +178,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             SizedBox(height: 18.h),
             /// REMOVE
             Padding(
-              padding:  EdgeInsets.only(left: 18.w, right: 17.w, bottom: 41.h),
+              padding:  EdgeInsets.only(left: 18.w, right: 17.w, bottom: 25.h),
               child: Container(
                 height: 55.h,
                 width: double.infinity,

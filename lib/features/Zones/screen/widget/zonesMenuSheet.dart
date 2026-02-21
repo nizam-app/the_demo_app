@@ -70,14 +70,13 @@ class ZonesMenuSheet extends StatelessWidget {
         ),
       ),
        
-
-            SizedBox(height: 14.h),
+            SizedBox(height: 9.h),
 
             /// MAIN CARD
             Container(
               decoration: BoxDecoration(
                 color: _card,
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(26.r),
               ),
               child: Column(
                 children: [
@@ -132,7 +131,7 @@ class ZonesMenuSheet extends StatelessWidget {
 
                     },
                     child: Container(
-                      margin: EdgeInsets.only(left: 20.w, right: 16.w, bottom: 27.h),
+                      margin: EdgeInsets.only(left: 20.w, right: 16.w, bottom: 35.h),
                       height: 55.h,
                       width: double.infinity,
                       decoration: BoxDecoration(

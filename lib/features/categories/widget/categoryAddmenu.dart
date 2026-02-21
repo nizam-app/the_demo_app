@@ -138,7 +138,7 @@ class CategoryAddMenu extends StatelessWidget {
 
                     },
                     child: Container(
-                      margin: EdgeInsets.only(left: 20.w, right: 16.w, bottom: 27.h),
+                      margin: EdgeInsets.only(left: 20.w, right: 16.w, bottom: 40.h),
                       height: 55.h,
                       width: double.infinity,
                       decoration: BoxDecoration(
