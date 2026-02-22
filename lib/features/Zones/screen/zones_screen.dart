@@ -306,14 +306,14 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const selected = Color(0xFF0088FE);
+    const selected = Color(0xFF111827);
     const unselected = Color(0xFF111827);
 
     final items = <_NavItem>[
       const _NavItem(label: "Devices", icon: "assets/Group 28.png"),
       const _NavItem(label: "Analytics", icon: "assets/bar 5.png"),
-      //const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
-      const _NavItem(label: "Voice", icon: "assets/image 98.png"),
+      const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
+      //const _NavItem(label: "Voice", icon: "assets/image 98.png"),
       const _NavItem(label: "Notifications", icon: "assets/Group 43.png"),
       const _NavItem(label: "Automations", icon: "assets/Mask group (8).png"),
     ];
