@@ -169,7 +169,7 @@ class SettingsScreen extends StatelessWidget {
           // Divider
           // Profile Option
          Padding(
-           padding:  EdgeInsets.only(left: 22.w, right: 20.w,bottom: 18.h, top: 12.h),
+           padding:  EdgeInsets.only(left: 22.w, right: 20.w,bottom: 18.h,),
            child: Row(
               children: [
                   SizedBox(

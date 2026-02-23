@@ -211,7 +211,7 @@ class _CircleIconButton extends StatelessWidget {
         width: 32.w,
         height: 32.w,
         decoration: const BoxDecoration(
-          color: Color(0xFFE6E8EE),
+          color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 22.sp, color: const Color(0xFF111827)),
@@ -246,7 +246,7 @@ class ZoneCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(26.r),
       child: Container(
         width: 195.w,
-        height: 183.h,
+        height: 184.h,
         padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
@@ -273,15 +273,18 @@ class ZoneCard extends StatelessWidget {
               ),
             ),
            SizedBox(height: 8.h),
-            Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
-                fontFamily: "Inter",
+            Padding(
+              padding:  EdgeInsets.symmetric(horizontal: 11.w, vertical: 2.h)       ,
+              child: Text(
+                item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111827),
+                  fontFamily: "Inter",
+                ),
               ),
             ),
           ],
@@ -333,9 +336,9 @@ class _BottomNav extends StatelessWidget {
             children: [
               Positioned(
                 top: 0,
-                left: w * selectedIndex + (w - 77.w) / 2,
+                left: w * selectedIndex + (w - 46.w) / 2,
                 child: Container(
-                  width: 77.w,
+                  width: 46.w,
                   height: 3.h,
                   decoration: BoxDecoration(
                     color: selected,

@@ -1218,11 +1218,12 @@ class _SectionTitle extends StatelessWidget {
         ),
         
         GestureDetector(
-          onTap: () => HomeScreen.showAddSectionSheet(context),
+          onTap: () => HomeScreen.showEditAddSectionSheet(context),
           child: 
             Row(
               children: [
                 Text("Edit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16.sp, fontFamily: "Inter", color: Color(0xFf0088FE)),),
+                SizedBox(width: 5.w,), 
                 Image.asset(
                   "assets/images/back_arro.png",
                   height: 11.h,

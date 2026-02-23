@@ -203,12 +203,11 @@ class CategoryAddMenu extends StatelessWidget {
                   children: [
                     Image.asset(
                       'assets/images/+ (1).png',  color: Colors.white,
-
                       height: 14.h,
                     ),
                     SizedBox(width: 5.w,),
                     Text(
-                      "Add category", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                      "Add ", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
                     ),
                   ],
                 ),

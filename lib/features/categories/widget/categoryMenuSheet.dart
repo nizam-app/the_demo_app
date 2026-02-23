@@ -184,7 +184,7 @@ class CategoryMenuSheet extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    "Save changes", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                    "Save", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
                   ),
                 ),
               ),

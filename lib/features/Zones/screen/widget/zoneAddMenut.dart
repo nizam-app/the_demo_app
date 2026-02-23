@@ -178,7 +178,7 @@ class ZoneAddMenu extends StatelessWidget {
                     ),
                     SizedBox(width: 5.w,),
                     Text(
-                      "Add zone", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                      "Add", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
                     ),
                   ],
                 ),

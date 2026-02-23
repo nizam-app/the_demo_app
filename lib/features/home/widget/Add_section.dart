@@ -184,7 +184,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                 width: double.infinity,
 
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                    color: Color(0xFF0088FE),
                   borderRadius: BorderRadius.circular(26.r),
                   border: Border.all(color: Color(0xFF0088FE),width: 1.w)
                 ),
@@ -196,12 +196,13 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       'assets/images/+ (1).png',
 
                       height: 14.h,
+                      color: Color(0xFFFFFFFF),
                     ),
                     SizedBox(width: 8.w),
                     Text(
-                      'Add Section',
+                      'Add ',
                       style: TextStyle(
-                        color: Color(0xFF0088FE),
+                        color: Color(0xFFFFFFFF),
                         fontWeight: FontWeight.w600,
                         fontSize: 16.sp,
                         fontFamily: 'Inter',

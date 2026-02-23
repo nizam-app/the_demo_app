@@ -199,7 +199,7 @@ class _TopBar extends StatelessWidget {
                 _CircleIconButton(
                   icon: Icons.more_horiz,
                   onTap: onMenu,
-                  borderColor: const Color(0xFFE6E8EE),
+                  borderColor: const Color(0xFFF3F4F6),
                   iconColor: const Color(0xFF111827),
                 ),
                 SizedBox(width: 15.w),
@@ -207,7 +207,7 @@ class _TopBar extends StatelessWidget {
                 _CircleIconButton(
                   icon: Icons.add,
                   onTap: onAdd,
-                  borderColor: const Color(0xFFE6E8EE),
+                  borderColor: const Color(0xFFF3F4F6),
                   iconColor: const Color(0xFF111827),
                 ),
                 // _CircleIconButton(
@@ -462,9 +462,9 @@ class _BottomNav extends StatelessWidget {
               // selection indicator (blue 3px bar like your figma)
               Positioned(
                 top: 0,
-                left: w * selectedIndex + (w - 77.w) / 2,
+                left: w * selectedIndex + (w - 46.w) / 2,
                 child: Container(
-                  width: 77.w,
+                  width: 46.w,
                   height: 3.h,
                   decoration: BoxDecoration(
                     color: selected,
