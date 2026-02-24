@@ -144,7 +144,7 @@ class ZoneAddMenu extends StatelessWidget {
                   //   iconColor: _destructive,
                   // ),
 
-                  SizedBox(height: 19.h,),
+                  //SizedBox(height: 19.h,),
                  
                 ],
               ),
@@ -171,11 +171,12 @@ class ZoneAddMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
 
                   children: [
-                    Image.asset(
-                      'assets/images/+ (1).png',  color: Colors.white,
-
-                      height: 14.h,
-                    ),
+                    // Image.asset(
+                    //   'assets/images/+ (1).png',  color: Colors.white,
+                    //
+                    //   height: 14.h,
+                    // ),
+                    Icon(Icons.add, size: 26.sp,color: Colors.white,),
                     SizedBox(width: 5.w,),
                     Text(
                       "Add", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
@@ -220,9 +221,10 @@ class _ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {},
-      borderRadius: BorderRadius.circular(16.r),
+      borderRadius: BorderRadius.circular(26.r),
       child: Padding(
-        padding: EdgeInsets.only(left: 15.w,right: 28.w, top: 20.h, bottom: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        // padding: EdgeInsets.only(left: 13.w,right: 28.w, top: 20.h, bottom: 20.h),
         child: Row(
           children: [
 

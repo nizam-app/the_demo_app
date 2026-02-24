@@ -106,7 +106,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             decoration: InputDecoration(
               hintText: 'Email',
               hintStyle: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 16.sp,
                 color: const Color(0xFF8A94A6),
                 fontFamily: 'Inter',
                 fontWeight: FontWeight.w400,
@@ -133,10 +133,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
+        child:
+        //Stack(
+         // children: [
             SingleChildScrollView(
-              padding: EdgeInsets.only(bottom: 90.h), // ✅ bottom fixed text এর জন্য space
+            //  padding: EdgeInsets.only(bottom: 90.h), // ✅ bottom fixed text এর জন্য space
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -186,7 +187,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         Text(
                           'Forgot Password',
                           style: GoogleFonts.roboto(
-                            fontSize: 26.sp,
+                            fontSize: 25.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF111827),
                           ),
@@ -249,6 +250,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                         ),
                         SizedBox(height: 420.h),
+
+                        Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Have password ? ',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 16.sp,
+                                  color: const Color(0xFF111827),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => context.go('/login'),
+                                child: Text(
+                                  'Login',
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 16.sp,
+                                    color: const Color(0xFF0088FE),
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
                       ],
                     ),
                   ),
@@ -257,39 +286,41 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
 
             // ✅ Bottom fixed text (MUST be inside Stack)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 12.h,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Have password ? ',
-                      style: GoogleFonts.roboto(
-                        fontSize: 16.sp,
-                        color: const Color(0xFF111827),
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.go('/login'),
-                      child: Text(
-                        'Login',
-                        style: GoogleFonts.roboto(
-                          fontSize: 16.sp,
-                          color: const Color(0xFF0088FE),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+            // Positioned(
+            //   left: 0,
+            //   right: 0,
+            //   bottom: 12.h,
+            //   child:
+            //
+            //   Center(
+            //     child: Row(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Text(
+            //           'Have password ? ',
+            //           style: GoogleFonts.roboto(
+            //             fontSize: 16.sp,
+            //             color: const Color(0xFF111827),
+            //             fontWeight: FontWeight.w400,
+            //           ),
+            //         ),
+            //         GestureDetector(
+            //           onTap: () => context.go('/login'),
+            //           child: Text(
+            //             'Login',
+            //             style: GoogleFonts.roboto(
+            //               fontSize: 16.sp,
+            //               color: const Color(0xFF0088FE),
+            //               fontWeight: FontWeight.w400,
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+          //],
+        //),
       ),
     );
   }

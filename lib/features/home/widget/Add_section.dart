@@ -186,18 +186,19 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                 decoration: BoxDecoration(
                     color: Color(0xFF0088FE),
                   borderRadius: BorderRadius.circular(26.r),
-                  border: Border.all(color: Color(0xFF0088FE),width: 1.w)
+                 // border: Border.all(color: Color(0xFF0088FE),width: 1.w)
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      'assets/images/+ (1).png',
-
-                      height: 14.h,
-                      color: Color(0xFFFFFFFF),
-                    ),
+                    // Image.asset(
+                    //   'assets/images/+ (1).png',
+                    //
+                    //   height: 14.h,
+                    //   color: Color(0xFFFFFFFF),
+                    // ),
+                    Icon(Icons.add, size: 26.sp,color: Colors.white,),
                     SizedBox(width: 8.w),
                     Text(
                       'Add ',
@@ -267,7 +268,7 @@ class _RowItem extends StatelessWidget {
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
     return Padding(
-      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 6.h, bottom: 6.h),
+      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 10.h, bottom: 10.h),
       child: Row(
         children: [
           leading,

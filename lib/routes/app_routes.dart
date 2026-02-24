@@ -16,6 +16,7 @@ import 'package:workpleis/features/profile/screen/profile_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/smart_device/presentation/smart_devices_screen.dart';
+import 'package:workpleis/features/user/screen/user_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
 
 import 'error_screen.dart';
@@ -124,6 +125,12 @@ class AppRouter {
         name: LoginScreen.routeName,
         builder: (context, state) => const LoginScreen(),
       ),
+      GoRoute(
+        path: UsersScreen.routeName,
+        name: UsersScreen.routeName,
+        builder: (context, state) => const UsersScreen(),
+      ),
+      
     ],
   );
 }

@@ -77,6 +77,7 @@ class CategoryMenuSheet extends StatelessWidget {
             
             /// CARD
             Container(
+             
               decoration: BoxDecoration(
                 color: _card,
                 borderRadius: BorderRadius.circular(26.r),
@@ -135,16 +136,16 @@ class CategoryMenuSheet extends StatelessWidget {
           
 
                   /// Remove
-                  _ItemRow(
-                    iconPath: 'assets/images/delete1.png',
-                    title: 'Delete category',
-                    iconWidth: 16.w,
-                    iconHeight: 19.h,
-                    titleColor: _destructive,
-                    iconColor: _destructive,
-                  ),
+                  // _ItemRow(
+                  //   iconPath: 'assets/images/delete1.png',
+                  //   title: 'Delete category',
+                  //   iconWidth: 16.w,
+                  //   iconHeight: 19.h,
+                  //   titleColor: _destructive,
+                  //   iconColor: _destructive,
+                  // ),
 
-                  SizedBox(height: 19.h,),
+                 // SizedBox(height: 19.h,),
                   // InkWell(
                   //   onTap: (){
                   //
@@ -222,9 +223,9 @@ class _ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {},
-      borderRadius: BorderRadius.circular(16.r),
+      borderRadius: BorderRadius.circular(26.r),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Row(
           children: [
 

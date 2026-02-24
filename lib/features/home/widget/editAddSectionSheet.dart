@@ -178,35 +178,35 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               ),
             ),
 
-            SizedBox(height: 10.h),
-            /// REMOVE
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(26.r),
-              ),
-              child: Row(
-                children: [
-                  Image.asset(
-                    'assets/images/cross.png',
-                    width: 26.w,
-                    height: 26.h,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Remove section',
-                    style: TextStyle(
-                      color: _danger,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16.sp,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
-              ),
-            )
+            // SizedBox(height: 10.h),
+            // /// REMOVE
+            // Container(
+            //   width: double.infinity,
+            //   padding: EdgeInsets.all(16.h),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.circular(26.r),
+            //   ),
+            //   child: Row(
+            //     children: [
+            //       Image.asset(
+            //         'assets/images/cross.png',
+            //         width: 26.w,
+            //         height: 26.h,
+            //       ),
+            //       SizedBox(width: 8.w),
+            //       Text(
+            //         'Remove section',
+            //         style: TextStyle(
+            //           color: _danger,
+            //           fontWeight: FontWeight.w400,
+            //           fontSize: 16.sp,
+            //           fontFamily: 'Inter',
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // )
 
           ],
         ),
@@ -262,7 +262,7 @@ class _RowItem extends StatelessWidget {
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
     return Padding(
-      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 6.h, bottom: 6.h),
+      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 10.h, bottom: 10.h),
       child: Row(
         children: [
           leading,

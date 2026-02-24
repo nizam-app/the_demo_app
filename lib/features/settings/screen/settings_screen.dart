@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/user/screen/user_screen.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
@@ -173,7 +174,7 @@ class SettingsScreen extends StatelessWidget {
            child: Row(
               children: [
                   SizedBox(
-                    width:18.w,
+                    width:18.w,                     
                     height: 18.h,
                     child: Center(
                       child: Image.asset(
@@ -252,7 +253,7 @@ class SettingsScreen extends StatelessWidget {
             badge: '1',
             iconWidth: 22,
             iconHeight: 22,
-            onTap: () {},
+            onTap: ()=>context.push(UsersScreen.routeName),
           ),
         ],
       ),

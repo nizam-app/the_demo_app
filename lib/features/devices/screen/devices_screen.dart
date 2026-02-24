@@ -756,7 +756,7 @@ class _FilterChipPill extends StatelessWidget {
       )
           : Container(
         height: 36.h,
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
