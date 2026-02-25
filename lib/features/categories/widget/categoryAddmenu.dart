@@ -185,11 +185,8 @@ class CategoryAddMenu extends StatelessWidget {
 
               },
               child: Container(
-
                 margin: EdgeInsets.only(left: 20.w, right: 16.w,),
-
-
-                height: 55.h,
+                height: 52.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
                     color: Color(0xFF0088FE),
@@ -199,7 +196,6 @@ class CategoryAddMenu extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
-
                   children: [
                     // Image.asset(
                     //   'assets/images/+ (1).png',  color: Colors.white,
@@ -208,7 +204,7 @@ class CategoryAddMenu extends StatelessWidget {
                     Icon(Icons.add, color: Colors.white, size: 26.sp,),  
                     SizedBox(width: 5.w,),
                     Text(
-                      "Add ", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                      "Add ", style: TextStyle(fontFamily: "Inter", color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w700 ),
                     ),
                   ],
                 ),

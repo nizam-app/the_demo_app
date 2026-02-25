@@ -173,7 +173,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 35.h),
+                        SizedBox(height: 43.h),
 
                         Image.asset(
                           ImagePath.loginLogo,
@@ -182,30 +182,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           fit: BoxFit.contain,
                         ),
 
-                        SizedBox(height: 25.h),
+                        SizedBox(height: 21.h),
 
                         Text(
                           'Forgot Password',
                           style: GoogleFonts.roboto(
-                            fontSize: 25.sp,
+                            fontSize: 26.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF111827),
                           ),
                         ),
 
-                        SizedBox(height: 10.h),
+                        SizedBox(height: 17.h),
 
                         Text(
                           'Your confirmation link will be sent to you.',
                           style: GoogleFonts.roboto(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w400,
-                            
                             color: const Color(0xFF111827),
                           ),
                         ),
 
-                        SizedBox(height: 25.h),
+                        SizedBox(height: 20.h),
 
                         _pillField(
                           controller: _emailC,
@@ -214,7 +213,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           keyboardType: TextInputType.emailAddress,
                         ),
 
-                        SizedBox(height: 18.h),
+                        SizedBox(height: 21.h),
 
                         // ✅ Send button
                         GestureDetector(
@@ -225,14 +224,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             width: double.infinity,
                             height: 54.h,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(28.r),
+                              borderRadius: BorderRadius.circular(26.r),
                               gradient: const LinearGradient(
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                                 colors: [
                                   Color(0xFF0088FE),
-                                  Color(0xFFB400FF),
-                                  Color(0xFFFF2D8D),
+                                  Color(0xFFFE019A),
+                                  // Color(0xFFFF2D8D),
                                 ],
                               ),
                             ),

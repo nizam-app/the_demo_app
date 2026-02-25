@@ -235,7 +235,7 @@ Widget _pillField({
                       gradient: const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
-                        colors: [Color(0xFF0088FE), Color(0xFF15DFFE)],
+                        colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
                       ),
                     ),
                     child: Center(

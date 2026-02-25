@@ -43,9 +43,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final zones = <ZoneItem>[
       ZoneItem(
         title: "Lighting",
-        image: "assets/lighting.png",
-        imageHeight: 156.w,
-        imageWidth: 182.h,
+        image: "assets/images/667x571 1.png",
+        imageHeight: 160.w,
+        imageWidth: 186.h,
       ),
       ZoneItem(
         title: "Shading",
@@ -90,7 +90,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         imageWidth: 169.w,
       ),
       ZoneItem(
-        title: "Charging",                   
+        title: "Charging",
         image: "assets/charging.png",
         imageHeight: 139.h,
         imageWidth: 139.w,
@@ -196,13 +196,33 @@ class _TopBar extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _CircleIconButton(
-                  icon: Icons.more_horiz,
+                InkWell(
                   onTap: onMenu,
-                  borderColor: const Color(0xFFF3F4F6),
-                  iconColor: const Color(0xFF111827),
+                  borderRadius: BorderRadius.circular(26),
+                  child: Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/image 89.png',
+                        width: 22.w,
+                        height: 22.h,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ),
-                SizedBox(width: 15.w),
+                // _CircleIconButton(
+                // // icon: Icons.more_horiz,
+                //   onTap: onMenu,
+                //   borderColor: const Color(0xFFF3F4F6),
+                //   iconColor: const Color(0xFF111827), icon: null,
+                // ),
+                SizedBox(width: 12.w),
 
                 _CircleIconButton(
                   icon: Icons.add,
@@ -235,7 +255,7 @@ class _CircleIconButton extends StatelessWidget {
     this.image,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback onTap;
   final Color borderColor;
   final Color iconColor;
@@ -254,7 +274,7 @@ class _CircleIconButton extends StatelessWidget {
           // border: Border.all(color: borderColor, width: 1),
         ),
         child: image != null
-            ? Image.asset(image!, width: 22.w, height: 22.h)
+            ? Image.asset(image!)
             : Icon(icon, size: 22.sp, color: iconColor),
       ),
     );
@@ -272,7 +292,7 @@ class ZoneItem {
     required this.title,
     required this.image,
     this.imageWidth,
-    this.imageHeight, 
+    this.imageHeight,
   });
 }
 
@@ -290,7 +310,7 @@ class ZoneCard extends StatelessWidget {
       child: Container(
         width: 195.w,
         height: 183.h,
-        padding: EdgeInsets.all(10.w),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(26.r),
@@ -316,15 +336,18 @@ class ZoneCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8.h),
-            Text(
-              item.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
-                fontFamily: "Inter",
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 2.h),
+              child: Text(
+                item.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111827),
+                  fontFamily: "Inter",
+                ),
               ),
             ),
           ],
@@ -333,8 +356,6 @@ class ZoneCard extends StatelessWidget {
     );
   }
 }
-
-
 
 class FrostCircle extends StatelessWidget {
   const FrostCircle({
@@ -440,8 +461,8 @@ class _BottomNav extends StatelessWidget {
     final items = <_NavItem>[
       const _NavItem(label: "Devices", icon: "assets/Group 28.png"),
       const _NavItem(label: "Analytics", icon: "assets/bar 5.png"),
-       const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
-     // const _NavItem(label: "Voice", icon: "assets/image 98.png"),
+      const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
+      // const _NavItem(label: "Voice", icon: "assets/image 98.png"),
       const _NavItem(label: "Notifications", icon: "assets/Group 43.png"),
       const _NavItem(label: "Automations", icon: "assets/Mask group (8).png"),
     ];

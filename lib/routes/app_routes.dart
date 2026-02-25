@@ -52,19 +52,23 @@ class AppRouter {
         path: SplashScreen.routeName,
         name: SplashScreen.routeName,
         builder: (context, state) => const SplashScreen(),
-      ),GoRoute(
+      ),
+      GoRoute(
         path: CategoriesScreen.routeName,
         name: CategoriesScreen.routeName,
         builder: (context, state) => const CategoriesScreen(),
-      ),  GoRoute(
+      ),
+      GoRoute(
         path: ZonesScreen.routeName,
         name: ZonesScreen.routeName,
-        builder: (context, state) =>  ZonesScreen(),
-      ),  GoRoute(
+        builder: (context, state) => ZonesScreen(),
+      ),
+      GoRoute(
         path: ForgotPasswordScreen.routeName,
         name: ForgotPasswordScreen.routeName,
         builder: (context, state) => const ForgotPasswordScreen(),
-      ),  GoRoute(
+      ),
+      GoRoute(
         path: JoinAicanScreen.routeName,
         name: JoinAicanScreen.routeName,
         builder: (context, state) => const JoinAicanScreen(),
@@ -130,7 +134,6 @@ class AppRouter {
         name: UsersScreen.routeName,
         builder: (context, state) => const UsersScreen(),
       ),
-      
     ],
   );
 }

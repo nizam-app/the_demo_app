@@ -355,13 +355,13 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                         width: double.infinity,
                         height: 54.h,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28.r),
+                          borderRadius: BorderRadius.circular(26.r),
                           gradient: const LinearGradient(
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
                             colors: [
                               Color(0xFF0088FE),
-                              Color(0xFFB400FF),
+                              Color(0xFFEB0FFE),
                             ],
                           ),
                         ),

@@ -78,7 +78,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
       ),
       ZoneItem(
         title: "Garden",
-        image: "assets/aa4e7e9dd3a7adf204473d4aa4b3e2f33973a876.png",
+        image: "assets/images/garden-design-flower.png",
         imageWidth: 208.w,
         imageHeight: 119.h,
       ),
@@ -166,16 +166,32 @@ class _TopBar extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _CircleIconButton(
-                      icon: Icons.more_horiz,
-                      onTap: onMenu,
-                    
-
+                  InkWell(
+                    onTap: onMenu,
+                    borderRadius: BorderRadius.circular(26.r),
+                    child: Container(
+                      width: 32.w,
+                      height: 32.w,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          'assets/image 89.png',
+                          width: 22.w,
+                          height: 22.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 15.w),
+                  // _CircleIconButton(
+                  //     icon: Icons.more_horiz,
+                  //     onTap: onMenu,
+                  // ),
+                  SizedBox(width: 12.w),
                   _CircleIconButton(icon: Icons.add, onTap: onAdd),
-                  
-                  
                 ],
               ),
             ],
@@ -246,8 +262,8 @@ class ZoneCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(26.r),
       child: Container(
         width: 195.w,
-        height: 184.h,
-        padding: EdgeInsets.all(10.w),
+        height: 183.h,
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(26.r),
@@ -272,9 +288,9 @@ class ZoneCard extends StatelessWidget {
                 ),
               ),
             ),
-           SizedBox(height: 8.h),
+            SizedBox(height: 8.h),
             Padding(
-              padding:  EdgeInsets.symmetric(horizontal: 11.w, vertical: 2.h)       ,
+              padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 2.h),
               child: Text(
                 item.title,
                 maxLines: 1,

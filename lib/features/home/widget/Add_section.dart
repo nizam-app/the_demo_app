@@ -180,7 +180,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             Padding(
               padding:  EdgeInsets.only(left: 18.w, right: 17.w, bottom: 25.h),
               child: Container(
-                height: 55.h,
+                height: 52.h,
                 width: double.infinity,
 
                 decoration: BoxDecoration(
@@ -199,12 +199,12 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     //   color: Color(0xFFFFFFFF),
                     // ),
                     Icon(Icons.add, size: 26.sp,color: Colors.white,),
-                    SizedBox(width: 8.w),
+                    SizedBox(width: 5.w),
                     Text(
-                      'Add ',
+                      'Add',
                       style: TextStyle(
                         color: Color(0xFFFFFFFF),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         fontSize: 16.sp,
                         fontFamily: 'Inter',
                       ),

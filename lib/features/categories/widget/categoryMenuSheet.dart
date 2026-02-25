@@ -176,7 +176,7 @@ class CategoryMenuSheet extends StatelessWidget {
               },
               child: Container(
                 margin: EdgeInsets.only(left: 20.w, right: 16.w,),
-                height: 55.h,
+                height: 52.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
                     color: Color(0xFFFFFFFF),
@@ -185,7 +185,7 @@ class CategoryMenuSheet extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    "Save", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w600 ),
+                    "Save", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w700 ),
                   ),
                 ),
               ),
