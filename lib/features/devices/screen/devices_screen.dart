@@ -41,7 +41,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
       isScrollControlled: true,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: const EditDeviceSheetContent(),
       ),
     );
@@ -117,9 +119,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             SizedBox(width: 10.w),
                             _CircleIconButton(
                               icon: Icons.add_rounded,
-                              onTap: ()=>_showAssignCategoryPopup(context),
+                              onTap: () => _showAssignCategoryPopup(context),
                               size: 32,
-                              bg:const Color(0xFF111827),
+                              bg: const Color(0xFF111827),
                               //bg: const Color(0xFF0088FE),
                               iconColor: Colors.white,
                               iconSize: 23,
@@ -244,13 +246,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const _CircleMiniBtn(icon: Icons.remove,),
+                        const _CircleMiniBtn(icon: Icons.remove),
                         SizedBox(width: 8.w),
                         const _CircleMiniBtn(icon: Icons.add),
                         SizedBox(width: 8.w),
                         const _ToggleColorswitch(isOn: true),
                         SizedBox(width: 8.w),
-                        
                       ],
                     ),
                   ),
@@ -258,7 +259,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   const _RowDivider(),
 
                   // Alarm
-             _DeviceRow(
+                  _DeviceRow(
                     outerPadding: EdgeInsets.only(top: 7.h, right: 0.w),
                     topRight: const _PinOnly(),
                     leading: const _LockIcon(),
@@ -327,13 +328,11 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     outerPadding: EdgeInsets.only(
                       top: 7.h,
                       right: 8.w,
-                      bottom:7.h
+                      bottom: 7.h,
                     ),
                     selected: _selectedDeviceTitle == 'Blind Living Room',
                     topRight: const _StarTimeTag(time: '20:36'),
-                    leading: const _BlindGreenIcon(
-                      
-                    ),
+                    leading: const _BlindGreenIcon(),
                     title: 'Blind Living Room',
                     onTap: () => setState(
                       () => _selectedDeviceTitle = 'Blind Living Room',
@@ -408,7 +407,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                       ],
                     ),
                     trailing: Padding(
-                      padding: EdgeInsets.only(top: 15.h, right: 15.w,),
+                      padding: EdgeInsets.only(top: 15.h, right: 15.w),
                       child: const _BrightnessPill(),
                     ),
                   ),
@@ -459,7 +458,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
                     title: 'CORE20',
                     sub2: 'CORE20-4B37-3419-363A',
                   ),
-                  _RowDivider(leftMargin: 56.w), // 12 (padding) + 34 (icon) + 10 (spacing)
+                  _RowDivider(
+                    leftMargin: 56.w,
+                  ), // 12 (padding) + 34 (icon) + 10 (spacing)
                   const _ControlUnitRow(
                     imagePath: 'assets/image 124.png',
                     title: 'D012',
@@ -475,7 +476,6 @@ class _DevicesScreenState extends State<DevicesScreen> {
     );
   }
 }
-
 
 /* --------------------------- UI Pieces --------------------------- */
 
@@ -582,11 +582,7 @@ class _DeviceRow extends StatelessWidget {
             ),
 
             if (topRight != null)
-              Positioned(
-                right: 0,
-                top: 0,
-                child: topRight!,
-              ),
+              Positioned(right: 0, top: 0, child: topRight!),
           ],
         ),
       ),
@@ -603,12 +599,13 @@ class _RowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.only(left: leftMargin ?? 74.w), // Default: 16 + 46 + 12 for device rows
+      margin: EdgeInsets.only(
+        left: leftMargin ?? 74.w,
+      ), // Default: 16 + 46 + 12 for device rows
       color: const Color(0xFFE5E7EB),
     );
   }
 }
-
 
 /* ---------------- Search + Chips ---------------- */
 
@@ -639,74 +636,73 @@ class _SearchBarState extends State<_SearchBar> {
       builder: (context, _) {
         final hasFocus = _searchFocusNode.hasFocus;
         return Container(
-            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24.r),
-              gradient: hasFocus
-                  ? const LinearGradient(
-                      colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    )
-                  : null,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                height: 46.h,
-                alignment: Alignment.centerLeft,
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Search',
-                    hintStyle: TextStyle(
-                      fontSize: 16.sp,
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                    filled: false,
-                    prefixIcon: Image.asset(
-                      'assets/images/Mask group copy.png',
-                      width: 22.w,
-                      height: 22.w,
-                      fit: BoxFit.contain,
-                      color: Color(0xFF6B7280),
-                    ),
-                    prefixIconConstraints: BoxConstraints(
-                      minWidth: 40.w,
-                      minHeight: 24.h,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 0,
-                    ),
-                    isDense: true,
-                  ),
-                  style: TextStyle(
+          padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.r),
+            gradient: hasFocus
+                ? const LinearGradient(
+                    colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              height: 46.h,
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
+              ),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: TextStyle(
                     fontSize: 16.sp,
+                    color: Color(0xFF6B7280),
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Inter',
-                    color: _primary,
                   ),
+                  filled: false,
+                  prefixIcon: Image.asset(
+                    'assets/images/Mask group copy.png',
+                    width: 22.w,
+                    height: 22.w,
+                    fit: BoxFit.contain,
+                    color: Color(0xFF6B7280),
+                  ),
+                  prefixIconConstraints: BoxConstraints(
+                    minWidth: 40.w,
+                    minHeight: 24.h,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    vertical: 12.h,
+                    horizontal: 0,
+                  ),
+                  isDense: true,
+                ),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: _primary,
                 ),
               ),
             ),
-          );
+          ),
+        );
       },
     );
   }
 }
-
 
 class _FilterChipPill extends StatelessWidget {
   const _FilterChipPill({
@@ -725,56 +721,54 @@ class _FilterChipPill extends StatelessWidget {
       onTap: onTap,
       child: selected
           ? Container(
-        height: 36.h,
-        padding: EdgeInsets.all(1.5), // border thickness
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF111827), // blue
-              Color(0xFF111827), // pink
-            ],
-          ),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.white, // inside color
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF111827),
-              fontFamily: 'Inter',
-            ),
-          ),
-        ),
-      )
+              height: 32.h,
+              padding: EdgeInsets.all(1.5), // border thickness
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF111827), // blue
+                    Color(0xFF111827), // pink
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal:label == "All" ? 20.w : 13.w),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white, // inside color
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            )
           : Container(
-        height: 36.h,
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: const Color(0xFFE5E7EB),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF111827),
-            fontFamily: 'Inter',
-          ),
-        ),
-      ),
+              height: 32.h,
+              padding: EdgeInsets.symmetric(horizontal: label == "All" ? 20.w : 13.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(999),
+                // border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF111827),
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
     );
   }
 }
@@ -843,11 +837,7 @@ class _CircleMiniBtn extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(
-        icon,
-        size: (isArrow ? 26 : 22).sp,
-        color: Color(0xFF6B7280),
-      ),
+      child: Icon(icon, size: (isArrow ? 26 : 22).sp, color: Color(0xFF6B7280)),
     );
   }
 }
@@ -1096,7 +1086,7 @@ class _TimeTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 2.h, ),
+      padding: EdgeInsets.only(top: 2.h),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1132,7 +1122,7 @@ class _StarTimeTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -1163,7 +1153,10 @@ class _StarOnly extends StatelessWidget {
       height: 24.h,
       width: 24.h,
       decoration: BoxDecoration(
-        border: Border.all(width: 1.sp, color: const Color(0xFF000000).withOpacity(0.25)),
+        border: Border.all(
+          width: 1.sp,
+          color: const Color(0xFF000000).withOpacity(0.25),
+        ),
         //borderRadius: BorderRadius.circular(6.r),
       ),
       child: Center(
