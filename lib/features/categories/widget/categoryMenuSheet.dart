@@ -20,15 +20,12 @@ class CategoryMenuSheet extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: _bgTransparent,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(26.r),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
         ),
         padding: EdgeInsets.only(left: 16.w, right: 16.w),
         child: Column(
-         mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-
             /// HEADER
             Padding(
               padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
@@ -60,8 +57,11 @@ class CategoryMenuSheet extends StatelessWidget {
                     child: IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: Center(
-                        child: Icon(Icons.close_rounded,
-                            size: 20.sp, color: _textPrimary),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 20.sp,
+                          color: _textPrimary,
+                        ),
                       ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
@@ -73,18 +73,14 @@ class CategoryMenuSheet extends StatelessWidget {
 
             SizedBox(height: 14.h),
 
-          
-            
             /// CARD
             Container(
-             
               decoration: BoxDecoration(
                 color: _card,
                 borderRadius: BorderRadius.circular(26.r),
               ),
               child: Column(
                 children: [
-
                   /// Rename
                   _ItemRow(
                     iconPath: 'assets/images/Erename.png',
@@ -101,8 +97,6 @@ class CategoryMenuSheet extends StatelessWidget {
                     ),
                   ),
 
-            
-
                   /// Upload image
                   _ItemRow(
                     iconPath: 'assets/images/uploadImage.png',
@@ -116,8 +110,6 @@ class CategoryMenuSheet extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-
-                  
 
                   /// Upload icon
                   _ItemRow(
@@ -133,19 +125,17 @@ class CategoryMenuSheet extends StatelessWidget {
                     ),
                   ),
 
-          
+                  // Remove
+                  _ItemRow(
+                    iconPath: 'assets/images/delete1.png',
+                    title: 'Delete',
+                    iconWidth: 16.w,
+                    iconHeight: 19.h,
+                    titleColor: _destructive,
+                    iconColor: _destructive,
+                  ),
 
-                  /// Remove
-                  // _ItemRow(
-                  //   iconPath: 'assets/images/delete1.png',
-                  //   title: 'Delete category',
-                  //   iconWidth: 16.w,
-                  //   iconHeight: 19.h,
-                  //   titleColor: _destructive,
-                  //   iconColor: _destructive,
-                  // ),
-
-                 // SizedBox(height: 19.h,),
+                  // SizedBox(height: 19.h,),
                   // InkWell(
                   //   onTap: (){
                   //
@@ -169,27 +159,31 @@ class CategoryMenuSheet extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 22.h,),
+            SizedBox(height: 22.h),
             InkWell(
-              onTap: (){
-
-              },
+              onTap: () {},
               child: Container(
-                margin: EdgeInsets.only(left: 20.w, right: 16.w,),
+                margin: EdgeInsets.only(left: 20.w, right: 16.w),
                 height: 52.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    color: Color(0xFFFFFFFF),
-                    borderRadius: BorderRadius.circular(26.r),
-                    border: Border.all(width: 1.w, color: Color(0xFF0088FE))
+                  color: Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(width: 1.w, color: Color(0xFF0088FE)),
                 ),
                 child: Center(
                   child: Text(
-                    "Save", style: TextStyle(fontFamily: "Inter",color: Color(0xFF0088FE), fontSize: 16.sp, fontWeight: FontWeight.w700 ),
+                    "Save",
+                    style: TextStyle(
+                      fontFamily: "Inter",
+                      color: Color(0xFF0088FE),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
-            ) , 
+            ),
             SizedBox(height: 41.h),
           ],
         ),
@@ -228,7 +222,6 @@ class _ItemRow extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Row(
           children: [
-
             /// ICON AREA (Fixed width for alignment stability)
             SizedBox(
               width: 28.w,
@@ -238,7 +231,7 @@ class _ItemRow extends StatelessWidget {
                   width: iconWidth ?? 22.w,
                   height: iconHeight ?? 22.w,
                   fit: BoxFit.contain,
-                 // color: iconColor,
+                  // color: iconColor,
                 ),
               ),
             ),

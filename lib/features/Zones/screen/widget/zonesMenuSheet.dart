@@ -127,16 +127,16 @@ class ZonesMenuSheet extends StatelessWidget {
 
             
 
-                  /// Remove
-                  // _ItemRow(
-                  //   iconPath: 'assets/images/delete1.png',
-                  //   title: 'Delete category',
-                  //   iconWidth: 16.w,
-                  //   iconHeight: 19.h,
-                  //   titleColor: _destructive,
-                  //   iconColor: _destructive,
-                  // ),
-                  //
+                  // Remove
+                  _ItemRow(
+                    iconPath: 'assets/images/delete1.png',
+                    title: 'Delete',
+                    iconWidth: 16.w,
+                    iconHeight: 19.h,
+                    titleColor: _destructive,
+                    iconColor: _destructive,
+                  ),
+                  
                   // SizedBox(height: 22.h,),
                   // InkWell(
                   //   onTap: (){

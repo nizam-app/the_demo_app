@@ -29,42 +29,41 @@ class ZoneAddMenu extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
 
-            /// HEADER
+            /// HEADER – title centered in screen, close on right
             Padding(
               padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Add zone',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textPrimary,
-                          fontFamily: 'Inter',
-                        ),
+                  Center(
+                    child: Text(
+                      'Add zone',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _textPrimary,
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
-                  // close
-                  Container(
-                    width: 30.w,
-                    height: 30.h,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFFFFF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Center(
-                        child: Icon(Icons.close_rounded,
-                            size: 20.sp, color: _textPrimary),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: 30.w,
+                      height: 30.h,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        shape: BoxShape.circle,
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Center(
+                          child: Icon(Icons.close_rounded,
+                              size: 20.sp, color: _textPrimary),
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
                   ),
                 ],
@@ -176,10 +175,27 @@ class ZoneAddMenu extends StatelessWidget {
                     //
                     //   height: 14.h,
                     // ),
-                    Icon(Icons.add, size: 26.sp,color: Colors.white,),
-                    SizedBox(width: 5.w,),
+                    Padding(
+                      padding:  EdgeInsets.only(bottom: 3.5.h),
+                      child: Text(
+                        '+',
+                        style: TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 22.sp,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
                     Text(
-                      "Add", style: TextStyle(fontFamily: "Inter",color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w700 ),
+                      'Add',
+                      style: TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16.sp,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ],
                 ),

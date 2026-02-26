@@ -198,8 +198,19 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     //   height: 14.h,
                     //   color: Color(0xFFFFFFFF),
                     // ),
-                    Icon(Icons.add, size: 26.sp,color: Colors.white,),
-                    SizedBox(width: 5.w),
+                    Padding(
+                      padding:  EdgeInsets.only(bottom: 3.5.h),
+                      child: Text(
+                        '+',
+                        style: TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 22.sp,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
                     Text(
                       'Add',
                       style: TextStyle(

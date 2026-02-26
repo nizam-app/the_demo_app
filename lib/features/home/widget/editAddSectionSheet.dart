@@ -170,35 +170,37 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               ),
             ),
 
-            // SizedBox(height: 10.h),
-            // /// REMOVE
-            // Container(
-            //   width: double.infinity,
-            //   padding: EdgeInsets.all(16.h),
-            //   decoration: BoxDecoration(
-            //     color: Colors.white,
-            //     borderRadius: BorderRadius.circular(26.r),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       Image.asset(
-            //         'assets/images/cross.png',
-            //         width: 26.w,
-            //         height: 26.h,
-            //       ),
-            //       SizedBox(width: 8.w),
-            //       Text(
-            //         'Remove section',
-            //         style: TextStyle(
-            //           color: _danger,
-            //           fontWeight: FontWeight.w400,
-            //           fontSize: 16.sp,
-            //           fontFamily: 'Inter',
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // )
+            SizedBox(height: 10.h),
+            /// REMOVE
+            Container(
+              width: double.infinity,
+              height: 49.h,
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(26.r),
+              ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/cross.png',
+                    width: 26.w,
+                    height: 26.h,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'Remove',
+                    style: TextStyle(
+                      color: _danger,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16.sp,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ],
+              ),
+            )
+         
           ],
         ),
       ),

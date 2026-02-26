@@ -89,7 +89,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             width: 16.w,
                             height: 16.h,
                           ),
-                          onTap: () => Navigator.maybePop(context),
+                          onTap: () {
+                            if (Navigator.of(context).canPop()) {
+                              Navigator.of(context).pop();
+                            } else {
+                              context.go('/home');
+                            }
+                          },
                         ),
                       ),
                       Center(

@@ -20,51 +20,50 @@ class CategoryAddMenu extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: _bgTransparent,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(26.r),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
         ),
         padding: EdgeInsets.only(left: 16.w, right: 16.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
-            /// HEADER
+            /// HEADER – title centered in screen, close on right
             Padding(
               padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Add category',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textPrimary,
-                          fontFamily: 'Inter',
-                        ),
+                  Center(
+                    child: Text(
+                      'Add category',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _textPrimary,
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
-                  // close
-                  Container(
-                    width: 30.w,
-                    height: 30.h,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFFFFF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Center(
-                        child: Icon(Icons.close_rounded,
-                            size: 20.sp, color: _textPrimary),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: 30.w,
+                      height: 30.h,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        shape: BoxShape.circle,
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Center(
+                          child: Icon(
+                            Icons.close_rounded,
+                            size: 20.sp,
+                            color: _textPrimary,
+                          ),
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
                   ),
                 ],
@@ -72,8 +71,6 @@ class CategoryAddMenu extends StatelessWidget {
             ),
 
             SizedBox(height: 14.h),
-
-
 
             /// CARD
             Container(
@@ -83,7 +80,6 @@ class CategoryAddMenu extends StatelessWidget {
               ),
               child: Column(
                 children: [
-
                   /// Rename
                   _ItemRow(
                     iconPath: 'assets/images/Erename.png',
@@ -100,8 +96,6 @@ class CategoryAddMenu extends StatelessWidget {
                     ),
                   ),
 
-
-
                   /// Upload image
                   _ItemRow(
                     iconPath: 'assets/images/uploadImage.png',
@@ -115,8 +109,6 @@ class CategoryAddMenu extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-
-
 
                   /// Upload icon
                   _ItemRow(
@@ -132,7 +124,6 @@ class CategoryAddMenu extends StatelessWidget {
                     ),
                   ),
 
-
                   //
                   // /// Remove
                   // _ItemRow(
@@ -144,7 +135,7 @@ class CategoryAddMenu extends StatelessWidget {
                   //   iconColor: _destructive,
                   // ),
 
-                 // SizedBox(height: 22.h,),
+                  // SizedBox(height: 22.h,),
                   // InkWell(
                   //   onTap: (){
                   //
@@ -160,11 +151,11 @@ class CategoryAddMenu extends StatelessWidget {
                   //     child: Row(
                   //       mainAxisAlignment: MainAxisAlignment.center,
                   //       crossAxisAlignment: CrossAxisAlignment.center,
-                  //      
+                  //
                   //       children: [
                   //         Image.asset(
                   //           'assets/images/+ (1).png',
-                  //          
+                  //
                   //           height: 14.h,
                   //         ),
                   //         SizedBox(width: 5.w,),
@@ -181,17 +172,15 @@ class CategoryAddMenu extends StatelessWidget {
 
             SizedBox(height: 20.h),
             InkWell(
-              onTap: (){
-
-              },
+              onTap: () {},
               child: Container(
-                margin: EdgeInsets.only(left: 20.w, right: 16.w,),
+                margin: EdgeInsets.only(left: 20.w, right: 16.w),
                 height: 52.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    color: Color(0xFF0088FE),
-                    borderRadius: BorderRadius.circular(26.r),
-                    //border: Border.all(width: 1.w, color: Color(0xFF0088FE))
+                  color: Color(0xFF0088FE),
+                  borderRadius: BorderRadius.circular(26.r),
+                  //border: Border.all(width: 1.w, color: Color(0xFF0088FE))
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -201,17 +190,33 @@ class CategoryAddMenu extends StatelessWidget {
                     //   'assets/images/+ (1).png',  color: Colors.white,
                     //   height: 14.h,
                     // ),
-                    Icon(Icons.add, color: Colors.white, size: 26.sp,),  
-                    SizedBox(width: 5.w,),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 3.5.h),
+                      child: Text(
+                        '+',
+                        style: TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 22.sp,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
                     Text(
-                      "Add ", style: TextStyle(fontFamily: "Inter", color: Color(0xFFFFFFFF), fontSize: 16.sp, fontWeight: FontWeight.w700 ),
+                      'Add',
+                      style: TextStyle(
+                        color: Color(0xFFFFFFFF),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16.sp,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ],
                 ),
               ),
-
             ),
-            SizedBox(height: 47.h,),
+            SizedBox(height: 47.h),
           ],
         ),
       ),
@@ -250,7 +255,6 @@ class _ItemRow extends StatelessWidget {
         //padding: EdgeInsets.only(left: 13.w,right: 28.w, top: 20.h, bottom: 20.h),
         child: Row(
           children: [
-
             /// ICON AREA (Fixed width for alignment stability)
             SizedBox(
               width: 28.w,
