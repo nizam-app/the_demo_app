@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 // Optional (for exact svg icons)
 // import 'package:flutter_svg/flutter_svg.dart';
 
@@ -27,15 +28,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: double.infinity,
             child: Column(
               children: [
-            
                 // Header
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 10.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 17.w,
+                    vertical: 10.h,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _CircleIconBtn(
-                        icon: Icons.chevron_left,
+                      GlobalCircleIconBtn(
+                        child: Image.asset(
+                          'assets/aro.png',
+                          width: 16.w,
+                          height: 16.h,
+                        ),
                         onTap: () => Navigator.maybePop(context),
                       ),
                       Text(
@@ -44,13 +51,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF111827),
+                          fontFamily: "Inter",
                         ),
                       ),
-                      _CircleIconBtn(
+                      GlobalCircleIconBtn(
                         child: Image.asset(
                           'assets/image 89 (1).png',
-                          width: 16.w,
-                          height: 16.w,
+                          width: 22.w,
+                          height: 22.w,
                           fit: BoxFit.contain,
                         ),
                         onTap: () {},
@@ -70,13 +78,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Row(
                     children: [
-                  EditableAvatar(
-  imageAsset: 'assets/b52badd361701e47675a4d4e9fd86fec8d5291c1.png',
-  cameraAsset: 'assets/image 44.png',
-  onTapCamera: () {},
-  size: 68,
-),
-
+                      EditableAvatar(
+                        imageAsset:
+                            'assets/b52badd361701e47675a4d4e9fd86fec8d5291c1.png',
+                        cameraAsset: 'assets/image 44.png',
+                        onTapCamera: () {},
+                        size: 68,
+                      ),
 
                       SizedBox(width: 16.w),
                       Expanded(
@@ -102,7 +110,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             SizedBox(height: 8.h),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 16.w,
+                                vertical: 4.h,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF00D1FF),
                                 borderRadius: BorderRadius.circular(5.r),
@@ -147,7 +158,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _DividerLine(),
                       _KeyValueRow(label: 'Phone', value: '0547640189'),
                       _DividerLine(),
-                      _KeyValueRow(label: 'Address', value: 'Margalit 54 Shoham Israel'),
+                      _KeyValueRow(
+                        label: 'Address',
+                        value: 'Margalit 54 Shoham Israel',
+                      ),
                       _DividerLine(),
                       _KeyValueRow(label: 'Categories', value: 'Electrician'),
                     ],
@@ -159,22 +173,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: 'Account',
                   child: _CardList(
                     children: [
-                      const _KeyValueRow(label: 'Email', value: 'oren@aican.co.il'),
+                      const _KeyValueRow(
+                        label: 'Email',
+                        value: 'oren@aican.co.il',
+                      ),
                       const _DividerLine(),
-                      const _KeyValueRow(label: 'Password', value: '*****************'),
+                      const _KeyValueRow(
+                        label: 'Password',
+                        value: '*****************',
+                      ),
                       const _DividerLine(),
                       _ToggleCircleRow(
                         label: 'Roles',
                         enabled: rolesEnabled,
-                        onTap: () => setState(() => rolesEnabled = !rolesEnabled),
-                        image1: 'assets/Mask group (10).png',
-                        image2: 'assets/Mask group (11).png',
-                        image3: 'assets/Mask group (12).png',
+                        onTap: () =>
+                            setState(() => rolesEnabled = !rolesEnabled),
+                        image1: 'assets/persion.png',
+                        image2: 'assets/key.png',
+                        image3: 'assets/seting.png',
                       ),
                       const _DividerLine(),
                       _RemoteAccessRow(
                         enabled: remoteAccessEnabled,
-                        onChanged: (v) => setState(() => remoteAccessEnabled = v),
+                        onChanged: (v) =>
+                            setState(() => remoteAccessEnabled = v),
                       ),
                     ],
                   ),
@@ -185,12 +207,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: 'Connect',
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 26.w,
+                      vertical: 16.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(26.r),
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _ConnectItem(
                           label: 'Apple',
@@ -251,9 +277,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               SizedBox(width: 8.w),
                               ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
-                                  colors: [Color(0xFF0088FE), Color(0xFF0088FE)],
-                                ).createShader(bounds),
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                      colors: [
+                                        Color(0xFF0088FE),
+                                        Color(0xFF0088FE),
+                                      ],
+                                    ).createShader(bounds),
                                 child: Text(
                                   'Update Account',
                                   style: TextStyle(
@@ -278,8 +308,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-
 
 class EditableAvatar extends StatelessWidget {
   const EditableAvatar({
@@ -383,35 +411,6 @@ class EditableAvatar extends StatelessWidget {
 
 /* -------------------- Small Widgets -------------------- */
 
-class _CircleIconBtn extends StatelessWidget {
-  const _CircleIconBtn({
-    this.icon,
-    this.child,
-    required this.onTap,
-  }) : assert(icon != null || child != null, 'Either icon or child must be provided');
-
-  final IconData? icon;
-  final Widget? child;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: child ?? Icon(icon, size: 16.sp, color: const Color(0xFF111827)),
-      ),
-    );
-  }
-}
 
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});
@@ -433,6 +432,7 @@ class _Section extends StatelessWidget {
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF111827),
+                fontFamily: 'Inter',
               ),
             ),
           ),
@@ -481,7 +481,8 @@ class _KeyValueRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
+              fontFamily: 'Inter',
             ),
           ),
           Flexible(
@@ -491,7 +492,8 @@ class _KeyValueRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
-                color: const Color(0xFF111827),
+                color: const Color(0xFF6B7280),
+                fontFamily: 'Inter',
               ),
             ),
           ),
@@ -538,7 +540,9 @@ class _ToggleCircleRow extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
+      color: Color(0xFFFFFFFF),
       constraints: BoxConstraints(minHeight: 56.h),
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -548,7 +552,7 @@ class _ToggleCircleRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
             ),
           ),
           if (hasImages)
@@ -558,10 +562,7 @@ class _ToggleCircleRow extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _RoleIcon(
-                    asset: image1!,
-                    active: enabled,
-                  ),
+                  _RoleIcon(asset: image1!, active: enabled),
                   SizedBox(width: 8.w),
                   _RoleIcon(asset: image2!, active: false),
                   SizedBox(width: 8.w),
@@ -578,7 +579,10 @@ class _ToggleCircleRow extends StatelessWidget {
                 height: 32.w,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: enabled ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1),
+                    color:
+                     enabled
+                        ? const Color(0xFF0088FE)
+                        : const Color(0xFFE1E1E1),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -620,15 +624,15 @@ class _RoleIcon extends StatelessWidget {
         height: s,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          color: Color(0xFF0B84FF),
+          color: Color(0xFFE1E1E1),
         ),
         alignment: Alignment.center,
         child: Image.asset(
           asset,
-          width: s * 0.50,  // smaller icon inside
+          width: s * 0.50, // smaller icon inside
           height: s * 0.50,
           fit: BoxFit.contain,
-          color: Colors.white,
+          color: Color(0xFF6B7280),
           colorBlendMode: BlendMode.srcIn,
         ),
       );
@@ -654,10 +658,7 @@ class _RoleIcon extends StatelessWidget {
 
 // Remote access (60x35 pill switch) like React
 class _RemoteAccessRow extends StatelessWidget {
-  const _RemoteAccessRow({
-    required this.enabled,
-    required this.onChanged,
-  });
+  const _RemoteAccessRow({required this.enabled, required this.onChanged});
 
   final bool enabled;
   final ValueChanged<bool> onChanged;
@@ -676,7 +677,7 @@ class _RemoteAccessRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              color: const Color(0xFF111827),
             ),
           ),
           GestureDetector(
@@ -687,13 +688,17 @@ class _RemoteAccessRow extends StatelessWidget {
               height: 35.h,
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: enabled ? const Color(0xFF0088FE) : const Color(0xFFE1E1E1),
+                color: enabled
+                    ? const Color(0xFF0088FE)
+                    : const Color(0xFFE1E1E1),
                 borderRadius: BorderRadius.circular(30.r),
               ),
               child: AnimatedAlign(
                 duration: const Duration(milliseconds: 180),
                 curve: Curves.easeOut,
-                alignment: enabled ? Alignment.centerRight : Alignment.centerLeft,
+                alignment: enabled
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
                 child: Container(
                   width: 31.w,
                   height: 31.w,
@@ -728,14 +733,18 @@ class _ConnectItem extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: SizedBox(width: 32.w, height: 32.w, child: FittedBox(child: icon)),
+          child: SizedBox(
+            width: 32.w,
+            height: 32.w,
+            child: FittedBox(child: icon),
+          ),
         ),
         SizedBox(width: 12.w),
         Text(
           label,
           style: TextStyle(
             fontSize: 16.sp,
-         
+
             fontWeight: FontWeight.w500,
             color: const Color(0xFF111827),
           ),
