@@ -263,7 +263,13 @@ class ZoneCard extends StatelessWidget {
       child: Container(
         width: 195.w,
         height: 183.h,
-        padding: EdgeInsets.only(left: 8.w, right: 8.w, top: 0.1.h, bottom: 12.h),
+        padding: EdgeInsets.all(
+          8.w,
+          // left: 8.w,
+          // right: 8.w,
+          //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         top: 0.1.h,
+          // bottom: 12.h,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(26.r),
