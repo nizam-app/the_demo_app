@@ -157,6 +157,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                   ],
                 ),
               ),
+              SizedBox(height: 13.h,),
               _DividerLine(),
               SizedBox(height: 13.h,),
 
@@ -238,12 +239,13 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                     children: [
                       AppAssetIcon(
                         "assets/images/+.png",
-                        height: 20.h,
-                        width: 20.w,
+                        height: 13.h,
+                        width: 13.w,
+                        
                         color: Colors.white,
                         
                       ),
-                      SizedBox(width: 5.w),
+                 SizedBox(width: 5.h,),
                       Text(
                         'Add',
                         style: TextStyle(

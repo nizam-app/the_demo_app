@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-
-
 class AppAssetIcon extends StatelessWidget {
   const AppAssetIcon(
       this.path, {
         super.key,
-        required this.size,
-        this.color,
+        required this.height,
+        required this.width,
+        this.color   ,
+        this.size,
+
       });
 
   final String path;
-  final double size;
+  final double height;
+  final double? size;
+  final double width;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Image.asset(
       path,
-      width: size,
-      height: size,
+      width: width,
+      height: height,
       fit: BoxFit.contain,
       color: color,
       colorBlendMode: color == null ? null : BlendMode.srcIn,
@@ -28,8 +31,9 @@ class AppAssetIcon extends StatelessWidget {
   }
 }
 
+
 /// ✅ Bottom Sheet UI (same to same)
-class UserEdit extends StatelessWidget {
+class UserEdit extends StatefulWidget {
   const UserEdit({super.key});
 
   static const Color _textDark = Color(0xFF111827);
@@ -37,6 +41,13 @@ class UserEdit extends StatelessWidget {
   static const Color _line = Color(0xFFE5E7EB);
   static const Color _blue = Color(0xFF0088FE);
   static const Color _chipBg = Color(0xFFF3F4F6);
+
+  @override
+  State<UserEdit> createState() => _UserEditState();
+}
+
+class _UserEditState extends State<UserEdit> {
+  bool _lastActivitiesOn = true;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +75,7 @@ class UserEdit extends StatelessWidget {
             children: [
               // Header
               Padding(
-                padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 2.h),
+                padding: EdgeInsets.fromLTRB(18.w, 0.h, 0.w, 2.h),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -74,7 +85,7 @@ class UserEdit extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: _textDark,
+                          color: UserEdit._textDark,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -91,8 +102,11 @@ class UserEdit extends StatelessWidget {
                         child: IconButton(
                           onPressed: () => Navigator.of(context).pop(),
                           icon: Center(
-                            child: Icon(Icons.close_rounded,
-                                size: 20.sp, color: _textDark),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 20.sp,
+                              color: UserEdit._textDark,
+                            ),
                           ),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -103,21 +117,21 @@ class UserEdit extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 10.h),
+              SizedBox(height: 13.h),
 
               // Fields
               _RowField(
                 left: 'Name',
                 right: 'Demo Account',
               ),
-              SizedBox(height: 8.h,),
+              SizedBox(height: 13.h,),
               _DividerLine(),
               SizedBox(height: 13.h,),
               _RowField(
                 left: 'Email',
                 right: 'Aican@gmail.com',
               ),
-              SizedBox(height: 8.h,),
+              SizedBox(height: 13.h,),
               _DividerLine(),
               SizedBox(height: 13.h,),
 
@@ -134,7 +148,7 @@ class UserEdit extends StatelessWidget {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: _textDark,
+                          color: UserEdit._textDark,
                         ),
                       ),
                     ),
@@ -142,8 +156,9 @@ class UserEdit extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(height: 13.h,),
               _DividerLine(),
-              SizedBox(height: 10.h,),
+              SizedBox(height: 13.h,),
 
               // Enable cloud control row
               SizedBox(
@@ -157,29 +172,52 @@ class UserEdit extends StatelessWidget {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: _textDark,
+                          color: UserEdit._textDark,
                         ),
                       ),
                     ),
                     Transform.scale(
                       scale: 1.05,
-                      child: SizedBox(
-                        height: 35.h,
-                        width: 60.w,
-                        child: Switch(
-                          value: true,
-                          onChanged: (_) {},
-                          activeColor: Colors.white,
-                          activeTrackColor: _blue,
-                          inactiveThumbColor: Colors.white,
-                          inactiveTrackColor: _line,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque, // ✅ tap area improve
+                        onTap: () {
+                          setState(() {
+                            _lastActivitiesOn = !_lastActivitiesOn;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 60.w,
+                          height: 35.h,
+                          padding: EdgeInsets.all(2.w),
+                          decoration: BoxDecoration(
+                            color: _lastActivitiesOn
+                                ? const Color(0xFF0088FE)
+                                : const Color(0xFFE1E1E1),
+                            borderRadius: BorderRadius.circular(30.r),
+                          ),
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 180),
+                            curve: Curves.easeOut,
+                            alignment: _lastActivitiesOn
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              width: 31.w,
+                              height: 31.w,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
-              SizedBox(height: 10.h,),
+              SizedBox(height: 13.h,),
               _DividerLine(),
               SizedBox(height: 13.h,),
              Row(
@@ -209,7 +247,7 @@ class UserEdit extends StatelessWidget {
                   height: 50.h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(26.r),
-                      border: Border.all(width: 1.w, color: _blue)
+                      border: Border.all(width: 1.w, color: UserEdit._blue),
                     ),
                   
                     child: Center(
@@ -219,7 +257,7 @@ class UserEdit extends StatelessWidget {
                               fontFamily: 'Inter',
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
-                              color: _blue,
+                              color: UserEdit._blue,
                             ),                   ),
                  
                 ), ),
@@ -317,7 +355,8 @@ class _RoleIcons extends StatelessWidget {
           child: Center(
             child: AppAssetIcon(
               "assets/Mask group (1) copy 2.png" ,
-              size: 20.sp,
+              height: 20.h,
+              width: 20.w,
               color: _textDark,
             ),
           ),
@@ -325,13 +364,15 @@ class _RoleIcons extends StatelessWidget {
         SizedBox(width: 10.w),
         AppAssetIcon(
           "assets/key.png",
-          size: 20.sp,
+          height: 19.9.h,
+          width: 19.9.w,
           color: _iconColor,
         ),
         SizedBox(width: 14.w),
         AppAssetIcon(
           "assets/images/setting.png",
-          size: 20.sp,
+          height: 20.55.h,
+          width: 20.55.w,
           color: _iconColor,
         ),
       ],
