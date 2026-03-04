@@ -64,7 +64,7 @@ class UsersScreen extends StatelessWidget {
                 subtitle: 'admin',
                 isActive: true,
                 image:  [
-                  _InlineIcon("assets/images/setting.png",13.h, 13.w,  color: _textDark),
+                  _InlineIcon("assets/images/setting.png",15.h, 15.w,  color: _textDark),
                   _InlineIcon("assets/images/glog.png",15.h, 15.w,  color: _globeCyan),
 
                   //Image.asset("assets/images/glog.png", height: 15.h, width: 15.w,fit: BoxFit.contain,color: UsersScreen._globeCyan,)  ,
@@ -82,7 +82,7 @@ class UsersScreen extends StatelessWidget {
                 isActive: true,
                 image:  [
                 
-                  _InlineIcon("assets/Mask group (1) copy 2.png",11.h, 11.w,   color: _textDark),
+                  _InlineIcon("assets/Mask group (1) copy 2.png",15.h, 15.w,   color: _textDark),
                   _InlineIcon("assets/images/glog.png", 15.h, 15.w, color: _globeCyan),
                 ],
               ),
@@ -92,8 +92,8 @@ class UsersScreen extends StatelessWidget {
                 isActive: false,
                 isSelected: true,
                 image:  [
-                  _InlineIcon( "assets/key.png",11.h, 11.w,  color: _textDark, ),
-                  _InlineIcon("assets/images/Group 55.png", 13.h, 13.w,),
+                  _InlineIcon( "assets/key.png",15.h, 15.w,  color: _textDark, ),
+                  _InlineIcon("assets/images/Group 55.png", 15.h, 15.w,),
                 ],
               ),
             ),
@@ -112,6 +112,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      
       children: [
         GlobalCircleIconBtn(
           child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
@@ -301,7 +302,7 @@ class _UserRowData {
 
 }
 
-class _UserRow extends StatelessWidget {
+class _UserRow extends StatefulWidget {
   const _UserRow({
     required this.data,
     required this.topRadius,
@@ -313,17 +314,31 @@ class _UserRow extends StatelessWidget {
   final double bottomRadius;
 
   @override
+  State<_UserRow> createState() => _UserRowState();
+}
+
+class _UserRowState extends State<_UserRow> {
+  late bool _isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _isActive = widget.data.isActive;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bg = data.isSelected ? UsersScreen._selectedRow : Colors.white;
+    final bg =   Colors.white;
+       // widget.data.isSelected ? UsersScreen._selectedRow : Colors.white;
 
     return Container(
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(topRadius),
-          topRight: Radius.circular(topRadius),
-          bottomLeft: Radius.circular(bottomRadius),
-          bottomRight: Radius.circular(bottomRadius),
+          topLeft: Radius.circular(widget.topRadius),
+          topRight: Radius.circular(widget.topRadius),
+          bottomLeft: Radius.circular(widget.bottomRadius),
+          bottomRight: Radius.circular(widget.bottomRadius),
         ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
@@ -338,7 +353,7 @@ class _UserRow extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        data.name,
+                        widget.data.name,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: 'Inter',
@@ -349,17 +364,16 @@ class _UserRow extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 14.w),
-                    ...data.image.map(
+                    ...widget.data.image.map(
                       (e) => Padding(
-                        padding: EdgeInsets.only(right: 12.w),
+                        padding: EdgeInsets.only(right: 8.w),
                         child: Container(
-                          height: 15.h,
-                          width: 15,
+                          height: 20.h,
+                          width: 20.w,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(26.r),
-                            color: Color(0xFFF3F4F6),
+                            color: const Color(0xFFF3F4F6),
                           ),
-
                           child: Center(
                             child: Image.asset(
                               e.image,
@@ -374,9 +388,9 @@ class _UserRow extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8.h),
+                //SizedBox(height: 8.h),
                 Text(
-                  data.subtitle,
+                  widget.data.subtitle,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
@@ -390,13 +404,21 @@ class _UserRow extends StatelessWidget {
           ),
           SizedBox(width: 12.w),
 
-          // Right side (ALWAYS visible — fixes your issue)
+          // Right side: status chip + menu
           Padding(
-            padding: EdgeInsets.only(top: 2.h, ),
+            padding: EdgeInsets.zero,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _StatusChip(isActive: data.isActive),
+                InkWell(
+                  borderRadius: BorderRadius.circular(26.r),
+                  onTap: () {
+                    setState(() {
+                      _isActive = !_isActive;
+                    });
+                  },
+                  child: _StatusChip(isActive: _isActive),
+                ),
                 SizedBox(width: 18.w),
                 InkWell(
                   onTap: () => UsersScreen.showEditUserBottomSheet(context),
@@ -422,7 +444,8 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 26.h,
+      height: 30.h,
+    
       padding: EdgeInsets.symmetric(horizontal: 22.w),
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -433,8 +456,8 @@ class _StatusChip extends StatelessWidget {
         isActive ? 'Active' : 'Inactive',
         style: TextStyle(
           fontFamily: 'Inter',
-          fontSize: 12.sp,
-          fontWeight: FontWeight.w500,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
           color: isActive ? Colors.white : UsersScreen._textDark,
         ),
       ),

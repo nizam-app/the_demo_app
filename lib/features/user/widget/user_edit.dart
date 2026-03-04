@@ -206,7 +206,7 @@ class UserEdit extends StatelessWidget {
                 onTap: (){},
                 child: Container(
                   width: double.infinity,
-                  height: 46.h,
+                  height: 50.h,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(26.r),
                       border: Border.all(width: 1.w, color: _blue)
