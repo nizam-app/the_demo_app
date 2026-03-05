@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
@@ -244,7 +245,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Integrations',
             iconWidth: 20,
             iconHeight: 20,
-            onTap: () {},
+            onTap: ()=>context.push(InterfacesScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(

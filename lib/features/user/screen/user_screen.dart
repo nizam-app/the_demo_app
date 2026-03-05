@@ -49,7 +49,7 @@ class UsersScreen extends StatelessWidget {
       floatingActionButton: const _FabPlus(),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 120.h),
+          padding: EdgeInsets.only(left: 15.w, right: 15.w,),
           children: [
             const _TopBar(),
             SizedBox(height: 16.h),
@@ -64,7 +64,7 @@ class UsersScreen extends StatelessWidget {
                 subtitle: 'admin',
                 isActive: true,
                 image:  [
-                  _InlineIcon("assets/images/setting.png",15.h, 15.w,  color: _textDark),
+                  _InlineIcon("assets/images/setting.png",13.h, 13.w,  color: _textDark),
                   _InlineIcon("assets/images/glog.png",15.h, 15.w,  color: _globeCyan),
 
                   //Image.asset("assets/images/glog.png", height: 15.h, width: 15.w,fit: BoxFit.contain,color: UsersScreen._globeCyan,)  ,
@@ -82,7 +82,7 @@ class UsersScreen extends StatelessWidget {
                 isActive: true,
                 image:  [
                 
-                  _InlineIcon("assets/Mask group (1) copy 2.png",15.h, 15.w,   color: _textDark),
+                  _InlineIcon("assets/Mask group (1) copy 2.png",11.h, 11.w,   color: _textDark),
                   _InlineIcon("assets/images/glog.png", 15.h, 15.w, color: _globeCyan),
                 ],
               ),
@@ -92,8 +92,8 @@ class UsersScreen extends StatelessWidget {
                 isActive: false,
                 isSelected: true,
                 image:  [
-                  _InlineIcon( "assets/key.png",15.h, 15.w,  color: _textDark, ),
-                  _InlineIcon("assets/images/Group 55.png", 15.h, 15.w,),
+                  _InlineIcon( "assets/key.png",11.h, 11.w,  color: _textDark, ),
+                  _InlineIcon("assets/images/Group 55.png", 13.h, 13.w,),
                 ],
               ),
             ),
@@ -112,11 +112,12 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      
       children: [
         GlobalCircleIconBtn(
           child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
-          onTap: (){},
+          onTap: (){
+            Navigator.maybePop(context);
+          },
           color: const Color(0xFFFFFFFF),
         ),
         Expanded(
@@ -132,7 +133,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         ),
-        //SizedBox(width: 44.w), // keeps title centered
+        SizedBox(width: 44.w), // keeps title visually centered
       ],
     );
   }
@@ -367,13 +368,13 @@ class _UserRowState extends State<_UserRow> {
                     ...widget.data.image.map(
                       (e) => Padding(
                         padding: EdgeInsets.only(right: 8.w),
-                        child: Container(
-                          height: 20.h,
-                          width: 20.w,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(26.r),
-                            color: const Color(0xFFF3F4F6),
-                          ),
+                        // child: Container(
+                        //   height: 20.h,
+                        //   width: 20.w,
+                        //   decoration: BoxDecoration(
+                        //     borderRadius: BorderRadius.circular(26.r),
+                        //     color: const Color(0xFFF3F4F6),
+                        //   ),
                           child: Center(
                             child: Image.asset(
                               e.image,
@@ -385,7 +386,7 @@ class _UserRowState extends State<_UserRow> {
                           ),
                         ),
                       ),
-                    ),
+                    
                   ],
                 ),
                 //SizedBox(height: 8.h),
@@ -445,20 +446,23 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 30.h,
-    
-      padding: EdgeInsets.symmetric(horizontal: 22.w),
+      width: 74.w,
+      //padding: EdgeInsets.symmetric(horizontal: 22.w),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isActive ? UsersScreen._activeBlue : UsersScreen._inactiveChipBg,
         borderRadius: BorderRadius.circular(26.r),
       ),
-      child: Text(
-        isActive ? 'Active' : 'Inactive',
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w600,
-          color: isActive ? Colors.white : UsersScreen._textDark,
+      child: Transform.translate(
+       offset: Offset(0, -2.h),
+        child: Text(
+          isActive ? 'Active' : 'Inactive',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: isActive ? Colors.white : UsersScreen._textDark,
+          ),
         ),
       ),
     );
