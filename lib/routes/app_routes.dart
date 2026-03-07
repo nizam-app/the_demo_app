@@ -10,6 +10,7 @@ import 'package:workpleis/features/auth/screens/register_screen.dart';
 import 'package:workpleis/features/auth/screens/splash_screen.dart';
 import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
+import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
 import 'package:workpleis/features/menu/screen/menu_screen.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
@@ -140,6 +141,12 @@ class AppRouter {
         name: InterfacesScreen.routeName,
         builder: (context, state) => const InterfacesScreen(),
       ),
+
+      GoRoute(
+        path: IntegrationsScreen.routeName,
+        name: IntegrationsScreen.routeName,
+        builder: (context, state) => const IntegrationsScreen(),
+      ), 
     ],
   );
 }

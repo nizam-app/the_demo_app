@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 
@@ -237,7 +238,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Interfaces',
             iconWidth: 20,
             iconHeight: 20,
-            onTap: () {},
+            onTap: ()=> context.push(InterfacesScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
@@ -245,7 +246,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Integrations',
             iconWidth: 20,
             iconHeight: 20,
-            onTap: ()=>context.push(InterfacesScreen.routeName),
+            onTap: ()=>context.push(IntegrationsScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
