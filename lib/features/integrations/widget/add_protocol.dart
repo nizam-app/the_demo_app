@@ -22,8 +22,16 @@ class AddProtocolImageRegistry {
     'assets/image 145.png': const AddProtocolImgSize(44, 44),
     'assets/TCP.png': const AddProtocolImgSize.square(44),
     'assets/RS485.png': const AddProtocolImgSize(44, 44),
-    'assets/zigport.png': const AddProtocolImgSize.square(44),
+    'assets/images/UDP.png': const AddProtocolImgSize.square(44),
     'assets/image 66.png': const AddProtocolImgSize.square(44),
+
+    
+
+    'assets/zigport.png': const AddProtocolImgSize.square(33),
+    'assets/images/BACnet.png': const AddProtocolImgSize.square(28),
+    'assets/images/KNX.png': const AddProtocolImgSize.square(30),
+
+
   };
 
   static AddProtocolImgSize of(String asset) {
@@ -60,13 +68,14 @@ class AddProtocolBottomSheet extends StatelessWidget {
     _ProtocolChoice('Modbus RTU', 'assets/image 145.png'),
     _ProtocolChoice('Modbus TCP', 'assets/TCP.png'),
     _ProtocolChoice('RS485', 'assets/RS485.png'),
-    _ProtocolChoice('UDP', 'assets/TCP.png'),
+    _ProtocolChoice('UDP', 'assets/images/UDP.png'),
   ];
   // Row 2: 3 items
-  static const List<_ProtocolChoice> _row2 = [
+  static const List<_ProtocolChoice> _row2 = <_ProtocolChoice>[
     _ProtocolChoice('Zigbee', 'assets/zigport.png'),
-    _ProtocolChoice('BACnet', 'assets/image 66.png'),
-    _ProtocolChoice('KNX', 'assets/image 145.png'),
+    _ProtocolChoice('BACnet', 'assets/images/BACnet.png'),
+    
+    _ProtocolChoice('KNX', 'assets/images/KNX.png'),
   ];
 
   @override
@@ -80,7 +89,7 @@ class AddProtocolBottomSheet extends StatelessWidget {
           color: Colors.transparent,
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 40.h),
+            padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 57.h),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
@@ -143,11 +152,18 @@ class AddProtocolBottomSheet extends StatelessWidget {
                 SizedBox(height: 22.h),
 
                 Divider(height: 1.h, thickness: 1.h, color: Color(0xFFE1E1E1)),
-                SizedBox(height: 22.h),// Row 2: 3 protocol options (Zigbee, BACnet, KNX)
+                SizedBox(height: 22.h),
+                // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _row2.map((c) => _ProtocolTile(choice: c)).toList(),
+                  children: [
+                    _ProtocolTile(choice: _row2[0]),
+                    _ProtocolTile(choice: _row2[1]),
+                    _ProtocolTile(choice: _row2[2]),
+                    const Expanded(child: SizedBox.shrink()),
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
                 ),
               ],
             ),

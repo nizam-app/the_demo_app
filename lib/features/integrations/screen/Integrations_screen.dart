@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 
 import '../widget/add_protocol.dart';
 
@@ -115,7 +117,7 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
             builder: (_) => const AddProtocolBottomSheet(),
           );
         },
-        child: Icon(Icons.add, size: 28.sp, color: _textDark),
+        child: Icon(Icons.add, size: 30.sp, color: _textDark),
       ),
 
       bottomNavigationBar: _BottomNav(
@@ -167,7 +169,7 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
                 ),
               ),
                    SizedBox(height: 12.h),
-              // Empty space (like screenshot)
+              // TCP/IP card — tap navigates to TCP/IP Integration screen
               ActiveIntegrationCard(
                 item: const ActiveIntegrationItem(
                   title: 'TCP/IP',
@@ -185,6 +187,7 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
                         : IntegrationState.enabled;
                   });
                 },
+                onTap: () => context.push(TcpIpIntegrationScreen.routeName),
               ),
               SizedBox(height: 10.h),
               ActiveIntegrationCard(
@@ -223,41 +226,47 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(26.r),
-          onTap: onBack,
-          child: Container(
-            width: 32.w,
-            height: 32.h,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.only(right: 40),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(26.r),
+            onTap: onBack,
+            child: Container(
+              width: 32.w,
+              height: 32.h,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: AppAssetIcon(
+                  'assets/aro.png',
+                  color: _textDark,
+                ),
+              ),
             ),
+          ),
+          //SizedBox(width: 5.w,),
+          Expanded(
             child: Center(
-              child: AppAssetIcon(
-                'assets/aro.png',
-                color: _textDark,
+              child: Text(
+                'Integrations',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: _textDark,
+                ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          child: Center(
-            child: Text(
-              'Integrations',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w600,
-                color: _textDark,
-              ),
-            ),
-          ),
-        ),
-        //SizedBox(width: 44.w),
-      ],
+          //SizedBox(width: 44.w),
+        ],
+      ),
     );
   }
 }
@@ -471,17 +480,20 @@ class ActiveIntegrationCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors. white,
           borderRadius: BorderRadius.circular(26.r),
         ),
         child: Row(
           children: [
             // left icon box
-            Center(
-              child: AppAssetIcon(item.logoAsset),
-            ),
+            Container(
+              height: 52,
+        width: 52,
 
-            SizedBox(width: 14.w),
+        child: Center(
+            child: AppAssetIcon(item.logoAsset))),
+
+            SizedBox(width: 10.w),
 
             // title + sub
             Expanded(

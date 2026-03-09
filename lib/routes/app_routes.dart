@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_snack_bar.dart';
+import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
@@ -146,7 +147,13 @@ class AppRouter {
         path: IntegrationsScreen.routeName,
         name: IntegrationsScreen.routeName,
         builder: (context, state) => const IntegrationsScreen(),
-      ), 
+      ),
+
+      GoRoute(
+        path: TcpIpIntegrationScreen.routeName,
+        name: TcpIpIntegrationScreen.routeName,
+        builder: (context, state) => const TcpIpIntegrationScreen(),
+      ),
     ],
   );
 }

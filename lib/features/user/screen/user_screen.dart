@@ -497,7 +497,7 @@ class _FabPlus extends StatelessWidget {
           child: Center(
             child: Icon(
               CupertinoIcons.add,
-              size: 24.sp,
+              size: 30.sp,
               color: UsersScreen._textDark,
             ),
           ),

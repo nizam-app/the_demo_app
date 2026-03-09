@@ -22,11 +22,11 @@ class ImageSizeRegistry {
     'assets/icons/close.png': const ImgSize.square(18),
 
     // Select interface icons
-    'assets/image 66.png': const ImgSize(26, 26),
-    'assets/image 145.png': const ImgSize(39, 36),
-    'assets/TCP.png': const ImgSize(52, 52),
-    'assets/RS485.png': const ImgSize(39, 39),
-    'assets/icons/wireless.png': const ImgSize(30, 30),
+    'assets/image 66.png': const ImgSize(33, 33),
+    'assets/image 145.png': const ImgSize(33, 33),
+    'assets/TCP.png': const ImgSize(33, 33),
+    'assets/RS485.png': const ImgSize(33, 33),
+    'assets/ip_camera.png': const ImgSize(33, 33),
     'assets/zigport.png': const ImgSize(33, 33),
     'assets/wifi-single.png': const ImgSize(33, 33),
   };
@@ -95,7 +95,7 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
           color: Colors.transparent,
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
+            padding: EdgeInsets.fromLTRB(26.w, 12.h, 26.w, 55.h),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
@@ -103,7 +103,7 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
                   blurRadius: 30.r,
-                  offset: Offset(0, -8.h),
+                  offset: Offset(0, -5.h),
                 ),
               ],
             ),
@@ -159,9 +159,17 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                 // Divider: thin light gray line
                 Divider(height: 1.h, thickness: 1.h, color: _line),
                 SizedBox(height: 20.h),
-                // Second row: 2 icons (Zigbee, IP Camera)
+                // Second row: 2 items in first 2 columns (same grid as row 1 — Zigbee under BUS, IP Camera under Modbus RTU)
                 Row(
-                  children: _bottomRow.map((it) => _ChoiceTile(choice: it)).toList(),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ChoiceTile(choice: _bottomRow[0]),
+                    _ChoiceTile(choice: _bottomRow[1]),
+                    const Expanded(child: SizedBox.shrink()),
+                    const Expanded(child: SizedBox.shrink()),
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
                 ),
               ],
             ),
