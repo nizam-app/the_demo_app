@@ -99,7 +99,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          padding: EdgeInsets.symmetric(horizontal: 18.w),
           child: Column(
             children: [
               SizedBox(height: 8.h),

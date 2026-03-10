@@ -28,8 +28,8 @@ class AddProtocolImageRegistry {
     
 
     'assets/zigport.png': const AddProtocolImgSize.square(33),
-    'assets/images/BACnet.png': const AddProtocolImgSize.square(28),
-    'assets/images/KNX.png': const AddProtocolImgSize.square(30),
+    'assets/images/BACnet.png': const AddProtocolImgSize.square(33),
+    'assets/images/KNX.png': const AddProtocolImgSize.square(33),
 
 
   };
@@ -59,8 +59,7 @@ class _ProtocolIcon extends StatelessWidget {
 class AddProtocolBottomSheet extends StatelessWidget {
   const AddProtocolBottomSheet({super.key});
 
-  static const Color _textDark = Color(0xFF333333);
-  static const Color _chipBg = Color(0xFFF0F0F0);
+  static const Color _textDark = Color(0xFF111827);
 
   // Row 1: 5 items
   static const List<_ProtocolChoice> _row1 = [
@@ -89,15 +88,15 @@ class AddProtocolBottomSheet extends StatelessWidget {
           color: Colors.transparent,
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 57.h),
+            padding: EdgeInsets.fromLTRB(0.w, 8.w, 8.w, 60.h),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
-                  blurRadius: 26.r,
-                  offset: Offset(0, -6.h),
+                  blurRadius: 30.r,
+                  offset: Offset(0, -8.h),
                 ),
               ],
             ),
@@ -107,36 +106,38 @@ class AddProtocolBottomSheet extends StatelessWidget {
                 // Header: "Add protocol" centered, close (X) on far right
                 Stack(
                   alignment: Alignment.center,
-                  clipBehavior: Clip.none,
                   children: [
                     Center(
                       child: Text(
                         'Add protocol',
                         style: TextStyle(
-                          fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: _textDark,
+                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
-                    Positioned(
-                      right: 0,
-                      child: Material(
-                        color: _chipBg,
-                        shape: const CircleBorder(),
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          customBorder: const CircleBorder(),
-                          child: SizedBox(
-                            width: 32.w,
-                            height: 32.h,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: 32.w,
+                        height: 32.h,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Center(
                             child: Icon(
                               Icons.close_rounded,
-                              size: 22.sp,
+                              size: 20.sp,
                               color: _textDark,
                             ),
                           ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ),
                     ),
@@ -145,17 +146,18 @@ class AddProtocolBottomSheet extends StatelessWidget {
                 SizedBox(height: 11.h),
                 // Row 1: 5 protocol options (TCP/IP, Modbus RTU, Modbus TCP, RS485, UDP)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: _row1.map((c) => _ProtocolTile(choice: c)).toList(),
                 ),
-                SizedBox(height: 22.h),
+                SizedBox(height: 10.h),
 
                 Divider(height: 1.h, thickness: 1.h, color: Color(0xFFE1E1E1)),
-                SizedBox(height: 22.h),
+                SizedBox(height: 10.h),
                 // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _ProtocolTile(choice: _row2[0]),
@@ -193,7 +195,7 @@ class _ProtocolTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _ProtocolIcon(asset: choice.asset),
-          SizedBox(height: 10.h),
+          //SizedBox(height: 10.h),
           Text(
             choice.label,
             textAlign: TextAlign.center,

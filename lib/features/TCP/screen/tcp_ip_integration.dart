@@ -149,6 +149,7 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
     // your menu action
   }
   bool _sliderWidget = true;
+  bool _sliderWidgets = true;
 
   @override
   Widget build(BuildContext context) {
@@ -210,8 +211,8 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
                       _SettingsRow(
                         title: 'Header',
                         trailing: CupertinoSwitch(
-                          value: _sliderWidget,
-                          onChanged: (v) => setState(() => _sliderWidget = v),
+                          value: _sliderWidgets,
+                          onChanged: (v) => setState(() => _sliderWidgets = v),
                           activeColor: _blue,
                         ),
                       ),
@@ -247,7 +248,7 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
                     children: [
                       for (int i = 0; i < controller.devices.length; i++) ...[
                         _ExposeDeviceRow(device: controller.devices[i]),
-                        if (i != controller.devices.length - 1) const _Line(),
+                        if (i != controller.devices.length - 1) const _ExposeLine(),
                       ],
                     ],
                   ),
@@ -362,40 +363,43 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Padding(
-      padding: EdgeInsets.only(top: 15.h, right: 14.w, left: 18.w, bottom: 15.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: _textDark,
+    final content = Container(
+      height: 55.h,
+      child: Padding(
+        padding: EdgeInsets.only(right: 14.w, left: 18.w, ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: _textDark,
+                ),
               ),
             ),
-          ),
-          if (rightText != null) ...[
-            Text(
-              rightText!,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: _textGrey,
+            if (rightText != null) ...[
+              Text(
+                rightText!,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: _textGrey,
+                ),
               ),
-            ),
-            //SizedBox(width: 8.w),
-          ],
-          if (trailing != null) trailing!,
-          if (showChevron) ...[
-            SizedBox(width: 10.w),
-            Image.asset("assets/Mask group copy 4.png", height: 13.h, width: 13.w,fit: BoxFit.cover,)
+              //SizedBox(width: 8.w),
+            ],
+            if (trailing != null) trailing!,
+            if (showChevron) ...[
+              SizedBox(width: 10.w),
+              Image.asset("assets/Mask group copy 4.png", height: 13.h, width: 13.w,fit: BoxFit.cover,)
 
+            ],
           ],
-        ],
+        ),
       ),
     );
 
@@ -509,53 +513,22 @@ class _Line extends StatelessWidget {
   }
 }
 
-/// iOS-like toggle (no setState; controller drives updates)
-class _IosToggle extends StatelessWidget {
-  const _IosToggle({
-    required this.value,
-    required this.onTap,
-  });
-
-  final bool value;
-  final VoidCallback onTap;
-
-  static const Color _blue = Color(0xFF0088FE);
-  static const Color _off = Color(0xFFE1E1E1);
+class _ExposeLine extends StatelessWidget {
+  const _ExposeLine();
 
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scale: 1.05,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          width: 60.w,
-          height: 35.h,
-          padding: EdgeInsets.all(2.w),
-          decoration: BoxDecoration(
-            color: value ? _blue : _off,
-            borderRadius: BorderRadius.circular(30.r),
-          ),
-          child: AnimatedAlign(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              width: 31.w,
-              height: 31.w,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ),
+    return Padding(
+      padding: EdgeInsets.only(right: 14.w, left: 62.w,),
+      child: Divider(
+        height: 1.h,
+        thickness: 1.h,
+        color: const Color(0xFFE5E7EB),
       ),
     );
   }
 }
+
 
 class _RoundFab extends StatelessWidget {
   const _RoundFab({required this.onTap});
