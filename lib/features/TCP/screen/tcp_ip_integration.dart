@@ -157,7 +157,6 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
 
       floatingActionButton: _RoundFab(
         onTap: () => showAddExposeDeviceBottomSheet(context),
-        child: Icon(Icons.add, size: 30.sp, color: _textDark),
       ),
 
       body: SafeArea(
@@ -559,9 +558,8 @@ class _IosToggle extends StatelessWidget {
 }
 
 class _RoundFab extends StatelessWidget {
-  const _RoundFab({required this.child, required this.onTap});
-
-  final Widget child;
+  const _RoundFab({required this.onTap});
+  
   final VoidCallback onTap;
 
   @override
@@ -579,13 +577,19 @@ class _RoundFab extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 24.r,
-                offset: Offset(0, 12.h),
+                color: const Color(0x10111827),
+                blurRadius: 22.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
-          child: Center(child: child),
+          child: Center(
+            child: Icon(
+              CupertinoIcons.plus,
+              size: 30.sp,
+              color: const Color(0xFF111827),
+            ),
+          ),
         ),
       ),
     );

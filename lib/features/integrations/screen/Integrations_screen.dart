@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -117,7 +118,6 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
             builder: (_) => const AddProtocolBottomSheet(),
           );
         },
-        child: Icon(Icons.add, size: 30.sp, color: _textDark),
       ),
 
       bottomNavigationBar: _BottomNav(
@@ -273,8 +273,8 @@ class _TopBar extends StatelessWidget {
 
 /// -------------------- FAB --------------------
 class _RoundFab extends StatelessWidget {
-  const _RoundFab({required this.child, required this.onTap});
-  final Widget child;
+  const _RoundFab({ required this.onTap});
+
   final VoidCallback onTap;
 
   @override
@@ -292,13 +292,19 @@ class _RoundFab extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 26.r,
-                offset: Offset(0, 12.h),
+                color: const Color(0x10111827),
+                blurRadius: 22.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
-          child: Center(child: child),
+          child: Center(
+            child: Icon(
+              CupertinoIcons.plus,
+              size: 30.sp,
+              color: const Color(0xFF111827),
+            ),
+          ),
         ),
       ),
     );
