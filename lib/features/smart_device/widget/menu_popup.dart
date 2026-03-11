@@ -292,24 +292,20 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
 
-            // ===== Dropdown overlay (on top, auto positioned under trigger) =====
+            // ===== Dropdown overlay (anchored just under the trigger, like design) =====
             if (_dashboardDropdownOpen)
-              Positioned(
-                top: 250.h,
-                right: 32.w,
-                child: CompositedTransformFollower(
-                  link: _dropdownLink,
-                  showWhenUnlinked: false,
-                  offset: Offset(-10.w, 36.h), // trigger এর নিচে
-                  child: _DashboardDropdownMenu(
-                    width: 220.w,
-                    items: _dashboards,
-                    selectedIndex: _selectedDashboardIndex,
-                    onSelect: (index) => setState(() {
-                      _selectedDashboardIndex = index;
-                      _dashboardDropdownOpen = false;
-                    }),
-                  ),
+              CompositedTransformFollower(
+                link: _dropdownLink,
+                showWhenUnlinked: false,
+                offset: Offset(0, 34.h), // small gap under text+arrow row
+                child: _DashboardDropdownMenu(
+                  width: 220.w,
+                  items: _dashboards,
+                  selectedIndex: _selectedDashboardIndex,
+                  onSelect: (index) => setState(() {
+                    _selectedDashboardIndex = index;
+                    _dashboardDropdownOpen = false;
+                  }),
                 ),
               ),
           ],
@@ -441,14 +437,12 @@ class _EditSheetRow extends StatelessWidget {
     this.iconHeight,
     this.iconWidth,
     this.trailing,
-    this.icon,
     this.isDestructive = false,
     this.onTap,
   });
 
   final String? imagePath;
   final String label;
-  final IconData? icon;
   final Widget? trailing;
   final bool isDestructive;
   final double? iconWidth;
@@ -456,28 +450,21 @@ class _EditSheetRow extends StatelessWidget {
   final VoidCallback? onTap;
 
   static const Color _kTextPrimary = Color(0xFF111827);
-  static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
 
   @override
   Widget build(BuildContext context) {
     final color = isDestructive ? _kDestructiveRed : _kTextPrimary;
-    final iconColor = isDestructive ? _kDestructiveRed : _kIconGrey;
 
-    final Widget leading;
-    if (imagePath != null) {
-      leading = Image.asset(
-        imagePath!,
-        width: iconWidth ?? 20.w,
-        height: iconHeight ?? 20.w,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      );
-    } else if (icon != null) {
-      leading = Icon(icon, size: iconWidth ?? 20.w, color: iconColor);
-    } else {
-      leading = SizedBox(width: 20.w, height: 20.w);
-    }
+    final Widget leading = imagePath != null
+        ? Image.asset(
+            imagePath!,
+            width: iconWidth ?? 20.w,
+            height: iconHeight ?? 20.w,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          )
+        : SizedBox(width: 20.w, height: 20.w);
 
     return InkWell(
       onTap: onTap,
@@ -579,31 +566,47 @@ class _DashboardDropdownMenu extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         width: width,
-        constraints: BoxConstraints(maxHeight: 195.h),
+        constraints: BoxConstraints(maxHeight: 180.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(26.r),
+          borderRadius: BorderRadius.circular(26.r), // same smooth radius as devices popup
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF111827).withOpacity(0.12),
               blurRadius: 26.r,
-              offset: const Offset(0, 12),
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 20.h),
+          padding: EdgeInsets.symmetric(vertical: 8.h),
           shrinkWrap: true,
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox.shrink(),
           itemBuilder: (context, i) {
             final selected = i == selectedIndex;
+            final bgColor = selected
+                ? const Color(0xFFE5F0FF) // light blue row highlight as in design
+                : Colors.white;
             return InkWell(
               onTap: () => onSelect(i),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              child: Container(
+                color: bgColor,
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 10.h),
                 child: Row(
                   children: [
+                    // Reserve space for check icon so text lines up in all rows
+                    SizedBox(
+                      width: 24.w,
+                      child: selected
+                          ? Icon(
+                              Icons.check_rounded,
+                              size: 18.sp,
+                              color: const Color(0xFF0088FE),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         items[i],
@@ -617,12 +620,6 @@ class _DashboardDropdownMenu extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (selected)
-                      Icon(
-                        Icons.check_rounded,
-                        size: 20.sp,
-                        color: const Color(0xFF2563EB),
-                      ),
                   ],
                 ),
               ),

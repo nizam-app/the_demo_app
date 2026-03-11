@@ -104,6 +104,8 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      isDismissible: true,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (_) => const SelectInterfaceBottomSheet(),
     );
@@ -175,24 +177,29 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                   padding: EdgeInsets.only(bottom: 92.h),
                   itemCount: _items.length,
                   separatorBuilder: (_, __) => SizedBox(height: 14.h),
-                  itemBuilder: (_, i) => _InterfaceCard(
-                    item: _items[i],
-                    status: _itemStatuses[i],
-                    onStatusTap: () {
+                  itemBuilder: (_, i) {
+                    void toggleStatus() {
                       setState(() {
                         _itemStatuses[i] = _itemStatuses[i] == _InterfaceStatus.ok
                             ? _InterfaceStatus.warn
                             : _InterfaceStatus.ok;
                       });
-                    },
-                    onMore: () {},
-                    bg: _card,
-                    textDark: _textDark,
-                    textGrey: _textGrey,
-                    pillGrey: _pillGrey,
-                    blue: _blue,
-                    magenta: _magenta,
-                  ),
+                    }
+
+                    return _InterfaceCard(
+                      item: _items[i],
+                      status: _itemStatuses[i],
+                      onStatusTap: toggleStatus,
+                      onTap: toggleStatus,
+                      onMore: () {},
+                      bg: _card,
+                      textDark: _textDark,
+                      textGrey: _textGrey,
+                      pillGrey: _pillGrey,
+                      blue: _blue,
+                      magenta: _magenta,
+                    );
+                  },
                 ),
               ),
             ],
@@ -263,6 +270,7 @@ class _InterfaceCard extends StatelessWidget {
     required this.item,
     required this.status,
     required this.onStatusTap,
+    required this.onTap,
     required this.onMore,
     required this.bg,
     required this.textDark,
@@ -275,6 +283,7 @@ class _InterfaceCard extends StatelessWidget {
   final _InterfaceItem item;
   final _InterfaceStatus status;
   final VoidCallback onStatusTap;
+  final VoidCallback onTap;
   final VoidCallback onMore;
 
   final Color bg;
@@ -292,20 +301,23 @@ class _InterfaceCard extends StatelessWidget {
     final pillBg = isActive ? pillGrey : _inactivePillRed;
     final pillTextColor = isActive ? textDark : Colors.white;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10.r,
-            offset: Offset(0, 10.h),
-          ),
-        ],
-      ),
-      child: Row(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(26.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(26.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10.r,
+              offset: Offset(0, 10.h),
+            ),
+          ],
+        ),
+        child: Row(
         children: [
           // Logo wrapper
           Container(
@@ -408,6 +420,7 @@ class _InterfaceCard extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

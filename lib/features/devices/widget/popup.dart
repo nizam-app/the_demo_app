@@ -26,7 +26,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   final List<String> _dashboards = const [
     'Lighting section name',
-
     'Lighting section name',
     'Lighting section name',
     'Lighting section name',
@@ -310,11 +309,12 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
 
-            // ✅ Dropdown overlay (ON TOP OF EVERYTHING)
+            // ✅ Dropdown overlay anchored directly under the trigger (same as design)
             if (_dashboardDropdownOpen)
-              Positioned(
-                right: 32.w,
-                top: 250.h, // ⚠️ Adjust this if needed (trigger position)
+              CompositedTransformFollower(
+                link: _dropdownLink,
+                showWhenUnlinked: false,
+                offset: Offset(0, 34.h), // just under the text + arrow
                 child: _DashboardDropdownMenu(
                   width: 220.w,
                   items: _dashboards,
@@ -384,14 +384,12 @@ class _EditSheetRow extends StatelessWidget {
     this.iconHeight,
     this.iconWidth,
     this.trailing,
-    this.icon,
     this.isDestructive = false,
     this.onTap,
   });
 
   final String? imagePath;
   final String label;
-  final IconData? icon;
   final Widget? trailing;
   final bool isDestructive;
   final double? iconWidth;
@@ -399,13 +397,11 @@ class _EditSheetRow extends StatelessWidget {
   final VoidCallback? onTap;
 
   static const Color _kTextPrimary = Color(0xFF111827);
-  static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
 
   @override
   Widget build(BuildContext context) {
     final color = isDestructive ? _kDestructiveRed : _kTextPrimary;
-    final iconColor = isDestructive ? _kDestructiveRed : _kIconGrey;
 
     final Widget leading;
     if (imagePath != null) {
@@ -416,8 +412,6 @@ class _EditSheetRow extends StatelessWidget {
         fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
       );
-    } else if (icon != null) {
-      leading = Icon(icon, size: iconWidth ?? 20.w, color: iconColor);
     } else {
       leading = SizedBox(width: 20.w, height: 20.w);
     }
@@ -519,33 +513,48 @@ class _DashboardDropdownMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: Container(
+        child: Container(
         width: width,
-        constraints: BoxConstraints(maxHeight: 220.h),
+        constraints: BoxConstraints(maxHeight: 195.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18.r),
+          borderRadius: BorderRadius.circular(20.r), // smoother, a bit tighter radius
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF111827).withOpacity(0.12),
-              blurRadius: 26,
-              offset: const Offset(0, 12),
+              blurRadius: 20.r,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
         child: ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
+          padding: EdgeInsets.symmetric(vertical: 8.h),
           shrinkWrap: true,
           itemCount: items.length,
           separatorBuilder: (_, __) => const SizedBox.shrink(),
           itemBuilder: (context, i) {
             final selected = i == selectedIndex;
+            final bgColor = selected
+                ? const Color(0xFFE5F0FF) // light blue row highlight (same as menu_popup)
+                : Colors.white;
             return InkWell(
               onTap: () => onSelect(i),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              child: Container(
+                color: bgColor,
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 child: Row(
                   children: [
+                    SizedBox(
+                      width: 24.w,
+                      child: selected
+                          ? Icon(
+                              Icons.check_rounded,
+                              size: 18.sp,
+                              color: const Color(0xFF0088FE),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         items[i],
@@ -553,18 +562,12 @@ class _DashboardDropdownMenu extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                           color: const Color(0xFF111827),
                           fontFamily: 'Inter',
                         ),
                       ),
                     ),
-                    if (selected)
-                      Icon(
-                        Icons.check_rounded,
-                        size: 20.sp,
-                        color: const Color(0xFF2563EB),
-                      ),
                   ],
                 ),
               ),

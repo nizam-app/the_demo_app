@@ -1,89 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// ✅ Open popup
-
 /// -------------------- Image Size Registry (edit sizes per asset) --------------------
-// @immutable
-// class ImgSize {
-//    final double w;
-//   final double h;
-//   //const ImgSize(this.w, this.h);
-//   const ImgSize( this.w, this.h);
-//   const ImgSize.square(double s) :   w = s, h = s;
-// }
-//
-// class ImageSizeRegistry {
-//   ImageSizeRegistry._();
-//
-//   static const ImgSize fallback = ImgSize.square(44);
-//
-//   /// ✅ Put every asset size here (each can be different)
-//   static final Map<String, ImgSize> byAsset = {
-//     'assets/icons/close.png': const ImgSize.square(18),
-//
-//     // Select interface icons
-//     'assets/image 66.png': const ImgSize( 40, 40),
-//     'assets/image 145.png': const ImgSize(44, 44),
-//     //'assets/TCP.png': const ImgSize(44, 44),
-//     'assets/RTU2.png': const ImgSize(56,56),
-//     'assets/RS485.png': const ImgSize(44, 44),
-//     'assets/ip_camera.png': const ImgSize(33, 33),
-//     'assets/zigport.png': const ImgSize(33, 33),
-//     'assets/wifi-single.png': const ImgSize(33, 33),
-//
-//
-//     // 'assets/image 66.png': const ImgSize( 26),
-//     // //'assets/image 145.png': const ImgSize(26,),
-//     // 'assets/RTU2.png': const ImgSize(26,),
-//     //
-//     // 'assets/TCP.png': const ImgSize(26,),
-//     // 'assets/RS485.png': const ImgSize(26, ),
-//     // 'assets/ip_camera.png': const ImgSize(26,),
-//     // 'assets/zigport.png': const ImgSize(26, ),
-//     // 'assets/wifi-single.png': const ImgSize(26,),
-//     //
-//
-//
-//   };
-//
-//
-//
-//
-//   static ImgSize of(String asset, {ImgSize? fallbackSize}) {
-//     return byAsset[asset] ?? (fallbackSize ?? fallback);
-//   }
-// }
-//
-//
-//
-// class AppAssetIcon extends StatelessWidget {
-//   const AppAssetIcon(
-//       this.asset, {
-//         super.key,
-//         this.size,
-//         this.color,
-//         this.fit = BoxFit.contain,
-//       });
-//
-//   final String asset;
-//   final ImgSize? size;
-//   final Color? color;
-//   final BoxFit fit;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final s = size ?? ImageSizeRegistry.of(asset);
-//     return Image.asset(
-//       asset,
-//       width: s.w.w,
-//       height: s.h.h,
-//       fit: fit,
-//       color: color,
-//       colorBlendMode: color == null ? null : BlendMode.srcIn,
-//     );
-//   }
-// }
 
 @immutable
 class ImgSize {
@@ -93,77 +11,59 @@ class ImgSize {
   const ImgSize.square(double s) : w = s, h = s;
 }
 
-// class ImageSizeRegistry {
-//   ImageSizeRegistry._();
-//
-//   static const ImgSize fallback = ImgSize.square(44);
-//
-// static final Map<String, ImgSize> byAsset = {
-//      'assets/icons/close.png': const ImgSize.square(18),
-//   //
-//     // ✅ Select interface icons (আপনার asset নাম অনুযায়ী)
-//     'assets/image 66.png': const ImgSize(26, 26),     // BUS
-//     'assets/RTU2.png': const ImgSize(52, 52),         // Modbus RTU
-//     'assets/image 145.png': const ImgSize(56, 56),    // Modbus TCP (আপনি যেটা ব্যবহার করেন)
-//     'assets/RS485.png': const ImgSize(56, 56),        // RS485
-//     'assets/wifi-single.png': const ImgSize(44, 44),  // Wireless
-//     'assets/zigport.png': const ImgSize(33, 33),      // Zigbee
-//     'assets/ip_camera.png': const ImgSize(33, 33),    // IP Camera
-//   };
-//
-//   static ImgSize of(String asset, {ImgSize? fallbackSize}) {
-//     final key = asset.trim(); // ✅ FIX-1: trim key
-//     return byAsset[key] ?? (fallbackSize ?? fallback);
-//   }
-// }
+class ImageSizeRegistry {
+  ImageSizeRegistry._();
+  static const ImgSize fallback = ImgSize.square(35);  
+
+  /// Set width and height separately per asset (e.g. 40.w x 44.h).
+  static final Map<String, ImgSize> byAsset = {
+    'assets/image 66.png': const ImgSize(30, 33),
+    'assets/image 145.png': const ImgSize(44, 33),
+    'assets/TCP.png': const ImgSize(52, 33),
+    'assets/RS485.png': const ImgSize(52, 33),
+    'assets/wifi-single.png': const ImgSize(33, 33),
+    'assets/zigport.png': const ImgSize(30, 33),
+    'assets/ip_camera.png': const ImgSize(30, 33),
+  };
+
+  static ImgSize of(String asset) => byAsset[asset] ?? fallback;
+}
 
 class AppAssetIcon extends StatelessWidget {
   const AppAssetIcon(
-      this.asset, {
-        super.key,
-        this.size,
-        this.color,
-        this.fit = BoxFit.contain,
-        this.forceSize = true,
-      });
+    this.asset, {
+    super.key,
+    this.size,
+    this.color,
+    this.fit = BoxFit.contain,
+    this.forceSize = true,
+  });
 
   final String asset;
   final ImgSize? size;
   final Color? color;
   final BoxFit fit;
-
-  /// ✅ FIX-2: force exact box size (so your registry size applies)
   final bool forceSize;
 
   @override
   Widget build(BuildContext context) {
-   // final s = size ?? ImageSizeRegistry.of(asset);
-
-    // ✅ FIX-3: icons scale by width to match design (consistent)
-    //final widthPx = s.w.w;
-   // final heightPx = s.h.w;
-
+    final s = size ?? ImageSizeRegistry.of(asset);
     final img = Image.asset(
       asset.trim(),
+      width: s.w.w,
+      height: s.h.h,
       fit: fit,
       color: color,
       colorBlendMode: color == null ? null : BlendMode.srcIn,
     );
 
-    if (!forceSize) {
-      return img;
-    }
+    if (!forceSize) return img;
 
     return SizedBox(
-      //width: widthPx,
-//height: heightPx,
-      child: FittedBox(
-        fit: fit, // contain like design
-        child: SizedBox(
-          //width: s.w,
-         // height: s.h,
-          child: img,
-        ),
+      width: s.w.w,
+      height: s.h.h,
+      child: Center(
+        child: img,
       ),
     );
   }
@@ -308,15 +208,9 @@ class _ChoiceTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // All popup icons use the exact same visual box size
-          SizedBox(
-            width: double.infinity,
-            height: 30.h,
-
-            child: AppAssetIcon(
-              choice.asset,
-
-            ),
+          // Icon: registry defines width & height per asset; same row height for alignment
+          Center(
+            child: AppAssetIcon(choice.asset),
           ),
           SizedBox(height: 10.h),
           Text(

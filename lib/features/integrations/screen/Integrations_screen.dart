@@ -115,6 +115,9 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
+            useSafeArea: true,
+            isDismissible: true,
+            barrierColor: Colors.black.withOpacity(0.25),
             builder: (_) => const AddProtocolBottomSheet(),
           );
         },

@@ -164,11 +164,16 @@ class _AddSmartDeviceSheetState extends State<AddSmartDeviceSheet> {
                 controller: widget.scrollController, // ✅ makes sheet draggable + list scroll
                 padding: EdgeInsets.only(bottom: 15.h),
                 itemCount: items.length,
-                separatorBuilder: (_, __) => Container(
-                  height: 1,
-                  margin: EdgeInsets.only(left: 64.w),
-                  color: _divider,
-                ),
+                separatorBuilder: (_, index) {
+                  // If two consecutive rows are selected, draw separator in selection color
+                  final bothSelected = _selectedIndices.contains(index) &&
+                      _selectedIndices.contains(index + 1);
+                  return Container(
+                    height: 1.h,
+                    color: bothSelected ? _selectedBg : _divider,
+                    margin: bothSelected ? EdgeInsets.zero : EdgeInsets.only(left: 64.w),
+                  );
+                },
                 itemBuilder: (context, i) {
                   final it = items[i];
                   final orderIndex = _selectedIndices.indexOf(i);
@@ -229,59 +234,69 @@ class _AddDeviceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected ? _selectedBg : Colors.white,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 32.w,
-                height: 32.h,
-                child: Center(
-                  child: Image.asset(
-                    imagePath,
-                    width: iconW.w,
-                    height: iconH.h,
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: _textPrimary,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-              if (selectionOrder != null)
-                Container(
-                  width: 18.w,
-                  height: 18.h,
-                  decoration: const BoxDecoration(
-                    color: _badgeBlue,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '$selectionOrder',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                      fontFamily: 'Inter',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: onTap,
+            splashColor: selected ? _selectedBg : null,
+            highlightColor: selected ? _selectedBg.withOpacity(0.5) : null,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+              child: Row(
+                children: [
+                  // Icon area uses same bg when selected so no white gap around the image
+                  Container(
+                    width: 32.w,
+                    height: 32.h,
+                    color: selected ? _selectedBg : null,
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      imagePath,
+                      width: iconW.w,
+                      height: iconH.h,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
                     ),
                   ),
-                ),
-            ],
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: _textPrimary,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ),
+                  if (selectionOrder != null)
+                    Container(
+                      width: 18.w,
+                      height: 18.h,
+                      decoration: const BoxDecoration(
+                        color: _badgeBlue,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$selectionOrder',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
+          // 1px bottom strip so selected background touches the separator
+          if (selected) SizedBox(height: 1.h, child: ColoredBox(color: _selectedBg)),
+        ],
       ),
     );
   }

@@ -48,7 +48,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
       ),
       ZoneItem(
         title: "Living room",
-        image: "assets/64b800555a0a813dc12aabe1da7c0d4ed1273346 (1).png",
+        image: "assets/chopha.png",
         imageWidth: 183.w,
         imageHeight: 90.h,
       ),
@@ -121,10 +121,9 @@ class _ZonesScreenState extends State<ZonesScreen> {
                   itemCount: zones.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16.w,
-                    mainAxisSpacing: 16.h,
-                    childAspectRatio:
-                        0.95, // closer to screenshot (slightly taller)
+                    crossAxisSpacing: 14.w,
+                    mainAxisSpacing: 14.h,
+                    childAspectRatio: 1.13,// closer to screenshot (slightly taller)
                   ),
                   itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {}),
                 ),
@@ -265,10 +264,6 @@ class ZoneCard extends StatelessWidget {
         height: 183.h,
         padding: EdgeInsets.all(
           8.w,
-          // left: 8.w,
-          // right: 8.w,
-          //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         top: 0.1.h,
-          // bottom: 12.h,
         ),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),

@@ -88,7 +88,7 @@ class AddProtocolBottomSheet extends StatelessWidget {
           color: Colors.transparent,
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(0.w, 8.w, 8.w, 60.h),
+            padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
@@ -143,7 +143,7 @@ class AddProtocolBottomSheet extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 11.h),
+                SizedBox(height: 13.h),
                 // Row 1: 5 protocol options (TCP/IP, Modbus RTU, Modbus TCP, RS485, UDP)
                 Row(
                   
@@ -157,7 +157,7 @@ class AddProtocolBottomSheet extends StatelessWidget {
                 SizedBox(height: 10.h),
                 // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
                 Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _ProtocolTile(choice: _row2[0]),
@@ -192,10 +192,11 @@ class _ProtocolTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           _ProtocolIcon(asset: choice.asset),
-          //SizedBox(height: 10.h),
+           SizedBox(height: 10.h),
           Text(
             choice.label,
             textAlign: TextAlign.center,
