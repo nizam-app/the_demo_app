@@ -13,17 +13,19 @@ class ImgSize {
 
 class ImageSizeRegistry {
   ImageSizeRegistry._();
-  static const ImgSize fallback = ImgSize.square(35);  
+  static const ImgSize fallback = ImgSize.square(44);
 
   /// Set width and height separately per asset (e.g. 40.w x 44.h).
   static final Map<String, ImgSize> byAsset = {
-    'assets/image 66.png': const ImgSize(30, 33),
-    'assets/image 145.png': const ImgSize(44, 33),
-    'assets/TCP.png': const ImgSize(52, 33),
-    'assets/RS485.png': const ImgSize(52, 33),
-    'assets/wifi-single.png': const ImgSize(33, 33),
-    'assets/zigport.png': const ImgSize(30, 33),
-    'assets/ip_camera.png': const ImgSize(30, 33),
+    //'assets/imagelogo.png': const ImgSize(52, 52),
+    'assets/imageslogo1.png': const ImgSize(44, 44),
+    'assets/image 145.png': const ImgSize(44, 44),
+    'assets/images41.png': const ImgSize(44, 44),
+    'assets/images42.png': const ImgSize(44, 44),
+    'assets/imiageswf45.png': const ImgSize(44, 44),
+   // 'assets/wifi-single.png': const ImgSize(33, 33),
+    'assets/zigport.png': const ImgSize(33, 33),
+    'assets/ip_camera.png': const ImgSize(33, 33),
   };
 
   static ImgSize of(String asset) => byAsset[asset] ?? fallback;
@@ -79,13 +81,13 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
   static const Color _chipBg = Color(0xFFF3F4F6);
 
   static const List<_InterfaceChoice> _topRow = [
-    _InterfaceChoice('BUS', 'assets/image 66.png',),
+    _InterfaceChoice('BUS', 'assets/imageslogo1.png',),
      _InterfaceChoice('Modbus RTU', 'assets/image 145.png'),
     // _InterfaceChoice('Modbus RTU', 'assets/RTU2.png'),
 
-    _InterfaceChoice('Modbus TCP', 'assets/TCP.png'),
-    _InterfaceChoice('RS485', 'assets/RS485.png'),
-    _InterfaceChoice('Wireless', 'assets/wifi-single.png'),
+    _InterfaceChoice('Modbus TCP', 'assets/images41.png'),
+    _InterfaceChoice('RS485', 'assets/images42.png'),
+    _InterfaceChoice('Wireless', 'assets/imiageswf45.png'),
   ];
   static const List<_InterfaceChoice> _bottomRow = [
     _InterfaceChoice('Zigbee', 'assets/zigport.png'),

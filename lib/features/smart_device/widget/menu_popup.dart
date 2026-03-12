@@ -565,66 +565,69 @@ class _DashboardDropdownMenu extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: width,
-        constraints: BoxConstraints(maxHeight: 180.h),
+        width: 190.w,
+        constraints: BoxConstraints(maxHeight: 150.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(26.r), // same smooth radius as devices popup
+          borderRadius: BorderRadius.circular(26.r),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF111827).withOpacity(0.12),
               blurRadius: 26.r,
-              offset: const Offset(0, 8),
+              offset: const Offset(0, 12),
             ),
           ],
         ),
-        child: ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          shrinkWrap: true,
-          itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox.shrink(),
-          itemBuilder: (context, i) {
-            final selected = i == selectedIndex;
-            final bgColor = selected
-                ? const Color(0xFFE5F0FF) // light blue row highlight as in design
-                : Colors.white;
-            return InkWell(
-              onTap: () => onSelect(i),
-              child: Container(
-                color: bgColor,
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 10.h),
-                child: Row(
-                  children: [
-                    // Reserve space for check icon so text lines up in all rows
-                    SizedBox(
-                      width: 24.w,
-                      child: selected
-                          ? Icon(
-                              Icons.check_rounded,
-                              size: 18.sp,
-                              color: const Color(0xFF0088FE),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Text(
-                        items[i],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF111827),
-                          fontFamily: 'Inter',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26.r),
+          child: ListView.separated(
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            shrinkWrap: true,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox.shrink(),
+            itemBuilder: (context, i) {
+              final selected = i == selectedIndex;
+              final bgColor = selected
+                  ? const Color(0xFFE5F0FF) // light blue row highlight as in design
+                  : Colors.white;
+              return InkWell(
+                onTap: () => onSelect(i),
+                child: Container(
+                  color: bgColor,
+                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 8.h),
+                  child: Row(
+                    children: [
+                      // Reserve space for check icon so text lines up in all rows
+                      SizedBox(
+                        width: 16.w,
+                        child: selected
+                            ? Icon(
+                                Icons.check_rounded,
+                                size: 18.sp,
+                                color: const Color(0xFF0088FE),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          items[i],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
