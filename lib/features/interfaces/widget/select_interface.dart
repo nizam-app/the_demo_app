@@ -78,7 +78,6 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
 
   static const Color _textDark = Color(0xFF111827);
   static const Color _line = Color(0xFFE5E7EB);
-  static const Color _chipBg = Color(0xFFF3F4F6);
 
   static const List<_InterfaceChoice> _topRow = [
     _InterfaceChoice('BUS', 'assets/imageslogo1.png',),
@@ -100,92 +99,111 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
     return SafeArea(
       top: false,
       bottom: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(0.w, 13.h, 8.w, 60.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 30.r,
-                  offset: Offset(0, -8.h),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Center(
-                      child: Text(
-                        'Select interface',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textDark,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: Center(
-                            child: Icon(
-                              Icons.close_rounded,
-                              size: 20.sp,
-                              color: _textDark,
-                            ),
-                          ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 13.h),
-                // First row: 5 icons (BUS, Modbus RTU, Modbus TCP, RS485, Wireless)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _topRow.map((it) => _ChoiceTile(choice: it)).toList(),
-                ),
-                SizedBox(height: 10.h),
-                // Divider: thin light gray line
-                Divider(height: 1.h, thickness: 1.h, color: _line),
-                SizedBox(height: 10.h),
-                // Second row: 2 items in first 2 columns (same grid as row 1 — Zigbee under BUS, IP Camera under Modbus RTU)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ChoiceTile(choice: _bottomRow[0]),
-                    _ChoiceTile(choice: _bottomRow[1]),
-                    const Expanded(child: SizedBox.shrink()),
-                    const Expanded(child: SizedBox.shrink()),
-                    const Expanded(child: SizedBox.shrink()),
-                  ],
-                ),
-              ],
+      child: Stack(
+        children: [
+          // Tap anywhere outside the white sheet to close (Zone popup behavior)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => Navigator.of(context).pop(),
+              child: const SizedBox.expand(),
             ),
           ),
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Material(
+              color: Colors.transparent,
+              child: GestureDetector(
+                // Absorb taps inside the sheet so only outside closes it
+                onTap: () {},
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(0.w, 13.h, 8.w, 60.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(28.r)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 30.r,
+                        offset: Offset(0, -8.h),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Center(
+                            child: Text(
+                              'Select interface',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: _textDark,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              width: 32.w,
+                              height: 32.h,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF3F4F6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: Center(
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    size: 20.sp,
+                                    color: _textDark,
+                                  ),
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 13.h),
+                      // First row: 5 icons (BUS, Modbus RTU, Modbus TCP, RS485, Wireless)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:
+                            _topRow.map((it) => _ChoiceTile(choice: it)).toList(),
+                      ),
+                      SizedBox(height: 10.h),
+                      // Divider: thin light gray line
+                      Divider(height: 1.h, thickness: 1.h, color: _line),
+                      SizedBox(height: 10.h),
+                      // Second row: 2 items in first 2 columns
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _ChoiceTile(choice: _bottomRow[0]),
+                          _ChoiceTile(choice: _bottomRow[1]),
+                          const Expanded(child: SizedBox.shrink()),
+                          const Expanded(child: SizedBox.shrink()),
+                          const Expanded(child: SizedBox.shrink()),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -41,6 +41,16 @@ class UsersScreen extends StatelessWidget {
     );
   }
 
+  // void showZonesMenuSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     backgroundColor: Colors.transparent,
+  //     isScrollControlled: true,
+  //     barrierColor: Colors.black.withOpacity(0.25),
+  //     builder: (_) => const ZonesMenuSheet(),
+  //   );
+  // }
+
 
   @override
   Widget build(BuildContext context) {

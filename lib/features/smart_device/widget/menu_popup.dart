@@ -363,50 +363,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   }
 
 
-  // Widget _buildHeader(BuildContext context) {
-  //   return Padding(
-  //     padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
-  //
-  //     child: Row(
-  //        crossAxisAlignment: CrossAxisAlignment.center,
-  //        mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Expanded(
-  //           child: Center(
-  //             child: Text(
-  //               'Edit smart device',
-  //               style: TextStyle(
-  //                 fontSize: 16.sp,
-  //                 fontWeight: FontWeight.w600,
-  //                 color: _kTextPrimary,
-  //                 fontFamily: 'Inter',
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //         // close
-  //
-  //         Container(
-  //           width: 30.w,
-  //           height: 30.w,
-  //           decoration: const BoxDecoration(
-  //             color: Color(0xFFFFFFFF),
-  //             shape: BoxShape.circle,
-  //           ),
-  //           child: IconButton(
-  //             onPressed: () => Navigator.of(context).pop(),
-  //             icon: Center(
-  //               child: Icon(Icons.close_rounded,
-  //                   size: 20.sp, color: _kTextPrimary),
-  //             ),
-  //             padding: EdgeInsets.zero,
-  //             constraints: const BoxConstraints(),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }
 
 // ====================== UI PARTS ======================
@@ -581,7 +537,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26.r),
           child: ListView.separated(
-            padding: EdgeInsets.symmetric(vertical: 8.h),
+            //padding: EdgeInsets.symmetric(vertical: 8.h),
             shrinkWrap: true,
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox.shrink(),

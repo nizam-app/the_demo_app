@@ -39,15 +39,20 @@ class AddProtocolImageRegistry {
   }
 }
 
-class _ProtocolIcon extends StatelessWidget {
+class _ProtocolIcon extends StatefulWidget {
   const _ProtocolIcon({required this.asset});
   final String asset;
 
   @override
+  State<_ProtocolIcon> createState() => _ProtocolIconState();
+}
+
+class _ProtocolIconState extends State<_ProtocolIcon> {
+  @override
   Widget build(BuildContext context) {
-    final s = AddProtocolImageRegistry.of(asset);
+    final s = AddProtocolImageRegistry.of(widget.asset);
     return Image.asset(
-      asset,
+      widget.asset,
       width: s.w.w,
       height: s.h.h,
       fit: BoxFit.contain,
@@ -56,7 +61,7 @@ class _ProtocolIcon extends StatelessWidget {
 }
 
 /// -------------------- Add Protocol Bottom Sheet --------------------
-class AddProtocolBottomSheet extends StatelessWidget {
+class AddProtocolBottomSheet extends StatefulWidget {
   const AddProtocolBottomSheet({super.key});
 
   static const Color _textDark = Color(0xFF111827);
@@ -78,96 +83,108 @@ class AddProtocolBottomSheet extends StatelessWidget {
   ];
 
   @override
+  State<AddProtocolBottomSheet> createState() => _AddProtocolBottomSheetState();
+}
+
+class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
       bottom: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 30.r,
-                  offset: Offset(0, -8.h),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header: "Add protocol" centered, close (X) on far right
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Center(
-                      child: Text(
-                        'Add protocol',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textDark,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: Center(
-                            child: Icon(
-                              Icons.close_rounded,
-                              size: 20.sp,
-                              color: _textDark,
-                            ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.of(context).pop(),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 30.r,
+                    offset: Offset(0, -8.h),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header: "Add protocol" centered, close (X) on far right
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Center(
+                        child: Text(
+                          'Add protocol',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AddProtocolBottomSheet._textDark,
+                            fontFamily: 'Inter',
                           ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 13.h),
-                // Row 1: 5 protocol options (TCP/IP, Modbus RTU, Modbus TCP, RS485, UDP)
-                Row(
-                  
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _row1.map((c) => _ProtocolTile(choice: c)).toList(),
-                ),
-                SizedBox(height: 10.h),
-
-                Divider(height: 1.h, thickness: 1.h, color: Color(0xFFE1E1E1)),
-                SizedBox(height: 10.h),
-                // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ProtocolTile(choice: _row2[0]),
-                    _ProtocolTile(choice: _row2[1]),
-                    _ProtocolTile(choice: _row2[2]),
-                    const Expanded(child: SizedBox.shrink()),
-                    const Expanded(child: SizedBox.shrink()),
-                  ],
-                ),
-              ],
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          width: 32.w,
+                          height: 32.h,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF3F4F6),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Center(
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 20.sp,
+                                color: AddProtocolBottomSheet._textDark,
+                              ),
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 13.h),
+                  // Row 1: 5 protocol options (TCP/IP, Modbus RTU, Modbus TCP, RS485, UDP)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: AddProtocolBottomSheet._row1
+                        .map((c) => _ProtocolTile(choice: c))
+                        .toList(),
+                  ),
+                  SizedBox(height: 10.h),
+                  Divider(
+                    height: 1.h,
+                    thickness: 1.h,
+                    color: const Color(0xFFE1E1E1),
+                  ),
+                  SizedBox(height: 10.h),
+                  // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ProtocolTile(choice: AddProtocolBottomSheet._row2[0]),
+                      _ProtocolTile(choice: AddProtocolBottomSheet._row2[1]),
+                      _ProtocolTile(choice: AddProtocolBottomSheet._row2[2]),
+                      const Expanded(child: SizedBox.shrink()),
+                      const Expanded(child: SizedBox.shrink()),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -83,6 +83,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             /// CARD 1
             _Card(
               child: Column(
+               
                 children: [
                   /// WIDGET SIZE
                   // _RowItem(
@@ -111,7 +112,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       ),
                     ),
                   ),
-
+                  
                   _RowItem(
                     imagePath: 'assets/images/widget_size.png',
                     title: 'Widget size',
@@ -122,6 +123,9 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       imageHeight: 22.h, // custom image height
                     ),
                   ),
+                  SizedBox(
+                    height: 13.h,
+                  )
                 ],
               ),
             ),

@@ -426,7 +426,7 @@ class _EditSheetRow extends StatelessWidget {
             height: 32.w,
             child: Center(child: leading),
           ),
-          SizedBox(width: 8.w),
+          SizedBox(width: 7.w),
           Expanded(
             child: Text(
               label,
@@ -531,7 +531,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26.r),
           child: ListView.separated(
-          //  padding: EdgeInsets.symmetric(vertical: 6.h),
+           //padding: EdgeInsets.symmetric(vertical: 8.h),
             shrinkWrap: true,
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox.shrink(),

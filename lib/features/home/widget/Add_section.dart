@@ -126,6 +126,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       imageHeight: 22.h, // custom image height
                     ),
                   ),
+                  SizedBox(height: 13.h,), 
                 ],
               ),
             ),
@@ -333,11 +334,11 @@ class _SimpleRow extends StatelessWidget {
 
     return Padding(
       // padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-      padding: EdgeInsets.only(left: 12.w, right: 17.w, top: 14.h, bottom: 17.h),
+      padding: EdgeInsets.only(left: 12.w, right: 17.w, top:10.h, bottom: 10.h),
       child: Row(
         children: [
           leading,
-          SizedBox(width: 10.w),
+         SizedBox(width: 10.w),
           Expanded(
             child: Text(
               title,

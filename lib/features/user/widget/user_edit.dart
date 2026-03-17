@@ -55,7 +55,10 @@ class _UserEditState extends State<UserEdit> {
     return SafeArea(
       top: false,
       bottom: false,
-      child: Align(
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => Navigator.of(context).pop(),
+        child: Align(
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
@@ -74,7 +77,7 @@ class _UserEditState extends State<UserEdit> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
+              // Header (same style as Add user)
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -251,6 +254,7 @@ class _UserEditState extends State<UserEdit> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
