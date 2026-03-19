@@ -81,54 +81,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             ),
 
             /// CARD 1
-            _Card(
-              child: Column(
-               
-                children: [
-                  /// WIDGET SIZE
-                  // _RowItem(
-                  //   imagePath: 'assets/images/widget_size.png',
-                  //   title: 'Widget size',
-                  //   trailing: _SizeSegment(
-                  //     value: _selectedSize,
-                  //     onChanged: (v) => setState(() => _selectedSize = v),
-                  //     imageWidth: 22.w, // custom image width
-                  //     imageHeight: 22.h, // custom image height
-                  //   ),
-                  // ),
-                  /// SLIDER WIDGET
-                  _RowItem(
-                    imagePath: 'assets/images/Slider.png',
-                    title: 'Slider widget',
-                    imageHeight: 22.h,
-                    imageWidth: 22.w,
-                    trailing: SizedBox(
-                      height: 35.h,
-                      width: 60.w,
-                      child: CupertinoSwitch(
-                        value: _sliderWidget,
-                        onChanged: (v) => setState(() => _sliderWidget = v),
-                        activeColor: _blue,
-                      ),
-                    ),
-                  ),
-                  
-                  _RowItem(
-                    imagePath: 'assets/images/widget_size.png',
-                    title: 'Widget size',
-                    trailing: _SizeSegment(
-                      value: _selectedSize,
-                      onChanged: (v) => setState(() => _selectedSize = v),
-                      imageWidth: 22.w, // custom image width
-                      imageHeight: 22.h, // custom image height
-                    ),
-                  ),
-                  SizedBox(
-                    height: 13.h,
-                  )
-                ],
-              ),
-            ),
+           
 
             SizedBox(height: 10.h),
 
@@ -146,10 +99,13 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     imagePath: 'assets/images/rename.png',
                     title: 'Rename',
                     trailingText: 'Light',
+                    iconPath: 'assets/images/edit_image.png',
                     imageWidth: 26.w,
                     imageHeight: 26.h,
+                    iconHeight: 13.h,
+                    iconWidth: 14.w,
                   ),
-
+                  
                   _SimpleRow(
                     imagePath: 'assets/images/add_device.png',
                     title: 'Add device',
@@ -157,6 +113,22 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     imageHeight: 23.h,
                   ),
 
+                  
+                ],
+              ),
+            ),
+              SizedBox(height:10.h,),
+           // Card 2
+            _Card(
+              child: Column(
+                children: [
+                  _RowItem(
+                    imagePath: 'assets/images/header_icon.png',
+                    title: 'Header',
+                    imageHeight: 26.h,
+                    imageWidth: 26.w,
+                    trailing: Image.asset("assets/images/header_image.png", height: 39.h, width: 39.w,fit: BoxFit.cover,),
+                  ),
                   _SimpleRow(
                     imagePath: 'assets/images/move_up.png',
                     title: 'Move up',
@@ -170,9 +142,41 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     imageWidth: 22.w,
                     imageHeight: 22.h,
                   ),
+
+                  
+                  
+                  _RowItem(
+                    imagePath: 'assets/images/Slider.png',
+                    title: 'Slider widget',
+                    imageHeight: 22.h,
+                    imageWidth: 22.w,
+                    trailing: SizedBox(
+                      height: 35.h,
+                      width: 60.w,
+                      child: CupertinoSwitch(
+                        value: _sliderWidget,
+                        onChanged: (v) => setState(() => _sliderWidget = v),
+                        activeColor: _blue,
+                      ),
+                    ),
+                  ),
+
+                  _RowItem(
+                    imagePath: 'assets/images/widget_size.png',
+                    title: 'Widget size',
+                    trailing: _SizeSegment(
+                      value: _selectedSize,
+                      onChanged: (v) => setState(() => _selectedSize = v),
+                      imageWidth: 22.w, // custom image width
+                      imageHeight: 22.h, // custom image height
+                    ),
+                  ),
+                  SizedBox(
+                    height: 13.h,
+                  )
                 ],
               ),
-            ),
+            ), 
 
             SizedBox(height: 10.h),
             /// REMOVE
@@ -258,30 +262,32 @@ class _RowItem extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 14.w,
-        right: 14.w,
-        top: 10.h,
-        bottom: 10.h,
-      ),
-      child: Row(
-        children: [
-          leading,
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
-                color: _textPrimary,
+    return Container(
+      height: 55.h,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 14.w,
+          right: 14.w,
+          
+        ),
+        child: Row(
+          children: [
+            leading,
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: _textPrimary,
+                ),
               ),
             ),
-          ),
-          trailing,
-        ],
+            trailing,
+          ],
+        ),
       ),
     );
   }
@@ -290,19 +296,27 @@ class _RowItem extends StatelessWidget {
 /// SIMPLE ROW
 class _SimpleRow extends StatelessWidget {
   final String? imagePath;
+  final String? iconPath; 
   final IconData? icon;
   final String title;
   final String? trailingText;
   final double imageWidth;
   final double imageHeight;
+  final double iconWidth;
+  final double iconHeight;
 
   const _SimpleRow({
     this.imagePath,
+    this.iconPath, 
     this.icon,
     required this.title,
     this.trailingText,
     this.imageWidth = 20,
     this.imageHeight = 20,
+    this.iconWidth = 14,
+    this.iconHeight = 14,
+
+    
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
 
   @override
@@ -316,34 +330,50 @@ class _SimpleRow extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-      child: Row(
-        children: [
-          leading,
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
-                color: _textPrimary,
+    return Container(
+      height: 55.h,
+      child: Padding(
+        padding: EdgeInsets.only(left: 12.w, right: 17.w,),
+        child: Row(
+          children: [
+            leading,
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: _textPrimary,
+                ),
               ),
             ),
-          ),
-          if (trailingText != null)
-            Text(
-              trailingText!,
-              style: TextStyle(
-                color: _textSecondary,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
+            if (trailingText != null)
+              Row(
+                children: [
+                  Text(
+                    trailingText!,
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+
+
+                  ),
+                  SizedBox(width: 5.w,),
+                  Image.asset(
+                    iconPath!,
+                    width: iconWidth.w,
+                    height: iconHeight.h,
+                    fit: BoxFit.contain,
+                  )
+                ],
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
