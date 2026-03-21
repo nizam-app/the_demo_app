@@ -22,6 +22,7 @@ import 'package:workpleis/features/smart_device/presentation/smart_devices_scree
 import 'package:workpleis/features/user/screen/user_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
 
+import '../features/core/screen/core_screen.dart';
 import 'error_screen.dart';
 
 class AppRouter {
@@ -127,6 +128,13 @@ class AppRouter {
         name: CoresScreen.routeName,
         builder: (context, state) => const CoresScreen(),
       ),
+
+      GoRoute(
+        path: CoreScreen.routeName,
+        name: CoreScreen.routeName,
+        builder: (context, state) => const CoreScreen(),
+      ),
+      
       GoRoute(
         path: LoginScreen.routeName,
         name: LoginScreen.routeName,

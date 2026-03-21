@@ -6,6 +6,8 @@ import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 
+import '../../notifications/screen/notifications_screen.dart';
+
 /// Single source of truth for all menu section card icon dimensions.
 /// Ensures every icon has the same container size, alignment, and fit.
 const double _kMenuIconContainerSize = 28;
@@ -163,7 +165,7 @@ class MenuScreen extends StatelessWidget {
                     // ✅ Overview
                     const _SectionTitle(title: 'Overview'),
                     _CardBlock(
-                      children: const [
+                      children:  [
                         _MenuItemRow(
                           imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',
@@ -187,6 +189,7 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/Group 43.png',
                           title: 'Notifications',
                           badgeText: '12',
+                          onTap: () => context.go(NotificationsScreen.routeName),
                           iconSize: 22,
                         ),
                       ],
@@ -381,6 +384,8 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }
+
+
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
