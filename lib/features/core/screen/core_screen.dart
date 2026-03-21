@@ -23,7 +23,7 @@ class _CoreScreenState extends State<CoreScreen> {
   static const Color _linkBlue = Color(0xFF0088FE);
   static const Color _badgeGreyBg = Color(0xFFDAE0E8);
   static const Color _cloudBadgeBg = Color(0xFF00D1FF);
-  static const Color _dhcpGreen = Color(0xFF10B981);
+  static const Color _dhcpGreen = Color(0xFF53DB6C);
 
   bool _dhcpEnabled = true;
 
@@ -73,12 +73,6 @@ class _CoreScreenState extends State<CoreScreen> {
                     ),
                     SizedBox(height: 18.h),
                     _sectionTitle('Inputs'),
-
-
-                    /// Done upper case okay
-
-                    
-
                     SizedBox(height: 21.h),
                     _whiteCard(
                       child: Column(
@@ -101,9 +95,9 @@ class _CoreScreenState extends State<CoreScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 39.h),
                     _sectionTitle('Network'),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 6.h),
                     _dhcpRow(),
                     SizedBox(height: 10.h),
                     _whiteCard(
@@ -119,7 +113,7 @@ class _CoreScreenState extends State<CoreScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 28.h),
                     _sectionTitle('Backup & Restore'),
                     SizedBox(height: 10.h),
                     _whiteCard(
@@ -135,22 +129,22 @@ class _CoreScreenState extends State<CoreScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 30.h),
                     _sectionTitle('Log'),
                     SizedBox(height: 10.h),
                     _whiteCard(
                       child: _chevronRowSimple('User and Updates'),
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 26.h),
                     _outlineActionButton(
                       label: 'Update firmware',
-                      icon: Icons.cloud_download_outlined,
+                      image: "assets/download.png",
                       onTap: () {},
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     _outlineActionButton(
                       label: 'Restart Core',
-                      icon: Icons.restart_alt_rounded,
+                      image: "assets/images/reload_icon.png",
                       onTap: () {},
                     ),
                   ],
@@ -165,7 +159,7 @@ class _CoreScreenState extends State<CoreScreen> {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(18.w, 6.h, 18.w, 10.h),
+      padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
       child: SizedBox(
         height: 40.h,
         child: Stack(
@@ -231,16 +225,16 @@ class _CoreScreenState extends State<CoreScreen> {
       decoration: BoxDecoration(
         color: _cardBg,
         borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.04),
+        //     blurRadius: 10.r,
+        //     offset: Offset(0, 2.h),
+        //   ),
+        // ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(26.r),
         child: child,
       ),
     );
@@ -310,7 +304,7 @@ class _CoreScreenState extends State<CoreScreen> {
           ),
           Container(
             height: 23.h,
-            //padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+            padding: EdgeInsets.symmetric(horizontal: 6.w, ),
             decoration: BoxDecoration(
               color: _badgeGreyBg,
               borderRadius: BorderRadius.circular(3.r),
@@ -359,7 +353,7 @@ class _CoreScreenState extends State<CoreScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-    Image.asset("assets/images/glog.png", height: 13.h, width: 13.w,color: Colors.white, ),
+                 Image.asset("assets/images/glog.png", height: 13.h, width: 13.w,color: Colors.white, ),
                 SizedBox(width: 4.w),
                 Text(
                   'Cloud',
@@ -390,8 +384,8 @@ class _CoreScreenState extends State<CoreScreen> {
                 label,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
                   color: _titleColor,
                 ),
               ),
@@ -400,13 +394,13 @@ class _CoreScreenState extends State<CoreScreen> {
               value,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 15.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: _valueColor,
               ),
             ),
             SizedBox(width: 6.w),
-            Icon(Icons.chevron_right_rounded, color: _titleColor, size: 22.sp),
+            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,),
           ],
         ),
       ),
@@ -417,9 +411,9 @@ class _CoreScreenState extends State<CoreScreen> {
     return InkWell(
       onTap: () {},
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Column(
@@ -429,30 +423,28 @@ class _CoreScreenState extends State<CoreScreen> {
                     'Language',
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
                       color: _titleColor,
                     ),
                   ),
                   SizedBox(height: 6.h),
                   Text(
-                    'Affects language settings of devices connected to this location. '
+                    'Affects the language settings of devices connected to this location. '
                     'Language settings of mobile devices are not affected.',
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w300,
                       color: _valueColor,
-                      height: 1.35,
+                      height: 1.25,
                     ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(top: 2.h),
-              child: Icon(Icons.chevron_right_rounded, color: _titleColor, size: 22.sp),
-            ),
+            SizedBox(width: 10.w,),
+            Image.asset('assets/back_arro.png', height: 13.h, width: 13.w, fit: BoxFit.cover,)
           ],
         ),
       ),
@@ -463,7 +455,7 @@ class _CoreScreenState extends State<CoreScreen> {
     return InkWell(
       onTap: () {},
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         child: Row(
           children: [
             Expanded(
@@ -471,13 +463,13 @@ class _CoreScreenState extends State<CoreScreen> {
                 label,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
                   color: _linkBlue,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _linkBlue, size: 22.sp),
+            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover, color: _linkBlue,)
           ],
         ),
       ),
@@ -488,15 +480,15 @@ class _CoreScreenState extends State<CoreScreen> {
     return InkWell(
       onTap: () {},
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Text(
             label,
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: _linkBlue,
             ),
           ),
@@ -509,7 +501,7 @@ class _CoreScreenState extends State<CoreScreen> {
     return InkWell(
       onTap: () {},
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         child: Row(
           children: [
             Expanded(
@@ -517,13 +509,13 @@ class _CoreScreenState extends State<CoreScreen> {
                 label,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
                   color: _titleColor,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: _titleColor, size: 22.sp),
+            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,),
           ],
         ),
       ),
@@ -540,9 +532,9 @@ class _CoreScreenState extends State<CoreScreen> {
               'Enable DHCP',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 15.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: _titleColor,
+                color: _valueColor,
               ),
             ),
           ),
@@ -561,36 +553,40 @@ class _CoreScreenState extends State<CoreScreen> {
 
   Widget _outlineActionButton({
     required String label,
-    required IconData icon,
+    required String image,
     required VoidCallback onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: _linkBlue, width: 1.5),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: _linkBlue, size: 22.sp),
-              SizedBox(width: 10.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _linkBlue,
+        borderRadius: BorderRadius.circular(26.r),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Container(
+            height: 50.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26.r),
+              color: Colors.white,
+              border: Border.all(color: _linkBlue, width: 1),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(image, height: 18.h, width: 18.w, fit: BoxFit.cover,),
+                SizedBox(width: 7.w),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _linkBlue,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
