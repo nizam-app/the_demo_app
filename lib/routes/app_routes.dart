@@ -4,6 +4,7 @@ import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
+import 'package:workpleis/features/configuration/screen/configuration_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/auth/screens/forget_screen.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
@@ -23,6 +24,7 @@ import 'package:workpleis/features/user/screen/user_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
 
 import '../features/core/screen/core_screen.dart';
+import '../features/settings/screen/setting_screen.dart';
 import 'error_screen.dart';
 
 class AppRouter {
@@ -124,6 +126,12 @@ class AppRouter {
         builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
+        path: SettingScreen.routeName,
+        name: SettingScreen.routeName,
+        builder: (context, state) => const SettingScreen(),
+      ),
+
+      GoRoute(
         path: CoresScreen.routeName,
         name: CoresScreen.routeName,
         builder: (context, state) => const CoresScreen(),
@@ -134,7 +142,12 @@ class AppRouter {
         name: CoreScreen.routeName,
         builder: (context, state) => const CoreScreen(),
       ),
-      
+      GoRoute(
+        path: ConfigurationScreen.routeName,
+        name: ConfigurationScreen.routeName,
+        builder: (context, state) => const ConfigurationScreen(),
+      ),
+
       GoRoute(
         path: LoginScreen.routeName,
         name: LoginScreen.routeName,

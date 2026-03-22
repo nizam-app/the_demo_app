@@ -5,6 +5,7 @@ import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
 
@@ -183,6 +184,7 @@ class MenuScreen extends StatelessWidget {
                           title: 'Weather',
                           iconWidth: 22,
                           iconHeight: 23.5,
+                          onTap: ()=> context.go(SettingScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
