@@ -13,11 +13,10 @@ class ConfigurationScreen extends StatelessWidget {
   static const Color _screenBg = Color(0xFFF3F4F6);
   static const Color _cardBg = Color(0xFFFFFFFF);
   static const Color _titleColor = Color(0xFF111827);
-  static const Color _labelColor = Color(0xFF6B7280);
-  static const Color _valueColor = Color(0xFF74777F);
-  static const Color _dividerColor = Color(0xFFE1E2E4);
-  static const Color _replaceBlue = Color(0xFF2196F3);
-  static const Color _deletePink = Color(0xFFE91E63);
+  static const Color _valueColor = Color(0xFF6B7280);
+  static const Color _dividerColor = Color(0xFFE1E1E1);
+  static const Color _replaceBlue = Color(0xFF0088FE);
+  static const Color _deletePink = Color(0xFFFE019A);
 
   static const List<({String label, String value})> _detailsRows = [
     (label: 'Serial Number', value: 'BLIND-4B37-3419-363A'),
@@ -36,22 +35,22 @@ class ConfigurationScreen extends StatelessWidget {
       _propertyRows = [
     (
       title: 'Salon 1',
-      subtitle: 'BLIND-4B37…',
+      subtitle: 'BLIND-4B37-3419-363A-BL1',
       trailing: 'Encoder Blind',
     ),
     (
       title: 'Salon 2',
-      subtitle: 'BLIND-4B37…',
+      subtitle: 'BLIND-4B37-3419-363A-BL2',
       trailing: 'Encoder Blind',
     ),
     (
       title: 'Kitchen 1',
-      subtitle: 'BLIND-4B37…',
+      subtitle: 'BLIND-4B37-3419-363A-BL3',
       trailing: 'Encoder Blind',
     ),
     (
       title: 'Kitchen 2',
-      subtitle: 'BLIND-4B37…',
+      subtitle: 'BLIND-4B37-3419-363A-BL4',
       trailing: 'Encoder Blind',
     ),
   ];
@@ -72,7 +71,7 @@ class ConfigurationScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _sectionTitle('Details'),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     _roundedCard(
                       child: Column(
                         children: [
@@ -86,7 +85,7 @@ class ConfigurationScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 31.h),
                     _sectionTitle('Properties'),
                     SizedBox(height: 10.h),
                     _roundedCard(
@@ -104,21 +103,25 @@ class ConfigurationScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 26.h),
                     _pillButton(
                       context,
                       label: 'Replace',
                       color: _replaceBlue,
-                      icon: Icons.sync_rounded,
+                      image: "assets/images/Peplace_icon.png",
                       onTap: () {},
+                      height: 30.h,
+                      width: 30.w, 
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     _pillButton(
                       context,
                       label: 'Delete',
                       color: _deletePink,
-                      icon: Icons.delete_outline_rounded,
+                      image: "assets/images/delete1.png",
                       onTap: () {},
+                      height: 19.h,
+                      width: 16.w, 
                     ),
                   ],
                 ),
@@ -196,7 +199,7 @@ class ConfigurationScreen extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: _cardBg,
-        borderRadius: BorderRadius.circular(28.r),
+        borderRadius: BorderRadius.circular(26.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -206,43 +209,46 @@ class ConfigurationScreen extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28.r),
+        borderRadius: BorderRadius.circular(26.r),
         child: child,
       ),
     );
   }
 
   Widget _rowDivider() {
-    return Divider(height: 1.h, thickness: 1, color: _dividerColor);
+    return Padding(
+      padding: const EdgeInsets.only(left: 14, right: 14),
+      child: Divider(height: 1.h, thickness: 1, color: _dividerColor),
+    );
   }
 
   Widget _detailRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 2,
+            flex: 7,
             child: Text(
               label,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w500,
-                color: _labelColor,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: _titleColor,
                 height: 1.3,
               ),
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 8,
             child: Text(
               value,
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 15.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: _valueColor,
                 height: 1.3,
@@ -265,7 +271,7 @@ class ConfigurationScreen extends StatelessWidget {
       child: InkWell(
         onTap: () {},
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.w),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -278,8 +284,9 @@ class ConfigurationScreen extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w400,
                         color: _titleColor,
+                        height: 1.3,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -289,9 +296,10 @@ class ConfigurationScreen extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: 'Inter',
-                        fontSize: 13.sp,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
                         color: _valueColor,
+                        height: 1.3,
                       ),
                     ),
                   ],
@@ -307,11 +315,8 @@ class ConfigurationScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4.w),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 22.sp,
-                color: _valueColor.withOpacity(0.85),
-              ),
+              Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color:_valueColor )  ,
+
             ],
           ),
         ),
@@ -323,88 +328,52 @@ class ConfigurationScreen extends StatelessWidget {
     BuildContext context, {
     required String label,
     required Color color,
-    required IconData icon,
+    required String image,
+        required double height,
+        required double width,
+        Color? imageColor,
     required VoidCallback onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 6.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 22.sp),
-              SizedBox(width: 10.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: color,
+        borderRadius: BorderRadius.circular(26),
+        child: Padding(
+          padding: EdgeInsets.only(right: 16.w, left: 16.w),
+          child: Container(
+            height: 50.h,
+            width: double.infinity,
+            
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: color, width: 1),
+              // boxShadow: [
+              //   BoxShadow(
+              //     color: Colors.black.withOpacity(0.03),
+              //     blurRadius: 6.r,
+              //     offset: Offset(0, 2.h),
+              //   ),
+              // ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(image,height: height.h, width: width.w, fit: BoxFit.cover,color:imageColor,),
+                SizedBox(width: 5.w),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CircleHeaderButton extends StatelessWidget {
-  const _CircleHeaderButton({
-    required this.onTap,
-    this.child,
-    this.icon,
-  }) : assert(child != null || icon != null);
-
-  final VoidCallback onTap;
-  final Widget? child;
-  final IconData? icon;
-
-  static const Color _primaryText = Color(0xFF1A1C1E);
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: Container(
-          width: 36.w,
-          height: 36.h,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 8.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: child ??
-              Icon(icon, size: 20.sp, color: _primaryText),
         ),
       ),
     );
