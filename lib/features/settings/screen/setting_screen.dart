@@ -21,7 +21,7 @@ class _SettingScreenState extends State<SettingScreen> {
   static const Color _secondaryText = Color(0xFF6B7280);
   static const Color _dividerColor = Color(0xFFE1E1E1);
   static const Color _blue = Color(0xFF0088FE);
-  static const Color _deletePink = Color(0xFFD81B60);
+  static const Color _deletePink = Color(0xFFFE019A);
 
   bool _useOtherWhenOff = false;
   bool _negateOutput = true;
@@ -70,35 +70,29 @@ class _SettingScreenState extends State<SettingScreen> {
                         onChanged: (v) => setState(() => _negateOutput = v),
                       ),
                     ),
-
-
-                    //Work is done in check. 
-
-
-                    SizedBox(height: 14.h),
+                    SizedBox(height: 10.h),
                     _whiteCard(
                       child: _titleSubtitleToggleRow(
                         title: 'Relative Luminance',
                         subtitle:
-                            'Based on CIE 1391 standard, Increase of light.'
-                            'non-linear curve so dimming feels more natural to the eye.',
+                            'Based on CIE 1391 standard, Increase of light. Power leads to smaller increase of perceived luminance. If this setting is turned on, changes of brightness, e.g. between 50% - 100% will be more visible.'
+                            ,
                         value: _relativeLuminance,
                         onChanged: (v) =>
                             setState(() => _relativeLuminance = v),
                       ),
                     ),
-                    SizedBox(height: 14.h),
+                    SizedBox(height: 10.h),
                     _whiteCard(
                       child: _titleSubtitleToggleRow(
                         title: 'AC Dimming',
                         subtitle:
-                            'Linearizes electrical power delivery for AC loads so '
-                            'brightness changes more evenly across the dimming range.',
+                            'If this setting is turned on, set brightness level is considered as an area under the sinusoidal curve. The result will be the linearization of electricity power, most visible for values close to 0% and 100%',
                         value: _acDimming,
                         onChanged: (v) => setState(() => _acDimming = v),
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 20.h),
                     _sectionTitle('Adaptations'),
                     SizedBox(height: 10.h),
                     _whiteCard(
@@ -110,31 +104,38 @@ class _SettingScreenState extends State<SettingScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 22.h),
+                    SizedBox(height: 20.h),
                     _sectionTitle('PMW'),
                     SizedBox(height: 10.h),
                     _whiteCard(
                       child: _chevronValueRow(
-                        'PMW frequency for UO1-2, UO7-8',
+                        'PMW frequency for \n'
+                            'UO1-2, UO7-8',
                         '25000Hz',
                         titleMaxLines: 2,
                       ),
                     ),
-                    SizedBox(height: 28.h),
+                    SizedBox(height: 26.h),
                     _pillOutlineButton(
                       label: 'Configuration',
                       color: _blue,
-                      icon: Icons.tune_rounded,
+                      image: "assets/Mask group (1) copy.png",
                       onTap: () {
                         context.push(ConfigurationScreen.routeName); 
                       },
+                      width: 30.w,
+                      height: 30.h,
+                      imageColor: _blue,
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
                     _pillOutlineButton(
                       label: 'Delete',
                       color: _deletePink,
-                      icon: Icons.delete_outline_rounded,
+                      image: "assets/images/delete1.png",
                       onTap: () {},
+                      width:  16.w,
+                      height: 19.h,
+                      //imageColor: _deletePink,
                     ),
                   ],
                 ),
@@ -286,7 +287,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 color: _secondaryText,
               ),
             ),
-            SizedBox(width: 4.w),
+            SizedBox(width: 5.w),
              Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit:BoxFit.cover,color: _secondaryText)  ,
           ],
         ),
@@ -305,17 +306,13 @@ class _SettingScreenState extends State<SettingScreen> {
                 title,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
                   color: _primaryText,
                 ),
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: _secondaryText.withOpacity(0.7),
-              size: 22.sp,
-            ),
+            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit:BoxFit.cover,color: _secondaryText)  ,
           ],
         ),
       ),
@@ -364,7 +361,7 @@ class _SettingScreenState extends State<SettingScreen> {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 14.h, 12.w, 14.h),
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -389,7 +386,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w300,
                     color: _primaryText,
-                     height: 1,
+                     //height: 1,
                   ),
                 ),
               ],
@@ -415,44 +412,51 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget _pillOutlineButton({
     required String label,
     required Color color,
-    required IconData icon,
+    required String image,
     required VoidCallback onTap,
+    required double height,
+    required double width,
+    Color? imageColor,
+    
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: color, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 6.r,
-                offset: Offset(0, 2.h),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 22.sp),
-              SizedBox(width: 10.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: color,
+        borderRadius: BorderRadius.circular(26),
+        child: Padding(
+          padding: EdgeInsets.only(left: 16.w, right: 16.w),
+          child: Container(
+            height: 50.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: color, width: 1),
+              // boxShadow: [
+              //   BoxShadow(
+              //     color: Colors.black.withOpacity(0.03),
+              //     blurRadius: 6.r,
+              //     offset: Offset(0, 2.h),
+              //   ),
+              // ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(image,height: height.h, width: width.w, fit: BoxFit.cover,color:imageColor,),
+                SizedBox(width: 5.w),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
