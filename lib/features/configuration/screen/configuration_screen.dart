@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widget/global_back_button.dart';
+
 /// Device **Configuration** screen — Details + Properties cards, Replace / Delete actions.
 class ConfigurationScreen extends StatelessWidget {
   const ConfigurationScreen({super.key});
 
   static const String routeName = '/configuration';
 
-  static const Color _screenBg = Color(0xFFF8F9FB);
+  static const Color _screenBg = Color(0xFFF3F4F6);
   static const Color _cardBg = Color(0xFFFFFFFF);
-  static const Color _titleColor = Color(0xFF1A1C1E);
+  static const Color _titleColor = Color(0xFF111827);
   static const Color _labelColor = Color(0xFF6B7280);
   static const Color _valueColor = Color(0xFF74777F);
   static const Color _dividerColor = Color(0xFFE1E2E4);
@@ -65,12 +67,12 @@ class ConfigurationScreen extends StatelessWidget {
             _buildAppBar(context),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(22.w, 8.h, 22.w, 28.h),
+                padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 28.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _sectionTitle('Details'),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 12.h),
                     _roundedCard(
                       child: Column(
                         children: [
@@ -130,41 +132,42 @@ class ConfigurationScreen extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
+      padding: EdgeInsets.fromLTRB(17.w, 6.h, 17.w, 10.h),
       child: SizedBox(
-        height: 44.h,
+        height: 40.h,
         child: Stack(
           alignment: Alignment.center,
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: _CircleHeaderButton(
-                onTap: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  } else {
-                    context.go('/home');
-                  }
-                },
+              child: GlobalCircleIconBtn(
+                color: Colors. white,
                 child: Image.asset(
                   'assets/aro.png',
                   width: 16.w,
                   height: 16.h,
                 ),
+                onTap: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    context.go('/setting-device');
+                  }
+                },
               ),
             ),
             Text(
               'Configuration',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 21.sp,
-                fontWeight: FontWeight.w700,
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w600,
                 color: _titleColor,
               ),
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: _CircleHeaderButton(
+              child: GlobalCircleIconBtn(
                 onTap: () {},
                 icon: Icons.more_horiz_rounded,
               ),
@@ -180,10 +183,10 @@ class ConfigurationScreen extends StatelessWidget {
       text,
       style: TextStyle(
         fontFamily: 'Inter',
-        fontSize: 18.sp,
-        fontWeight: FontWeight.w700,
+        fontSize: 20.sp,
+        fontWeight: FontWeight.w600,
         color: _titleColor,
-        height: 1.2,
+        // height: 1.2,
       ),
     );
   }
