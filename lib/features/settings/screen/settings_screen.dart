@@ -71,7 +71,15 @@ class SettingsScreen extends StatelessWidget {
               width: 16.w,
               height: 16.h,
             ),
-            onTap: () => context.pop(),
+            //onTap: () => context.pop(),
+
+            onTap: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                context.go('/menu');
+              }
+            },
             // color: Color(0xFFF3F4F6),
           ),
           Expanded(
