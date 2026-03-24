@@ -333,18 +333,19 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                     tab.$2,
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: active
-                          ? const Color(0xFF111827)
-                          : const Color(0xFF6B7280),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color:  Color(0xFF111827) ,
+                      // active
+                      //     ? const Color(0xFF111827)
+                      //     : const Color(0xFF111827),
                     ),
                   ),
-                  SizedBox(height: 12.h),
+                  SizedBox(height: 6.h),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    height: 1.5.h,
-                    width: active ? 46.w : 0.w,
+                    height: 3.h,
+                    width: active ? 49.w : 0.w,
                     decoration: BoxDecoration(
                       color: const Color(0xFF111827),
                       borderRadius: BorderRadius.circular(26.r),
@@ -383,7 +384,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _buildManageDeviceCard() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 22.w),
+      padding: EdgeInsets.only(right: 22.w, left: 22.w),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -400,26 +401,35 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 10.h),
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
               child: Text(
                 'Manage your device',
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF111827),
                 ),
               ),
             ),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowLabels(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+            Padding(
+              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+            ),
             _manageRowAlerts(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+            Padding(
+              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+            ),
             _manageRowSafeValue(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE5E7EB)),
+            Padding(
+              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+            ),
             _manageRowManualOverride(),
-            SizedBox(height: 14.h),
+            //SizedBox(height: 14.h),
           ],
         ),
       ),
@@ -428,21 +438,17 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _manageRowLabels() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Icon(
-            Icons.local_offer_rounded,
-            size: 22.sp,
-            color: const Color(0xFF111827),
-          ),
+          Image.asset("assets/labels_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover,), 
           SizedBox(width: 12.w),
           Text(
             'Labels',
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -451,7 +457,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             children: [
               _Chip(
                 label: 'Bathroom',
-                bg: const Color(0xFFF901A8),
+                bg: const Color(0xFFFE019A),
                 textColor: Colors.white,
                 border: Colors.transparent,
               ),
@@ -459,15 +465,11 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               _Chip(
                 label: _label,
                 bg: Colors.white,
-                textColor: const Color(0xFF0B5DFA),
-                border: const Color(0xFF0B5DFA),
+                textColor: const Color(0xFF0088FE),
+                border: const Color(0xFF0088FE),
               ),
               SizedBox(width: 8.w),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: const Color(0xFF9CA3AF),
-                size: 22.sp,
-              ),
+              Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280)), 
             ],
           ),
         ],
@@ -477,31 +479,27 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _manageRowAlerts() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Icon(
-            Icons.warning_rounded,
-            size: 22.sp,
-            color: const Color(0xFF111827),
-          ),
+          Image.asset("assets/alerts_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover),  
           SizedBox(width: 12.w),
           Text(
             'Alerts',
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
           const Spacer(),
           Container(
-            width: 34.w,
-            height: 34.w,
+            width: 38.w,
+            height: 29.h,
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(999.r),
+              borderRadius: BorderRadius.circular(26.r),
             ),
             child: Center(
               child: Text(
@@ -509,18 +507,14 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF6B7280),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF111827),
                 ),
               ),
             ),
           ),
-          SizedBox(width: 10.w),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: const Color(0xFF9CA3AF),
-            size: 22.sp,
-          ),
+          SizedBox(width: 8.w, ),
+             Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280),), 
         ],
       ),
     );
@@ -528,21 +522,17 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _manageRowSafeValue() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Icon(
-            Icons.settings_rounded,
-            size: 22.sp,
-            color: const Color(0xFF111827),
-          ),
+          Image.asset("assets/sate_icon.png", height: 21.h, width: 21.w, fit: BoxFit.cover),  
           SizedBox(width: 12.w),
           Text(
             'Safe Value',
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -552,16 +542,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF111827),
             ),
           ),
-          SizedBox(width: 10.w),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: const Color(0xFF9CA3AF),
-            size: 22.sp,
-          ),
+          SizedBox(width: 8.w),
+          Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280),), 
         ],
       ),
     );
@@ -572,36 +558,42 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Icon(
-            Icons.tune_rounded,
-            size: 22.sp,
-            color: const Color(0xFF111827),
-          ),
+          Image.asset("assets/manual_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover), 
           SizedBox(width: 12.w),
           Text(
             'Manual Override',
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
           const Spacer(),
-          Row(
-            children: [
-              _ModeButton(
-                label: 'A',
-                active: _manualMode == 'A',
-                onTap: () => setState(() => _manualMode = 'A'),
-              ),
-              SizedBox(width: 10.w),
-              _ModeButton(
-                label: 'M',
-                active: _manualMode == 'M',
-                onTap: () => setState(() => _manualMode = 'M'),
-              ),
-            ],
+          Container(
+            height: 36.h,
+            width: 69.w,
+            decoration: BoxDecoration(
+              color: Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(30.r), 
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _ModeButton(
+                  label: 'A',
+                  active: _manualMode == 'A',
+                  onTap: () => setState(() => _manualMode = 'A'),
+                ),
+                //SizedBox(width: 10.w),
+                _ModeButton(
+                  label: 'M',
+                  active: _manualMode == 'M',
+                  onTap: () => setState(() => _manualMode = 'M'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1022,25 +1014,24 @@ class _Chip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+      padding: EdgeInsets.only(right: 10.w, left: 10.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: border, width: 1.2),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: border, width: 1),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 14.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w400,
           color: textColor,
         ),
       ),
     );
   }
 }
-
 class _ModeButton extends StatelessWidget {
   const _ModeButton({
     required this.label,
@@ -1057,24 +1048,25 @@ class _ModeButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 34.w,
-        height: 34.w,
+        padding: EdgeInsets.all(2.w),
+        width: 30.w,
+        height: 30.w,
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFEEF2F6) : Colors.white,
-          borderRadius: BorderRadius.circular(999.r),
-          border: Border.all(
-            color: const Color(0xFFE5E7EB),
-            width: 1.2,
-          ),
+          color: active
+              ? const Color(0xFFE1E1E1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(26.r),
         ),
         child: Center(
           child: Text(
             label,
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF6B7280),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: active
+                  ? const Color(0xFF111827)
+                  : const Color(0xFF6B7280),
             ),
           ),
         ),
