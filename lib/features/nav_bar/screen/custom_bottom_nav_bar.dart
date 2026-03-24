@@ -18,9 +18,9 @@ class BottomNavBarWidget extends StatelessWidget {
     const items = [
       NavItemData('Devices', 'assets/Group 28.png'),
       NavItemData('Analytics', 'assets/bar 5.png'),
-      NavItemData('Voice', 'assets/image 98.png'),
+      NavItemData('Dashboard', 'assets/images/dashboard_icon.png'),
       NavItemData('Notifications', 'assets/Group 43.png'),
-      NavItemData('Automations', 'assets/Mask group (8).png'),
+      NavItemData('Settings', 'assets/seting.png'),
     ];
 
     return RepaintBoundary(
@@ -62,8 +62,8 @@ class BottomNavBarWidget extends StatelessWidget {
                           width: indicatorW,
                           height: indicatorH,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0088FE),
-                            borderRadius: BorderRadius.circular(99.r),
+                            color: const Color(0xFF111827),
+                            borderRadius: BorderRadius.circular(26.r),
                           ),
                         ),
                       ),
@@ -297,7 +297,7 @@ class BottomNavItem extends StatelessWidget {
                       height: iconBox,
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFF0088FE),
+                        color: Color(0xFF111827),
                       ),
                     ),
 
@@ -351,7 +351,7 @@ class BottomNavItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
+              color: isSelected ? const Color(0xFF111827) : const Color(0xFF111827),
             ),
             child: Text(
               label,

@@ -14,6 +14,7 @@ import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
+import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 import 'package:workpleis/features/menu/screen/menu_screen.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/profile/screen/profile_screen.dart';
@@ -169,6 +170,12 @@ class AppRouter {
         name: IntegrationsScreen.routeName,
         builder: (context, state) => const IntegrationsScreen(),
       ),
+
+      GoRoute(
+        path: LightDinningRoomScreen.routeName,
+        name: LightDinningRoomScreen.routeName,
+        builder: (context, state) => const LightDinningRoomScreen(),
+      ), 
 
       GoRoute(
         path: TcpIpIntegrationScreen.routeName,

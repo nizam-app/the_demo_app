@@ -5,6 +5,7 @@ import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
@@ -236,10 +237,11 @@ class MenuScreen extends StatelessWidget {
                     const _SectionTitle(title: 'Categories'),
                     _CardBlock(
                       children: [
-                        const _MenuItemRow(
+                         _MenuItemRow(
                           imagePath: 'assets/Mask group.png',
                           title: 'Lighting',
                           iconSize: 22,
+                          onTap: ()=>context.push(LightDinningRoomScreen.routeName),
                         ),
                         const _InnerDivider(),
                         const _MenuItemRow(
