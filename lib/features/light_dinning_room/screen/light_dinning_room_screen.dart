@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
@@ -672,7 +673,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 8.h),
+            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
             child: Row(
               children: [
                 Expanded(
@@ -680,8 +681,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                     'Live chart',
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -778,7 +779,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(26.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -791,52 +792,60 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 8.h),
+            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
             child: Text(
               'Activity log',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF111827),
               ),
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          const Divider(height: 1, color: Color(0xFFE1E1E1)),
           _activityRow(
-            leading: const Icon(Icons.person_rounded, color: Color(0xFF0B5DFA)),
+            leading: const Icon(Icons.person_rounded,size: 17, color: Color(0xFF0088FE)),
             time: '18.12.25',
             clock: '18:26',
             name: 'User name 1',
             statusText: 'On',
-            statusColor: const Color(0xFF0B5DFA),
+            //statusColor: const Color(0xFF111827),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          Padding(
+            padding: EdgeInsets.only( left: 58.w),
+            child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
+          ),
           _activityRow(
-            leading: const Icon(Icons.person_rounded, color: Color(0xFF0B5DFA)),
+            leading: const Icon(Icons.person_rounded, size: 17, color: Color(0xFF0088FE)),
             time: '18.12.25',
             clock: '17:55',
             name: 'User name 2',
             statusText: 'Off',
-            statusColor: const Color(0xFF6B7280),
+            //statusColor: const Color(0xFF),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          Padding(
+            padding: EdgeInsets.only( left: 58.w),
+            child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
+          ),
           _activityRow(
             leading: const Text(
               'M',
               style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Color(0xFFEC4899),
+                fontWeight: FontWeight.w500,
+                color: Color(0xFFFFFFFF),
+                fontSize: 16, 
               ),
             ),
             time: '18.12.25',
             clock: '16:13',
             name: 'User name 3',
             statusText: '78%',
-            statusColor: const Color(0xFFEC4899),
+           // statusColor: const Color(0xFFEC4899),
             statusIsPercent: true,
+            avatarBgColor: const Color(0xFFFE019A),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 5.h),
         ],
       ),
     );
@@ -901,61 +910,69 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     required String clock,
     required String name,
     required String statusText,
-    required Color statusColor,
+    //required Color statusColor,
     bool statusIsPercent = false,
+    Color? avatarBgColor,
   }) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
         children: [
-          leading,
+          Container(
+            height: 33.h,
+            width: 33.w,
+            child: CircleAvatar(
+              radius: 33.r,
+                backgroundColor: avatarBgColor ?? const Color(0xFFF3F4F6),
+                child: leading),
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '$time   $clock   $name',
+                Text.rich(
+                  TextSpan(
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: time,
+                        style: TextStyle(color: const Color(0xFF6B7280)),
+                      ),
+                      const TextSpan(text: '   '),
+                      TextSpan(
+                        text: clock,
+                        style: TextStyle(color: const Color(0xFF6B7280)),
+                      ),
+                      const TextSpan(text: '   '),
+                      TextSpan(
+                        text: name,
+                        style: TextStyle(fontSize: 14.sp, color: const Color(0xFF111827)),
+                      ),
+                    ],
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111827),
-                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 10.w),
-          if (statusIsPercent)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(999.r),
-              ),
-              child: Text(
-                statusText,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w700,
-                  color: statusColor,
-                ),
-              ),
-            )
-          else
+          //SizedBox(width: 10.w),
+          
             Text(
               statusText,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: statusColor,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF111827),
               ),
-            ),
+            )
+          
         ],
       ),
     );
@@ -976,7 +993,7 @@ class _StatBlock extends StatelessWidget {
           top,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 14.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF111827),
           ),
