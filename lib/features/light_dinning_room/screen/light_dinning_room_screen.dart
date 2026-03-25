@@ -617,32 +617,39 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 8.h),
+            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
             child: Text(
               'Organize automation',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF111827),
               ),
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          const Divider(height: 1, color: Color(0xFFE1E1E1)),
           _miniAutomationRow(
             title: 'Set actions based on value of',
             subtitle: 'Multi-Value Switch',
-            icon: Icons.settings_input_component,
-            iconColor: const Color(0xFF00BFA5),
+            image: "assets/set_actions_icon.png",
+            //iconColor: const Color(0xFF00BFA5),
+              imageheight: 40.h,
+              imagewidth: 40.w
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          Padding(
+            padding:  EdgeInsets.only(left: 60.w, right: 14.w),
+            child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
+          ),
           _miniAutomationRow(
             title: 'Temperature hysteresis controller (2)',
             subtitle: 'Multi-Value Switch',
-            icon: Icons.thermostat_outlined,
-            iconColor: const Color(0xFFFF4D4D),
+            image: "assets/temperature_icon.png",
+            //iconColor: const Color(0xFFFF4D4D),
+            imageheight: 34.h,
+            imagewidth: 34.w
           ),
-          SizedBox(height: 8.h),
+          //SizedBox(height: 8.h),
         ],
       ),
     );
@@ -838,23 +845,18 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   Widget _miniAutomationRow({
     required String title,
     required String subtitle,
-    required IconData icon,
-    required Color iconColor,
+    required String image,
+     Color? iconColor,
+    required double imageheight,
+    required double imagewidth,
+    
   }) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            width: 34.w,
-            height: 34.w,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, size: 18.sp, color: iconColor),
-          ),
+          Image.asset(image,height:imageheight, width: imagewidth,fit: BoxFit.cover, ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -866,8 +868,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                   ),
                 ),
@@ -878,7 +880,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 10.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
                   ),
@@ -887,11 +889,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
           ),
           SizedBox(width: 6.w),
-          Icon(
-            Icons.chevron_right_rounded,
-            size: 20.sp,
-            color: const Color(0xFF9CA3AF),
-          ),
+          Image.asset("assets/images/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,)
         ],
       ),
     );
