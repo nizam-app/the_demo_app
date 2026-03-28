@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/widget/zoneAddMenut.dart';
@@ -106,7 +107,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
 
               // ✅ Top bar like screenshot
               _TopBar(
-                onBack: () => Navigator.maybePop(context),
+                onBack: () => context.pop(),
                 onMenu: () => showZonesMenuSheet(context),
                 onAdd: () => showZonesAddMenuSheet(context),
               ),
