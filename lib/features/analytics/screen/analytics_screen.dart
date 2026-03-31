@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 
 class AnalyticsScreen extends StatefulWidget {
-  const AnalyticsScreen({super.key});
+  const AnalyticsScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/analytics';
+  final bool showBottomNav;
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -37,7 +38,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF111827)),
-          onPressed: () => context.go('/home'),
+          onPressed: () {
+            if (!widget.showBottomNav) {
+              final shell = CustomBottomNavBar.of(context);
+              if (shell != null) {
+                shell.setSelectedIndex(2);
+                return;
+              }
+            }
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
         ),
         title: Text(
           'Analytics',
@@ -59,10 +73,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBarWidget(
-        selectedIndex: _selectedNavIndex,
-        onItemTapped: _onNavItemTapped,
-      ),
+      bottomNavigationBar: widget.showBottomNav
+          ? BottomNavBarWidget(
+              selectedIndex: _selectedNavIndex,
+              onItemTapped: _onNavItemTapped,
+            )
+          : null,
     );
   }
 }

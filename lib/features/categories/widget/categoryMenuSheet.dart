@@ -87,13 +87,25 @@ class CategoryMenuSheet extends StatelessWidget {
                     title: 'Rename',
                     iconWidth: 22.w,
                     iconHeight: 22.h,
-                    trailing: Text(
-                      'Living room',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: _textSecondary,
-                        fontFamily: 'Inter',
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Living room',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: _textSecondary,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Image.asset(
+                          'assets/Group 63.png',
+                          width: 14.w,
+                          height: 13.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
                     ),
                   ),
 

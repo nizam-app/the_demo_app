@@ -194,17 +194,10 @@ class _CoreScreenState extends State<CoreScreen> {
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(26.r),
-                onTap: (){},
-                child: Container(
-                  width: 32.w,
-                  height: 32.w,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: Center(
-                    child: Icon(Icons.more_horiz_rounded, size: 22.sp, color: Color(0xFF111827)),
-                  ),
-                ),
+              child: GlobalCircleIconBtn(
+                color: Colors.white,
+                icon: Icons.more_horiz_rounded,
+                onTap: () {},
               ),
             ),
           ],

@@ -332,7 +332,6 @@ onTap: () => context.pop(),
                           showChevron: false,
                           iconSize: 20,
                           onTap: () {
-                            Navigator.pop(context);
                             context.push(ZonesScreen.routeName);
                           },
                         ),

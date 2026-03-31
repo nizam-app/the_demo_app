@@ -521,7 +521,7 @@ class ActiveIntegrationCard extends StatelessWidget {
                           color: _textDark,
                         ),
                       ),
-                      SizedBox(width: 10.w),
+                      SizedBox(width: 6.w),
                       AppAssetIcon(
                         item.statusIconAsset,
                        
@@ -554,7 +554,7 @@ class ActiveIntegrationCard extends StatelessWidget {
               ),
             ),
 
-            SizedBox(width: 12.w),
+            SizedBox(width: 6.w),
 
             // Right pill + arrow
             Row(
@@ -565,7 +565,7 @@ class ActiveIntegrationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(26.r),
                   child: _StatusPill(enabled: isEnabled),
                 ),
-                SizedBox(width: 14.w),
+                SizedBox(width: 6.w),
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 26.sp,

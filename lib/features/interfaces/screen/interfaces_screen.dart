@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -48,12 +47,12 @@ class ImageSizeRegistry {
 
 class AppAssetIcon extends StatelessWidget {
   const AppAssetIcon(
-      this.asset, {
-        super.key,
-        this.size,
-        this.color,
-        this.fit = BoxFit.contain,
-      });
+    this.asset, {
+    super.key,
+    this.size,
+    this.color,
+    this.fit = BoxFit.contain,
+  });
 
   final String asset;
   final ImgSize? size;
@@ -111,7 +110,6 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
     );
   }
 
-
   final List<_InterfaceItem> _items = const [
     _InterfaceItem(
       title: 'Aican Bus',
@@ -145,7 +143,7 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
       backgroundColor: _bg,
 
       floatingActionButton: _FabPlus(
-        onTap: ()=>showSelectInterfaceBottomSheet(context),
+        onTap: () => showSelectInterfaceBottomSheet(context),
       ),
 
       bottomNavigationBar: _BottomNav(
@@ -180,7 +178,8 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                   itemBuilder: (_, i) {
                     void toggleStatus() {
                       setState(() {
-                        _itemStatuses[i] = _itemStatuses[i] == _InterfaceStatus.ok
+                        _itemStatuses[i] =
+                            _itemStatuses[i] == _InterfaceStatus.ok
                             ? _InterfaceStatus.warn
                             : _InterfaceStatus.ok;
                       });
@@ -220,7 +219,6 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      
       padding: const EdgeInsets.only(right: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -237,10 +235,7 @@ class _TopBar extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: AppAssetIcon(
-                  'assets/aro.png',
-                  color: _textDark,
-                ),
+                child: AppAssetIcon('assets/aro.png', color: _textDark),
               ),
             ),
           ),
@@ -318,108 +313,106 @@ class _InterfaceCard extends StatelessWidget {
           ],
         ),
         child: Row(
-        children: [
-          // Logo wrapper
-          Container(
-            width: 43.w,
-            height: 43.h,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(10.r),
+          children: [
+            // Logo wrapper
+            Container(
+              width: 43.w,
+              height: 43.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Center(child: AppAssetIcon(item.logoAsset)),
             ),
-            child: Center(
-              child: AppAssetIcon(item.logoAsset),
-            ),
-          ),
 
-          SizedBox(width: 14.w),
+            SizedBox(width: 14.w),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        item.title,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: textDark,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          item.title,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: textDark,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: onStatusTap,
-                        borderRadius: BorderRadius.circular(26.r),
-                        //behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: EdgeInsets.all(4.w),
-                          child: _StatusBadge(status: status),
+                      SizedBox(width: 6.w),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onStatusTap,
+                          borderRadius: BorderRadius.circular(26.r),
+                          //behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: EdgeInsets.all(4.w),
+                            child: _StatusBadge(status: status),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                //SizedBox(height: 6.h),
-                Text(
-                  item.subtitle,
-                  //overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: textGrey,
+                    ],
                   ),
+                  //SizedBox(height: 6.h),
+                  Text(
+                    item.subtitle,
+                    //overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: textGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(width: 6.w),
+
+            // Devices pill
+            Container(
+              height: 30.h,
+              width: 96.w,
+              // padding: EdgeInsets.symmetric(horizontal: 16.w),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: pillBg,
+                borderRadius: BorderRadius.circular(26.r),
+              ),
+              child: Text(
+                item.devices,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: pillTextColor,
                 ),
-              ],
-            ),
-          ),
-
-          SizedBox(width: 10.w),
-
-          // Devices pill
-          Container(
-            height: 30.h,
-            width: 96.w,
-           // padding: EdgeInsets.symmetric(horizontal: 16.w),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: pillBg,
-              borderRadius: BorderRadius.circular(26.r),
-            ),
-            child: Text(
-              item.devices,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: pillTextColor,
               ),
             ),
-          ),
 
-          SizedBox(width: 10.w),
+            SizedBox(width: 4.w),
 
-          InkWell(
-            onTap: onMore,
-            borderRadius: BorderRadius.circular(10.r),
-            child: Padding(
-              padding: EdgeInsets.all(8.r),
-              child: Icon(
-                Icons.more_horiz_rounded,
-                size: 22.sp,
-                color: const Color(0xFF6B7280),
+            InkWell(
+              onTap: onMore,
+              borderRadius: BorderRadius.circular(10.r),
+              child: Padding(
+                padding: EdgeInsets.all(4.r),
+                child: Icon(
+                  Icons.more_horiz_rounded,
+                  size: 22.sp,
+                  color: const Color(0xFF6B7280),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -436,10 +429,14 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (status == _InterfaceStatus.ok) {
-      return Image.asset("assets/zigbee_done.png", height: 13, width: 13,fit: BoxFit.cover,) ;
-    
+      return Image.asset(
+        "assets/zigbee_done.png",
+        height: 13,
+        width: 13,
+        fit: BoxFit.cover,
+      );
     }
-    return Icon(Icons.warning_rounded, size: 22.sp, color: _magenta);
+    return Icon(Icons.warning_rounded, size: 18.sp, color: _magenta);
   }
 }
 
@@ -473,7 +470,9 @@ class _BottomNav extends StatelessWidget {
       height: 72.h,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.74),
-        border: const Border(top: BorderSide(color: Color(0xFFE1E1E1), width: 1)),
+        border: const Border(
+          top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
+        ),
       ),
       child: LayoutBuilder(
         builder: (context, c) {
@@ -511,7 +510,8 @@ class _BottomNav extends StatelessWidget {
                             clipBehavior: Clip.none,
                             children: [
                               AppAssetIcon(item.icon, color: color),
-                              if (item.label == 'Notifications' && notificationCount > 0)
+                              if (item.label == 'Notifications' &&
+                                  notificationCount > 0)
                                 Positioned(
                                   right: -10.w,
                                   top: -6.h,
@@ -607,6 +607,7 @@ class _FabPlus extends StatelessWidget {
 
 /// -------------------- Models --------------------
 enum _InterfaceStatus { ok, warn }
+
 enum _PillStyle { grey, magenta }
 
 class _InterfaceItem {

@@ -99,19 +99,31 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                           label: 'Rename',
                           trailing: Padding(
                             padding: EdgeInsets.only(right: 14.w),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: 160.w),
-                              child: Text(
-                                _renameController.text,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: _kTextSecondary,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(maxWidth: 145.w),
+                                  child: Text(
+                                    _renameController.text,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: _kTextSecondary,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(width: 6.w),
+                                Image.asset(
+                                  'assets/Group 63.png',
+                                  width: 14.w,
+                                  height: 13.h,
+                                  fit: BoxFit.contain,
+                                ),
+                              ],
                             ),
                           ),
                         ),

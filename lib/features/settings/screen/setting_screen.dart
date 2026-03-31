@@ -189,7 +189,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: GlobalCircleIconBtn(
-                    child: Icon(Icons.more_horiz_rounded,color: Colors.black,),
+                    icon: Icons.more_horiz_rounded,
                     onTap: () {},
                   ),
                 ),

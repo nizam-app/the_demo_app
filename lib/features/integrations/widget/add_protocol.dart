@@ -25,13 +25,9 @@ class AddProtocolImageRegistry {
     'assets/images/UDP.png': const AddProtocolImgSize.square(44),
     'assets/image 66.png': const AddProtocolImgSize.square(44),
 
-    
-
     'assets/zigport.png': const AddProtocolImgSize.square(33),
     'assets/images/BACnet.png': const AddProtocolImgSize.square(33),
     'assets/images/KNX.png': const AddProtocolImgSize.square(33),
-
-
   };
 
   static AddProtocolImgSize of(String asset) {
@@ -78,7 +74,7 @@ class AddProtocolBottomSheet extends StatefulWidget {
   static const List<_ProtocolChoice> _row2 = <_ProtocolChoice>[
     _ProtocolChoice('Zigbee', 'assets/zigport.png'),
     _ProtocolChoice('BACnet', 'assets/images/BACnet.png'),
-    
+
     _ProtocolChoice('KNX', 'assets/images/KNX.png'),
   ];
 
@@ -164,7 +160,7 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                         .map((c) => _ProtocolTile(choice: c))
                         .toList(),
                   ),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 14.h),
                   Divider(
                     height: 1.h,
                     thickness: 1.h,
@@ -213,7 +209,7 @@ class _ProtocolTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _ProtocolIcon(asset: choice.asset),
-           SizedBox(height: 10.h),
+          SizedBox(height: 6.h),
           Text(
             choice.label,
             textAlign: TextAlign.center,

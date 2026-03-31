@@ -181,7 +181,7 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                         children:
                             _topRow.map((it) => _ChoiceTile(choice: it)).toList(),
                       ),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 14.h),
                       // Divider: thin light gray line
                       Divider(height: 1.h, thickness: 1.h, color: _line),
                       SizedBox(height: 10.h),
@@ -232,7 +232,7 @@ class _ChoiceTile extends StatelessWidget {
           Center(
             child: AppAssetIcon(choice.asset),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 6.h),
           Text(
             choice.label,
             textAlign: TextAlign.center,

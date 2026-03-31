@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
-
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/widget/zoneAddMenut.dart';
 import 'package:workpleis/features/Zones/screen/widget/zonesMenuSheet.dart';
+import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/features/automations/screen/automations_screen.dart';
+import 'package:workpleis/features/devices/screen/devices_screen.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
+import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 
 class ZonesScreen extends StatefulWidget {
   const ZonesScreen({super.key});
@@ -15,8 +18,6 @@ class ZonesScreen extends StatefulWidget {
 }
 
 class _ZonesScreenState extends State<ZonesScreen> {
-  int _selectedIndex = 2;
-
   void showZonesMenuSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -39,7 +40,6 @@ class _ZonesScreenState extends State<ZonesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Use your existing assets (I’m using your "icon" images as the main picture like the screenshot)
     final zones = <ZoneItem>[
       ZoneItem(
         title: "Whole House",
@@ -91,46 +91,46 @@ class _ZonesScreenState extends State<ZonesScreen> {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedIndex,
-        notificationCount: 12,
-        onTap: (i) => setState(() => _selectedIndex = i),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w),
-          child: Column(
-            children: [
-              SizedBox(height: 8.h),
+    return CustomBottomNavBar(
+      initialIndex: 2,
+      children: [
+        const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
+        const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
+        RepaintBoundary(child: _buildZonesBody(context, zones)),
+        const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
+        const RepaintBoundary(child: AutomationsScreen(showBottomNav: false)),
+      ],
+    );
+  }
 
-              // ✅ Top bar like screenshot
-              _TopBar(
-                onBack: () => context.pop(),
-                onMenu: () => showZonesMenuSheet(context),
-                onAdd: () => showZonesAddMenuSheet(context),
-              ),
-
-              SizedBox(height: 14.h),
-
-              // ✅ Grid like screenshot
-              Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: zones.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14.w,
-                    mainAxisSpacing: 14.h,
-                    childAspectRatio: 1.13,// closer to screenshot (slightly taller)
-                  ),
-                  itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {}),
+  Widget _buildZonesBody(BuildContext context, List<ZoneItem> zones) {
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 18.w),
+        child: Column(
+          children: [
+            SizedBox(height: 8.h),
+            _TopBar(
+              onBack: () => Navigator.pop(context),
+              onMenu: () => showZonesMenuSheet(context),
+              onAdd: () => showZonesAddMenuSheet(context),
+            ),
+            SizedBox(height: 14.h),
+            Expanded(
+              child: GridView.builder(
+                padding: EdgeInsets.only(bottom: 16.h),
+                physics: const BouncingScrollPhysics(),
+                itemCount: zones.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14.w,
+                  mainAxisSpacing: 14.h,
+                  childAspectRatio: 1.13,
                 ),
+                itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {}),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -263,9 +263,7 @@ class ZoneCard extends StatelessWidget {
       child: Container(
         width: 195.w,
         height: 183.h,
-        padding: EdgeInsets.all(
-          8.w,
-        ),
+        padding: EdgeInsets.all(8.w),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
           borderRadius: BorderRadius.circular(26.r),
@@ -310,137 +308,4 @@ class ZoneCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/* -------------------- Your existing bottom nav (unchanged) -------------------- */
-
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.selectedIndex,
-    required this.onTap,
-    required this.notificationCount,
-  });
-
-  final int selectedIndex;
-  final void Function(int) onTap;
-  final int notificationCount;
-
-  @override
-  Widget build(BuildContext context) {
-    const selected = Color(0xFF111827);
-    const unselected = Color(0xFF111827);
-
-    final items = <_NavItem>[
-      const _NavItem(label: "Devices", icon: "assets/Group 28.png"),
-      const _NavItem(label: "Analytics", icon: "assets/bar 5.png"),
-      const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
-      //const _NavItem(label: "Voice", icon: "assets/image 98.png"),
-      const _NavItem(label: "Notifications", icon: "assets/Group 43.png"),
-      const _NavItem(label: "Automations", icon: "assets/Mask group (8).png"),
-    ];
-
-    return Container(
-      height: 72.h,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.74),
-        border: const Border(
-          top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth / items.length;
-          return Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: w * selectedIndex + (w - 46.w) / 2,
-                child: Container(
-                  width: 46.w,
-                  height: 3.h,
-                  decoration: BoxDecoration(
-                    color: selected,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(2.r),
-                      bottomRight: Radius.circular(2.r),
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                children: List.generate(items.length, (i) {
-                  final isSel = i == selectedIndex;
-                  final color = isSel ? selected : unselected;
-                  final item = items[i];
-
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () => onTap(i),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Image.asset(
-                                item.icon,
-                                width: 26.sp,
-                                height: 26.sp,
-                                color: color,
-                              ),
-                              if (item.label == "Notifications" &&
-                                  notificationCount > 0)
-                                Positioned(
-                                  right: -10.w,
-                                  top: -6.h,
-                                  child: Container(
-                                    width: 19.w,
-                                    height: 15.h,
-                                    alignment: Alignment.center,
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 2.w,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFE019A),
-                                      borderRadius: BorderRadius.circular(18.r),
-                                    ),
-                                    child: Text(
-                                      notificationCount.toString(),
-                                      style: TextStyle(
-                                        fontSize: 10.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w700,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _NavItem {
-  final String label;
-  final String icon;
-  const _NavItem({required this.label, required this.icon});
 }

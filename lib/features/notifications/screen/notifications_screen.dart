@@ -7,9 +7,10 @@ import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 /// Design: light grey screen, circular back, "Notifications" title, filter chips,
 /// grouped lists (Errors, Security, Alerts, System) with Clear + cards.
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  const NotificationsScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/notifications';
+  final bool showBottomNav;
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -17,6 +18,19 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   int _selectedNavIndex = 3; // Notifications is index 3
+
+  void _onNavItemTapped(int index) {
+    final routes = [
+      '/devices',
+      '/analytics',
+      '/home',
+      '/notifications',
+      '/automations',
+    ];
+    if (index < routes.length) {
+      context.go(routes[index]);
+    }
+  }
 
   static const Color _screenBg = Color(0xFFFFFFFF);
   static const Color _textPrimary = Color(0xFF111827);
@@ -93,8 +107,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           height: 16.h,
                         ),
                         onTap: () {
-                          if (Navigator.of(context).canPop()) {
-                            Navigator.of(context).pop();
+                          if (!widget.showBottomNav) {
+                            final shell = CustomBottomNavBar.of(context);
+                            if (shell != null) {
+                              shell.setSelectedIndex(2);
+                              return;
+                            }
+                          }
+                          if (context.canPop()) {
+                            context.pop();
                           } else {
                             context.go('/home');
                           }
@@ -215,6 +236,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: widget.showBottomNav
+          ? BottomNavBarWidget(
+              selectedIndex: _selectedNavIndex,
+              onItemTapped: _onNavItemTapped,
+            )
+          : null,
     );
   }
 }

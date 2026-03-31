@@ -99,19 +99,31 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                           iconWidth: 22.w,
                           iconHeight: 22.h,
                           label: 'Rename',
-                          trailing: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 170.w),
-                            child: Text(
-                              _renameController.text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: _kTextSecondary,
-                                fontFamily: 'Inter',
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 155.w),
+                                child: Text(
+                                  _renameController.text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: _kTextSecondary,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(width: 6.w),
+                              Image.asset(
+                                'assets/Group 63.png',
+                                width: 14.w,
+                                height: 13.h,
+                                fit: BoxFit.contain,
+                              ),
+                            ],
                           ),
                           onTap: () {
                             // TODO: open rename dialog if needed
@@ -201,8 +213,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                   onTap: () => setState(() => _lastActivitiesOn = !_lastActivitiesOn),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 180),
-                                    width: 60.w,
-                                    height: 35.h,
+                                    width: 58.w,
+                                    height: 33.h,
                                     padding: EdgeInsets.all(2.w),
                                     decoration: BoxDecoration(
                                       color:   _lastActivitiesOn
@@ -315,45 +327,48 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return SizedBox(
+      height: 56.h,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          // Left spacer (same as close button) => title becomes truly centered
-          SizedBox(width: 30.w, height: 30.w),
-
-          Expanded(
-            child: Center(
-              child: Text(
-                'Edit smart device',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _kTextPrimary,
-                  fontFamily: 'Inter',
-                ),
+          Center(
+            child: Text(
+              'Edit smart device',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: _kTextPrimary,
+                fontFamily: 'Inter',
               ),
             ),
           ),
-
-          // Close button (right)
-          Container(
-            width: 30.w,
-            height: 30.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFFFFF),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: Icon(
-                Icons.close_rounded,
-                size: 20.sp,
-                color: _kTextPrimary,
+          Positioned(
+            right: 20.w,
+            top: 14.h,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 30.w,
+                height: 30.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFFFF),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF111827).withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 20.sp,
+                  color: _kTextPrimary,
+                ),
               ),
             ),
           ),
@@ -608,7 +623,8 @@ class _ChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      height: 25.h,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6.r),

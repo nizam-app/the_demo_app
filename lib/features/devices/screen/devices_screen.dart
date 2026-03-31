@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
 
 import '../widget/assign_category_zone.dart';
 
 class DevicesScreen extends StatefulWidget {
-  const DevicesScreen({super.key});
+  const DevicesScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/devices';
+  final bool showBottomNav;
 
   @override
   State<DevicesScreen> createState() => _DevicesScreenState();
@@ -90,8 +92,15 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             height: 16.h,
                           ),
                           onTap: () {
-                            if (Navigator.of(context).canPop()) {
-                              Navigator.of(context).pop();
+                            if (!widget.showBottomNav) {
+                              final shell = CustomBottomNavBar.of(context);
+                              if (shell != null) {
+                                shell.setSelectedIndex(2);
+                                return;
+                              }
+                            }
+                            if (context.canPop()) {
+                              context.pop();
                             } else {
                               context.go('/home');
                             }
@@ -479,6 +488,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: widget.showBottomNav
+          ? BottomNavBarWidget(
+              selectedIndex: _selectedNavIndex,
+              onItemTapped: _onNavItemTapped,
+            )
+          : null,
     );
   }
 }

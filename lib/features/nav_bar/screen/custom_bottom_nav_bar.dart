@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
 // Standalone bottom nav bar widget for individual screens (uses route navigation)
 class BottomNavBarWidget extends StatelessWidget {
@@ -38,64 +37,67 @@ class BottomNavBarWidget extends StatelessWidget {
               height: 75.h,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.95),
-                border: const Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+                border: const Border(
+                  top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                ),
               ),
-            child: LayoutBuilder(
-              builder: (context, c) {
-                final slotW = c.maxWidth / items.length;
-                final indicatorW = 56.w;
-                final indicatorH = 4.h;
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final slotW = c.maxWidth / items.length;
+                  final indicatorW = 56.w;
+                  final indicatorH = 4.h;
 
-                final left = selectedIndex >= 0 && selectedIndex < items.length
-                    ? (slotW * selectedIndex) + (slotW - indicatorW) / 2
-                    : -1000.0;
+                  final left =
+                      selectedIndex >= 0 && selectedIndex < items.length
+                      ? (slotW * selectedIndex) + (slotW - indicatorW) / 2
+                      : -1000.0;
 
-                return Stack(
-                  children: [
-                    if (selectedIndex >= 0 && selectedIndex < items.length)
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 220),
-                        curve: Curves.easeOutCubic,
-                        top: 0.5.h,
-                        left: left,
-                        child: Container(
-                          width: indicatorW,
-                          height: indicatorH,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF111827),
-                            borderRadius: BorderRadius.circular(26.r),
+                  return Stack(
+                    children: [
+                      if (selectedIndex >= 0 && selectedIndex < items.length)
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          top: 0.5.h,
+                          left: left,
+                          child: Container(
+                            width: indicatorW,
+                            height: indicatorH,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF111827),
+                              borderRadius: BorderRadius.circular(26.r),
+                            ),
                           ),
                         ),
-                      ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 15.h, bottom: 4.h),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: List.generate(items.length, (i) {
-                          final isSelected = i == selectedIndex;
-                          return InkResponse(
-                            onTap: () => onItemTapped(i),
-                            radius: 28.r,
-                            child: RepaintBoundary(
-                              child: BottomNavItem(
-                                label: items[i].label,
-                                imagePath: items[i].imagePath,
-                                isSelected: isSelected,
-                                showBadge: items[i].label == 'Notifications',
+                      Padding(
+                        padding: EdgeInsets.only(top: 15.h, bottom: 4.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: List.generate(items.length, (i) {
+                            final isSelected = i == selectedIndex;
+                            return InkResponse(
+                              onTap: () => onItemTapped(i),
+                              radius: 28.r,
+                              child: RepaintBoundary(
+                                child: BottomNavItem(
+                                  label: items[i].label,
+                                  imagePath: items[i].imagePath,
+                                  isSelected: isSelected,
+                                  showBadge: items[i].label == 'Notifications',
+                                ),
                               ),
-                            ),
-                          );
-                        }),
+                            );
+                          }),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -115,7 +117,7 @@ class CustomBottomNavBar extends StatefulWidget {
   final int initialIndex;
   final Widget? drawer;
   final Color? backgroundColor;
-  
+
   static CustomBottomNavBarState? of(BuildContext context) {
     return context.findAncestorStateOfType<CustomBottomNavBarState>();
   }
@@ -127,23 +129,27 @@ class CustomBottomNavBar extends StatefulWidget {
 class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   late int _selectedIndex;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
   }
-  
+
   void openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
   }
 
-  void _onItemTapped(int index) {
-    if (index != _selectedIndex && index < widget.children.length) {
+  void setSelectedIndex(int index) {
+    if (index != _selectedIndex && index >= 0 && index < widget.children.length) {
       setState(() {
         _selectedIndex = index;
       });
     }
+  }
+
+  void _onItemTapped(int index) {
+    setSelectedIndex(index);
   }
 
   @override
@@ -151,7 +157,7 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     const items = [
       NavItemData('Devices', 'assets/Group 28.png'),
       NavItemData('Analytics', 'assets/bar 5.png'),
-      NavItemData('Voice', 'assets/image 98.png'),
+      NavItemData('Dashboard', 'assets/images/dashboard_icon.png'),
       NavItemData('Notifications', 'assets/Group 43.png'),
       NavItemData('Automations', 'assets/Mask group (8).png'),
     ];
@@ -161,10 +167,7 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
       backgroundColor: widget.backgroundColor ?? Colors.white,
       drawer: widget.drawer,
       body: RepaintBoundary(
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: widget.children,
-        ),
+        child: IndexedStack(index: _selectedIndex, children: widget.children),
       ),
       bottomNavigationBar: RepaintBoundary(
         child: SafeArea(
@@ -179,7 +182,9 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
               height: 75.h,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.95),
-                border: const Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+                border: const Border(
+                  top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                ),
               ),
               child: LayoutBuilder(
                 builder: (context, c) {
@@ -187,7 +192,8 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   final indicatorW = 56.w;
                   final indicatorH = 4.h;
 
-                  final left = _selectedIndex >= 0 && _selectedIndex < items.length
+                  final left =
+                      _selectedIndex >= 0 && _selectedIndex < items.length
                       ? (slotW * _selectedIndex) + (slotW - indicatorW) / 2
                       : -1000.0; // Hide indicator when no selection
 
@@ -321,7 +327,10 @@ class BottomNavItem extends StatelessWidget {
                       top: -6.h,
                       right: -6.w,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 4.h,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFfFE019A),
                           borderRadius: BorderRadius.circular(18.r),
@@ -351,7 +360,9 @@ class BottomNavItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: isSelected ? const Color(0xFF111827) : const Color(0xFF111827),
+              color: isSelected
+                  ? const Color(0xFF111827)
+                  : const Color(0xFF111827),
             ),
             child: Text(
               label,
@@ -360,9 +371,10 @@ class BottomNavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9.sp,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? const Color(0xFF0088FE) : const Color(0xFF111827),
+                color: isSelected
+                    ? const Color(0xFF0088FE)
+                    : const Color(0xFF111827),
               ),
-              
             ),
           ),
         ],

@@ -34,22 +34,22 @@ class ConfigurationScreen extends StatelessWidget {
   static const List<({String title, String subtitle, String trailing})>
       _propertyRows = [
     (
-      title: 'Blind 1',
+      title: 'Salon 1',
       subtitle: 'BLIND-4B37-3419-363A-BL1',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Blind 2',
+      title: 'Salon 2',
       subtitle: 'BLIND-4B37-3419-363A-BL2',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Blind 3',
+      title: 'Kitchen 1',
       subtitle: 'BLIND-4B37-3419-363A-BL3',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Blind 4',
+      title: 'Kitchen 2',
       subtitle: 'BLIND-4B37-3419-363A-BL4',
       trailing: 'Encoder Blind',
     ),
@@ -160,7 +160,7 @@ class ConfigurationScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'Blinds control unit',
+              'Configuration',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 22.sp,
@@ -172,7 +172,7 @@ class ConfigurationScreen extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: GlobalCircleIconBtn(
                 onTap: () {},
-                child: Icon(Icons.more_horiz_rounded,color: Colors.black,),
+                icon: Icons.more_horiz_rounded,
               ),
             ),
           ],
@@ -275,12 +275,6 @@ class ConfigurationScreen extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding:  EdgeInsets.only(top: 7.h),
-                child: Image.asset("assets/Group 60.png", height: 45.h, width: 30.w, fit: BoxFit.cover),
-              ),
-              SizedBox(width: 12.w),
-              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,20 +305,13 @@ class ConfigurationScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                height: 26.h,
-                // width: 96.w,
-                alignment: Alignment.center,
-                padding: EdgeInsets.only(right: 10.w, left: 10.w),
-                decoration: BoxDecoration(color: Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(26.r)),
-                child: Text(
-                  trailing,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF111827),
-                  ),
+              Text(
+                trailing,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                  color: _valueColor,
                 ),
               ),
               SizedBox(width: 4.w),

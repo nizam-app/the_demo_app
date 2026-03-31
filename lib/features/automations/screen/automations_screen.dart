@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 
 class AutomationsScreen extends StatefulWidget {
-  const AutomationsScreen({super.key});
+  const AutomationsScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/automations';
+  final bool showBottomNav;
 
   @override
   State<AutomationsScreen> createState() => _AutomationsScreenState();
@@ -37,7 +38,20 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF111827)),
-          onPressed: () => context.go('/home'),
+          onPressed: () {
+            if (!widget.showBottomNav) {
+              final shell = CustomBottomNavBar.of(context);
+              if (shell != null) {
+                shell.setSelectedIndex(2);
+                return;
+              }
+            }
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
         ),
         title: Text(
           'Automations',
@@ -59,10 +73,12 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBarWidget(
-        selectedIndex: _selectedNavIndex,
-        onItemTapped: _onNavItemTapped,
-      ),
+      bottomNavigationBar: widget.showBottomNav
+          ? BottomNavBarWidget(
+              selectedIndex: _selectedNavIndex,
+              onItemTapped: _onNavItemTapped,
+            )
+          : null,
     );
   }
 }
