@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/configuration/screen/configuration_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
+
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
@@ -55,7 +56,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           _toggleRow(
                             label: 'Use Other value when output is turned off',
                             value: _useOtherWhenOff,
-                            onChanged: (v) => setState(() => _useOtherWhenOff = v),
+                            onChanged: (v) =>
+                                setState(() => _useOtherWhenOff = v),
                           ),
                         ],
                       ),
@@ -64,8 +66,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     _whiteCard(
                       child: _titleSubtitleToggleRow(
                         title: 'Negate Output',
-                        subtitle:
-                            'E.g value 80% sets physical device to 20%',
+                        subtitle: 'E.g value 80% sets physical device to 20%',
                         value: _negateOutput,
                         onChanged: (v) => setState(() => _negateOutput = v),
                       ),
@@ -75,8 +76,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       child: _titleSubtitleToggleRow(
                         title: 'Relative Luminance',
                         subtitle:
-                            'Based on CIE 1391 standard, Increase of light. Power leads to smaller increase of perceived luminance. If this setting is turned on, changes of brightness, e.g. between 50% - 100% will be more visible.'
-                            ,
+                            'Based on CIE 1391 standard, Increase of light. Power leads to smaller increase of perceived luminance. If this setting is turned on, changes of brightness, e.g. between 50% - 100% will be more visible.',
                         value: _relativeLuminance,
                         onChanged: (v) =>
                             setState(() => _relativeLuminance = v),
@@ -121,7 +121,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       color: _blue,
                       image: "assets/Mask group (1) copy.png",
                       onTap: () {
-                        context.push(ConfigurationScreen.routeName); 
+                        context.push(ConfigurationScreen.routeName);
                       },
                       width: 30.w,
                       height: 30.h,
@@ -133,7 +133,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       color: _deletePink,
                       image: "assets/images/delete1.png",
                       onTap: () {},
-                      width:  16.w,
+                      width: 16.w,
                       height: 19.h,
                       //imageColor: _deletePink,
                     ),
@@ -185,18 +185,18 @@ class _SettingScreenState extends State<SettingScreen> {
                     color: _primaryText,
                   ),
                 ),
-             
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: GlobalCircleIconBtn(
-                    icon: Icons.more_horiz_rounded,
+                    child: Icon(Icons.more_horiz_rounded, color: Colors.black),
                     onTap: () {},
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10.h,),  
+          SizedBox(height: 10.h),
           Text(
             'Original value is set as it was before the failure',
             textAlign: TextAlign.center,
@@ -212,6 +212,7 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
     );
   }
+
   /// White circle with soft shadow (back / overflow menu).
   Widget _sectionTitle(String text) {
     return Text(
@@ -224,6 +225,7 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
     );
   }
+
   Widget _whiteCard({required Widget child}) {
     return Container(
       width: double.infinity,
@@ -238,23 +240,18 @@ class _SettingScreenState extends State<SettingScreen> {
         //   ),
         // ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26.r),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(26.r), child: child),
     );
   }
+
   Widget _rowDivider() {
     return Padding(
       padding: const EdgeInsets.only(left: 14, right: 14),
       child: Divider(height: 1.h, thickness: 1, color: _dividerColor),
     );
   }
-  Widget _chevronValueRow(
-    String title,
-    String value, {
-    int titleMaxLines = 1,
-  }) {
+
+  Widget _chevronValueRow(String title, String value, {int titleMaxLines = 1}) {
     return InkWell(
       onTap: () {},
       child: Padding(
@@ -288,12 +285,19 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
             ),
             SizedBox(width: 5.w),
-             Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit:BoxFit.cover,color: _secondaryText)  ,
+            Image.asset(
+              "assets/back_arro.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+              color: _secondaryText,
+            ),
           ],
         ),
       ),
     );
   }
+
   Widget _chevronOnlyRow(String title) {
     return InkWell(
       onTap: () {},
@@ -312,7 +316,13 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
               ),
             ),
-            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit:BoxFit.cover,color: _secondaryText)  ,
+            Image.asset(
+              "assets/back_arro.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+              color: _secondaryText,
+            ),
           ],
         ),
       ),
@@ -341,7 +351,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
             ),
           ),
-          Transform. scale(
+          Transform.scale(
             scale: 0.82,
             child: CupertinoSwitch(
               value: value,
@@ -386,7 +396,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w300,
                     color: _primaryText,
-                     //height: 1,
+                    //height: 1,
                   ),
                 ),
               ],
@@ -417,7 +427,6 @@ class _SettingScreenState extends State<SettingScreen> {
     required double height,
     required double width,
     Color? imageColor,
-    
   }) {
     return Material(
       color: Colors.transparent,
@@ -444,7 +453,13 @@ class _SettingScreenState extends State<SettingScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(image,height: height.h, width: width.w, fit: BoxFit.cover,color:imageColor,),
+                Image.asset(
+                  image,
+                  height: height.h,
+                  width: width.w,
+                  fit: BoxFit.cover,
+                  color: imageColor,
+                ),
                 SizedBox(width: 5.w),
                 Text(
                   label,
