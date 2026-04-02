@@ -26,6 +26,7 @@ import 'package:workpleis/features/voice/screen/voice_screen.dart';
 
 import '../features/core/screen/core_screen.dart';
 import '../features/settings/screen/setting_screen.dart';
+import '../features/weather/screen/weather_screen.dart';
 import 'error_screen.dart';
 
 class AppRouter {
@@ -99,6 +100,11 @@ class AppRouter {
         path: AnalyticsScreen.routeName,
         name: AnalyticsScreen.routeName,
         builder: (context, state) => const AnalyticsScreen(),
+      ),
+      GoRoute(
+        path: WeatherScreen.routeName,
+        name: WeatherScreen.routeName,
+        builder: (context, state) => const WeatherScreen(),
       ),
       GoRoute(
         path: VoiceScreen.routeName,
