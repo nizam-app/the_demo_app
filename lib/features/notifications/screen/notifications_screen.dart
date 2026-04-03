@@ -25,7 +25,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       '/analytics',
       '/home',
       '/notifications',
-      '/automations',
+      '/settings',
     ];
     if (index < routes.length) {
       context.go(routes[index]);

@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
-import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
+import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 import '../widget/categoryAddmenu.dart';
@@ -114,7 +114,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
         RepaintBoundary(child: _buildCategoriesBody(context, zones)),
         const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
-        const RepaintBoundary(child: AutomationsScreen(showBottomNav: false)),
+        const RepaintBoundary(child: SettingsScreen()),
       ],
     );
   }

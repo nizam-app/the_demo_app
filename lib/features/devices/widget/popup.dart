@@ -13,12 +13,14 @@ class _EditDeviceSheetContent extends StatefulWidget {
   const _EditDeviceSheetContent();
 
   @override
-  State<_EditDeviceSheetContent> createState() => _EditDeviceSheetContentState();
+  State<_EditDeviceSheetContent> createState() =>
+      _EditDeviceSheetContentState();
 }
 
 class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
-  final TextEditingController _renameController =
-  TextEditingController(text: 'Light living room');
+  final TextEditingController _renameController = TextEditingController(
+    text: 'Light living room',
+  );
 
   bool _dashboardDropdownOpen = false;
   int _selectedDashboardIndex = 0;
@@ -56,6 +58,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       setState(() => _dashboardDropdownOpen = false);
     }
   }
+
   final LayerLink _dropdownLink = LayerLink();
 
   @override
@@ -184,7 +187,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                             //     onTap: _toggleDashboardMenu,
                             //   ),
                             // ),
-
                             SizedBox(height: 14.h),
                             _EditSheetRow(
                               imagePath: 'assets/images/category&zone.png',
@@ -196,7 +198,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                 children: [
                                   _ChipPill(
                                     text: 'Light',
-                                    bg: Colors. white,
+                                    bg: Colors.white,
                                     border: _kBlue,
                                     textColor: _kBlue,
                                   ),
@@ -220,23 +222,28 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               onTap: () {},
                               trailing: Transform.scale(
                                 scale: 1.00,
-                                child:   GestureDetector(
-                                  onTap: () => setState(() => _lastActivitiesOn = !_lastActivitiesOn),
+                                child: GestureDetector(
+                                  onTap: () => setState(
+                                    () =>
+                                        _lastActivitiesOn = !_lastActivitiesOn,
+                                  ),
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 180),
                                     width: 60.w,
                                     height: 35.h,
                                     padding: EdgeInsets.all(2.w),
                                     decoration: BoxDecoration(
-                                      color:   _lastActivitiesOn
+                                      color: _lastActivitiesOn
                                           ? const Color(0xFF0088FE)
                                           : const Color(0xFFE1E1E1),
                                       borderRadius: BorderRadius.circular(30.r),
                                     ),
                                     child: AnimatedAlign(
-                                      duration: const Duration(milliseconds: 180),
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
                                       curve: Curves.easeOut,
-                                      alignment:  _lastActivitiesOn
+                                      alignment: _lastActivitiesOn
                                           ? Alignment.centerRight
                                           : Alignment.centerLeft,
                                       child: Container(
@@ -266,7 +273,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                 //   ),
                                 // ),
                               ),
-                              
                             ),
                           ],
                         ),
@@ -276,7 +282,12 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
                       // -------- Settings/Remove card --------
                       Container(
-                        padding: EdgeInsets.only(top: 5.h, right: 10.w, left: 14.w, bottom: 10.h),
+                        padding: EdgeInsets.only(
+                          top: 5.h,
+                          right: 10.w,
+                          left: 14.w,
+                          bottom: 10.h,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(26.r),
                           color: _kCloseBtnBg,
@@ -291,7 +302,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               label: 'Settings',
                               onTap: () {},
                             ),
-                           SizedBox(height: 16.h),
+                            SizedBox(height: 16.h),
                             _EditSheetRow(
                               imagePath: 'assets/images/delete1.png',
                               iconWidth: 16.w,
@@ -527,7 +538,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         width: 185.w,
-       // height: 136.h,
+        // height: 136.h,
         constraints: BoxConstraints(maxHeight: 150.h),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -543,14 +554,16 @@ class _DashboardDropdownMenu extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(26.r),
           child: ListView.separated(
-           //padding: EdgeInsets.symmetric(vertical: 8.h),
+            //padding: EdgeInsets.symmetric(vertical: 8.h),
             shrinkWrap: true,
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox.shrink(),
             itemBuilder: (context, i) {
               final selected = i == selectedIndex;
               final bgColor = selected
-                  ? const Color(0xFFE5F0FF) // light blue row highlight (same as menu_popup)
+                  ? const Color(
+                      0xFFE5F0FF,
+                    ) // light blue row highlight (same as menu_popup)
                   : Colors.white;
               return InkWell(
                 onTap: () => onSelect(i),
@@ -561,17 +574,22 @@ class _DashboardDropdownMenu extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 23.w,
-                       // height: 26.h,
+                        // height: 26.h,
                         child: selected
-                            ? Image.asset("assets/popup_done.png", height: 23.h, width: 23.w, fit: BoxFit.cover,)
-                        // Icon(
-                        //         Icons.check_rounded,
-                        //         size: 18.sp,
-                        //         color: const Color(0xFF0088FE),
-                        //       )
+                            ? Image.asset(
+                                "assets/popup_done.png",
+                                height: 23.h,
+                                width: 23.w,
+                                fit: BoxFit.cover,
+                              )
+                            // Icon(
+                            //         Icons.check_rounded,
+                            //         size: 18.sp,
+                            //         color: const Color(0xFF0088FE),
+                            //       )
                             : const SizedBox.shrink(),
                       ),
-                     // SizedBox(width: 4.w),
+                      // SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
                           items[i],
@@ -597,7 +615,6 @@ class _DashboardDropdownMenu extends StatelessWidget {
   }
 }
 
-
 class _ChipPill extends StatelessWidget {
   const _ChipPill({
     required this.text,
@@ -614,8 +631,8 @@ class _ChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      height: 25.h,
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6.r),

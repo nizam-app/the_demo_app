@@ -32,24 +32,28 @@ class ConfigurationScreen extends StatelessWidget {
   ];
 
   static const List<({String title, String subtitle, String trailing})>
-      _propertyRows = [
+  _propertyRows = [
     (
-      title: 'Salon 1',
+      // title: 'Salon 1',
+      title: 'Blind 1',
       subtitle: 'BLIND-4B37-3419-363A-BL1',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Salon 2',
+      // title: 'Salon 2',
+      title: 'Blind 2',
       subtitle: 'BLIND-4B37-3419-363A-BL2',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Kitchen 1',
+      // title: 'Kitchen 1',
+      title: 'Blind 3',
       subtitle: 'BLIND-4B37-3419-363A-BL3',
       trailing: 'Encoder Blind',
     ),
     (
-      title: 'Kitchen 2',
+      // title: 'Kitchen 2',
+      title: 'Blind 4',
       subtitle: 'BLIND-4B37-3419-363A-BL4',
       trailing: 'Encoder Blind',
     ),
@@ -111,7 +115,7 @@ class ConfigurationScreen extends StatelessWidget {
                       image: "assets/images/Peplace_icon.png",
                       onTap: () {},
                       height: 30.h,
-                      width: 30.w, 
+                      width: 30.w,
                     ),
                     SizedBox(height: 10.h),
                     _pillButton(
@@ -121,7 +125,7 @@ class ConfigurationScreen extends StatelessWidget {
                       image: "assets/images/delete1.png",
                       onTap: () {},
                       height: 19.h,
-                      width: 16.w, 
+                      width: 16.w,
                     ),
                   ],
                 ),
@@ -144,12 +148,8 @@ class ConfigurationScreen extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: GlobalCircleIconBtn(
-                color: Colors. white,
-                child: Image.asset(
-                  'assets/aro.png',
-                  width: 16.w,
-                  height: 16.h,
-                ),
+                color: Colors.white,
+                child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
                 onTap: () {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
@@ -160,7 +160,8 @@ class ConfigurationScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'Configuration',
+              // 'Configuration',
+              'Blinds control unit',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 22.sp,
@@ -172,7 +173,8 @@ class ConfigurationScreen extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: GlobalCircleIconBtn(
                 onTap: () {},
-                icon: Icons.more_horiz_rounded,
+                // icon: Icons.more_horiz_rounded,
+                child: Icon(Icons.more_horiz_rounded, color: Colors.black),
               ),
             ),
           ],
@@ -208,10 +210,7 @@ class ConfigurationScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26.r),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(26.r), child: child),
     );
   }
 
@@ -275,6 +274,17 @@ class ConfigurationScreen extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Padding(
+                padding: EdgeInsets.only(top: 7.h),
+                child: Image.asset(
+                  "assets/Group 60.png",
+                  height: 45.h,
+                  width: 30.w,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              SizedBox(width: 12.w),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,18 +315,40 @@ class ConfigurationScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                trailing,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _valueColor,
+              // Text(
+              //   trailing,
+              //   style: TextStyle(
+              //     fontFamily: 'Inter',
+              //     fontSize: 14.sp,
+              //     fontWeight: FontWeight.w400,
+              //     color: _valueColor,
+              Container(
+                height: 26.h,
+                // width: 96.w,
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(right: 10.w, left: 10.w),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(26.r),
+                ),
+                child: Text(
+                  trailing,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFF111827),
+                  ),
                 ),
               ),
               SizedBox(width: 4.w),
-              Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color:_valueColor )  ,
-
+              Image.asset(
+                "assets/back_arro.png",
+                height: 13.h,
+                width: 13.w,
+                fit: BoxFit.cover,
+                color: _valueColor,
+              ),
             ],
           ),
         ),
@@ -329,9 +361,9 @@ class ConfigurationScreen extends StatelessWidget {
     required String label,
     required Color color,
     required String image,
-        required double height,
-        required double width,
-        Color? imageColor,
+    required double height,
+    required double width,
+    Color? imageColor,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -344,7 +376,7 @@ class ConfigurationScreen extends StatelessWidget {
           child: Container(
             height: 50.h,
             width: double.infinity,
-            
+
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(26),
@@ -360,7 +392,13 @@ class ConfigurationScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(image,height: height.h, width: width.w, fit: BoxFit.cover,color:imageColor,),
+                Image.asset(
+                  image,
+                  height: height.h,
+                  width: width.w,
+                  fit: BoxFit.cover,
+                  color: imageColor,
+                ),
                 SizedBox(width: 5.w),
                 Text(
                   label,

@@ -7,6 +7,7 @@ import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
+import 'package:workpleis/features/weather/screen/weather_screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
 
@@ -172,6 +173,7 @@ onTap: () => context.pop(),
                           imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',
                           iconSize: 17.5,
+                          onTap: ()=> context.go(SettingScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -185,7 +187,8 @@ onTap: () => context.pop(),
                           title: 'Weather',
                           iconWidth: 22,
                           iconHeight: 23.5,
-                          onTap: ()=> context.go(SettingScreen.routeName),
+                          
+                          onTap: ()=> context.go(WeatherScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
