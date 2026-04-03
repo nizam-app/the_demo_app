@@ -19,14 +19,14 @@ class GlobalCircleIconBtn extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
       child: Container(
-        width: 32.w,
-        height: 32.h,
+        width: 36.w,
+        height: 36.h,
         decoration:  BoxDecoration(
           color: color,
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: child ?? Icon(icon, size: 16.sp, color: const Color(0xFF111827)),
+        child: child ?? Icon(icon, size: 23.sp, color: const Color(0xFF111827)),
       ),
     );
   }

@@ -166,7 +166,7 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                     thickness: 1.h,
                     color: const Color(0xFFE1E1E1),
                   ),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 14.h),
                   // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

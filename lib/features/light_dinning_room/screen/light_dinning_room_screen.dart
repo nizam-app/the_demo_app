@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
-import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
+import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
@@ -30,12 +30,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
       initialIndex: 2,
+      backgroundColor: const Color(0xFFF3F4F6),
       children: [
         const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
         RepaintBoundary(child: _buildLightDinningRoomBody(context)),
         const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
-        const RepaintBoundary(child: AutomationsScreen(showBottomNav: false)),
+        const RepaintBoundary(child: SettingsScreen()),
       ],
     );
   }
@@ -44,6 +45,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     return SafeArea(
       top: true,
       bottom: false,
+     
       child: Column(
         children: [
           _buildTopHeader(context),
@@ -99,7 +101,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             // Ellipsis button + blue plus
             GlobalCircleIconBtn(
               onTap: () {},
-              icon: Icons.more_horiz_rounded,
+           child: Icon(Icons.more_horiz_rounded, color: Colors.black),
             ),
             SizedBox(width: 10.w),
             Container(

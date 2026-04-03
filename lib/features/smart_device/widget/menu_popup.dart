@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -13,12 +14,14 @@ class _EditDeviceSheetContent extends StatefulWidget {
   const _EditDeviceSheetContent();
 
   @override
-  State<_EditDeviceSheetContent> createState() => _EditDeviceSheetContentState();
+  State<_EditDeviceSheetContent> createState() =>
+      _EditDeviceSheetContentState();
 }
 
 class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
-  final TextEditingController _renameController =
-  TextEditingController(text: 'Light living room');
+  final TextEditingController _renameController = TextEditingController(
+    text: 'Light living room',
+  );
 
   bool _dashboardDropdownOpen = false;
   int _selectedDashboardIndex = 0;
@@ -61,11 +64,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     }
   }
 
-  
   // bool select = true;
   // late  ValueChanged<bool> onChanged;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +183,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                 children: [
                                   _ChipPill(
                                     text: 'Light',
-                                    bg: Colors. white,
+                                    bg: Colors.white,
                                     border: _kBlue,
                                     textColor: _kBlue,
                                   ),
@@ -207,53 +207,15 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconWidth: 26.w,
                               iconHeight: 26.h,
                               label: 'Last activities',
-                              trailing: Transform.scale(
-                                scale: 1.00,
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _lastActivitiesOn = !_lastActivitiesOn),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 180),
-                                    width: 58.w,
-                                    height: 33.h,
-                                    padding: EdgeInsets.all(2.w),
-                                    decoration: BoxDecoration(
-                                      color:   _lastActivitiesOn
-                                          ? const Color(0xFF0088FE)
-                                          : const Color(0xFFE1E1E1),
-                                      borderRadius: BorderRadius.circular(30.r),
-                                    ),
-                                    child: AnimatedAlign(
-                                      duration: const Duration(milliseconds: 180),
-                                      curve: Curves.easeOut,
-                                      alignment:  _lastActivitiesOn
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      child: Container(
-                                        width: 31.w,
-                                        height: 31.w,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                              trailing: SizedBox(
+                                height: 35.h,
+                                width: 60.w,
+                                child: CupertinoSwitch(
+                                  value: _lastActivitiesOn,
+                                  onChanged: (v) =>
+                                      setState(() => _lastActivitiesOn = v),
+                                  activeColor: _kBlue,
                                 ),
-
-                                // SizedBox(
-                                //   height: 35.h,
-                                //   width: 60.w,
-                                //   child: Switch(
-                                //     value: _lastActivitiesOn,
-                                //     onChanged: (v) =>
-                                //         setState(() => _lastActivitiesOn = v),
-                                //     activeColor: Colors.white,
-                                //     activeTrackColor: _kBlue,
-                                //     inactiveThumbColor: Colors.white,
-                                //     inactiveTrackColor:
-                                //     const Color(0xFFE5E7EB),
-                                //   ),
-                                // ),
                               ),
                             ),
                           ],
@@ -295,7 +257,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
             // ===== Outside tap closes dropdown =====
             if (_dashboardDropdownOpen)
-              
               Positioned.fill(
                 child: GestureDetector(
                   onTap: _closeDashboardMenu,
@@ -376,8 +337,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       ),
     );
   }
-
-
 }
 
 // ====================== UI PARTS ======================
@@ -467,7 +426,6 @@ class _EditSheetRow extends StatelessWidget {
     );
   }
 }
-
 
 class _DashboardDropdownTrigger extends StatelessWidget {
   const _DashboardDropdownTrigger({
@@ -559,7 +517,9 @@ class _DashboardDropdownMenu extends StatelessWidget {
             itemBuilder: (context, i) {
               final selected = i == selectedIndex;
               final bgColor = selected
-                  ? const Color(0xFFE5F0FF) // light blue row highlight as in design
+                  ? const Color(
+                      0xFFE5F0FF,
+                    ) // light blue row highlight as in design
                   : Colors.white;
               return InkWell(
                 onTap: () => onSelect(i),
@@ -573,15 +533,20 @@ class _DashboardDropdownMenu extends StatelessWidget {
                         width: 23.w,
                         //height: 26.h,
                         child: selected
-                            ? Image.asset("assets/popup_done.png", height: 23.h, width: 23.w, fit: BoxFit.cover,)
-                        // Icon(
-                        //         Icons.check_rounded,
-                        //         size: 18.sp,
-                        //         color: const Color(0xFF0088FE),
-                        //       )
+                            ? Image.asset(
+                                "assets/popup_done.png",
+                                height: 23.h,
+                                width: 23.w,
+                                fit: BoxFit.cover,
+                              )
+                            // Icon(
+                            //         Icons.check_rounded,
+                            //         size: 18.sp,
+                            //         color: const Color(0xFF0088FE),
+                            //       )
                             : const SizedBox.shrink(),
                       ),
-                     // SizedBox(width: 4.w),
+                      // SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
                           items[i],

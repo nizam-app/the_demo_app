@@ -11,6 +11,7 @@ import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
 import '../../profile/screen/profile_screen.dart';
+import '../../settings/screen/settings_screen.dart';
 import '../widget/Add_section.dart';
 import '../widget/editAddSectionSheet.dart';
 
@@ -284,8 +285,8 @@ class _HomeScreenState extends State<HomeScreen> {
         RepaintBoundary(child: _buildHomeBody()),
         // Index 3: Notifications
         RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
-        // Index 4: Automations
-        RepaintBoundary(child: _AutomationsBody()),
+        // Index 4: Settings
+        const RepaintBoundary(child: SettingsScreen()),
       ],
     );
   }
@@ -2638,38 +2639,6 @@ class _AnalyticsBody extends StatelessWidget {
   }
 }
 
-
-class _AutomationsBody extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Automations',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Text(
-          'Automations Screen',
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // Devices Screen Helper Widgets
 

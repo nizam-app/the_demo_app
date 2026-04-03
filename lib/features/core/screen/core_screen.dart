@@ -195,10 +195,9 @@ class _CoreScreenState extends State<CoreScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: GlobalCircleIconBtn(
-                color: Colors.white,
-                icon: Icons.more_horiz_rounded,
-                onTap: () {},
-              ),
+                    child: Icon(Icons.more_horiz_rounded, color: Colors.black),
+                    onTap: () {},
+                  ),
             ),
           ],
         ),

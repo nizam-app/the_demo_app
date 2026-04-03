@@ -113,7 +113,7 @@ class WeatherScreen extends ConsumerWidget {
       '/analytics',
       '/home',
       '/notifications',
-      '/automations',
+      '/settings',
     ];
     if (index < routes.length) {
       context.go(routes[index]);

@@ -184,7 +184,7 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                       SizedBox(height: 14.h),
                       // Divider: thin light gray line
                       Divider(height: 1.h, thickness: 1.h, color: _line),
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 14.h),
                       // Second row: 2 items in first 2 columns
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,7 +232,7 @@ class _ChoiceTile extends StatelessWidget {
           Center(
             child: AppAssetIcon(choice.asset),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 4.h),
           Text(
             choice.label,
             textAlign: TextAlign.center,

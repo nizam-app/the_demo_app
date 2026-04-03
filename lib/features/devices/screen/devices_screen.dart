@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +30,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       '/analytics',
       '/home', // Voice points to home
       '/notifications',
-      '/automations',
+      '/settings',
     ];
     if (index < routes.length) {
       context.go(routes[index]);
@@ -903,24 +904,13 @@ class _ToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60.w, // ✅ closer to iOS toggle size
+    return SizedBox(
       height: 35.h,
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Align(
-        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 30.w,
-          height: 30.h,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
+      width: 60.w,
+      child: CupertinoSwitch(
+        value: isOn,
+        onChanged: (_) {},
+        activeColor: const Color(0xFF0088FE),
       ),
     );
   }
@@ -932,24 +922,13 @@ class _ToggleColorswitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60.w, // ✅ closer to iOS toggle size
+    return SizedBox(
       height: 35.h,
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Align(
-        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 28.w,
-          height: 28.w,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
+      width: 60.w,
+      child: CupertinoSwitch(
+        value: isOn,
+        onChanged: (_) {},
+        activeColor: const Color(0xFF0088FE),
       ),
     );
   }
