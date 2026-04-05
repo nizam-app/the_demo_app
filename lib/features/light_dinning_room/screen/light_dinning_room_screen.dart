@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
@@ -31,6 +32,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     return CustomBottomNavBar(
       initialIndex: 2,
       backgroundColor: const Color(0xFFF3F4F6),
+      //backgroundColor: Colors.black,
       children: [
         const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
@@ -45,7 +47,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     return SafeArea(
       top: true,
       bottom: false,
-     
+
       child: Column(
         children: [
           _buildTopHeader(context),
@@ -82,12 +84,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         child: Row(
           children: [
             GlobalCircleIconBtn(
-              color: Colors. white,
-              child: Image.asset(
-                'assets/aro.png',
-                width: 16.w,
-                height: 16.h,
-              ),
+              color: Color(0xFFFFFFFFF),
+              child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
               onTap: () {
                 if (Navigator.of(context).canPop()) {
                   Navigator.of(context).pop();
@@ -96,12 +94,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 }
               },
             ),
-           
+
             const Spacer(),
             // Ellipsis button + blue plus
             GlobalCircleIconBtn(
+              color: Color(0xFFFFFFFFF),
               onTap: () {},
-           child: Icon(Icons.more_horiz_rounded, color: Colors.black),
+              child: Icon(Icons.more_horiz_rounded, color: Colors.black),
             ),
             SizedBox(width: 10.w),
             Container(
@@ -128,7 +127,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       children: [
         SizedBox(height: 4.h),
         Center(
-          child: Image.asset("assets/Mask group (5).png", height: 88.h, width: 88.w, fit: BoxFit.cover,)
+          child: Image.asset(
+            "assets/Mask group (5).png",
+            height: 88.h,
+            width: 88.w,
+            fit: BoxFit.cover,
+          ),
         ),
         SizedBox(height: 10.h),
         Row(
@@ -144,7 +148,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               ),
             ),
             SizedBox(width: 10.w),
-            Image.asset("assets/images/edit_image.png", height: 13, width: 13.w, fit: BoxFit.cover, color: const Color(0xFF111827) )
+            Image.asset(
+              "assets/images/edit_image.png",
+              height: 13,
+              width: 13.w,
+              fit: BoxFit.cover,
+              color: const Color(0xFF111827),
+            ),
           ],
         ),
         SizedBox(height: 7.h),
@@ -159,22 +169,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         ),
         SizedBox(height: 16.h),
         Padding(
-         padding: EdgeInsets.only(left: 80.w, right: 90.w),
+          padding: EdgeInsets.only(left: 80.w, right: 90.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _StatBlock(
-                top: '5h 58m',
-                bottom: '7 Days',
-              ),
-              _StatBlock(
-                top: '12:57',
-                bottom: 'Operations',
-              ),
-              _StatBlock(
-                top: '36%',
-                bottom: 'Average',
-              ),
+              _StatBlock(top: '12:57', bottom: 'On time'),
+              _StatBlock(top: '5h 58m', bottom: '7 Days'),
+              _StatBlock(top: '1257', bottom: 'Cycles'),
             ],
           ),
         ),
@@ -187,7 +188,6 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.only(left: 130.w, right: 130.w),
       child: Row(
         children: [
-          
           Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _isOn = false),
@@ -202,10 +202,15 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset("assets/off_logo.png", height: 13.h, width: 13.w, fit: BoxFit.cover,
-                          color: _isOn
-                          ? Color(0xFF111827)
-                          : const Color(0xFFFFFFFF),),
+                      Image.asset(
+                        "assets/off_logo.png",
+                        height: 13.h,
+                        width: 13.w,
+                        fit: BoxFit.cover,
+                        color: _isOn
+                            ? Color(0xFF111827)
+                            : const Color(0xFFFFFFFF),
+                      ),
                       SizedBox(width: 8.w),
                       Text(
                         'Off',
@@ -242,9 +247,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                       Icon(
                         Icons.power_settings_new_rounded,
                         size: 18.sp,
-                              color: _isOn
-                                  ? Colors.white
-                                  : const Color(0xFF111827),
+                        color: _isOn ? Colors.white : const Color(0xFF111827),
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -253,9 +256,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                                color: _isOn
-                                    ? Colors.white
-                                    : const Color(0xFF111827),
+                          color: _isOn ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                     ],
@@ -273,7 +274,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     return Center(
       child: Container(
         height: 22.h,
-        padding: EdgeInsets.only(right: 10.w, left: 10.w ),
+        padding: EdgeInsets.only(right: 10.w, left: 10.w),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFFFF),
           borderRadius: BorderRadius.circular(26.r),
@@ -288,7 +289,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset("assets/message_icon.png", height: 15.h, width: 15.w,fit: BoxFit.cover,),
+            Image.asset(
+              "assets/message_icon.png",
+              height: 15.h,
+              width: 15.w,
+              fit: BoxFit.cover,
+            ),
             SizedBox(width: 10.w),
             Text(
               'Don\'t ON this device while you sleeping',
@@ -332,7 +338,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                       fontFamily: 'Inter',
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
-                      color:  Color(0xFF111827) ,
+                      color: Color(0xFF111827),
                       // active
                       //     ? const Color(0xFF111827)
                       //     : const Color(0xFF111827),
@@ -391,7 +397,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               color: Colors.black.withOpacity(0.03),
               blurRadius: 10.r,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Column(
@@ -412,18 +418,30 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowLabels(),
             Padding(
-              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+              padding: EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFE1E1E1),
+              ),
             ),
             _manageRowAlerts(),
             Padding(
-              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+              padding: EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFE1E1E1),
+              ),
             ),
             _manageRowSafeValue(),
             Padding(
-              padding:  EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+              padding: EdgeInsets.only(right: 14.w, left: 48.w),
+              child: const Divider(
+                height: 1,
+                thickness: 1,
+                color: Color(0xFFE1E1E1),
+              ),
             ),
             _manageRowManualOverride(),
             //SizedBox(height: 14.h),
@@ -438,7 +456,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Image.asset("assets/labels_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover,), 
+          Image.asset(
+            "assets/labels_icon.png",
+            height: 23.h,
+            width: 23.w,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 12.w),
           Text(
             'Labels',
@@ -466,7 +489,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 border: const Color(0xFF0088FE),
               ),
               SizedBox(width: 8.w),
-              Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280)), 
+              Image.asset(
+                "assets/back_arro.png",
+                height: 13.h,
+                width: 13.w,
+                fit: BoxFit.cover,
+                color: Color(0xFF6B7280),
+              ),
             ],
           ),
         ],
@@ -479,7 +508,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Image.asset("assets/alerts_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover),  
+          Image.asset(
+            "assets/alerts_icon.png",
+            height: 23.h,
+            width: 23.w,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 12.w),
           Text(
             'Alerts',
@@ -510,8 +544,14 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               ),
             ),
           ),
-          SizedBox(width: 8.w, ),
-             Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280),), 
+          SizedBox(width: 8.w),
+          Image.asset(
+            "assets/back_arro.png",
+            height: 13.h,
+            width: 13.w,
+            fit: BoxFit.cover,
+            color: Color(0xFF6B7280),
+          ),
         ],
       ),
     );
@@ -522,7 +562,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Image.asset("assets/sate_icon.png", height: 21.h, width: 21.w, fit: BoxFit.cover),  
+          Image.asset(
+            "assets/sate_icon.png",
+            height: 21.h,
+            width: 21.w,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 12.w),
           Text(
             'Safe Value',
@@ -544,7 +589,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
           ),
           SizedBox(width: 8.w),
-          Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,color: Color(0xFF6B7280),), 
+          Image.asset(
+            "assets/back_arro.png",
+            height: 13.h,
+            width: 13.w,
+            fit: BoxFit.cover,
+            color: Color(0xFF6B7280),
+          ),
         ],
       ),
     );
@@ -555,7 +606,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       child: Row(
         children: [
-          Image.asset("assets/manual_icon.png", height: 23.h, width: 23.w, fit: BoxFit.cover), 
+          Image.asset(
+            "assets/manual_icon.png",
+            height: 23.h,
+            width: 23.w,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 12.w),
           Text(
             'Manual Override',
@@ -572,7 +628,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             width: 69.w,
             decoration: BoxDecoration(
               color: Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(30.r), 
+              borderRadius: BorderRadius.circular(30.r),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -600,15 +656,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   Widget _automationCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFCDE5FF),
         borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -626,27 +675,26 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
           ),
           const Divider(height: 1, color: Color(0xFFE1E1E1)),
-          _miniAutomationRow(
-            title: 'Set actions based on value of',
-            subtitle: 'Multi-Value Switch',
-            image: "assets/set_actions_icon.png",
-            //iconColor: const Color(0xFF00BFA5),
+          Padding(
+            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 0),
+            child: _miniAutomationRow(
+              title: 'Set actions based on value of',
+              subtitle: 'Multi-Value Switch',
+              image: "assets/set_actions_icon.png",
               imageheight: 40.h,
-              imagewidth: 40.w
+              imagewidth: 40.w,
+            ),
           ),
           Padding(
-            padding:  EdgeInsets.only(left: 60.w, right: 14.w),
-            child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
+            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+            child: _miniAutomationRow(
+              title: 'Temperature hysteresis controller (2)',
+              subtitle: 'Multi-Value Switch',
+              image: "assets/temperature_icon.png",
+              imageheight: 34.h,
+              imagewidth: 34.w,
+            ),
           ),
-          _miniAutomationRow(
-            title: 'Temperature hysteresis controller (2)',
-            subtitle: 'Multi-Value Switch',
-            image: "assets/temperature_icon.png",
-            //iconColor: const Color(0xFFFF4D4D),
-            imageheight: 34.h,
-            imagewidth: 34.w
-          ),
-          //SizedBox(height: 8.h),
         ],
       ),
     );
@@ -666,106 +714,134 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Live chart',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF111827),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0B5DFA),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    'Light On',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
+            child: Text(
+              'Live chart',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF111827),
+              ),
             ),
           ),
+          Divider(height: 1.h, color: const Color(0xFFE1E1E1)),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Container(
+            padding: EdgeInsets.only(top: 15.h, right: 12.w),
+            child: SizedBox(
               height: 150.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFFDBEBFF),
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: Stack(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(14.r),
-                      child: CustomPaint(
-                        painter: _SimpleChartPainter(),
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      height: 120.h,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFFCDE5FF),
+                            Color(0xFFFFFFFF),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(14.r),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias, // 👈 important
+                      child: Stack(
+                        children: [
+                          /// ✅ Chart (transparent background হওয়া লাগবে)
+                          Positioned.fill(
+                            child: CustomPaint(painter: _SimpleChartPainter(),
+                              child: Container(color: Colors.transparent),),
+                          ),
+
+                          /// ✅ Top Right Tag
+                          Positioned(
+                            top: 15.h,
+                            right: 8.w,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0088FF),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Text(
+                                'Light ON',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          /// ✅ Bottom Time Axis
+                          Positioned(
+                            bottom: 12.h,
+                            left: 10.w,
+                            right: 10.w,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                _TimeAxis('12:00'),
+                                _TimeAxis('14:00'),
+                                _TimeAxis('16:00'),
+                                _TimeAxis('18:00'),
+                                _TimeAxis('20:00'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Positioned(
-                    top: 10.h,
-                    right: 8.w,
-                    child: Text(
-                      'On',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF0B5DFA),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 12.h,
-                    left: 10.w,
-                    right: 10.w,
-                    child: Row(
+
+                  SizedBox(width: 4.w),
+
+                  /// ✅ Right Side Labels
+                  Padding(
+                    padding: EdgeInsets.only(top: 0.h, bottom: 58.h),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _TimeAxis('12:00'),
-                        _TimeAxis('14:00'),
-                        _TimeAxis('16:00'),
-                        _TimeAxis('18:00'),
-                        _TimeAxis('20:00'),
+                        Text(
+                          'On',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                        Text(
+                          'Off',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 62.h,
-                    right: 14.w,
-                    child: Text(
-                      'Off',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF6B7280),
-                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 10.h),
         ],
       ),
     );
@@ -801,7 +877,11 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           ),
           const Divider(height: 1, color: Color(0xFFE1E1E1)),
           _activityRow(
-            leading: const Icon(Icons.person_rounded,size: 17, color: Color(0xFF0088FE)),
+            leading: const Icon(
+              Icons.person_rounded,
+              size: 17,
+              color: Color(0xFF0088FE),
+            ),
             time: '18.12.25',
             clock: '18:26',
             name: 'User name 1',
@@ -809,11 +889,15 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             //statusColor: const Color(0xFF111827),
           ),
           Padding(
-            padding: EdgeInsets.only( left: 58.w),
+            padding: EdgeInsets.only(left: 58.w),
             child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
           ),
           _activityRow(
-            leading: const Icon(Icons.person_rounded, size: 17, color: Color(0xFF0088FE)),
+            leading: const Icon(
+              Icons.person_rounded,
+              size: 17,
+              color: Color(0xFF0088FE),
+            ),
             time: '18.12.25',
             clock: '17:55',
             name: 'User name 2',
@@ -821,7 +905,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             //statusColor: const Color(0xFF),
           ),
           Padding(
-            padding: EdgeInsets.only( left: 58.w),
+            padding: EdgeInsets.only(left: 58.w),
             child: const Divider(height: 1, color: Color(0xFFE1E1E1)),
           ),
           _activityRow(
@@ -830,14 +914,14 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 color: Color(0xFFFFFFFF),
-                fontSize: 16, 
+                fontSize: 16,
               ),
             ),
             time: '18.12.25',
             clock: '16:13',
             name: 'User name 3',
             statusText: '78%',
-           // statusColor: const Color(0xFFEC4899),
+            // statusColor: const Color(0xFFEC4899),
             statusIsPercent: true,
             avatarBgColor: const Color(0xFFFE019A),
           ),
@@ -851,17 +935,25 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     required String title,
     required String subtitle,
     required String image,
-     Color? iconColor,
+    Color? iconColor,
     required double imageheight,
     required double imagewidth,
-    
   }) {
-    return Padding(
+    return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(18.r),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(image,height:imageheight, width: imagewidth,fit: BoxFit.cover, ),
+          Image.asset(
+            image,
+            height: imageheight,
+            width: imagewidth,
+            fit: BoxFit.cover,
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -894,7 +986,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
           ),
           SizedBox(width: 6.w),
-          Image.asset("assets/images/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,)
+          Image.asset(
+            "assets/images/back_arro.png",
+            height: 13.h,
+            width: 13.w,
+            fit: BoxFit.cover,
+          ),
         ],
       ),
     );
@@ -919,8 +1016,9 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             width: 33.w,
             child: CircleAvatar(
               radius: 33.r,
-                backgroundColor: avatarBgColor ?? const Color(0xFFF3F4F6),
-                child: leading),
+              backgroundColor: avatarBgColor ?? const Color(0xFFF3F4F6),
+              child: leading,
+            ),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -947,7 +1045,10 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                       const TextSpan(text: '   '),
                       TextSpan(
                         text: name,
-                        style: TextStyle(fontSize: 14.sp, color: const Color(0xFF111827)),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF111827),
+                        ),
                       ),
                     ],
                   ),
@@ -957,18 +1058,17 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               ],
             ),
           ),
+
           //SizedBox(width: 10.w),
-          
-            Text(
-              statusText,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF111827),
-              ),
-            )
-          
+          Text(
+            statusText,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF111827),
+            ),
+          ),
         ],
       ),
     );
@@ -1043,6 +1143,7 @@ class _Chip extends StatelessWidget {
     );
   }
 }
+
 class _ModeButton extends StatelessWidget {
   const _ModeButton({
     required this.label,
@@ -1063,9 +1164,7 @@ class _ModeButton extends StatelessWidget {
         width: 30.w,
         height: 30.w,
         decoration: BoxDecoration(
-          color: active
-              ? const Color(0xFFE1E1E1)
-              : Colors.transparent,
+          color: active ? const Color(0xFFE1E1E1) : Colors.transparent,
           borderRadius: BorderRadius.circular(26.r),
         ),
         child: Center(
@@ -1075,9 +1174,7 @@ class _ModeButton extends StatelessWidget {
               fontFamily: 'Inter',
               fontSize: 16.sp,
               fontWeight: FontWeight.w500,
-              color: active
-                  ? const Color(0xFF111827)
-                  : const Color(0xFF6B7280),
+              color: active ? const Color(0xFF111827) : const Color(0xFF6B7280),
             ),
           ),
         ),
@@ -1090,15 +1187,15 @@ class _SimpleChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Background
-    final bg = Paint()..color = const Color(0xFFDBEBFF);
-    canvas.drawRect(Offset.zero & size, bg);
+    // final bg = Paint()..color = const Color(0xFFDBEBFF);
+    // canvas.drawRect(Offset.zero & size, bg);
 
     // Screenshot-style: single thick top line + endpoint dot.
-    final blue = const Color(0xFF0B5DFA);
+    final blue = const Color(0xFF0088FF);
 
-    final y = size.height * 0.16; // near the top
-    final startX = size.width * 0.06;
-    final endX = size.width * 0.94;
+    final y = size.height * 0.03; // near the top
+    final startX = size.width * 0.01;
+    final endX = size.width * 0.98;
 
     final linePaint = Paint()
       ..color = blue
