@@ -46,6 +46,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       'assets/images/heating_cooling.png'; // Using heating as alternative
   static const _icIrrigation = 'assets/images/irrigation.png';
   static const _icKitchen = 'assets/images/kitchen.png';
+  static const _icFanUp = 'assets/Mask group copy 8.png';
+  static const _icFanDown = 'assets/Mask group (1) copy 3.png';
+  static const _icIrrigationLeft = 'assets/Mask group (2) copy 2.png';
+  static const _icIrrigationRight = 'assets/Mask group copy 4.png';
 
 
 
@@ -360,6 +364,41 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
+  /// Same circle size, gap, and trailing inset for all +/- and arrow pairs.
+  Widget _deviceControlPair({
+    required IconData left,
+    required IconData right,
+    VoidCallback? onLeft,
+    VoidCallback? onRight,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _CircleButton(icon: left, onTap: onLeft ?? () {}),
+        SizedBox(width: 10.w),
+        _CircleButton(icon: right, onTap: onRight ?? () {}),
+        SizedBox(width: 10.w),
+      ],
+    );
+  }
+
+  Widget _deviceControlPairAssets({
+    required String leftAsset,
+    required String rightAsset,
+    VoidCallback? onLeft,
+    VoidCallback? onRight,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _CircleButton(imagePath: leftAsset, onTap: onLeft ?? () {}),
+        SizedBox(width: 10.w),
+        _CircleButton(imagePath: rightAsset, onTap: onRight ?? () {}),
+        SizedBox(width: 10.w),
+      ],
+    );
+  }
+
   // ✅ Whole list (match screenshot)
   Widget _buildDeviceList() {
     return Column(
@@ -561,20 +600,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
 
               SizedBox(height: 5.w),
-              Row(
-                children: [
-                  _CircleButton(
-                    icon: Icons.keyboard_arrow_up_rounded,
-
-                    onTap: () {},
-                  ),
-                  SizedBox(width: 19.w),
-                  _CircleButton(
-                    icon: Icons.keyboard_arrow_down_rounded,
-                    onTap: () {},
-                  ),
-                  SizedBox(width: 10.w),
-                ],
+              _deviceControlPairAssets(
+                leftAsset: _icFanUp,
+                rightAsset: _icFanDown,
               ),
             ],
           ),
@@ -615,14 +643,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           ),
           title: 'Heating & Cooling',
           subtitle: const _InlineText('Heating', bold: true),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _CircleButton(icon: Icons.remove_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-              _CircleButton(icon: Icons.add_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-            ],
+          trailing: _deviceControlPair(
+            left: Icons.remove_rounded,
+            right: Icons.add_rounded,
           ),
         ),
         _buildDivider(),
@@ -636,14 +659,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           ),
           title: 'Irrigation',
           subtitle: const _InlineText('0', bold: true),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _CircleButton(icon: Icons.chevron_left_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-              _CircleButton(icon: Icons.chevron_right_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-            ],
+          trailing: _deviceControlPairAssets(
+            leftAsset: _icIrrigationLeft,
+            rightAsset: _icIrrigationRight,
           ),
         ),
         _buildDivider(),
@@ -689,14 +707,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
             ],
           ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _CircleButton(icon: Icons.remove_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-              _CircleButton(icon: Icons.add_rounded, onTap: () {}),
-              SizedBox(width: 10.w),
-            ],
+          trailing: _deviceControlPair(
+            left: Icons.remove_rounded,
+            right: Icons.add_rounded,
           ),
         ),
       ],
@@ -790,21 +803,18 @@ class _SmallCircleText extends StatelessWidget {
 }
 
 class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.icon, this.onTap});
+  const _CircleButton({this.icon, this.imagePath, this.onTap})
+    : assert(
+        icon != null || imagePath != null,
+        'Provide icon or imagePath',
+      );
 
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    // Determine icon size based on icon type
-    double iconSize = 30.sp;
-    if (icon == Icons.remove_rounded || icon == Icons.remove) {
-      iconSize = 20.sp;
-    } else if (icon == Icons.add_rounded || icon == Icons.add) {
-      iconSize = 25.sp;
-    }
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -814,8 +824,16 @@ class _CircleButton extends StatelessWidget {
           color: Color(0xFFF3F4F6),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: iconSize, color:Color(0xFF6B7280)),
-     ),
+        alignment: Alignment.center,
+        child: imagePath != null
+            ? Image.asset(
+                imagePath!,
+                width: 15.w,
+                height: 15.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
+      ),
     );
   }
 }

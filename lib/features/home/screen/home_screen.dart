@@ -1409,7 +1409,8 @@ class _DimmerPill extends StatelessWidget {
     final p = percent.clamp(0.0, 1.0);
 
     return Container(
-      height: 36.h, // ✅ image-1 height
+      height: 35.h, // ✅ image-1 height
+      width: 133.w,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(999),
@@ -1529,7 +1530,7 @@ class _ThermostatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _CircleBtn(child: Icon(Icons.remove, size: 18.sp, color: Color(0xFF6B7280),)),
+                  _CircleBtn(size: 35, child: Icon(Icons.remove, size: 23.sp, color: Color(0xFF6B7280),)),
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
@@ -1538,7 +1539,7 @@ class _ThermostatCard extends StatelessWidget {
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  _CircleBtn(child: Icon(Icons.add, size: 18.sp, color: Color(0xFF6B7280),), ),
+                  _CircleBtn(size: 35, child: Icon(Icons.add, size: 23.sp, color: Color(0xFF6B7280),), ),
                 ],
               ),
             ],
