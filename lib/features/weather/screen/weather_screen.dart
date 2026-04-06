@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 
@@ -35,41 +37,46 @@ final _weatherScreenProvider = Provider<_WeatherScreenData>((ref) {
       _MetricData(
         title: 'Temperature',
         primary: '24°',
-        secondary: 'Similar to the actual temperature.',
+        secondary: 'Similar to the actual  temperature.',
         iconType: _MetricIconType.temperature,
       ),
       _MetricData(
         title: 'UV index',
         primary: '1',
-        secondary: 'Low for the first part of the day',
+        primary2: 'Low',
+        secondary: 'Low for the rest of the day',
         accent: Color(0xFF15DFFE),
         iconType: _MetricIconType.uv,
       ),
       _MetricData(
         title: 'Sunset',
         primary: '19:48',
-        secondary: 'Sunrise 5:55',
+        secondary: 'Sunrise: 5:35',
         accent: Color(0xFFFFE241),
         iconType: _MetricIconType.sunset,
       ),
       _MetricData(
         title: 'Precipitation',
         primary: '0 mm',
-        secondary: 'Today\'s amount 2.4 mm',
+        secondary: 'Today\'s amount 2.6mm',
         accent: Color(0xFF38A4FE),
         iconType: _MetricIconType.precipitation,
       ),
       _MetricData(
         title: 'Wind Map',
         primary: 'Wind',
-        secondary: 'Today H  41 km/h\nDirection  335°',
-        accent: Color(0xFFA7CAFE),
+        secondary: '21 km/h',
+        primary2: 'Today H',
+        primary3: 'Direction',
+        secondery2: "41 km/h",
+        secondery3: '306°',
+        accent: Color(0xFF000000),
         iconType: _MetricIconType.wind,
       ),
       _MetricData(
         title: 'Pressure',
-        primary: '1007',
-        secondary: 'Light',
+        primary: 'Low',
+        secondary: 'High',
         accent: Color(0xFF15DFFE),
         iconType: _MetricIconType.pressure,
       ),
@@ -88,8 +95,8 @@ final _weatherScreenProvider = Provider<_WeatherScreenData>((ref) {
         iconType: _MetricIconType.air,
       ),
     ],
-    latitude: '45° 26\' 43.34" N',
-    longitude: '75° 44\' 44.14" W',
+    latitude: '48.208579°',
+    longitude: '16.374124°',
   );
 });
 
@@ -584,7 +591,7 @@ class _ForecastRow extends StatelessWidget {
                           height: barH,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(999.r),
+                            borderRadius: BorderRadius.circular(26.r),
                           ),
                         ),
                       ),
@@ -595,7 +602,7 @@ class _ForecastRow extends StatelessWidget {
                           height: barH,
                           decoration: BoxDecoration(
                             gradient: _gradient,
-                            borderRadius: BorderRadius.circular(999.r),
+                            borderRadius: BorderRadius.circular(26.r),
                           ),
                         ),
                       ),
@@ -641,12 +648,14 @@ class _MetricCard extends StatelessWidget {
   double get _cardHeight {
     switch (metric.iconType) {
       case _MetricIconType.pressure:
-        return 154.h;
+      
+        return 182.h;
       case _MetricIconType.wind:
         // Taller than default: header + large primary + 2-line secondary needs room.
-        return 152.h;
+        return 182.h;
       default:
-        return 132.h;
+    //case _MetricIconType.uv:
+        return 173.h;
     }
   }
 
@@ -654,10 +663,11 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: _cardHeight,
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
+      padding: EdgeInsets.fromLTRB(19.w, 15.h, 15.w, 14.h),
       decoration: BoxDecoration(
         color: WeatherScreen._panelSoft,
         borderRadius: BorderRadius.circular(26.r),
+        border: Border.all(width: 1.h, color:Colors.white),  
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,19 +690,26 @@ class _MetricCard extends StatelessWidget {
             ],
           ),
           SizedBox(
-            height: metric.iconType == _MetricIconType.pressure ? 8.h : 12.h,
+            height: (metric.iconType == _MetricIconType.pressure ||
+                    metric.iconType == _MetricIconType.uv)
+                ? 8.h
+                : 12.h,
           ),
+
           if (metric.iconType == _MetricIconType.pressure)
             Expanded(
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: _PressureGauge(
-                    value: metric.primary,
-                    label: metric.secondary,
-                  ),
-                ),
+              child: _PressureGauge(
+                value: metric.primary,
+                label: metric.secondary,
+              ),
+            )
+          else if (metric.iconType == _MetricIconType.uv)
+            Expanded(
+              child: _UvIndexCard(
+                value: metric.primary,
+                statusLabel: metric.primary2 ?? '',
+                description: metric.secondary,
+                accentColor: metric.accent,
               ),
             )
           else if (metric.iconType == _MetricIconType.wind)
@@ -700,50 +717,114 @@ class _MetricCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    metric.primary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Expanded(
-                    child: Text(
-                      metric.secondary,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: WeatherScreen._textSecondary,
-                        height: 1.45,
+                  Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        metric.primary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
+                      Text(
+                        metric.secondary,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  Divider(height: 1.h, color: Colors.white,),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        metric.primary2!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        metric.secondery2!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  Divider(height: 1.h, color: Colors.white,),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        metric.primary3!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        metric.secondery3!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             )
           else ...[
-            Text(
+              SizedBox(height: 12.h,),
+              Text(
               metric.primary,
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 30.sp,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: Colors.white,
                 height: 1.0,
               ),
             ),
-            const Spacer(),
+               SizedBox(height: 12.h,),
             Text(
               metric.secondary,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 12.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: WeatherScreen._textSecondary,
                 height: 1.35,
@@ -765,10 +846,11 @@ class _LocationMapCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
+      padding: EdgeInsets.fromLTRB(19.w, 15.h, 15.w, 12.h),
       decoration: BoxDecoration(
         color: WeatherScreen._textPrimary,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(26.r),
+        border: Border.all(width: 1.w, color: Colors.white)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -795,10 +877,10 @@ class _LocationMapCard extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           Container(
-            height: 176.h,
+            height: 281.h,
             decoration: BoxDecoration(
               color: const Color(0xFFF6F7FB),
-              borderRadius: BorderRadius.circular(18.r),
+              borderRadius: BorderRadius.circular(26.r),
             ),
             clipBehavior: Clip.antiAlias,
 
@@ -812,6 +894,8 @@ class _LocationMapCard extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           _LatLngRow(label: 'Latitude', value: latitude),
+          SizedBox(height: 6.h),
+          Divider(height: 1.h, color: Colors.white,),
           SizedBox(height: 6.h),
           _LatLngRow(label: 'Longitude', value: longitude),
         ],
@@ -919,89 +1003,125 @@ class _PressureGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+     
       children: [
-        SizedBox(
-          width: 88.w,
-          height: 58.h,
-          child: CustomPaint(painter: _GaugePainter()),
-        ),
-        Transform.translate(
-          offset: Offset(0, -6.h),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Text(
+        Center(child: Image.asset("assets/images/presure_bigicon.png",
+          height: 88.h,
+         // width: 170.w,
+          fit: BoxFit.cover,)),
+        
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              //"Low" ,
               value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
               ),
             ),
-          ),
-        ),
-        Transform.translate(
-          offset: Offset(0, -5.h),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: WeatherScreen._textSecondary,
+             //SizedBox(width: 10.w,),
+            Text(
+            //  "High",
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _StaticMapPainterWidget extends StatelessWidget {
-  const _StaticMapPainterWidget();
+/// UV index body: large value, accent status, gradient scale bar, footer text.
+class _UvIndexCard extends StatelessWidget {
+  const _UvIndexCard({
+    required this.value,
+    required this.statusLabel,
+    required this.description,
+    required this.accentColor,
+  });
+
+  final String value;
+  final String statusLabel;
+  final String description;
+  final Color accentColor;
+
+  static const _barGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      Color(0xFFFAB300),
+      Color(0xFFFE019A),
+      Color(0xFF00E52A),
+      Color(0xFF315051),
+    ],
+    stops: [0.09, 0.40, 0.60, 0.90],
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Positioned.fill(child: CustomPaint(painter: _MapPainter())),
-        Positioned(
-          left: 18.w,
-          top: 24.h,
-          child: Text(
-            'Jerusalem',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF002172),
-            ),
+        Text(
+          value,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 30.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            height: 1.05,
           ),
         ),
-        Positioned(
-          right: 44.w,
-          bottom: 38.h,
-          child: Column(
-            children: [
-              Container(
-                width: 14.w,
-                height: 14.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEF4444),
-                  shape: BoxShape.circle,
-                ),
+        SizedBox(height: 4.h),
+        Text(
+          statusLabel,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            color: accentColor,
+            height: 1,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          width: double.infinity,
+          height: 5.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            gradient: _barGradient,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Expanded(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+                height: 1.2,
               ),
-              Container(
-                width: 3.w,
-                height: 18.h,
-                color: const Color(0xFFEF4444),
-              ),
-            ],
+            ),
           ),
         ),
       ],
@@ -1036,66 +1156,6 @@ class _WeatherHeroIllustration extends StatelessWidget {
             height: 126.h,
             width: 130.w,
             fit: BoxFit.contain,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CloudLayer extends StatelessWidget {
-  const _CloudLayer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 6.w,
-          top: 16.h,
-          child: Container(
-            width: 42.w,
-            height: 42.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD9E9FF),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 28.w,
-          top: 4.h,
-          child: Container(
-            width: 52.w,
-            height: 52.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD9E9FF),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 60.w,
-          top: 16.h,
-          child: Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFD9E9FF),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 12.w,
-          top: 26.h,
-          child: Container(
-            width: 90.w,
-            height: 28.h,
-            decoration: BoxDecoration(
-              color: const Color(0xFFD9E9FF),
-              borderRadius: BorderRadius.circular(18.r),
-            ),
           ),
         ),
       ],
@@ -1207,17 +1267,25 @@ class _ForecastDay {
 }
 
 class _MetricData {
-  const _MetricData({
+  const _MetricData({    
     required this.title,
     required this.primary,
     required this.secondary,
     required this.iconType,
+    this.secondery2,
+    this.primary2,
+    this.primary3,
+    this.secondery3,
     this.accent = const Color(0xFFA7CAFE),
   });
 
   final String title;
   final String primary;
+  final String? primary2;
+  final String? primary3;
   final String secondary;
+  final String? secondery2;
+  final String? secondery3;
   final _MetricIconType iconType;
   final Color accent;
 }
@@ -1231,215 +1299,4 @@ enum _MetricIconType {
   pressure,
   humidity,
   air,
-}
-
-class _GaugePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height);
-    final radius = math.min(size.width / 2, size.height) - 4;
-
-    final trackPaint = Paint()
-      ..color = const Color(0xFF95BFFF)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 7;
-    final progressPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFF0088FE), Color(0xFF15DFFE)],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 7;
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      math.pi,
-      math.pi,
-      false,
-      trackPaint,
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      math.pi,
-      math.pi * 0.72,
-      false,
-      progressPaint,
-    );
-
-    final angle = math.pi * 1.72;
-    final needleStart = Offset(
-      center.dx + math.cos(angle) * 10,
-      center.dy + math.sin(angle) * 10,
-    );
-    final needleEnd = Offset(
-      center.dx + math.cos(angle) * (radius - 8),
-      center.dy + math.sin(angle) * (radius - 8),
-    );
-
-    final needlePaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(needleStart, needleEnd, needlePaint);
-    canvas.drawCircle(center, 4, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = const Color(0xFFF3F4F6);
-    canvas.drawRect(Offset.zero & size, bgPaint);
-
-    final roadPaint = Paint()
-      ..color = const Color(0xFFD9DCE4)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-    final mainRoadPaint = Paint()
-      ..color = const Color(0xFFF5C977)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round;
-    final waterPaint = Paint()..color = const Color(0xFFCDE7FF);
-    final parkPaint = Paint()..color = const Color(0xFFDDF4D7);
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * 0.62,
-          size.height * 0.08,
-          size.width * 0.22,
-          size.height * 0.18,
-        ),
-        const Radius.circular(24),
-      ),
-      parkPaint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * 0.08,
-          size.height * 0.58,
-          size.width * 0.28,
-          size.height * 0.2,
-        ),
-        const Radius.circular(24),
-      ),
-      waterPaint,
-    );
-
-    final path1 = Path()
-      ..moveTo(0, size.height * 0.36)
-      ..quadraticBezierTo(
-        size.width * 0.2,
-        size.height * 0.22,
-        size.width * 0.42,
-        size.height * 0.35,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.68,
-        size.height * 0.5,
-        size.width,
-        size.height * 0.32,
-      );
-    canvas.drawPath(path1, mainRoadPaint);
-
-    final path2 = Path()
-      ..moveTo(size.width * 0.16, 0)
-      ..quadraticBezierTo(
-        size.width * 0.22,
-        size.height * 0.24,
-        size.width * 0.3,
-        size.height * 0.42,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.42,
-        size.height * 0.72,
-        size.width * 0.54,
-        size.height,
-      );
-    canvas.drawPath(path2, roadPaint);
-
-    final path3 = Path()
-      ..moveTo(size.width * 0.48, 0)
-      ..quadraticBezierTo(
-        size.width * 0.56,
-        size.height * 0.26,
-        size.width * 0.66,
-        size.height * 0.44,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.76,
-        size.height * 0.66,
-        size.width * 0.92,
-        size.height,
-      );
-    canvas.drawPath(path3, roadPaint);
-
-    final routePaint = Paint()
-      ..color = const Color(0xFF4F8FFF)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-    final route = Path()
-      ..moveTo(size.width * 0.18, size.height * 0.74)
-      ..quadraticBezierTo(
-        size.width * 0.32,
-        size.height * 0.62,
-        size.width * 0.42,
-        size.height * 0.55,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.57,
-        size.height * 0.46,
-        size.width * 0.68,
-        size.height * 0.48,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.78,
-        size.height * 0.52,
-        size.width * 0.86,
-        size.height * 0.7,
-      );
-    canvas.drawPath(route, routePaint);
-
-    final markerPaint = Paint()..color = const Color(0xFFEF4444);
-    canvas.drawCircle(
-      Offset(size.width * 0.86, size.height * 0.7),
-      6,
-      markerPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _SparkPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFFFF2A6)
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(
-      Offset(size.width / 2, 0),
-      Offset(size.width / 2, size.height),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(0, size.height / 2),
-      Offset(size.width, size.height / 2),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
