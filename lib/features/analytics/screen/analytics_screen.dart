@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,8 +9,9 @@ import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 // —— Riverpod (Analytics screen only) ——
 enum _AnalyticsPeriod { week, day }
 
-final _analyticsPeriodProvider =
-    StateProvider<_AnalyticsPeriod>((ref) => _AnalyticsPeriod.day);
+final _analyticsPeriodProvider = StateProvider<_AnalyticsPeriod>(
+  (ref) => _AnalyticsPeriod.day,
+);
 
 final _analyticsSelectedDeviceIndexProvider = StateProvider<int>((ref) => 1);
 
@@ -143,37 +142,42 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                         ),
                         const Spacer(),
-                        
-                            GestureDetector(
-                              onTap: () =>
-                                  context.push(CategoriesScreen.routeName),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'Categories ',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: _AnalyticsColors.linkBlue,
-                                    ),
-                                  ),
-                                  Image.asset("assets/images/back_arro.png", height: 11.h, width: 11.w, fit: BoxFit.cover, color: _AnalyticsColors.linkBlue,)
-                                ],
+                        GestureDetector(
+                          onTap: () => context.push(CategoriesScreen.routeName),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Categories ',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: _AnalyticsColors.linkBlue,
+                                ),
                               ),
-                            //  Image.asset("name")
-                              
-                              
-                            ),
-                        
+                              Image.asset(
+                                "assets/images/back_arro.png",
+                                height: 11.h,
+                                width: 11.w,
+                                fit: BoxFit.cover,
+                                color: _AnalyticsColors.linkBlue,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: 14.h),
                     _DeviceUsageCard(
                       selectedIndex: selectedDevice,
-                      onSelect: (i) => ref
-                          .read(_analyticsSelectedDeviceIndexProvider.notifier)
-                          .state = i,
+                      onSelect: (i) =>
+                          ref
+                                  .read(
+                                    _analyticsSelectedDeviceIndexProvider
+                                        .notifier,
+                                  )
+                                  .state =
+                              i,
                     ),
                   ],
                 ),
@@ -183,10 +187,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         ),
       ),
       bottomNavigationBar: widget.showBottomNav
-          ? BottomNavBarWidget(
-              selectedIndex: 1,
-              onItemTapped: _onNavItemTapped,
-            )
+          ? BottomNavBarWidget(selectedIndex: 1, onItemTapped: _onNavItemTapped)
           : null,
     );
   }
@@ -243,9 +244,9 @@ class _SegmentChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 35.h,
-        width: 132.w,
+      width: 132.w,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -254,9 +255,7 @@ class _SegmentChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             decoration: BoxDecoration(
-              color: selected
-                  ? const Color(0xFFF3F4F6)
-                  : Colors.white,
+              color: selected ? const Color(0xFFF3F4F6) : Colors.white,
               borderRadius: BorderRadius.circular(26.r),
             ),
             child: Center(
@@ -285,30 +284,23 @@ class _ActivityCard extends StatelessWidget {
   final _AnalyticsPeriod period;
 
   static const List<double> _weekHeights = [
-    0.42,
-    0.58,
-    0.72,
-    0.48,
-    0.65,
-    0.88,
-    0.52,
+    0.93, // S
+    0.71, // M
+    0.52, // T
+    0.87, // W
+    0.98, // T
+    0.71, // F
+    0.99, // S
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 16.h),
       decoration: BoxDecoration(
         color: _AnalyticsColors.cardBg,
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(30.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,180 +314,239 @@ class _ActivityCard extends StatelessWidget {
               fontSize: 24.sp,
               fontWeight: FontWeight.w500,
               color: const Color(0xFF111827),
-              height: 1.25,
+              height: 1.2,
             ),
           ),
           SizedBox(height: 18.h),
-          SizedBox(
-            height: 132.h,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: CustomPaint(
-                    painter: _WeeklyBarsPainter(
-                      normalizedHeights: _weekHeights,
-                      gridColor: _AnalyticsColors.gridLine,
-                    ),
-                    child: const SizedBox.expand(),
-                  ),
+
+          /// Top chart
+         /// Top chart - same box/table style like image 1
+SizedBox(
+  height: 150.h,
+  width: 400.w,
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(left: 4.w),
+          child: Stack(
+            children: [
+              CustomPaint(
+                size: Size(double.infinity, 150.h),
+                painter: _WeeklyBarsPainter(
+                  normalizedHeights: _weekHeights,
+                  gridColor: const Color(0xFFE5E7EB),
                 ),
-                SizedBox(width: 8.w),
-                SizedBox(
-                  width: 32.w,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: ['24h', '18h', '12h', '6h', '0']
-                        .map(
-                          (t) => Text(
-                            t,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w400,
-                              color: _AnalyticsColors.subtitle,
-                              //color: Color(0xFF6B7280)
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 150.h,
+                ),
+              ),
+
+              /// labels inside bottom row of the same chart box
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 8.h,
+                child: Row(
+                  children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+                      .map(
+                        (d) => Expanded(
+                          child: Center(
+                            child: Text(
+                              d,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF6B7280),
+                              ),
                             ),
                           ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                .map(
-                  (d) => Expanded(
-                    child: Center(
-                      child: Text(
-                        d,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: _AnalyticsColors.subtitle,
                         ),
-                      ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      SizedBox(width: 0.2.w),
+      SizedBox(
+        width: 35.w,
+        child: Padding(
+          padding: EdgeInsets.only(top: 0.h, bottom: 35.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: ['24h', '18h', '12h', '6h', '0']
+                .map(
+                  (t) => Text(
+                    t,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF6B7280),
                     ),
                   ),
                 )
                 .toList(),
           ),
-          SizedBox(height: 22.h),
-          SizedBox(
-            height: 110.h,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: CustomPaint(
-                    painter: _DailyStackPainter(
-                      slotData: const [
-                        (0.28, 0.22, 0.18),
-                        (0.35, 0.30, 0.20),
-                        (0.40, 0.25, 0.22),
-                        (0.22, 0.18, 0.15),
-                      ],
-                      gridColor: _AnalyticsColors.gridLine,
-                    ),
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                SizedBox(
-                  width: 32.w,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: ['100%', '75%', '50%', '25%', '0']
-                        .map(
-                          (t) => Text(
-                            t,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w400,
-                              color: _AnalyticsColors.subtitle,
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ),
+      ),
+    ],
+  ),
+),
+
+SizedBox(height: 18.h),
+
+SizedBox(
+  height: 135.h,
+  width: 400.w,
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(left: 2.w, right: 2.w),
+          child: Stack(
             children: [
-              Text(
-                '00:00',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _AnalyticsColors.subtitle,
+              CustomPaint(
+                painter: _DailyStackPainter(
+                  gridColor: const Color(0xFFE5E7EB),
+                  barWidth: 11.w,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 184.h,
                 ),
               ),
-              Text(
-                '6:00',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _AnalyticsColors.subtitle,
-                ),
-              ),
-              Text(
-                '12:00',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _AnalyticsColors.subtitle,
-                ),
-              ),
-              Text(
-                '18:00',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _AnalyticsColors.subtitle,
+
+              /// x-axis labels inside same chart box
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 8.h,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '00:00',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                      Text(
+                        '6:00',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                      Text(
+                        '12:00',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                      Text(
+                        '18:00',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 18.h),
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
-          SizedBox(height: 10.h),
+        ),
+      ),
+      SizedBox(width: 0.2.w),
+      SizedBox(
+        width: 35.w,
+        child: Padding(
+          padding: EdgeInsets.only(top: 2.h, bottom: 38.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: ['100%', '75%', '50%', '25%', '0']
+                .map(
+                  (t) => Text(
+                    t,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+// SizedBox(height: 12.h),
+// const Divider(height: 1, color: Color(0xFFF1F3F5)),
+// SizedBox(height: 12.h),
+// const Divider(height: 1, color: Color(0xFFF1F3F5)),  
+          
+          SizedBox(height: 12.h),
+
           Row(
-            children: const [
+            children: [
               Expanded(
-                child: _LegendColumn(
-                  label: 'On',
-                  value: '5h 58m',
-                  labelColor: Color(0xFF0088FE),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _LegendColumn(
+                    label: 'On',
+                    value: '5h 58m',
+                    labelColor: const Color(0xFF0088FE),
+                    textAlign: TextAlign.left,
+                  ),
                 ),
               ),
               Expanded(
-                child: _LegendColumn(
-                  label: 'Off',
-                  value: '1h 29m',
-                  labelColor: Color(0xFF111827),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: _LegendColumn(
+                    label: 'Off',
+                    value: '1h 29m',
+                    labelColor: const Color(0xFF111827),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
               Expanded(
-                child: _LegendColumn(
-                  label: 'Auto',
-                  value: '8h 50m',
-                  labelColor: Color(0xFF00D1FF),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _LegendColumn(
+                    label: 'Auto',
+                    value: '8h 50m',
+                    labelColor: const Color(0xFF00C8FF),
+                    textAlign: TextAlign.right,
+                  ),
                 ),
               ),
             ],
@@ -511,22 +562,38 @@ class _LegendColumn extends StatelessWidget {
     required this.label,
     required this.value,
     required this.labelColor,
-  });                                
+    this.textAlign = TextAlign.left,
+  });
 
   final String label;
   final String value;
   final Color labelColor;
+  final TextAlign textAlign;
+
+  CrossAxisAlignment _crossAxis() {
+    switch (textAlign) {
+      case TextAlign.right:
+      case TextAlign.end:
+        return CrossAxisAlignment.end;
+      case TextAlign.center:
+        return CrossAxisAlignment.center;
+      default:
+        return CrossAxisAlignment.start;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: _crossAxis(),
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
+          textAlign: textAlign,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 16.sp,
+            fontSize: 17.sp,
             fontWeight: FontWeight.w400,
             color: labelColor,
           ),
@@ -534,9 +601,10 @@ class _LegendColumn extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           value,
+          textAlign: textAlign,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 14.sp,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF111827),
           ),
@@ -561,63 +629,91 @@ class _WeeklyBarsPainter extends CustomPainter {
       ..color = gridColor
       ..strokeWidth = 1;
 
-    const barCount = 7;
-    final gap = 5.0;
-    final barW = (size.width - gap * (barCount + 1)) / barCount;
+    const int barCount = 7;
 
-    // Lined grid behind bars: horizontal (0,6h,12h,18h,24h) + vertical per day column.
-    for (var i = 0; i <= 4; i++) {
-      final y = size.height * (i / 4);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    // bottom row for weekday labels
+    final double labelRowHeight = 34;
+    final double chartHeight = size.height - labelRowHeight;
+
+    final double columnWidth = size.width / barCount;
+    final double barWidth = columnWidth * 0.48;
+
+    // outer vertical lines (full height including label row)
+    for (int i = 0; i <= barCount; i++) {
+      final x = columnWidth * i;
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        grid,
+      );
     }
-    canvas.drawLine(Offset(0, 0), Offset(0, size.height), grid);
+
+    // horizontal lines for chart area only
+    for (int i = 0; i <= 4; i++) {
+      final y = chartHeight * (i / 4);
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        grid,
+      );
+    }
+
+    // separator line between chart and weekday row
     canvas.drawLine(
-      Offset(size.width, 0),
-      Offset(size.width, size.height),
+      Offset(0, chartHeight),
+      Offset(size.width, chartHeight),
       grid,
     );
-    for (var k = 0; k < barCount - 1; k++) {
-      final x = gap + k * (barW + gap) + barW + gap / 2;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
 
-    for (var i = 0; i < barCount; i++) {
-      final nh = normalizedHeights[i].clamp(0.0, 1.0);
-      final h = size.height * nh;
-      final left = gap + i * (barW + gap);
-      final top = size.height - h;
-      final r = RRect.fromRectAndCorners(
-        Rect.fromLTWH(left, top, barW, h),
-        topLeft: const Radius.circular(4),
-        topRight: const Radius.circular(4),
+    for (int i = 0; i < barCount; i++) {
+      final double value = normalizedHeights[i].clamp(0.0, 1.0);
+      final double barHeight = chartHeight * value;
+
+      final double left = (i * columnWidth) + ((columnWidth - barWidth) / 2);
+      final double top = chartHeight - barHeight;
+
+      final rect = Rect.fromLTWH(left, top, barWidth, barHeight);
+      final rrect = RRect.fromRectAndCorners(
+        rect,
+        topLeft: const Radius.circular(5),
+        topRight: const Radius.circular(5),
+        bottomRight: Radius.zero,
+        bottomLeft: Radius.zero,
       );
-      final shader = ui.Gradient.linear(
-        Offset(left, top),
-        Offset(left, size.height),
-        const [Color(0xFF90CAF9), Color(0xFF1565C0)],
-      );
-      canvas.drawRRect(r, Paint()..shader = shader);
+
+      final paint = Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+              Color(0xFF0088FE),
+            Color(0xFF00D1FF),
+          
+          ],
+        ).createShader(rect);
+
+      canvas.drawRRect(rrect, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _WeeklyBarsPainter oldDelegate) =>
-      oldDelegate.normalizedHeights != normalizedHeights ||
-      oldDelegate.gridColor != gridColor;
+  bool shouldRepaint(covariant _WeeklyBarsPainter oldDelegate) {
+    return oldDelegate.normalizedHeights != normalizedHeights ||
+        oldDelegate.gridColor != gridColor;
+  }
 }
-
 class _DailyStackPainter extends CustomPainter {
   _DailyStackPainter({
-    required this.slotData,
     required this.gridColor,
+    required this.barWidth,
   });
 
-  final List<(double, double, double)> slotData;
   final Color gridColor;
+  final double barWidth;
 
-  static const _light = Color(0xFF90CAF9);
-  static const _mid = Color(0xFF1976D2);
-  static const _dark = Color(0xFF0D47A1);
+  static const Color onColor = Color(0xFF1E90FF);
+  static const Color autoColor = Color(0xFF14C8F7);
+  static const Color offColor = Color(0xFF111827);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -625,78 +721,123 @@ class _DailyStackPainter extends CustomPainter {
       ..color = gridColor
       ..strokeWidth = 1;
 
-    final n = slotData.length;
-    final gap = 8.0;
-    final colW = (size.width - gap * (n + 1)) / n;
+    const double labelRowHeight = 34;
+    final double chartHeight = size.height - labelRowHeight;
+    const double radius = 2.5;
 
-    // Lined grid behind stacks: horizontal (0–100%) + vertical between time slots.
-    for (var i = 0; i <= 4; i++) {
-      final y = size.height * (i / 4);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    // vertical lines full height including label row
+    for (int i = 0; i <= 4; i++) {
+      final x = size.width * (i / 4);
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        grid,
+      );
     }
-    canvas.drawLine(Offset(0, 0), Offset(0, size.height), grid);
+
+    // horizontal lines only for chart area
+    for (int i = 0; i <= 4; i++) {
+      final y = chartHeight * (i / 4);
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        grid,
+      );
+    }
+
+    // separator between chart and x-axis label row
     canvas.drawLine(
-      Offset(size.width, 0),
-      Offset(size.width, size.height),
+      Offset(0, chartHeight),
+      Offset(size.width, chartHeight),
       grid,
     );
-    for (var k = 0; k < n - 1; k++) {
-      final x = gap + k * (colW + gap) + colW + gap / 2;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
-    }
 
-    for (var i = 0; i < n; i++) {
-      final left = gap + i * (colW + gap);
-      final (a, b, c) = slotData[i];
-      final total = (a + b + c).clamp(0.001, 10.0);
-      final track = RRect.fromRectAndCorners(
-        Rect.fromLTWH(left, 0, colW, size.height),
-        topLeft: const Radius.circular(5),
-        topRight: const Radius.circular(5),
-        bottomLeft: const Radius.circular(5),
-        bottomRight: const Radius.circular(5),
-      );
+    final bars = <_StackBarDraw>[
+      _StackBarDraw(xFactor: 0.18,  on: 0.40, auto: 0.00, off: 0.10),
+      _StackBarDraw(xFactor: 0.29, on: 0.40, auto: 0.00, off: 0.10),
+      _StackBarDraw(xFactor: 0.335,  on: 0.40, auto: 0.13, off: 0.22),
+      _StackBarDraw(xFactor: 0.38, on: 0.26, auto: 0.20, off: 0.17),
+      _StackBarDraw(xFactor: 0.425,  on: 0.32, auto: 0.18, off: 0.24),
+      _StackBarDraw(xFactor: 0.47, on: 0.35, auto: 0.13, off: 0.14),
+    ];
 
-      final h1 = size.height * (a / total);
-      final h2 = size.height * (b / total);
-      final h3 = size.height * (c / total);
+    for (final bar in bars) {
+      final double x = (size.width * bar.xFactor) - (barWidth / 2);
 
-      canvas.save();
-      canvas.clipRRect(track);
-      canvas.drawRect(
-        Rect.fromLTWH(left, 0, colW, size.height),
-        Paint()..color = const Color(0xFFF3F4F6),
-      );
-      var yBottom = size.height;
-      yBottom -= h1;
-      canvas.drawRect(
-        Rect.fromLTWH(left, yBottom, colW, h1),
-        Paint()..color = _light,
-      );
-      yBottom -= h2;
-      canvas.drawRect(
-        Rect.fromLTWH(left, yBottom, colW, h2),
-        Paint()..color = _mid,
-      );
-      yBottom -= h3;
-      canvas.drawRect(
-        Rect.fromLTWH(left, yBottom, colW, h3),
-        Paint()..color = _dark,
-      );
-      canvas.restore();
+      final double onH = chartHeight * bar.on;
+      final double autoH = chartHeight * bar.auto;
+      final double offH = chartHeight * bar.off;
+
+      double bottom = chartHeight;
+
+      if (bar.on > 0) {
+        bottom -= onH;
+        canvas.drawRect(
+          Rect.fromLTWH(x, bottom, barWidth, onH),
+          Paint()..color = onColor,
+        );
+      }
+
+      if (bar.auto > 0) {
+        bottom -= autoH;
+        canvas.drawRect(
+          Rect.fromLTWH(x, bottom, barWidth, autoH),
+          Paint()..color = autoColor,
+        );
+      }
+
+      if (bar.off > 0) {
+        bottom -= offH;
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            Rect.fromLTWH(x, bottom, barWidth, offH),
+            topLeft: const Radius.circular(radius),
+            topRight: const Radius.circular(radius),
+          ),
+          Paint()..color = offColor,
+        );
+      }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DailyStackPainter oldDelegate) =>
-      oldDelegate.slotData != slotData || oldDelegate.gridColor != gridColor;
+  bool shouldRepaint(covariant _DailyStackPainter oldDelegate) {
+    return oldDelegate.gridColor != gridColor ||
+        oldDelegate.barWidth != barWidth;
+  }
+}
+
+
+class _StackBarDraw {
+  const _StackBarDraw({
+    required this.xFactor,
+    required this.on,
+    required this.auto,
+    required this.off,
+  });
+
+  final double xFactor;
+  final double on;
+  final double auto;
+  final double off;
+}
+
+class _StackBar {
+  const _StackBar({
+    required this.xFactor,
+    required this.on,
+    required this.auto,
+    required this.off,
+  });
+
+  final double xFactor;
+  final double on;
+  final double auto;
+  final double off;
 }
 
 class _DeviceUsageCard extends StatelessWidget {
-  const _DeviceUsageCard({
-    required this.selectedIndex,
-    required this.onSelect,
-  });
+  const _DeviceUsageCard({required this.selectedIndex, required this.onSelect});
 
   final int selectedIndex;
   final ValueChanged<int> onSelect;
@@ -707,42 +848,36 @@ class _DeviceUsageCard extends StatelessWidget {
       value: '8h 44m',
       progress: 0.90,
       image: "assets/Mask group (5).png",
-      
     ),
     _DeviceUsageRowData(
       name: 'Push button',
       value: '28times',
       progress: 0.70,
       image: "assets/Mask group (13).png",
-      
     ),
     _DeviceUsageRowData(
       name: 'Vent 3 speed',
       value: '1h 44m',
       progress: 0.60,
       image: "assets/images/fan.png",
-
     ),
     _DeviceUsageRowData(
       name: 'Air condition',
       value: '2h 05m',
       progress: 0.50,
       image: "assets/images/6376d7bf4226592678854fa38ee9afdd47741881.png",
-    
     ),
     _DeviceUsageRowData(
       name: 'Irrigation',
       value: '2h 05m',
       progress: 0.55,
       image: "assets/images/irrigation.png",
-      
     ),
     _DeviceUsageRowData(
       name: 'Volt meter',
       value: '47.5kW',
       progress: 0.82,
       image: "assets/images/brightness_sensor.png",
-      
     ),
   ];
 
@@ -754,7 +889,7 @@ class _DeviceUsageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -781,11 +916,12 @@ class _DeviceUsageCard extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          Image.asset(row.image,
+                          Image.asset(
+                            row.image,
                             height: 26.h,
                             width: 26.w,
                             fit: BoxFit.contain,
-                            ),
+                          ),
                           SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
@@ -806,9 +942,9 @@ class _DeviceUsageCard extends StatelessWidget {
                                   child: LinearProgressIndicator(
                                     value: row.progress,
                                     minHeight: 5.h,
-                                  //  backgroundColor: const Color(0xFFE1E1E1),
+                                    backgroundColor: const Color(0xFFE1E1E1),
                                     valueColor: const AlwaysStoppedAnimation(
-                                      Color(0xFFE1E1E1),
+                                      Color(0xFF3B82F6),
                                     ),
                                   ),
                                 ),
@@ -826,11 +962,13 @@ class _DeviceUsageCard extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 4.w),
-                          Image.asset("assets/images/back_arro.png",
+                          Image.asset(
+                            "assets/images/back_arro.png",
                             height: 11.h,
                             width: 11.w,
                             fit: BoxFit.cover,
-                            color: Color(0xFF6B7280),)
+                            color: const Color(0xFF6B7280),
+                          ),
                         ],
                       ),
                     ),
@@ -858,12 +996,10 @@ class _DeviceUsageRowData {
     required this.value,
     required this.progress,
     required this.image,
-
   });
 
   final String name;
   final String value;
   final double progress;
   final String image;
-  
 }
