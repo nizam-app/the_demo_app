@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
+import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
@@ -180,6 +181,7 @@ onTap: () => context.pop(),
                           imagePath: 'assets/bar 5 copy.png',
                           title: 'Analytics',
                           iconSize: 17.5,
+                          onTap: ()=> context.go(AnalyticsScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(

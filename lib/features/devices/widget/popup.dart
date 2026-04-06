@@ -1,7 +1,9 @@
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-/// Public widget so that [DevicesScreen] can show the edit device bottom sheet.
+/// Public widget
 class EditDeviceSheetContent extends StatelessWidget {
   const EditDeviceSheetContent({super.key});
 
@@ -34,13 +36,17 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     'Lighting section name',
     'Lighting section name',
     'Lighting section name',
+    'Lighting section name',
   ];
 
-  // --------- Fallback colors (যদি তোমার constants না থাকে) ----------
+  // For perfect dropdown anchoring (no hardcoded top)
+  final LayerLink _dropdownLink = LayerLink();
+
+  // Colors
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
-  static const Color _kCloseBtnBg = Colors.white;
   static const Color _kDestructiveRed = Color(0xFFFE019A);
+  static const Color _kSheetBg = Color(0xFFF3F4F6);
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
@@ -59,13 +65,14 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     }
   }
 
-  final LayerLink _dropdownLink = LayerLink();
+  // bool select = true;
+  // late  ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6).withOpacity(0.74),
+        color: _kSheetBg.withOpacity(0.74),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
@@ -74,92 +81,81 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       child: SafeArea(
         top: false,
         child: Stack(
-          clipBehavior: Clip.none,
+          alignment: Alignment.center,
           children: [
-            // ✅ Main content
+            // ===== Main content =====
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildHeader(context),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // -------- Rename card --------
-                      Container(
-                        padding: EdgeInsets.all(14.sp),
-                        height: 57.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26.r),
-                          color: _kCloseBtnBg,
-                        ),
+                      // Rename Card
+                      _Card(
                         child: _EditSheetRow(
                           imagePath: 'assets/images/Erename.png',
-                          iconHeight: 22.h,
                           iconWidth: 22.w,
+                          iconHeight: 22.h,
                           label: 'Rename',
-                          trailing: Padding(
-                            padding: EdgeInsets.only(right: 14.w),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: 145.w),
-                                  child: Text(
-                                    _renameController.text,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: _kTextSecondary,
-                                    ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 155.w),
+                                child: Text(
+                                  _renameController.text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: _kTextSecondary,
+                                    fontFamily: 'Inter',
                                   ),
                                 ),
-                                SizedBox(width: 6.w),
-                                Image.asset(
-                                  'assets/Group 63.png',
-                                  width: 14.w,
-                                  height: 13.h,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
-                            ),
+                              ),
+                              SizedBox(width: 6.w),
+                              Image.asset(
+                                'assets/Group 63.png',
+                                width: 14.w,
+                                height: 13.h,
+                                fit: BoxFit.contain,
+                              ),
+                            ],
                           ),
+                          onTap: () {
+                            // TODO: open rename dialog if needed
+                          },
                         ),
                       ),
 
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 12.h),
 
-                      // -------- Actions card (with dropdown trigger) --------
-                      Container(
-                        padding: EdgeInsets.all(14.sp),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26.r),
-                          color: _kCloseBtnBg,
-                        ),
+                      // Actions Card
+                      _Card(
                         child: Column(
                           children: [
                             _EditSheetRow(
                               imagePath: 'assets/images/pin1.png',
-                              iconHeight: 20.h,
                               iconWidth: 20.w,
+                              iconHeight: 20.h,
                               label: 'Pin device',
                               onTap: () {},
                             ),
-                            SizedBox(height: 14.h),
+                            SizedBox(height: 12.h),
                             _EditSheetRow(
                               imagePath: 'assets/images/star1.png',
-                              iconHeight: 32.h,
                               iconWidth: 32.w,
+                              iconHeight: 32.h,
                               label: 'Add to favorites',
                               onTap: () {},
                             ),
-                            SizedBox(height: 14.h),
+                            SizedBox(height: 12.h),
 
+                            // Add to dashboard (anchor target)
                             _EditSheetRow(
                               imagePath: 'assets/images/add_dashboard.png',
                               iconWidth: 21.w,
@@ -175,19 +171,9 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               ),
                             ),
 
-                            // ✅ Add to dashboard (ONE LINE)
-                            // _EditSheetRow(
-                            //   imagePath: 'assets/images/add_dashboard.png',
-                            //   iconHeight: 21.h,
-                            //   iconWidth: 21.w,
-                            //   label: 'Add to dashboard',
-                            //   trailing: _DashboardDropdownTrigger(
-                            //     value: _dashboards[_selectedDashboardIndex],
-                            //     isOpen: _dashboardDropdownOpen,
-                            //     onTap: _toggleDashboardMenu,
-                            //   ),
-                            // ),
-                            SizedBox(height: 14.h),
+                            SizedBox(height: 12.h),
+
+                            // Category & zone (chips)
                             _EditSheetRow(
                               imagePath: 'assets/images/category&zone.png',
                               iconWidth: 20.w,
@@ -213,96 +199,44 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               ),
                               onTap: () {},
                             ),
-                            SizedBox(height: 14.h),
+
+                            SizedBox(height: 10.h),
+
+                            // Last activities (big switch)
                             _EditSheetRow(
                               imagePath: 'assets/images/last_active.png',
-                              iconHeight: 26.h,
                               iconWidth: 26.w,
+                              iconHeight: 26.h,
                               label: 'Last activities',
-                              onTap: () {},
-                              trailing: Transform.scale(
-                                scale: 1.00,
-                                child: GestureDetector(
-                                  onTap: () => setState(
-                                    () =>
-                                        _lastActivitiesOn = !_lastActivitiesOn,
-                                  ),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 180),
-                                    width: 60.w,
-                                    height: 35.h,
-                                    padding: EdgeInsets.all(2.w),
-                                    decoration: BoxDecoration(
-                                      color: _lastActivitiesOn
-                                          ? const Color(0xFF0088FE)
-                                          : const Color(0xFFE1E1E1),
-                                      borderRadius: BorderRadius.circular(30.r),
-                                    ),
-                                    child: AnimatedAlign(
-                                      duration: const Duration(
-                                        milliseconds: 180,
-                                      ),
-                                      curve: Curves.easeOut,
-                                      alignment: _lastActivitiesOn
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      child: Container(
-                                        width: 31.w,
-                                        height: 31.w,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                              trailing: SizedBox(
+                                height: 35.h,
+                                width: 60.w,
+                                child: CupertinoSwitch(
+                                  value: _lastActivitiesOn,
+                                  onChanged: (v) =>
+                                      setState(() => _lastActivitiesOn = v),
+                                  activeColor: _kBlue,
                                 ),
-
-                                // SizedBox(
-                                //   height: 35.h,
-                                //   width: 60.w,
-                                //   child: Switch(
-                                //     value: _lastActivitiesOn,
-                                //     onChanged: (v) =>
-                                //         setState(() => _lastActivitiesOn = v),
-                                //     activeColor: Colors.white,
-                                //     activeTrackColor: _kBlue,
-                                //     inactiveThumbColor: Colors.white,
-                                //     inactiveTrackColor:
-                                //     const Color(0xFFE5E7EB),
-                                //   ),
-                                // ),
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 12.h),
 
-                      // -------- Settings/Remove card --------
-                      Container(
-                        padding: EdgeInsets.only(
-                          top: 5.h,
-                          right: 10.w,
-                          left: 14.w,
-                          bottom: 10.h,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26.r),
-                          color: _kCloseBtnBg,
-                        ),
+                      // Settings / Remove Card
+                      _Card(
                         child: Column(
                           children: [
-                            SizedBox(height: 10.h),
                             _EditSheetRow(
                               imagePath: 'assets/images/setting.png',
-                              iconHeight: 18.h,
                               iconWidth: 18.w,
+                              iconHeight: 18.h,
                               label: 'Settings',
                               onTap: () {},
                             ),
-                            SizedBox(height: 16.h),
+                            SizedBox(height: 12.h),
                             _EditSheetRow(
                               imagePath: 'assets/images/delete1.png',
                               iconWidth: 16.w,
@@ -322,7 +256,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
               ],
             ),
 
-            // ✅ Outside tap -> close dropdown
+            // ===== Outside tap closes dropdown =====
             if (_dashboardDropdownOpen)
               Positioned.fill(
                 child: GestureDetector(
@@ -332,12 +266,12 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
 
-            // ✅ Dropdown overlay anchored directly under the trigger (same as design)
+            // ===== Dropdown overlay (anchored just under the trigger, like design) =====
             if (_dashboardDropdownOpen)
               CompositedTransformFollower(
                 link: _dropdownLink,
                 showWhenUnlinked: false,
-                offset: Offset(0, 34.h), // just under the text + arrow
+                offset: Offset(0, 34.h), // small gap under text+arrow row
                 child: _DashboardDropdownMenu(
                   width: 220.w,
                   items: _dashboards,
@@ -363,6 +297,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           Center(
             child: Text(
               'Edit device',
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
@@ -373,13 +308,14 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           ),
           Positioned(
             right: 20.w,
+            top: 14.h,
             child: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Container(
                 width: 30.w,
                 height: 30.h,
                 decoration: BoxDecoration(
-                  color: _kCloseBtnBg,
+                  color: const Color(0xFFFFFFFF),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -390,12 +326,37 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                   ],
                 ),
                 alignment: Alignment.center,
-                child: Icon(Icons.close, size: 20.sp, color: _kTextPrimary),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 20.sp,
+                  color: _kTextPrimary,
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ====================== UI PARTS ======================
+
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
+  final Widget child;
+
+  static const Color _kCardBg = Colors.white;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(14.sp),
+      decoration: BoxDecoration(
+        color: _kCardBg,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: child,
     );
   }
 }
@@ -426,18 +387,15 @@ class _EditSheetRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isDestructive ? _kDestructiveRed : _kTextPrimary;
 
-    final Widget leading;
-    if (imagePath != null) {
-      leading = Image.asset(
-        imagePath!,
-        width: iconWidth ?? 20.w,
-        height: iconHeight ?? 20.w,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      );
-    } else {
-      leading = SizedBox(width: 20.w, height: 20.w);
-    }
+    final Widget leading = imagePath != null
+        ? Image.asset(
+      imagePath!,
+      width: iconWidth ?? 20.w,
+      height: iconHeight ?? 20.w,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+    )
+        : SizedBox(width: 20.w, height: 20.w);
 
     return InkWell(
       onTap: onTap,
@@ -538,7 +496,6 @@ class _DashboardDropdownMenu extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         width: 185.w,
-        // height: 136.h,
         constraints: BoxConstraints(maxHeight: 150.h),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -562,8 +519,8 @@ class _DashboardDropdownMenu extends StatelessWidget {
               final selected = i == selectedIndex;
               final bgColor = selected
                   ? const Color(
-                      0xFFE5F0FF,
-                    ) // light blue row highlight (same as menu_popup)
+                0xFFE5F0FF,
+              ) // light blue row highlight as in design
                   : Colors.white;
               return InkWell(
                 onTap: () => onSelect(i),
@@ -572,21 +529,22 @@ class _DashboardDropdownMenu extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
                   child: Row(
                     children: [
+                      // Reserve space for check icon so text lines up in all rows
                       SizedBox(
                         width: 23.w,
-                        // height: 26.h,
+                        //height: 26.h,
                         child: selected
                             ? Image.asset(
-                                "assets/popup_done.png",
-                                height: 23.h,
-                                width: 23.w,
-                                fit: BoxFit.cover,
-                              )
-                            // Icon(
-                            //         Icons.check_rounded,
-                            //         size: 18.sp,
-                            //         color: const Color(0xFF0088FE),
-                            //       )
+                          "assets/popup_done.png",
+                          height: 23.h,
+                          width: 23.w,
+                          fit: BoxFit.cover,
+                        )
+                        // Icon(
+                        //         Icons.check_rounded,
+                        //         size: 18.sp,
+                        //         color: const Color(0xFF0088FE),
+                        //       )
                             : const SizedBox.shrink(),
                       ),
                       // SizedBox(width: 4.w),
@@ -632,7 +590,7 @@ class _ChipPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 25.h,
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6.r),

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
@@ -279,8 +280,10 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // Index 0: Devices
         RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
-        // Index 1: Analytics
-        RepaintBoundary(child: _AnalyticsBody()),
+        // Index 1: Analytics (single shell nav: no second bottom bar)
+        const RepaintBoundary(
+          child: AnalyticsScreen(showBottomNav: false),
+        ),
         // Index 2: Home/Voice
         RepaintBoundary(child: _buildHomeBody()),
         // Index 3: Notifications
