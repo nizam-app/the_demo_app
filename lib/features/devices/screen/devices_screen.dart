@@ -263,7 +263,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 8.w),
+                        SizedBox(width: 14.w),
                         const _CircleMiniBtn(icon: Icons.add),
                         SizedBox(width: 8.w),
                         const _ToggleColorswitch(isOn: true),
@@ -367,7 +367,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                          SizedBox(width: 10.w),
+                          SizedBox(width: 14.w),
                           _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
                           SizedBox(width: 10.w),
                         ],

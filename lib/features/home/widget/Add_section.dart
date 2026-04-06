@@ -138,7 +138,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
 
                   _RowItem(
                     imagePath: 'assets/images/header_icon.png',
-                    title: 'Header',
+                    title: 'Header background',
                     imageHeight: 26.h,
                     imageWidth: 26.w,
                     trailing: Image.asset("assets/images/header_image.png", height: 39.h, width: 39.w,fit: BoxFit.cover,),
@@ -147,7 +147,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   /// SLIDER WIDGET
                   _RowItem(
                     imagePath: 'assets/images/Slider.png',
-                    title: 'Slider widget',
+                    title: 'Horizontal scrolling',
                     imageHeight: 22.h,
                     imageWidth: 22.w,
                     trailing: CupertinoSwitch(
@@ -279,7 +279,7 @@ class _RowItem extends StatelessWidget {
     return Container(
       height: 55.h,
       child: Padding(
-        padding: EdgeInsets.only(left: 14.w, right: 14.w, ),
+        padding: EdgeInsets.only(left: 12.w, right: 14.w),
         child: Row(
           children: [
             leading,
