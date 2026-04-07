@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   static const String routeName = '/home';
+
 
   static void showEditAddSectionSheet(BuildContext context) {
     showModalBottomSheet(
@@ -463,69 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Widget _buildTemperatureSetPointCard() {
-  //   return Container(
-  //     height: 210.h,
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       border: Border.all(color: const Color(0xFFE1E1E1)),
-  //       borderRadius: BorderRadius.circular(26.r),
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         Expanded(
-  //           child: Padding(
-  //             padding: EdgeInsets.all(16.w),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   'Bathroom Temperature set point',
-  //                   style: TextStyle(
-  //                     fontSize: 16.sp,
-  //                     fontWeight: FontWeight.w500,
-  //                     color: const Color(0xFF111827),
-  //                   ),
-  //                 ),
-  //                 SizedBox(height: 16.h),
-  //                 Container(
-  //                   padding: EdgeInsets.symmetric(
-  //                     horizontal: 8.w,
-  //                     vertical: 4.h,
-  //                   ),
-  //                   decoration: BoxDecoration(
-  //                     color: const Color(0xFF0088FE),
-  //                     borderRadius: BorderRadius.circular(5.r),
-  //                   ),
-  //                   child: Text(
-  //                     '24.6°c',
-  //                     style: TextStyle(
-  //                       fontSize: 10.sp,
-  //                       fontWeight: FontWeight.w700,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //         Container(
-  //           height: 42.h,
-  //           decoration: BoxDecoration(
-  //             color: const Color(0xFFEAF1FF),
-  //             borderRadius: BorderRadius.only(
-  //               bottomLeft: Radius.circular(26.r),
-  //               bottomRight: Radius.circular(26.r),
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
+  
   Widget _buildFavoritesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1679,7 +1619,7 @@ class _BlindCard extends StatelessWidget {
   }
 }
 
-class _ToggleCard extends StatelessWidget {
+class _ToggleCard extends StatefulWidget {
   const _ToggleCard({
     required this.title,
     required this.isOn,
@@ -1695,6 +1635,27 @@ class _ToggleCard extends StatelessWidget {
   final String? imagePath;
 
   @override
+  State<_ToggleCard> createState() => _ToggleCardState();
+}
+
+class _ToggleCardState extends State<_ToggleCard> {
+  late bool _on;
+
+  @override
+  void initState() {
+    super.initState();
+    _on = widget.isOn;
+  }
+
+  @override
+  void didUpdateWidget(covariant _ToggleCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isOn != widget.isOn) {
+      _on = widget.isOn;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -1702,9 +1663,9 @@ class _ToggleCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              imagePath != null
+              widget.imagePath != null
                   ? Image.asset(
-                      imagePath!,
+                      widget.imagePath!,
                       width: 52.w,
                       height: 52.w,
                       fit: BoxFit.contain,
@@ -1717,7 +1678,7 @@ class _ToggleCard extends StatelessWidget {
               SizedBox(height: 17.h),
               Expanded(
                 child: Text(
-                  title,
+                  widget.title,
                   style: TextStyle(
                     fontSize: 16.sp,
                     color: const Color(0xFF111827),
@@ -1732,14 +1693,22 @@ class _ToggleCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isOn ? 'On' : 'Off',
+                    _on ? 'On' : 'Off',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  _ToggleColorswitch(isOn: isOn),
+                  SizedBox(
+                    height: 35.h,
+                    width: 60.w,
+                    child: CupertinoSwitch(
+                      value: _on,
+                      onChanged: (v) => setState(() => _on = v),
+                      activeColor: const Color(0xFF0088FE),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1748,7 +1717,7 @@ class _ToggleCard extends StatelessWidget {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: mode, filled: modeFilled),
+          child: _ModeBadge(mode: widget.mode, filled: widget.modeFilled),
         ),
       ],
     );

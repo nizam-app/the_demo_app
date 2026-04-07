@@ -149,8 +149,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
             SizedBox(width: 10.w),
             Image.asset(
-              "assets/images/edit_image.png",
-              height: 13,
+              "assets/Group 63.png",
+              height: 13.h,
               width: 13.w,
               fit: BoxFit.cover,
               color: const Color(0xFF111827),
@@ -320,7 +320,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     ];
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 22.w),
+      padding: EdgeInsets.symmetric(horizontal: 14.w),
       child: Row(
         children: List.generate(tabs.length, (index) {
           final tab = tabs[index];
@@ -336,8 +336,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                     tab.$2,
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFF111827),
                       // active
                       //     ? const Color(0xFF111827)
@@ -387,7 +387,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _buildManageDeviceCard() {
     return Padding(
-      padding: EdgeInsets.only(right: 22.w, left: 22.w),
+      padding: EdgeInsets.only(right: 15.w, left: 15.w),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -403,7 +403,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
+            Container(
+              height: 60.h,
               padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
               child: Text(
                 'Manage your device',
@@ -452,8 +453,9 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   }
 
   Widget _manageRowLabels() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+    return Container(
+      height: 60.h,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       child: Row(
         children: [
           Image.asset(
@@ -504,8 +506,9 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   }
 
   Widget _manageRowAlerts() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+    return Container(
+      height: 60.h,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       child: Row(
         children: [
           Image.asset(
@@ -558,8 +561,9 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   }
 
   Widget _manageRowSafeValue() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+    return Container(
+      height: 60.h,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       child: Row(
         children: [
           Image.asset(
@@ -602,8 +606,9 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   }
 
   Widget _manageRowManualOverride() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+    return Container(
+      height: 60.h,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
       child: Row(
         children: [
           Image.asset(
@@ -656,7 +661,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   Widget _automationCard() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFCDE5FF),
+        color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Column(
@@ -676,7 +681,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           ),
           const Divider(height: 1, color: Color(0xFFE1E1E1)),
           Padding(
-            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 0),
+            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
             child: _miniAutomationRow(
               title: 'Set actions based on value of',
               subtitle: 'Multi-Value Switch',
@@ -685,6 +690,10 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
               imagewidth: 40.w,
             ),
           ),
+           Padding(
+             padding: EdgeInsets.fromLTRB(70.w, 0.h, 14.w, 0.h),
+             child: Divider(height: 1, color: Color(0xFFE1E1E1)),
+           ),
           Padding(
             padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
             child: _miniAutomationRow(
