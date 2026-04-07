@@ -63,30 +63,50 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               padding: EdgeInsets.fromLTRB(15.w, 6.h, 14.w, 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+              
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GlobalCircleIconBtn(
-                      color: _AnalyticsColors.cardBg,
-                      child: Image.asset(
-                        'assets/aro.png',
-                        width: 16.w,
-                        height: 16.h,
-                      ),
-                      onTap: () {
-                        if (!widget.showBottomNav) {
-                          final shell = CustomBottomNavBar.of(context);
-                          if (shell != null) {
-                            shell.setSelectedIndex(2);
-                            return;
-                          }
-                        }
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('/home');
-                        }
-                      },
+                  SizedBox(
+                    height: 32.w,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GlobalCircleIconBtn(
+                            color: _AnalyticsColors.cardBg,
+                            child: Image.asset(
+                              'assets/aro.png',
+                              width: 16.w,
+                              height: 16.h,
+                            ),
+                            onTap: () {
+                              if (!widget.showBottomNav) {
+                                final shell = CustomBottomNavBar.of(context);
+                                if (shell != null) {
+                                  shell.setSelectedIndex(2);
+                                  return;
+                                }
+                              }
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/home');
+                              }
+                            },
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            'Analytics',
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _AnalyticsColors.title,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 17.h),
@@ -96,6 +116,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       onChanged: (p) =>
                           ref.read(_analyticsPeriodProvider.notifier).state = p,
                     ),
+
                   ),
                 ],
               ),
@@ -594,7 +615,7 @@ class _LegendColumn extends StatelessWidget {
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 17.sp,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w700,
             color: labelColor,
           ),
         ),
@@ -759,6 +780,8 @@ class _DailyStackPainter extends CustomPainter {
       _StackBarDraw(xFactor: 0.38, on: 0.26, auto: 0.20, off: 0.17),
       _StackBarDraw(xFactor: 0.425,  on: 0.32, auto: 0.18, off: 0.24),
       _StackBarDraw(xFactor: 0.47, on: 0.35, auto: 0.13, off: 0.14),
+
+      _StackBarDraw(xFactor: 0.53, on: 0.47, auto: 0.22, off: 0.17),
     ];
 
     for (final bar in bars) {
@@ -942,9 +965,9 @@ class _DeviceUsageCard extends StatelessWidget {
                                   child: LinearProgressIndicator(
                                     value: row.progress,
                                     minHeight: 5.h,
-                                    backgroundColor: const Color(0xFFE1E1E1),
+                                    backgroundColor: const Color(0xFFFFFFFF),
                                     valueColor: const AlwaysStoppedAnimation(
-                                      Color(0xFF3B82F6),
+                                      Color(0xFFE1E1E1),
                                     ),
                                   ),
                                 ),
