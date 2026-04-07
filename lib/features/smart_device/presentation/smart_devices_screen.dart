@@ -375,7 +375,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleButton(icon: left, onTap: onLeft ?? () {}),
-        SizedBox(width: 10.w),
+        SizedBox(width: 20.w),
         _CircleButton(icon: right, onTap: onRight ?? () {}),
         SizedBox(width: 10.w),
       ],
@@ -392,7 +392,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleButton(imagePath: leftAsset, onTap: onLeft ?? () {}),
-        SizedBox(width: 10.w),
+        SizedBox(width: 20.w),
         _CircleButton(imagePath: rightAsset, onTap: onRight ?? () {}),
         SizedBox(width: 10.w),
       ],
