@@ -7,6 +7,8 @@ import 'package:workpleis/features/integrations/screen/Integrations_screen.dart'
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 
+import '../../profile/screen/profile_screen.dart';
+
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
 
@@ -22,6 +24,7 @@ class SettingsScreen extends StatelessWidget {
   static const _secondary = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
   static const _pink = Color(0xFFFE019A);
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     SizedBox(height: 16.h),
                     // Account Information Card
-                    _buildAccountCard(),
+                    _buildAccountCard(context),
                     SizedBox(height: 30.h),
                     // General Settings Card
                     _buildGeneralSettingsCard(context),
@@ -101,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountCard() {
+  Widget _buildAccountCard(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -181,42 +184,46 @@ class SettingsScreen extends StatelessWidget {
           // Profile Option
          Padding(
            padding:  EdgeInsets.only(left: 22.w, right: 20.w,bottom: 18.h,),
-           child: Row(
-              children: [
-                  SizedBox(
-                    width:18.w,                     
-                    height: 18.h,
-                    child: Center(
-                      child: Image.asset(
-                        "assets/Mask group (1) copy 2.png",
-                        width: 18.w,
-                        height: 18.h,
-                        fit: BoxFit.cover,
-                        color: Color(0xFF111827),
+           child: InkWell(
+             onTap: ()=>context.push(ProfileScreen.routeName),
+            
+             child: Row(
+                children: [
+                    SizedBox(
+                      width:18.w,                     
+                      height: 18.h,
+                      child: Center(
+                        child: Image.asset(
+                          "assets/Mask group (1) copy 2.png",
+                          width: 18.w,
+                          height: 18.h,
+                          fit: BoxFit.cover,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      "Profile",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color:  _primary,
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    "Profile",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                      color:  _primary,
-                      fontFamily: 'Inter',
-                    ),
+             
+                  Image.asset(
+                    "assets/Mask group copy 4.png",
+                    width: 13.sp,
+                    height: 13.sp,
+             
                   ),
-                ),
-
-                Image.asset(
-                  "assets/Mask group copy 4.png",
-                  width: 13.sp,
-                  height: 13.sp,
-
-                ),
-              ],
-            ),
+                ],
+              ),
+           ),
          ),
         ],
       ),

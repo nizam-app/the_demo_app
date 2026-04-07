@@ -781,7 +781,7 @@ class _DailyStackPainter extends CustomPainter {
       _StackBarDraw(xFactor: 0.425,  on: 0.32, auto: 0.18, off: 0.24),
       _StackBarDraw(xFactor: 0.47, on: 0.35, auto: 0.13, off: 0.14),
 
-      _StackBarDraw(xFactor: 0.53, on: 0.47, auto: 0.22, off: 0.17),
+      _StackBarDraw(xFactor: 0.53, on: 0.46, auto: 0.21, off: 0.16),
     ];
 
     for (final bar in bars) {

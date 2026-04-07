@@ -11,6 +11,7 @@ import 'package:workpleis/features/settings/screen/setting_screen.dart';
 import 'package:workpleis/features/weather/screen/weather_screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
+import '../../profile/screen/profile_screen.dart';
 
 /// Single source of truth for all menu section card icon dimensions.
 /// Ensures every icon has the same container size, alignment, and fit.
@@ -170,6 +171,14 @@ onTap: () => context.pop(),
                     const _SectionTitle(title: 'Overview'),
                     _CardBlock(
                       children:  [
+
+                        // _MenuItemRow(
+                        //   imagePath: 'assets/images/profile_icon.png',
+                        //   title: 'Profile',
+                        //   iconSize: 17.5,
+                        //   onTap: ()=> context.push(ProfileScreen.routeName),
+                        // ),
+                        //const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',

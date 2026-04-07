@@ -681,7 +681,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           ),
           const Divider(height: 1, color: Color(0xFFE1E1E1)),
           Padding(
-            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+            padding: EdgeInsets.fromLTRB(5.w, 10.h, 10.w, 10.h),
             child: _miniAutomationRow(
               title: 'Set actions based on value of',
               subtitle: 'Multi-Value Switch',
@@ -691,11 +691,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             ),
           ),
            Padding(
-             padding: EdgeInsets.fromLTRB(70.w, 0.h, 14.w, 0.h),
+             padding: EdgeInsets.fromLTRB(65.w, 0.h, 14.w, 0.h),
              child: Divider(height: 1, color: Color(0xFFE1E1E1)),
            ),
           Padding(
-            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+            
+            padding: EdgeInsets.fromLTRB(5.w, 10.h, 10.w, 10.h),
             child: _miniAutomationRow(
               title: 'Temperature hysteresis controller (2)',
               subtitle: 'Multi-Value Switch',
