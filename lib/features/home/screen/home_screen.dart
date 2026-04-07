@@ -238,25 +238,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   context.push(MenuScreen.routeName);
                 },
               ),
-             
-              ListTile(
-                leading: const Icon(
-                  Icons.person_outline,
-                  color: Color(0xFF111827),
-                ),
-                title: Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push(ProfileScreen.routeName);
-                },
-              ),
+
+              ///PROFILE MENU OPTION
+
+              // ListTile(
+              //   leading: const Icon(
+              //     Icons.person_outline,
+              //     color: Color(0xFF111827),
+              //   ),
+              //   title: Text(
+              //     'Profile',
+              //     style: TextStyle(
+              //       fontSize: 16.sp,
+              //       fontWeight: FontWeight.w500,
+              //       color: const Color(0xFF111827),
+              //     ),
+              //   ),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //     context.push(ProfileScreen.routeName);
+              //   },
+              // ),
+
+
+
+
+
+              
               // ListTile(
               //   leading: const Icon(
               //     Icons.align_horizontal_center,
