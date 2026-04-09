@@ -86,7 +86,7 @@ class ZoneAddMenu extends StatelessWidget {
                   /// Rename
                   _ItemRow(
                     iconPath: 'assets/images/Erename.png',
-                    title: 'Rename',
+                    title: 'Name',
                     iconWidth: 22.w,
                     iconHeight: 22.h,
                     trailing: Row(

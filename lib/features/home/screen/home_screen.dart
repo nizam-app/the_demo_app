@@ -71,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Builder(
                     builder: (context) => _Header(
                       onMenuTap: () {
-                        CustomBottomNavBar.of(context)?.openDrawer();
+                        context.push(MenuScreen.routeName);
+                       // CustomBottomNavBar.of(context)?.openDrawer();
                       },
                       onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
                       
@@ -205,88 +206,89 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
-      initialIndex: 2, // Voice/Home is index 2
-      drawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(20.w),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(Icons.menu, color: Color(0xFF111827)),
-                title: Text(
-                  'Menu',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push(MenuScreen.routeName);
-                },
-              ),
-
-              ///PROFILE MENU OPTION
-
-              // ListTile(
-              //   leading: const Icon(
-              //     Icons.person_outline,
-              //     color: Color(0xFF111827),
-              //   ),
-              //   title: Text(
-              //     'Profile',
-              //     style: TextStyle(
-              //       fontSize: 16.sp,
-              //       fontWeight: FontWeight.w500,
-              //       color: const Color(0xFF111827),
-              //     ),
-              //   ),
-              //   onTap: () {
-              //     Navigator.pop(context);
-              //     context.push(ProfileScreen.routeName);
-              //   },
-              // ),
-
-
-
-
-
-              
-              // ListTile(
-              //   leading: const Icon(
-              //     Icons.align_horizontal_center,
-              //     color: Color(0xFF111827),
-              //   ),
-              //   title: Text(
-              //     'Zones',
-              //     style: TextStyle(
-              //       fontSize: 16.sp,
-              //       fontWeight: FontWeight.w500,
-              //       color: const Color(0xFF111827),
-              //     ),
-              //   ),
-              //   onTap: () {
-              //     Navigator.pop(context);
-              //
-              //   },
-              // ),
-            ],
-          ),
-        ),
-      ),
+      initialIndex: 2,
+      // Voice/Home is index 2
+      // drawer: Drawer(
+      //   child: SafeArea(
+      //     child: Column(
+      //       crossAxisAlignment: CrossAxisAlignment.stretch,
+      //       children: [
+      //         Padding(
+      //           padding: EdgeInsets.all(20.w),
+      //           child: Text(
+      //             'Menu',
+      //             style: TextStyle(
+      //               fontSize: 22.sp,
+      //               fontWeight: FontWeight.w600,
+      //               color: const Color(0xFF111827),
+      //             ),
+      //           ),
+      //         ),
+      //         const Divider(height: 1),
+      //         ListTile(
+      //           leading: const Icon(Icons.menu, color: Color(0xFF111827)),
+      //           title: Text(
+      //             'Menu',
+      //             style: TextStyle(
+      //               fontSize: 16.sp,
+      //               fontWeight: FontWeight.w500,
+      //               color: const Color(0xFF111827),
+      //             ),
+      //           ),
+      //           onTap: () {
+      //             Navigator.pop(context);
+      //             context.push(MenuScreen.routeName);
+      //           },
+      //         ),
+      //
+      //         ///PROFILE MENU OPTION
+      //
+      //         // ListTile(
+      //         //   leading: const Icon(
+      //         //     Icons.person_outline,
+      //         //     color: Color(0xFF111827),
+      //         //   ),
+      //         //   title: Text(
+      //         //     'Profile',
+      //         //     style: TextStyle(
+      //         //       fontSize: 16.sp,
+      //         //       fontWeight: FontWeight.w500,
+      //         //       color: const Color(0xFF111827),
+      //         //     ),
+      //         //   ),
+      //         //   onTap: () {
+      //         //     Navigator.pop(context);
+      //         //     context.push(ProfileScreen.routeName);
+      //         //   },
+      //         // ),
+      //
+      //
+      //
+      //
+      //
+      //
+      //         // ListTile(
+      //         //   leading: const Icon(
+      //         //     Icons.align_horizontal_center,
+      //         //     color: Color(0xFF111827),
+      //         //   ),
+      //         //   title: Text(
+      //         //     'Zones',
+      //         //     style: TextStyle(
+      //         //       fontSize: 16.sp,
+      //         //       fontWeight: FontWeight.w500,
+      //         //       color: const Color(0xFF111827),
+      //         //     ),
+      //         //   ),
+      //         //   onTap: () {
+      //         //     Navigator.pop(context);
+      //         //
+      //         //   },
+      //         // ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
       children: [
         // Index 0: Devices
         RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
@@ -828,7 +830,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onMenuTap, required this.onEditTap});
+  const _Header({
+    required this.onMenuTap,
+    required this.onEditTap});
 
   final VoidCallback onMenuTap;
   final VoidCallback onEditTap;
@@ -845,7 +849,7 @@ class _Header extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: InkWell(
-              onTap: onMenuTap,
+              onTap:  onMenuTap,
               borderRadius: BorderRadius.circular(12.r),
               child: SizedBox(
                 width: 44.w,
