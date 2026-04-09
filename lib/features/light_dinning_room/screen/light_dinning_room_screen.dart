@@ -19,7 +19,7 @@ class LightDinningRoomScreen extends StatefulWidget {
   State<LightDinningRoomScreen> createState() => _LightDinningRoomScreenState();
 }
 
-enum _DeviceTab { tools, automation, chart, activity }
+enum _DeviceTab { tools, automation, overview,  chart, activity }
 
 class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   bool _isOn = true;
@@ -315,12 +315,13 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     const tabs = [
       (_DeviceTab.tools, 'Tools'),
       (_DeviceTab.automation, 'Automation'),
+      (_DeviceTab.overview, 'Overview'),
       (_DeviceTab.chart, 'Chart'),
       (_DeviceTab.activity, 'Activity'),
     ];
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
       child: Row(
         children: List.generate(tabs.length, (index) {
           final tab = tabs[index];
@@ -336,8 +337,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                     tab.$2,
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
                       color: Color(0xFF111827),
                       // active
                       //     ? const Color(0xFF111827)
@@ -365,12 +366,18 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _buildTabContent() {
     switch (_tab) {
+      
       case _DeviceTab.tools:
         return _buildManageDeviceCard();
       case _DeviceTab.automation:
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 22.w),
           child: _automationCard(),
+        );
+      case _DeviceTab.overview:
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 22.w),
+          child: deviceOverviewCard(),
         );
       case _DeviceTab.chart:
         return Padding(
@@ -876,7 +883,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           Padding(
             padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
             child: Text(
-              'Activity log',
+              'History log',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 18.sp,
@@ -950,7 +957,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     required double imagewidth,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 8.h),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(18.r),
@@ -1084,6 +1091,125 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     );
   }
 }
+
+Widget deviceOverviewCard() {
+  return Container(
+   
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(26.r),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        /// Title
+        Text(
+          'Device overview',
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF111827),
+          ),
+        ),
+
+        SizedBox(height: 10.h),
+        Divider(color: Color(0xFFE1E1E1), height: 1.h,),
+        SizedBox(height: 10.h),
+
+        /// Grid Info
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _infoItem("Savings", "₪ 268.7"),
+            _infoItem("Peak", "1.3 kWh"),
+            _infoItem("Usage", "13.8%"),
+          ],
+        ),
+
+        SizedBox(height: 14.h),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _infoItem("Energy", "0.52 kWh"),
+            _infoItem("Avr cost", "₪ 139.8"),
+            _infoItem("Runtime", "5h 58m"),
+          ],
+        ),
+
+        SizedBox(height: 16.h),
+
+        
+        SizedBox(height: 10.h),
+
+        /// Bottom Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _bottomItem("Last action", "26% 12:45"),
+            _bottomItem("Status", "78%"),
+            _bottomItem("Next action", "Off 13:26"),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+Widget _infoItem(String title, String value) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.grey,
+        ),
+      ),
+      SizedBox(height: 4.h),
+      Text(
+        value,
+        style: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF111827),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _bottomItem(String title, String value) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.grey,
+        ),
+      ),
+      SizedBox(height: 4.h),
+      Text(
+        value,
+        style: TextStyle(
+          fontSize: 13.sp,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF111827),
+        ),
+      ),
+    ],
+  );
+}
+
 
 class _StatBlock extends StatelessWidget {
   const _StatBlock({required this.top, required this.bottom});

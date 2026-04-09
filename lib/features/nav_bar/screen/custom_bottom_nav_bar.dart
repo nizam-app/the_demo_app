@@ -81,13 +81,13 @@ class CustomBottomNavBar extends StatefulWidget {
     super.key,
     required this.children,
     this.initialIndex = 2,
-    this.drawer,
+    //this.drawer,
     this.backgroundColor,
   });
 
   final List<Widget> children;
   final int initialIndex;
-  final Widget? drawer;
+ // final Widget? drawer;
   final Color? backgroundColor;
 
   static CustomBottomNavBarState? of(BuildContext context) {
@@ -137,7 +137,7 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: widget.backgroundColor ?? Colors.white,
-      drawer: widget.drawer,
+      //drawer: widget.drawer,
       body: RepaintBoundary(
         child: IndexedStack(index: _selectedIndex, children: widget.children),
       ),
