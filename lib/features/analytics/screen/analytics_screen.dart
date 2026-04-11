@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
-import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 
 // —— Riverpod (Analytics screen only) ——
@@ -22,7 +21,7 @@ final _analyticsSelectedDeviceIndexProvider = StateProvider<int>((ref) => 1);
 const double _analyticsChartLabelRowHeight = 34;
 
 double _analyticsChartGridLineY(double chartAreaHeight, int lineIndex) {
-  return chartAreaHeight * (lineIndex / 4.0);
+  return chartAreaHeight * (lineIndex / 3.5);
 }
 
 abstract final class _AnalyticsColors {
@@ -35,6 +34,15 @@ abstract final class _AnalyticsColors {
   static const Color gridLine = Color(0xFFE5E7EB);
 }
 
+/// Category picker shown from Analytics “Categories” (matches main Categories assets).
+const _analyticsCategoryMenuEntries = <({String label, String asset})>[
+  (label: 'Lighting', asset: 'assets/Mask group (3).png'),
+  (label: 'Shading', asset: 'assets/Mask group (2).png'),
+  (label: 'HVAC', asset: 'assets/Mask group (4).png'),
+  (label: 'Irrigation', asset: 'assets/Mask group 2.png'),
+  (label: 'Security', asset: 'assets/securety.png'),
+];
+
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key, this.showBottomNav = true});
 
@@ -46,6 +54,152 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  String _selectedAnalyticsCategory = 'Shading';
+  final GlobalKey _categoriesMenuAnchorKey = GlobalKey();
+
+  Future<void> _openCategoryDropdown({
+    required double menuOuterW,
+    required double menuPadH,
+    required double menuPadV,
+  }) async {
+    final ctx = _categoriesMenuAnchorKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+    final renderBox = ctx.findRenderObject() as RenderBox?;
+    final overlayState = Overlay.maybeOf(ctx);
+    if (renderBox == null || overlayState == null) return;
+    final overlay = overlayState.context.findRenderObject() as RenderBox;
+
+    final topLeft = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
+    final size = renderBox.size;
+    final overlaySize = overlay.size;
+    final gap = 6.h;
+    final menuLeft = (topLeft.dx + size.width - menuOuterW).clamp(
+      8.0,
+      overlaySize.width - menuOuterW - 8.0,
+    );
+    final menuTop = topLeft.dy + size.height + gap;
+    final menuPosition = RelativeRect.fromLTRB(
+      menuLeft,
+      menuTop,
+      overlaySize.width - menuLeft - menuOuterW,
+      0,
+    );
+
+    final result = await showMenu<String>(
+      context: ctx,
+      position: menuPosition,
+      color: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      menuPadding: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(),
+      items: [
+        PopupMenuItem<String>(
+          padding: EdgeInsets.zero,
+          value: '',
+          child: Container(
+            width: menuOuterW,
+            decoration: BoxDecoration(
+              color: _AnalyticsColors.cardBg,
+              borderRadius: BorderRadius.circular(24.r),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0x29000000),
+                  blurRadius: 22.r,
+                  offset: Offset(0, 10.h),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                menuPadH,
+                menuPadV,
+                menuPadH,
+                menuPadV,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final e in _analyticsCategoryMenuEntries)
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14.r),
+                        onTap: () => Navigator.of(ctx).pop(e.label),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: e.label == _selectedAnalyticsCategory
+                                ? _AnalyticsColors.selectedRowBg
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 28.w,
+                                  height: 28.w,
+                                  child: Center(
+                                    child: Image.asset(
+                                      e.asset,
+                                      width: 24.w,
+                                      height: 24.h,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Text(
+                                    e.label,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: _AnalyticsColors.title,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 28.w,
+                                  height: 28.w,
+                                  child: Center(
+                                    child: e.label == _selectedAnalyticsCategory
+                                        ? Icon(
+                                            Icons.check_rounded,
+                                            size: 22.sp,
+                                            color: _AnalyticsColors.linkBlue,
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (!mounted) return;
+    if (result != null && result.isNotEmpty) {
+      setState(() => _selectedAnalyticsCategory = result);
+    }
+  }
+
   void _onNavItemTapped(int index) {
     final routes = [
       '/devices',
@@ -63,6 +217,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget build(BuildContext context) {
     final period = ref.watch(_analyticsPeriodProvider);
     final selectedDevice = ref.watch(_analyticsSelectedDeviceIndexProvider);
+    final menuOuterW = 288.w;
+    final menuPadH = 10.w;
+    final menuPadV = 14.h;
 
     return Scaffold(
       backgroundColor: _AnalyticsColors.pageBg,
@@ -173,27 +330,36 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           ),
                         ),
                         const Spacer(),
-                        GestureDetector(
-                          onTap: () => context.push(CategoriesScreen.routeName),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Categories ',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
+                        KeyedSubtree(
+                          key: _categoriesMenuAnchorKey,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => _openCategoryDropdown(
+                              menuOuterW: menuOuterW,
+                              menuPadH: menuPadH,
+                              menuPadV: menuPadV,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Categories ',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: _AnalyticsColors.linkBlue,
+                                  ),
+                                ),
+                                Image.asset(
+                                  'assets/images/back_arro.png',
+                                  height: 11.h,
+                                  width: 11.w,
+                                  fit: BoxFit.cover,
                                   color: _AnalyticsColors.linkBlue,
                                 ),
-                              ),
-                              Image.asset(
-                                "assets/images/back_arro.png",
-                                height: 11.h,
-                                width: 11.w,
-                                fit: BoxFit.cover,
-                                color: _AnalyticsColors.linkBlue,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -417,8 +583,10 @@ SizedBox(
               children: [
                 for (int i = 0; i < labels.length; i++)
                   Positioned(
-                    top: _analyticsChartGridLineY(chartH, i) -14.sp * 0.52,
+                    top: _analyticsChartGridLineY(chartH, i) -1.sp * 0.52,
+                    
                     right: 0,
+                   
                     child: Text(
                       labels[i],
                       style: TextStyle(
@@ -529,35 +697,37 @@ SizedBox(
         ),
       ),
       SizedBox(width: 0.2.w),
-      SizedBox(
-        width: 35.w,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double totalH = constraints.maxHeight;
-            final double chartH = totalH - _analyticsChartLabelRowHeight;
-            const labels = ['100%', '75%', '50%', '25%', '0'];
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (int i = 0; i < labels.length; i++)
-                  Positioned(
-                    top: _analyticsChartGridLineY(chartH, i) - 12.sp * 0.52,
-                    right: 0,
-                    child: Text(
-                      labels[i],
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
+    
+          SizedBox(
+            width: 35.w,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double totalH = constraints.maxHeight;
+                final double chartH = totalH - _analyticsChartLabelRowHeight;
+                const labels = ['100%', '75%', '50%', '25%', '0'];
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    for (int i = 0; i < labels.length; i++)
+                      Positioned(
+                        top: _analyticsChartGridLineY(chartH, i) - 1.sp * 0.52,
+                        right: 0,
+                        child: Text(
+                          labels[i],
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B7280),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ),
+                  ],
+                );
+              },
+            ),
+          ),
+      
     ],
   ),
 ),
