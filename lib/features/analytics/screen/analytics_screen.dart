@@ -1,3 +1,5 @@
+import 'dart:math' show min;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +16,14 @@ final _analyticsPeriodProvider = StateProvider<_AnalyticsPeriod>(
 );
 
 final _analyticsSelectedDeviceIndexProvider = StateProvider<int>((ref) => 1);
+
+/// Bottom time/day label row inside activity chart painters — keep in sync
+/// with Y-axis `Stack` positioning in `_ActivityCard`.
+const double _analyticsChartLabelRowHeight = 34;
+
+double _analyticsChartGridLineY(double chartAreaHeight, int lineIndex) {
+  return chartAreaHeight * (lineIndex / 4.0);
+}
 
 abstract final class _AnalyticsColors {
   static const Color pageBg = Color(0xFFF3F4F6);
@@ -397,25 +407,31 @@ SizedBox(
       SizedBox(width: 0.2.w),
       SizedBox(
         width: 35.w,
-        child: Padding(
-          padding: EdgeInsets.only(top: 0.h, bottom: 35.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: ['24h', '18h', '12h', '6h', '0']
-                .map(
-                  (t) => Text(
-                    t,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double totalH = constraints.maxHeight;
+            final double chartH = totalH - _analyticsChartLabelRowHeight;
+            const labels = ['24h', '18h', '12h', '6h', '0'];
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (int i = 0; i < labels.length; i++)
+                  Positioned(
+                    top: _analyticsChartGridLineY(chartH, i) -14.sp * 0.52,
+                    right: 0,
+                    child: Text(
+                      labels[i],
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
                   ),
-                )
-                .toList(),
-          ),
+              ],
+            );
+          },
         ),
       ),
     ],
@@ -442,58 +458,70 @@ SizedBox(
                 ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 184.h,
+                  height: 135.h,
                 ),
               ),
 
-              /// x-axis labels inside same chart box
+              /// x-axis labels — centered under each 6h column (matches grid).
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 8.h,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '00:00',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          '00:00',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B7280),
+                          ),
                         ),
                       ),
-                      Text(
-                        '6:00',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          '6:00',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B7280),
+                          ),
                         ),
                       ),
-                      Text(
-                        '12:00',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          '12:00',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B7280),
+                          ),
                         ),
                       ),
-                      Text(
-                        '18:00',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          '18:00',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B7280),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -503,25 +531,31 @@ SizedBox(
       SizedBox(width: 0.2.w),
       SizedBox(
         width: 35.w,
-        child: Padding(
-          padding: EdgeInsets.only(top: 2.h, bottom: 38.h),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: ['100%', '75%', '50%', '25%', '0']
-                .map(
-                  (t) => Text(
-                    t,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double totalH = constraints.maxHeight;
+            final double chartH = totalH - _analyticsChartLabelRowHeight;
+            const labels = ['100%', '75%', '50%', '25%', '0'];
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (int i = 0; i < labels.length; i++)
+                  Positioned(
+                    top: _analyticsChartGridLineY(chartH, i) - 12.sp * 0.52,
+                    right: 0,
+                    child: Text(
+                      labels[i],
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF6B7280),
+                      ),
                     ),
                   ),
-                )
-                .toList(),
-          ),
+              ],
+            );
+          },
         ),
       ),
     ],
@@ -653,7 +687,7 @@ class _WeeklyBarsPainter extends CustomPainter {
     const int barCount = 7;
 
     // bottom row for weekday labels
-    final double labelRowHeight = 34;
+    final double labelRowHeight = _analyticsChartLabelRowHeight;
     final double chartHeight = size.height - labelRowHeight;
 
     final double columnWidth = size.width / barCount;
@@ -736,13 +770,28 @@ class _DailyStackPainter extends CustomPainter {
   static const Color autoColor = Color(0xFF14C8F7);
   static const Color offColor = Color(0xFF111827);
 
+  /// Demo stacked fractions (on, auto, off) — cycled across 24 one-hour slots.
+  static const List<List<double>> _hourStackPattern = [
+    [0.40, 0.00, 0.10],
+    [0.40, 0.00, 0.10],
+    [0.40, 0.13, 0.22],
+    [0.26, 0.20, 0.17],
+    [0.32, 0.18, 0.24],
+    [0.35, 0.13, 0.14],
+    [0.35, 0.13, 0.14],
+    [0.46, 0.21, 0.16],
+  ];
+
+  static const int _sixHourSegments = 4;
+  static const int _hoursPerSegment = 6;
+
   @override
   void paint(Canvas canvas, Size size) {
     final grid = Paint()
       ..color = gridColor
       ..strokeWidth = 1;
 
-    const double labelRowHeight = 34;
+    const double labelRowHeight = _analyticsChartLabelRowHeight;
     final double chartHeight = size.height - labelRowHeight;
     const double radius = 2.5;
 
@@ -773,52 +822,57 @@ class _DailyStackPainter extends CustomPainter {
       grid,
     );
 
-    final bars = <_StackBarDraw>[
-      _StackBarDraw(xFactor: 0.18,  on: 0.40, auto: 0.00, off: 0.10),
-      _StackBarDraw(xFactor: 0.29, on: 0.40, auto: 0.00, off: 0.10),
-      _StackBarDraw(xFactor: 0.335,  on: 0.40, auto: 0.13, off: 0.22),
-      _StackBarDraw(xFactor: 0.38, on: 0.26, auto: 0.20, off: 0.17),
-      _StackBarDraw(xFactor: 0.425,  on: 0.32, auto: 0.18, off: 0.24),
-      _StackBarDraw(xFactor: 0.47, on: 0.35, auto: 0.13, off: 0.14),
+    final double segmentWidth = size.width / _sixHourSegments;
+    final double slotWidth = segmentWidth / _hoursPerSegment;
+    final double drawBarWidth = min(barWidth, slotWidth * 0.88);
 
-      _StackBarDraw(xFactor: 0.53, on: 0.46, auto: 0.21, off: 0.16),
-    ];
+    for (int seg = 0; seg < _sixHourSegments; seg++) {
+      final double segmentLeft = segmentWidth * seg;
+      for (int h = 0; h < _hoursPerSegment; h++) {
+        final int hourIndex = seg * _hoursPerSegment + h;
+        final List<double> stack =
+            _hourStackPattern[hourIndex % _hourStackPattern.length];
+        final double on = stack[0];
+        final double auto = stack[1];
+        final double off = stack[2];
 
-    for (final bar in bars) {
-      final double x = (size.width * bar.xFactor) - (barWidth / 2);
+        final double xCenter =
+            segmentLeft + slotWidth * (h + 0.5);
+        final double x = xCenter - drawBarWidth / 2;
 
-      final double onH = chartHeight * bar.on;
-      final double autoH = chartHeight * bar.auto;
-      final double offH = chartHeight * bar.off;
+        final double onH = chartHeight * on;
+        final double autoH = chartHeight * auto;
+        final double offH = chartHeight * off;
 
-      double bottom = chartHeight;
+        double bottom = chartHeight;
 
-      if (bar.on > 0) {
-        bottom -= onH;
-        canvas.drawRect(
-          Rect.fromLTWH(x, bottom, barWidth, onH),
-          Paint()..color = onColor,
-        );
-      }
+        if (on > 0) {
+          bottom -= onH;
+          canvas.drawRect(
+            Rect.fromLTWH(x, bottom, drawBarWidth, onH),
+            Paint()..color = onColor,
+          );
+        }
 
-      if (bar.auto > 0) {
-        bottom -= autoH;
-        canvas.drawRect(
-          Rect.fromLTWH(x, bottom, barWidth, autoH),
-          Paint()..color = autoColor,
-        );
-      }
+        if (auto > 0) {
+          bottom -= autoH;
+          canvas.drawRect(
+            Rect.fromLTWH(x, bottom, drawBarWidth, autoH),
+            Paint()..color = autoColor,
+          );
+        }
 
-      if (bar.off > 0) {
-        bottom -= offH;
-        canvas.drawRRect(
-          RRect.fromRectAndCorners(
-            Rect.fromLTWH(x, bottom, barWidth, offH),
-            topLeft: const Radius.circular(radius),
-            topRight: const Radius.circular(radius),
-          ),
-          Paint()..color = offColor,
-        );
+        if (off > 0) {
+          bottom -= offH;
+          canvas.drawRRect(
+            RRect.fromRectAndCorners(
+              Rect.fromLTWH(x, bottom, drawBarWidth, offH),
+              topLeft: const Radius.circular(radius),
+              topRight: const Radius.circular(radius),
+            ),
+            Paint()..color = offColor,
+          );
+        }
       }
     }
   }
@@ -828,35 +882,6 @@ class _DailyStackPainter extends CustomPainter {
     return oldDelegate.gridColor != gridColor ||
         oldDelegate.barWidth != barWidth;
   }
-}
-
-
-class _StackBarDraw {
-  const _StackBarDraw({
-    required this.xFactor,
-    required this.on,
-    required this.auto,
-    required this.off,
-  });
-
-  final double xFactor;
-  final double on;
-  final double auto;
-  final double off;
-}
-
-class _StackBar {
-  const _StackBar({
-    required this.xFactor,
-    required this.on,
-    required this.auto,
-    required this.off,
-  });
-
-  final double xFactor;
-  final double on;
-  final double auto;
-  final double off;
 }
 
 class _DeviceUsageCard extends StatelessWidget {
