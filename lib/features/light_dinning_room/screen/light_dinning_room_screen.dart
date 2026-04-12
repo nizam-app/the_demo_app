@@ -315,14 +315,16 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
     const tabs = [
       (_DeviceTab.tools, 'Tools'),
       (_DeviceTab.automation, 'Automation'),
-      (_DeviceTab.overview, 'Overview'),
       (_DeviceTab.chart, 'Chart'),
+      (_DeviceTab.overview, 'Overview'),
+
       (_DeviceTab.activity, 'Activity'),
     ];
 
     return Padding(
-      padding: EdgeInsets.only(left: 10.w, right: 10.w),
+      padding: EdgeInsets.only(left: 6.w, right: 6.w),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(tabs.length, (index) {
           final tab = tabs[index];
           final active = _tab == tab.$1;
@@ -333,16 +335,21 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(height: 6.h),
-                  Text(
-                    tab.$2,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF111827),
-                      // active
-                      //     ? const Color(0xFF111827)
-                      //     : const Color(0xFF111827),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Center(
+                      child: Text(
+                        tab.$2,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF111827),
+                          // active
+                          //     ? const Color(0xFF111827)
+                          //     : const Color(0xFF111827),
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 6.h),
@@ -350,6 +357,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                     duration: const Duration(milliseconds: 180),
                     height: 3.h,
                     width: active ? 49.w : 0.w,
+                    //width: active ? double.infinity : 0, // ✅ FIX
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
                     decoration: BoxDecoration(
                       color: const Color(0xFF111827),
                       borderRadius: BorderRadius.circular(26.r),
@@ -366,7 +375,6 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
 
   Widget _buildTabContent() {
     switch (_tab) {
-      
       case _DeviceTab.tools:
         return _buildManageDeviceCard();
       case _DeviceTab.automation:
@@ -484,15 +492,17 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           const Spacer(),
           Row(
             children: [
-              _Chip(
-                label: 'Bathroom',
+              _ChipPill(
+                text: 'Bathroom',
                 bg: const Color(0xFFFE019A),
                 textColor: Colors.white,
                 border: Colors.transparent,
               ),
+
+          
               SizedBox(width: 10.w),
-              _Chip(
-                label: _label,
+              _ChipPill(
+                text: _label,
                 bg: Colors.white,
                 textColor: const Color(0xFF0088FE),
                 border: const Color(0xFF0088FE),
@@ -1098,6 +1108,7 @@ Widget deviceOverviewCard() {
   const overviewLabel = Color(0xFF6B7280);
 
   return Container(
+    //height: 203.h,
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(26.r),
@@ -1113,7 +1124,7 @@ Widget deviceOverviewCard() {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 16.h),
+          padding: EdgeInsets.only(left:  20.w, top:  10.h, bottom:  10.h),
           child: Text(
             'Device overview',
             style: TextStyle(
@@ -1130,7 +1141,7 @@ Widget deviceOverviewCard() {
           thickness: 1,
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
+          padding: EdgeInsets.only(left:  20.w, top: 10.h, right:  20.w, bottom:  16.h),
           child: Column(
             children: [
               Row(
@@ -1230,7 +1241,7 @@ Widget _deviceOverviewGridCell(
     fontFamily: 'Inter',
     fontSize: 12.sp,
     fontWeight: FontWeight.w500,
-    height: 1.15,
+    height: 1,
   );
 
   final String trimmedValue = value.trimLeft();
@@ -1283,7 +1294,7 @@ Widget _deviceOverviewGridCell(
             fontFamily: 'Inter',
             fontSize: 10.sp,
             fontWeight: FontWeight.w400,
-            height: 1.2,
+            height: 1,
             color: labelColor,
           ),
         ),
@@ -1329,40 +1340,82 @@ class _StatBlock extends StatelessWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
-  const _Chip({
-    required this.label,
+// class _Chip extends StatelessWidget {
+//   const _Chip({
+//     required this.label,
+//     required this.bg,
+//     required this.textColor,
+//     required this.border,
+//   });
+//
+//   final String label;
+//   final Color bg;
+//   final Color textColor;
+//   final Color border;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 25,
+//       padding: EdgeInsets.only(right: 10.w, left: 10.h),
+//       decoration: BoxDecoration(
+//         color: bg,
+//         borderRadius: BorderRadius.circular(8.r),
+//         border: Border.all(color: border, width: 1),
+//       ),
+//       child: Text(
+//         label,
+//         style: TextStyle(
+//           fontFamily: 'Inter',
+//           fontSize: 14.sp,
+//           fontWeight: FontWeight.w400,
+//           color: textColor,
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+class _ChipPill extends StatelessWidget {
+  const _ChipPill({
+    required this.text,
     required this.bg,
-    required this.textColor,
     required this.border,
+    required this.textColor,
   });
 
-  final String label;
+  final String text;
   final Color bg;
-  final Color textColor;
   final Color border;
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(right: 10.w, left: 10.h),
+      height: 25.h,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: border, width: 1),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: border, width: 1.2.w),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w400,
-          color: textColor,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: textColor,
+            fontFamily: 'Inter',
+            // height: 1.0,
+          ),
         ),
       ),
     );
   }
 }
+
 
 class _ModeButton extends StatelessWidget {
   const _ModeButton({

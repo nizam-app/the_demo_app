@@ -571,37 +571,86 @@ SizedBox(
         ),
       ),
       SizedBox(width: 0.2.w),
-      SizedBox(
-        width: 35.w,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double totalH = constraints.maxHeight;
-            final double chartH = totalH - _analyticsChartLabelRowHeight;
-            const labels = ['24h', '18h', '12h', '6h', '0'];
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (int i = 0; i < labels.length; i++)
-                  Positioned(
-                    top: _analyticsChartGridLineY(chartH, i) -1.sp * 0.52,
-                    
-                    right: 0,
-                   
-                    child: Text(
-                      labels[i],
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
+
+      
+      Column(
+        children: [
+          Expanded(
+            flex: 9,
+            child: SizedBox(
+              width: 35.w,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double totalH = constraints.maxHeight;
+                  final double chartH = totalH - _analyticsChartLabelRowHeight;
+                  const labels = ['24h', '18h', '12h', '6h', '0'];
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      for (int i = 0; i < labels.length; i++)
+                        Positioned(
+                          top: _analyticsChartGridLineY(chartH, i),
+                          right: 5.w,
+                          child: Transform.translate(
+                            offset: Offset(1, -10.sp), // 👈 perfect center adjust
+                            child: Text(
+                              labels[i],
+                              textAlign: TextAlign.start, // 👈 important
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(
+                 flex: 1,
+              child: Container(
+            
+          ))
+        ],
       ),
+
+      /// old code,
+      // SizedBox(
+      //   width: 35.w,
+      //   child: LayoutBuilder(
+      //     builder: (context, constraints) {
+      //       final double totalH = constraints.maxHeight;
+      //       final double chartH = totalH - _analyticsChartLabelRowHeight;
+      //       const labels = ['24h', '18h', '12h', '6h', '0'];
+      //       return Stack(
+      //         clipBehavior: Clip.none,
+      //         children: [
+      //           for (int i = 0; i < labels.length; i++)
+      //             Positioned(
+      //               top: _analyticsChartGridLineY(chartH, i) -15.sp * 1,
+      //               right: 5.w,
+      //               bottom:5.h ,
+      //               child: Text(
+      //                 labels[i],
+      //                 style: TextStyle(
+      //                   fontFamily: 'Inter',
+      //                   fontSize: 14.sp,
+      //                   fontWeight: FontWeight.w400,
+      //                   color: const Color(0xFF6B7280),
+      //                 ),
+      //               ),
+      //             ),
+      //         ],
+      //       );
+      //     },
+      //   ),
+      // ),
     ],
   ),
 ),
@@ -697,36 +746,83 @@ SizedBox(
         ),
       ),
       SizedBox(width: 0.2.w),
-    
-          SizedBox(
-            width: 35.w,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final double totalH = constraints.maxHeight;
-                final double chartH = totalH - _analyticsChartLabelRowHeight;
-                const labels = ['100%', '75%', '50%', '25%', '0'];
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    for (int i = 0; i < labels.length; i++)
-                      Positioned(
-                        top: _analyticsChartGridLineY(chartH, i) - 1.sp * 0.52,
-                        right: 0,
-                        child: Text(
-                          labels[i],
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF6B7280),
+      Column(
+        
+        children: [
+          Expanded(
+            flex: 9,
+            child: SizedBox(
+              width: 35.w,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final double totalH = constraints.maxHeight;
+                  final double chartH = totalH - _analyticsChartLabelRowHeight;
+                  const labels = ['100%', '75%', '50%', '25%', '0'];
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      for (int i = 0; i < labels.length; i++)
+                        Positioned(
+                          top: _analyticsChartGridLineY(chartH, i),
+                          right: 5,
+                          child: Transform.translate(
+                            offset: Offset(5, -10.sp), // 👈 center fix
+                            child: Text(
+                              labels[i],
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
+          Expanded(
+              flex: 1,
+              child: Container(
+
+              ))
+        ],
+      ), 
+    
+          // SizedBox(
+          //   width: 35.w,
+          //   child: LayoutBuilder(
+          //     builder: (context, constraints) {
+          //       final double totalH = constraints.maxHeight;
+          //       final double chartH = totalH - _analyticsChartLabelRowHeight;
+          //       const labels = ['100%', '75%', '50%', '25%', '0'];
+          //       return Stack(
+          //         clipBehavior: Clip.none,
+          //         children: [
+          //           for (int i = 0; i < labels.length; i++)
+          //             Positioned(
+          //               top: _analyticsChartGridLineY(chartH, i) - 1.sp * 0.52,
+          //               right: 0,
+          //               child: Text(
+          //                 labels[i],
+          //                 style: TextStyle(
+          //                   fontFamily: 'Inter',
+          //                   fontSize: 12.sp,
+          //                   fontWeight: FontWeight.w400,
+          //                   color: const Color(0xFF6B7280),
+          //                 ),
+          //               ),
+          //             ),
+          //         ],
+          //       );
+          //     },
+          //   ),
+          // ),
       
     ],
   ),

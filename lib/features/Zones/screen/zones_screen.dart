@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/Zones/screen/widget/zoneAddMenut.dart';
 import 'package:workpleis/features/Zones/screen/widget/zonesMenuSheet.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
@@ -127,7 +129,9 @@ class _ZonesScreenState extends State<ZonesScreen> {
                   mainAxisSpacing: 14.h,
                   childAspectRatio: 1.13,
                 ),
-                itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {}),
+                itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {
+                   context.push(HomeScreen.routeName);
+                }),
               ),
             ),
           ],
