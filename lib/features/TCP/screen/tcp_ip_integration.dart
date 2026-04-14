@@ -161,101 +161,107 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
       ),
 
       body: SafeArea(
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (context, _) {
-            return ListView(
+        child: Column(
+          children: [
+            Padding(
               padding: EdgeInsets.fromLTRB(18.w, 20.h, 14.w, 120.h),
-              children: [
-                _TopBar(
-                  title: 'TCP/IP Integration',
-                  onBack: () => Navigator.maybePop(context),
-                  onMenu: _openMenu,
-                ),
-                SizedBox(height: 24.h),
-
-                Text(
-                  'Inputs',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _textDark,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-
-                _CardContainer(
-                  child: Column(
-                    children: [
-                      _SettingsRow(
-                        title: 'Interface ID',
-                        rightText: '${controller.interfaceId}',
-                        showChevron: true,
-                        onTap: () {
-                          // demo: cycle 1..3
-                          final next = controller.interfaceId == 3 ? 1 : controller.interfaceId + 1;
-                          controller.setInterfaceId(next);
-                        },
+              child: _TopBar(
+                title: 'TCP/IP Integration',
+                onBack: () => Navigator.maybePop(context),
+                onMenu: _openMenu,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) {
+                return ListView(
+                  padding: EdgeInsets.fromLTRB(18.w, 20.h, 14.w, 120.h),
+                  children: [
+                    Text(
+                      'Inputs',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _textDark,
                       ),
-                      const _Line(),
-                      _SettingsRow(
-                        title: 'Auto send (Push All)',
-                        trailing: CupertinoSwitch(
-                          value: _sliderWidget,
-                          onChanged: (v) => setState(() => _sliderWidget = v),
-                          activeColor: _blue,
-                        ),
-                      ),
-                      const _Line(),
-                      _SettingsRow(
-                        title: 'Header',
-                        trailing: CupertinoSwitch(
-                          value: _sliderWidgets,
-                          onChanged: (v) => setState(() => _sliderWidgets = v),
-                          activeColor: _blue,
-                        ),
-                      ),
-                      const _Line(),
-                      _SettingsRow(
-                        title: 'TCP Port',
-                        rightText: '${controller.tcpPort}',
-                        showChevron: true,
-                        onTap: () {
-                          // demo change
-                          controller.setTcpPort(controller.tcpPort == 10000 ? 10001 : 10000);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                    SizedBox(height: 8.h),
 
-                SizedBox(height: 22.h),
+                    _CardContainer(
+                      child: Column(
+                        children: [
+                          _SettingsRow(
+                            title: 'Interface ID',
+                            rightText: '${controller.interfaceId}',
+                            showChevron: true,
+                            onTap: () {
+                              // demo: cycle 1..3
+                              final next = controller.interfaceId == 3 ? 1 : controller.interfaceId + 1;
+                              controller.setInterfaceId(next);
+                            },
+                          ),
+                          const _Line(),
+                          _SettingsRow(
+                            title: 'Auto send (Push All)',
+                            trailing: CupertinoSwitch(
+                              value: _sliderWidget,
+                              onChanged: (v) => setState(() => _sliderWidget = v),
+                              activeColor: _blue,
+                            ),
+                          ),
+                          const _Line(),
+                          _SettingsRow(
+                            title: 'Header',
+                            trailing: CupertinoSwitch(
+                              value: _sliderWidgets,
+                              onChanged: (v) => setState(() => _sliderWidgets = v),
+                              activeColor: _blue,
+                            ),
+                          ),
+                          const _Line(),
+                          _SettingsRow(
+                            title: 'TCP Port',
+                            rightText: '${controller.tcpPort}',
+                            showChevron: true,
+                            onTap: () {
+                              // demo change
+                              controller.setTcpPort(controller.tcpPort == 10000 ? 10001 : 10000);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
 
-                Text(
-                  'Expose devices',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _textDark,
-                  ),
-                ),
-                SizedBox(height: 8.h),
+                    SizedBox(height: 22.h),
 
-                _CardContainer(
-                  child: Column(
-                    children: [
-                      for (int i = 0; i < controller.devices.length; i++) ...[
-                        _ExposeDeviceRow(device: controller.devices[i]),
-                        if (i != controller.devices.length - 1) const _ExposeLine(),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
+                    Text(
+                      'Expose devices',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _textDark,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+
+                    _CardContainer(
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < controller.devices.length; i++) ...[
+                            _ExposeDeviceRow(device: controller.devices[i]),
+                            if (i != controller.devices.length - 1) const _ExposeLine(),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

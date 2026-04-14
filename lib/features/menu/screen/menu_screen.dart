@@ -6,9 +6,11 @@ import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
 import 'package:workpleis/features/weather/screen/weather_screen.dart';
+import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
 import '../../profile/screen/profile_screen.dart';
@@ -30,7 +32,7 @@ class MenuScreen extends StatelessWidget {
   static const String routeName = '/menu';
 
   // colors (match screenshot)
-  static const _bg = Color(0xFFF3F4F6);
+  static const _bg = Color(0xFFFFFFFF);
   static const _card = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -50,14 +52,16 @@ class MenuScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
               child: Row(
-                children: [
+                children:[
                   GlobalCircleIconBtn(
+                    color: Color(0xFFF3F4F6),
                     child: Image.asset(
                       'assets/aro.png',
                       width: 16.w,
                       height: 16.h,
+                     
                     ),
-onTap: () => context.pop(),
+                 onTap: () => context.pop(),
                   ),
                   Expanded(
                     child: Center(
@@ -76,7 +80,7 @@ onTap: () => context.pop(),
                 ],
               ),
             ),
-
+ 
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(bottom: 22.h),
@@ -84,15 +88,16 @@ onTap: () => context.pop(),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 10.h),
                       child: Container(
                         padding: EdgeInsets.all(10.w),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(26.r),
+                          border: Border.all(color: Colors.white, width: 2.h),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -248,7 +253,9 @@ onTap: () => context.pop(),
                     ),
 
                     // ✅ Categories
-                    const _SectionTitle(title: 'Categories'),
+                    InkWell(
+                        onTap: ()=>context.push(Zone_Category_Screen.routeName),
+                        child: const _SectionTitle(title: 'Categories')),
                     _CardBlock(
                       children: [
                          _MenuItemRow(
@@ -300,7 +307,9 @@ onTap: () => context.pop(),
                     ),
 
                     // ✅ Zones
-                    const _SectionTitle(title: 'Zones'),
+                    InkWell(
+                        onTap: ()=>context.push(Zone_Category_Screen.routeName),
+                        child: const _SectionTitle(title: 'Zones')),
                     _CardBlock(
                       children: [
                         const _MenuItemRow(
@@ -645,7 +654,15 @@ class _CardBlock extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22.r),
+        borderRadius: BorderRadius.circular(26.r),
+        border: Border.all(width: 1.h, color: Colors.white) ,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22.r),

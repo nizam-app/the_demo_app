@@ -23,6 +23,7 @@ import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/smart_device/presentation/smart_devices_screen.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 import 'package:workpleis/features/voice/screen/voice_screen.dart';
+import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../features/core/screen/core_screen.dart';
 import '../features/settings/screen/setting_screen.dart';
@@ -95,6 +96,11 @@ class AppRouter {
         path: MenuScreen.routeName,
         name: MenuScreen.routeName,
         builder: (context, state) => const MenuScreen(),
+      ),
+      GoRoute(
+        path: Zone_Category_Screen.routeName,
+        name: Zone_Category_Screen.routeName,
+        builder: (context, state) => const Zone_Category_Screen(),
       ),
       GoRoute(
         path: AnalyticsScreen.routeName,

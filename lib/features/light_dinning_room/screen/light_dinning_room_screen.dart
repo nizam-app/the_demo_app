@@ -1141,7 +1141,7 @@ Widget deviceOverviewCard() {
           thickness: 1,
         ),
         Padding(
-          padding: EdgeInsets.only(left:  20.w, top: 10.h, right:  20.w, bottom:  16.h),
+          padding: EdgeInsets.only(top: 10.h, bottom:  16.h),
           child: Column(
             children: [
               Row(
@@ -1172,7 +1172,7 @@ Widget deviceOverviewCard() {
               ),
               SizedBox(height: 22.h),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   _deviceOverviewGridCell(
                     'Energy',
