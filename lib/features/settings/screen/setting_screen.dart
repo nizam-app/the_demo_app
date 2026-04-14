@@ -117,14 +117,14 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     SizedBox(height: 26.h),
                     _pillOutlineButton(
-                      label: 'Configuration',
+                      label: 'Control unit',
                       color: _blue,
-                      image: "assets/Mask group (1) copy.png",
+                      image: "assets/image 125.png",
                       onTap: () {
                         context.push(ConfigurationScreen.routeName);
                       },
-                      width: 30.w,
-                      height: 30.h,
+                      width: 18.w,
+                      height: 18.h,
                       imageColor: _blue,
                     ),
                     SizedBox(height: 10.h),
@@ -196,18 +196,18 @@ class _SettingScreenState extends State<SettingScreen> {
               ],
             ),
           ),
-          SizedBox(height: 10.h),
-          Text(
-            'Original value is set as it was before the failure',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: _secondaryText,
-              height: 1.35,
-            ),
-          ),
+          // SizedBox(height: 10.h),
+          // Text(
+          //   'Original value is set as it was before the failure',
+          //   textAlign: TextAlign.center,
+          //   style: TextStyle(
+          //     fontFamily: 'Inter',
+          //     fontSize: 16.sp,
+          //     fontWeight: FontWeight.w400,
+          //     color: _secondaryText,
+          //     height: 1.35,
+          //   ),
+          // ),
         ],
       ),
     );

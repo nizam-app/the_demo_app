@@ -94,7 +94,21 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
   static const Color _textGrey = Color(0xFF6B7280);
   static const Color _danger = Color(0xFFFE019A);
 
-  int _selectedIndex = 3; // Notifications selected in screenshot
+  /// Bottom nav: Settings (4) is selected when this screen is opened from Settings.
+  int _selectedNavIndex = 4;
+
+  void _onNavItemTapped(int index) {
+    const routes = [
+      '/devices',
+      '/analytics',
+      '/home',
+      '/notifications',
+      '/settings',
+    ];
+    if (index < routes.length) {
+      context.go(routes[index]);
+    }
+  }
 
   late final List<IntegrationState> _cardStates = [
     IntegrationState.enabled,
@@ -124,9 +138,9 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
       ),
 
       bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedIndex,
+        selectedIndex: _selectedNavIndex,
         notificationCount: 12,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: _onNavItemTapped,
       ),
 
       body: SafeArea(

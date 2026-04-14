@@ -25,7 +25,8 @@ Flutter/app.zip
 Flutter/flutter_assets/
 Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
-Runner/GeneratedPluginRegistrant.*
+# GeneratedPluginRegistrant.* is tracked so Xcode always shows it and clones build without a prior `flutter pub get`.
+# After adding/removing plugins, run `flutter pub get` and commit the updated registrant files.
 
 # Exceptions to above rules.
 !default.mode1v3

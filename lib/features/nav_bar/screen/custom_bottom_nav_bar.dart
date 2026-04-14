@@ -145,7 +145,8 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: Container(
           height: 72.h,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.74),
+            color: Colors.white,
+                // .withOpacity(0.10),
             border: const Border(
               top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
             ),

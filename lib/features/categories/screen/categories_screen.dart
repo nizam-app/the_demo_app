@@ -9,6 +9,7 @@ import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 import '../widget/categoryAddmenu.dart';
@@ -147,7 +148,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
                 itemBuilder: (_, i) {
                   return ZoneCard(item: zones[i], onTap: () {
-                    context.push(HomeScreen.routeName); 
+                    context.push(Zone_Category_Screen.routeName);
                   });
                 },
               ),

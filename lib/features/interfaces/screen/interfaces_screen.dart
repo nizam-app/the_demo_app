@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widget/select_interface.dart';
 
@@ -92,7 +93,21 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
   static const Color _blue = Color(0xFF0A84FF);
   static const Color _magenta = Color(0xFFFF00A8);
 
-  int _selectedIndex = 2;
+  /// Bottom nav: Settings (4) is selected when this screen is opened from Settings.
+  int _selectedNavIndex = 4;
+
+  void _onNavItemTapped(int index) {
+    const routes = [
+      '/devices',
+      '/analytics',
+      '/home',
+      '/notifications',
+      '/settings',
+    ];
+    if (index < routes.length) {
+      context.go(routes[index]);
+    }
+  }
 
   late final List<_InterfaceStatus> _itemStatuses = [
     for (final e in _items) e.status,
@@ -147,9 +162,9 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
       ),
 
       bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedIndex,
+        selectedIndex: _selectedNavIndex,
         notificationCount: 12,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: _onNavItemTapped,
       ),
 
       body: SafeArea(

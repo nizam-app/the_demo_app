@@ -10,6 +10,7 @@ import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 class ZonesScreen extends StatefulWidget {
   const ZonesScreen({super.key});
@@ -130,7 +131,7 @@ class _ZonesScreenState extends State<ZonesScreen> {
                   childAspectRatio: 1.13,
                 ),
                 itemBuilder: (_, i) => ZoneCard(item: zones[i], onTap: () {
-                   context.push(HomeScreen.routeName);
+                   context.push(Zone_Category_Screen.routeName);
                 }),
               ),
             ),

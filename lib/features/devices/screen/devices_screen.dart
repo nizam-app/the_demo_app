@@ -70,14 +70,14 @@ class _DevicesScreenState extends State<DevicesScreen> {
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 18.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // -------- Header (top bar) ----------
-              Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
+        child: Column(
+          
+          children: [
+
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: EdgeInsets.only(left: 14.w,  right:  14.w, ),
                 child: SizedBox(
                   height: 36.w,
                   child: Stack(
@@ -149,344 +149,430 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   ),
                 ),
               ),
-
-              // -------- Search ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-                child: _SearchBar(),
-              ),
-
-              SizedBox(height: 10.h),
-
-              // -------- Filter chips ----------
-              SizedBox(
-                height: 40.h,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
+            ),
+            
+            Expanded(
+              flex: 10,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: 18.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FilterChipPill(
-                      label: 'All',
-                      selected: _selectedFilter == 'All',
-                      onTap: () => setState(() => _selectedFilter = 'All'),
+                    // -------- Header (top bar) ----------
+                    // Padding(
+                    //   padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
+                    //   child: SizedBox(
+                    //     height: 36.w,
+                    //     child: Stack(
+                    //       alignment: Alignment.center,
+                    //       children: [
+                    //         Align(
+                    //           alignment: Alignment.centerLeft,
+                    //           child: GlobalCircleIconBtn(
+                    //             color: Color(0xFFF3F4F6),
+                    //             child: Image.asset(
+                    //               'assets/aro.png',
+                    //               width: 16.w,
+                    //               height: 16.h,
+                    //             ),
+                    //             onTap: () {
+                    //               if (!widget.showBottomNav) {
+                    //                 final shell = CustomBottomNavBar.of(context);
+                    //                 if (shell != null) {
+                    //                   shell.setSelectedIndex(2);
+                    //                   return;
+                    //                 }
+                    //               }
+                    //               if (context.canPop()) {
+                    //                 context.pop();
+                    //               } else {
+                    //                 context.go('/home');
+                    //               }
+                    //             },
+                    //           ),
+                    //         ),
+                    //         Center(
+                    //           child: Text(
+                    //             'Devices',
+                    //             style: TextStyle(
+                    //               fontSize: 22.sp,
+                    //               fontWeight: FontWeight.w600,
+                    //               color: const Color(0xFF111827),
+                    //               fontFamily: 'Inter',
+                    //             ),
+                    //           ),
+                    //         ),
+                    //         Align(
+                    //           alignment: Alignment.centerRight,
+                    //           child: Row(
+                    //             mainAxisSize: MainAxisSize.min,
+                    //             children: [
+                    //               _CircleIconButton(
+                    //                 icon: Icons.more_horiz_rounded,
+                    //                 onTap: () => _showEditDeviceBottomSheet(context),
+                    //                 size: 32,
+                    //                 bg: const Color(0xFFF3F4F6),
+                    //                 iconColor: const Color(0xFF111827),
+                    //                 iconSize: 22,
+                    //               ),
+                    //               SizedBox(width: 10.w),
+                    //               _CircleIconButton(
+                    //                 icon: Icons.add_rounded,
+                    //                 onTap: () => _showAssignCategoryPopup(context),
+                    //                 size: 32,
+                    //                 bg: const Color(0xFF111827),
+                    //                 //bg: const Color(0xFF0088FE),
+                    //                 iconColor: Colors.white,
+                    //                 iconSize: 23,
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    // -------- Search ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                      child: _SearchBar(),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Favorites',
-                      selected: _selectedFilter == 'Favorites',
-                      onTap: () =>
-                          setState(() => _selectedFilter = 'Favorites'),
+
+                    SizedBox(height: 10.h),
+
+                    // -------- Filter chips ----------
+                    SizedBox(
+                      height: 40.h,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        children: [
+                          _FilterChipPill(
+                            label: 'All',
+                            selected: _selectedFilter == 'All',
+                            onTap: () => setState(() => _selectedFilter = 'All'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Favorites',
+                            selected: _selectedFilter == 'Favorites',
+                            onTap: () =>
+                                setState(() => _selectedFilter = 'Favorites'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Smart',
+                            selected: _selectedFilter == 'Smart',
+                            onTap: () => setState(() => _selectedFilter = 'Smart'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Groups',
+                            selected: _selectedFilter == 'Groups',
+                            onTap: () => setState(() => _selectedFilter = 'Groups'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Category',
+                            selected: _selectedFilter == 'Category',
+                            onTap: () => setState(() => _selectedFilter = 'Category'),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Smart',
-                      selected: _selectedFilter == 'Smart',
-                      onTap: () => setState(() => _selectedFilter = 'Smart'),
+
+                    SizedBox(height: 12.h),
+
+                    // -------- Section Title ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Text(
+                        'Devices',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Groups',
-                      selected: _selectedFilter == 'Groups',
-                      onTap: () => setState(() => _selectedFilter = 'Groups'),
+
+                    SizedBox(height: 8.h),
+
+                    // -------- List (rows) ----------
+                    _DeviceListCard(
+                      children: [
+                        // RGBW
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(top: 7.h, right: 10.w),
+                          topRight: const _TimeTag(text: '18:32', blueIcon: true),
+                          leading: const _GradientCircleIcon(size: 34),
+                          title: 'RGBW',
+                          selected: _selectedDeviceTitle == 'RGBW',
+                          onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const _ModeDot(text: 'A', filledA: false),
+                                  SizedBox(width: 6.w),
+                                  const _SmallText('Off'),
+                                ],
+                              ),
+                              SizedBox(height: 2.h),
+                              const _TinyGreyText('LCD0C12'),
+                              SizedBox(height: 6.h),
+                              Wrap(
+                                spacing: 6.w,
+                                runSpacing: 6.h,
+                                children: const [
+                                  _TagChip(
+                                    text: 'Lighting',
+                                    bg: Color(0xFF0088fe),
+                                    outlined: true,
+                                  ),
+                                  _TagChip(
+                                    text: 'Bathroom',
+                                    bg: Color(0xFFFE019A),
+                                    outlined: false,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const _CircleMiniBtn(icon: Icons.remove),
+                              SizedBox(width: 14.w),
+                              const _CircleMiniBtn(icon: Icons.add),
+                              SizedBox(width: 8.w),
+                              const _ToggleColorswitch(isOn: true),
+                              SizedBox(width: 8.w),
+                            ],
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Alarm
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(top: 7.h, right: 0.w),
+                          topRight: const _PinOnly(),
+                          leading: const _LockIcon(),
+                          title: 'Alarm',
+                          selected: _selectedDeviceTitle == 'Alarm',
+                          onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
+                          subtitle: const _SmallText('Disarmed'),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(right: 20.w),
+                            child: _CircleActionBlue(
+                              imagePath: 'assets/Mask group (15).png',
+                            ),
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Bathroom
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 20.w,
+                            bottom: 7.h,
+                          ),
+                          leading: const _PowerRingIcon(),
+                          title: 'Bathroom',
+                          selected: _selectedDeviceTitle == 'Bathroom',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Bathroom'),
+                          subtitle: Row(
+                            children: [
+                              const _ModeDot(text: 'M', filledA: true),
+                              const SizedBox(width: 10),
+                              Image.asset(
+                                'assets/low-temperature 1.png',
+                                width: 9.w,
+                                height: 19.h,
+                                fit: BoxFit.contain,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                '24.6°C',
+                                style: TextStyle(
+                                  fontSize: 14, // screenshot vibe
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF111827),
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const _CircleMiniBtn(icon: Icons.remove),
+                              SizedBox(width: 14.w),
+                              const _CircleMiniBtn(icon: Icons.add),
+                            ],
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Blind Living Room (selected highlight row)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 8.w,
+                            bottom: 7.h,
+                          ),
+                          selected: _selectedDeviceTitle == 'Blind Living Room',
+                          topRight: const _StarTimeTag(time: '20:36'),
+                          leading: const _BlindGreenIcon(),
+                          title: 'Blind Living Room',
+                          onTap: () => setState(
+                            () => _selectedDeviceTitle = 'Blind Living Room',
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              SizedBox(height: 2),
+                              _BlindStatsRow(),
+                              _TinyGreyText('D012U12'),
+                            ],
+                          ),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(right: 4.w, top: 15.h),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
+                                SizedBox(width: 14.w),
+                                _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
+                                SizedBox(width: 10.w),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Block Irrigation Schedule (blue play row)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 20.w,
+                            bottom: 5.h,
+                          ),
+                          leading: const _PlayCircleIcon(),
+                          title: 'Block Irrigation Schedule',
+                          selected:
+                              _selectedDeviceTitle == 'Block Irrigation Schedule',
+                          onTap: () => setState(
+                            () => _selectedDeviceTitle = 'Block Irrigation Schedule',
+                          ),
+                          subtitle: const _SmallText('Blocked'),
+                          trailing: _CircleActionBlue(
+                            imagePath: 'assets/play.png',
+                            isPlay: true,
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Brightness (with pill slider)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 2.h,
+                            right: 8.w,
+                            bottom: 5.h,
+                          ),
+                          brightness: true,
+                          topRight: const _StarOnly(),
+                          leading: const _SunIcon(),
+                          title: 'Brightness',
+                          selected: _selectedDeviceTitle == 'Brightness',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Brightness'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              _BoldSmall('54%'),
+                              SizedBox(height: 2),
+                              _TinyGreyText('W5BT'),
+                            ],
+                          ),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(top: 15.h, right: 15.w),
+                            child: const _BrightnessPill(),
+                          ),
+                        ),
+                        const _RowDivider(),
+
+                        // Card Reader(s)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 10.h,
+                            right: 22.w,
+                            bottom: 5.h,
+                          ),
+                          leading: const _BulbIcon(),
+                          title: 'Card Reader(s)',
+                          selected: _selectedDeviceTitle == 'Card Reader(s)',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
+                          subtitle: const _SmallText('Blocked'),
+                          trailing: const _ToggleSwitch(isOn: false),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Category',
-                      selected: _selectedFilter == 'Category',
-                      onTap: () => setState(() => _selectedFilter = 'Category'),
+
+                    const _RowDivider(),
+
+                    SizedBox(height: 20.h),
+
+                    // -------- Control units ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Text(
+                        'Control units',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    _DeviceListCard(
+                      children: [
+                        const _ControlUnitRow(
+                          imagePath: 'assets/image 124.png',
+                          title: 'CORE20',
+                          sub2: 'CORE20-4B37-3419-363A',
+                        ),
+                        _RowDivider(
+                          leftMargin: 56.w,
+                        ), // 12 (padding) + 34 (icon) + 10 (spacing)
+                        const _ControlUnitRow(
+                          imagePath: 'assets/image 124.png',
+                          title: 'D012',
+                          sub: '11 Devices',
+                          sub2: 'CORE20-4B37-3419-363A',
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-
-              SizedBox(height: 12.h),
-
-              // -------- Section Title ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Devices',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              // -------- List (rows) ----------
-              _DeviceListCard(
-                children: [
-                  // RGBW
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 10.w),
-                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-                    leading: const _GradientCircleIcon(size: 34),
-                    title: 'RGBW',
-                    selected: _selectedDeviceTitle == 'RGBW',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const _ModeDot(text: 'A', filledA: false),
-                            SizedBox(width: 6.w),
-                            const _SmallText('Off'),
-                          ],
-                        ),
-                        SizedBox(height: 2.h),
-                        const _TinyGreyText('LCD0C12'),
-                        SizedBox(height: 6.h),
-                        Wrap(
-                          spacing: 6.w,
-                          runSpacing: 6.h,
-                          children: const [
-                            _TagChip(
-                              text: 'Lighting',
-                              bg: Color(0xFF0088fe),
-                              outlined: true,
-                            ),
-                            _TagChip(
-                              text: 'Bathroom',
-                              bg: Color(0xFFFE019A),
-                              outlined: false,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 14.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                        SizedBox(width: 8.w),
-                        const _ToggleColorswitch(isOn: true),
-                        SizedBox(width: 8.w),
-                      ],
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Alarm
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 0.w),
-                    topRight: const _PinOnly(),
-                    leading: const _LockIcon(),
-                    title: 'Alarm',
-                    selected: _selectedDeviceTitle == 'Alarm',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
-                    subtitle: const _SmallText('Disarmed'),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(right: 20.w),
-                      child: _CircleActionBlue(
-                        imagePath: 'assets/Mask group (15).png',
-                      ),
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Bathroom
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 20.w,
-                      bottom: 7.h,
-                    ),
-                    leading: const _PowerRingIcon(),
-                    title: 'Bathroom',
-                    selected: _selectedDeviceTitle == 'Bathroom',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Bathroom'),
-                    subtitle: Row(
-                      children: [
-                        const _ModeDot(text: 'M', filledA: true),
-                        const SizedBox(width: 10),
-                        Image.asset(
-                          'assets/low-temperature 1.png',
-                          width: 9.w,
-                          height: 19.h,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          '24.6°C',
-                          style: TextStyle(
-                            fontSize: 14, // screenshot vibe
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111827),
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 14.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                      ],
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Blind Living Room (selected highlight row)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 8.w,
-                      bottom: 7.h,
-                    ),
-                    selected: _selectedDeviceTitle == 'Blind Living Room',
-                    topRight: const _StarTimeTag(time: '20:36'),
-                    leading: const _BlindGreenIcon(),
-                    title: 'Blind Living Room',
-                    onTap: () => setState(
-                      () => _selectedDeviceTitle = 'Blind Living Room',
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        SizedBox(height: 2),
-                        _BlindStatsRow(),
-                        _TinyGreyText('D012U12'),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(right: 4.w, top: 15.h),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                          SizedBox(width: 14.w),
-                          _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-                          SizedBox(width: 10.w),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Block Irrigation Schedule (blue play row)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 20.w,
-                      bottom: 5.h,
-                    ),
-                    leading: const _PlayCircleIcon(),
-                    title: 'Block Irrigation Schedule',
-                    selected:
-                        _selectedDeviceTitle == 'Block Irrigation Schedule',
-                    onTap: () => setState(
-                      () => _selectedDeviceTitle = 'Block Irrigation Schedule',
-                    ),
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: _CircleActionBlue(
-                      imagePath: 'assets/play.png',
-                      isPlay: true,
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Brightness (with pill slider)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 2.h,
-                      right: 8.w,
-                      bottom: 5.h,
-                    ),
-                    brightness: true,
-                    topRight: const _StarOnly(),
-                    leading: const _SunIcon(),
-                    title: 'Brightness',
-                    selected: _selectedDeviceTitle == 'Brightness',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Brightness'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        _BoldSmall('54%'),
-                        SizedBox(height: 2),
-                        _TinyGreyText('W5BT'),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(top: 15.h, right: 15.w),
-                      child: const _BrightnessPill(),
-                    ),
-                  ),
-                  const _RowDivider(),
-
-                  // Card Reader(s)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 10.h,
-                      right: 22.w,
-                      bottom: 5.h,
-                    ),
-                    leading: const _BulbIcon(),
-                    title: 'Card Reader(s)',
-                    selected: _selectedDeviceTitle == 'Card Reader(s)',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: const _ToggleSwitch(isOn: false),
-                  ),
-                ],
-              ),
-
-              const _RowDivider(),
-
-              SizedBox(height: 20.h),
-
-              // -------- Control units ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Control units',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              _DeviceListCard(
-                children: [
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'CORE20',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                  _RowDivider(
-                    leftMargin: 56.w,
-                  ), // 12 (padding) + 34 (icon) + 10 (spacing)
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'D012',
-                    sub: '11 Devices',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: widget.showBottomNav

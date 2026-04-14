@@ -9,18 +9,19 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
+import '../../home/widget/Add_section.dart';
+import '../../home/widget/editAddSectionSheet.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
 import '../../profile/screen/profile_screen.dart';
 import '../../settings/screen/settings_screen.dart';
-import '../widget/Add_section.dart';
-import '../widget/editAddSectionSheet.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
 
-  static const String routeName = '/home';
+class Zone_Category_Screen extends StatefulWidget {
+  const Zone_Category_Screen({super.key});
+
+  static const String routeName = '/zone_category';
 
 
   static void showEditAddSectionSheet(BuildContext context) {
@@ -51,15 +52,15 @@ class HomeScreen extends StatefulWidget {
 
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<Zone_Category_Screen> createState() => _Zone_Category_ScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildHomeBody() {
     return SafeArea(
       child: Column(
         children: [
-
+          
           Padding(
             padding:  EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h, bottom: 5.h),
             child: Expanded(
@@ -70,13 +71,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     context.push(MenuScreen.routeName);
                     // CustomBottomNavBar.of(context)?.openDrawer();
                   },
-                  onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
+                  onEditTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
 
                 ),
               ),
             ),
           ),
-
           
           Expanded(
             flex: 10,
@@ -88,65 +88,63 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 10.h),
-
-                        // ✅ Header
+                        // SizedBox(height: 8.h),
+                        //
+                        // // ✅ Header
                         // Builder(
                         //   builder: (context) => _Header(
                         //     onMenuTap: () {
                         //       context.push(MenuScreen.routeName);
-                        //      // CustomBottomNavBar.of(context)?.openDrawer();
+                        //       // CustomBottomNavBar.of(context)?.openDrawer();
                         //     },
-                        //     onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
+                        //     onEditTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
                         //
                         //   ),
                         // ),
 
-                        // SizedBox(height: 16.h),
+                        SizedBox(height: 10.h),
 
                         // ✅ Category pills (Light selected)
-                        SizedBox(
-                          height: 63.h,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            // padding: EdgeInsets.symmetric(horizontal: 12.w),
-                            children: [
-                              _CategoryPill(
-                                label: 'Light',
-                                isSelected: true,
-                                icon: Icons.lightbulb_outline,
-                                imagePath: 'assets/Mask group (3).png',
-                                onTap: () {},
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'Shading',
-                                isSelected: false,
-                                icon: Icons.blinds_outlined,
-                                imagePath: 'assets/Mask group (2).png',
-                                onTap: () {},
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'HVAC',
-                                isSelected: false,
-                                icon: Icons.ac_unit_outlined,
-                                imagePath: 'assets/Mask group (4).png',
-                                onTap: () {},
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'Security',
-                                isSelected: false,
-                                icon: Icons.ac_unit_outlined,
-                                imagePath: 'assets/securety.png',
-                                onTap: () {},
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(height: 18.h),
+                        // SizedBox(
+                        //   height: 63.h,
+                        //   child: ListView(
+                        //     scrollDirection: Axis.horizontal,
+                        //     // padding: EdgeInsets.symmetric(horizontal: 12.w),
+                        //     children: [
+                        //       _CategoryPill(
+                        //         label: 'Light',
+                        //         isSelected: true,
+                        //         icon: Icons.lightbulb_outline,
+                        //         imagePath: 'assets/Mask group (3).png',
+                        //         onTap: () {},
+                        //       ),
+                        //       SizedBox(width: 12.w),
+                        //       _CategoryPill(
+                        //         label: 'Shading',
+                        //         isSelected: false,
+                        //         icon: Icons.blinds_outlined,
+                        //         imagePath: 'assets/Mask group (2).png',
+                        //         onTap: () {},
+                        //       ),
+                        //       SizedBox(width: 12.w),
+                        //       _CategoryPill(
+                        //         label: 'HVAC',
+                        //         isSelected: false,
+                        //         icon: Icons.ac_unit_outlined,
+                        //         imagePath: 'assets/Mask group (4).png',
+                        //         onTap: () {},
+                        //       ),
+                        //       SizedBox(width: 12.w),
+                        //       _CategoryPill(
+                        //         label: 'Security',
+                        //         isSelected: false,
+                        //         icon: Icons.ac_unit_outlined,
+                        //         imagePath: 'assets/securety.png',
+                        //         onTap: () {},
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
 
                         const _SectionTitle('Light'),
                         SizedBox(height: 12.h),
@@ -462,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // ✅ Right controls (same row, 2 circles)
           Align(
             alignment:
-                Alignment.bottomCenter, // ✅ moves circles to bottom like image
+            Alignment.bottomCenter, // ✅ moves circles to bottom like image
             child: Padding(
               padding: EdgeInsets.only(
                 bottom: 6.h,
@@ -489,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         'assets/Mask group (17).png',
                         width: 13.w,
                         height: 13.h,
-                          color: Color(0xFF6B7280),
+                        color: Color(0xFF6B7280),
                       ),
                     ),
                   ),
@@ -501,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
+
   Widget _buildFavoritesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,7 +654,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 deviceName: 'Light Scene child room',
                 status: 'All On',
                 iconImage:
-                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -665,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 deviceName: 'RGBW light patio entry',
                 status: '100%',
                 iconImage:
-                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -680,7 +678,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           deviceName: 'LED Dimmer living room',
                           status: '100%',
                           iconImage:
-                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
                         ),
                       ),
@@ -705,7 +703,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 deviceName: 'Light Scene child room',
                 status: 'All On',
                 iconImage:
-                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -714,7 +712,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 deviceName: 'RGBW light\npatio entry',
                 status: '100%',
                 iconImage:
-                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
               ),
             ),
             SizedBox(width: 12.w),
@@ -729,7 +727,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           deviceName: 'LED Dimmer living room',
                           status: '100%',
                           iconImage:
-                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
                         ),
                       ),
@@ -769,19 +767,19 @@ class _HomeScreenState extends State<HomeScreen> {
           progressCircle
               ? _lightingProgress100()
               : Image.asset(
-                  iconImage,
-                  width: 52.w,
-                  height: 52.h,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 52.w,
-                    height: 52.h,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                ),
+            iconImage,
+            width: 52.w,
+            height: 52.h,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 52.w,
+              height: 52.h,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+          ),
           SizedBox(height: 8.h),
           // Device name
           Flexible(
@@ -897,7 +895,7 @@ class _Header extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'Dashboard',
+              'Zone/Categories',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22.sp,
@@ -939,7 +937,7 @@ class _Header extends StatelessWidget {
                 ),
                 SizedBox(width: 13.w),
                 InkWell(
-                  onTap: () => HomeScreen.showAddSectionSheet(context),
+                  onTap: () => Zone_Category_Screen.showAddSectionSheet(context),
                   borderRadius: BorderRadius.circular(999),
                   child: Container(
                     width: 32.w,
@@ -966,95 +964,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ---------------------------
-// class _Header extends StatelessWidget {
-//   const _Header({required this.onMenuTap, required this.onEditTap});
-//
-//   final VoidCallback onMenuTap;
-//   final VoidCallback onEditTap;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         InkWell(
-//           onTap: onMenuTap,
-//           borderRadius: BorderRadius.circular(12.r),
-//           child: SizedBox(
-//             width: 44.w,
-//             height: 44.w,
-//             child: Center(
-//               child: Image.asset(
-//                 'assets/Group 35 (1).png',
-//                 width: 26.w,
-//                 height: 17.w,
-//                 fit: BoxFit.contain,
-//               ),
-//             ),
-//           ),
-//         ),
-//         Expanded(
-//           child: Center(
-//             child: Text(
-//               'Dashboard',
-//               style: TextStyle(
-//                 fontSize: 22.sp,
-//                 fontWeight: FontWeight.w600,
-//                 color: const Color(0xFF111827),
-//                 fontFamily: 'Inter',
-//               ),
-//             ),
-//           ),
-//         ),
-//         Row(
-//           children: [
-//             InkWell(
-//               onTap: onEditTap,
-//               borderRadius: BorderRadius.circular(999),
-//               child: Container(
-//                 width: 32.w,
-//                 height: 32.w,
-//                 decoration: const BoxDecoration(
-//                   color: Color(0xFFF3F4F6),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: Center(
-//                   child: Image.asset(
-//                     'assets/image 89.png',
-//                     width: 22.w,
-//                     height: 22.w,
-//                     fit: BoxFit.contain,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//             SizedBox(width: 13.w,), 
-//             InkWell(
-//               onTap: () => HomeScreen.showAddSectionSheet(context),
-//               borderRadius: BorderRadius.circular(999),
-//               child: Container(
-//                 width: 32.w,
-//                 height: 32.w,
-//                 decoration: const BoxDecoration(
-//                   color: Color(0xFFF3F4F6),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: Center(
-//                   child: Icon(Icons.add_rounded, color: Color(0xFF111827), size: 23.sp,)
-//                 ),
-//               ),
-//             ),
-//            
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// ---------------------------
-// Category pill
-// ---------------------------
 class _CategoryPill extends StatelessWidget {
   const _CategoryPill({
     required this.label,
@@ -1104,11 +1013,11 @@ class _CategoryPill extends StatelessWidget {
               alignment: Alignment.center,
               child: imagePath != null
                   ? Image.asset(
-                      imagePath!,
-                      width: 22.w,
-                      height: 22.w,
-                      fit: BoxFit.contain,
-                    )
+                imagePath!,
+                width: 22.w,
+                height: 22.w,
+                fit: BoxFit.contain,
+              )
                   : Icon(icon, size: 20.sp, color: const Color(0xFF111827)),
             ),
             SizedBox(width: 10.w),
@@ -1129,52 +1038,52 @@ class _CategoryPill extends StatelessWidget {
         ),
       );
     }
-
+                                    
     return InkWell(
       onTap: onTap,
       borderRadius: radius,
       child: isSelected
           ? pillBody(
-              Container(
-                height: 63.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFFFFD700), // yellow
-                      Color(0xFF00FF99), // green-ish
-                      Color(0xFF15DFFE), // cyan
-                    ],
-                    stops: [0.0, 0.55, 1.0],
-                  ),
-                  borderRadius: radius,
-                ),
-                padding: EdgeInsets.all(1.6.r), // ✅ border thickness
-                child: Container(
-                  height: 63.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: radius,
-                  ),
-                  child: innerRow(selected: true),
-                ),
-              ),
-            )
-          : pillBody(
-              Container(
-                height: 63.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: const Color(0xFFE1E1E1),
-                    width: 1.5,
-                  ),
-                  borderRadius: radius,
-                ),
-                child: innerRow(selected: false),
-              ),
+        Container(
+          height: 63.h,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Color(0xFFFFD700), // yellow
+                Color(0xFF00FF99), // green-ish
+                Color(0xFF15DFFE), // cyan
+              ],
+              stops: [0.0, 0.55, 1.0],
             ),
+            borderRadius: radius,
+          ),
+          padding: EdgeInsets.all(1.6.r), // ✅ border thickness
+          child: Container(
+            height: 63.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: radius,
+            ),
+            child: innerRow(selected: true),
+          ),
+        ),
+      )
+          : pillBody(
+        Container(
+          height: 63.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: const Color(0xFFE1E1E1),
+              width: 1.5,
+            ),
+            borderRadius: radius,
+          ),
+          child: innerRow(selected: false),
+        ),
+      ),
     );
   }
 }
@@ -1198,24 +1107,24 @@ class _SectionTitle extends StatelessWidget {
             fontFamily: 'Inter',
           ),
         ),
-        
+
         GestureDetector(
-          onTap: () => HomeScreen.showEditAddSectionSheet(context),
-          child: 
-            Row(
-              children: [
-                Text("Edit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16.sp, fontFamily: "Inter", color: Color(0xFf0088FE)),),
-                SizedBox(width: 5.w,), 
-                Image.asset(
-                  "assets/images/back_arro.png",
-                  height: 11.h,
-                  width: 11.w,
-                  fit: BoxFit.contain,
-                  color: Color(0xFf0088FE),
-                ),
-              ],
-            ),
-          
+          onTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
+          child:
+          Row(
+            children: [
+              Text("Edit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16.sp, fontFamily: "Inter", color: Color(0xFf0088FE)),),
+              SizedBox(width: 5.w,),
+              Image.asset(
+                "assets/images/back_arro.png",
+                height: 11.h,
+                width: 11.w,
+                fit: BoxFit.contain,
+                color: Color(0xFf0088FE),
+              ),
+            ],
+          ),
+
         ),
       ],
     );
@@ -1240,7 +1149,7 @@ class _CardShell extends StatelessWidget {
       child: child,
     );
   }
-}       
+}
 
 class _ModeBadge extends StatelessWidget {
   const _ModeBadge({required this.mode, required this.filled});
@@ -1321,16 +1230,16 @@ class _LightDimmerCard extends StatelessWidget {
               // ✅ icon size like image-1
               imagePath != null
                   ? Image.asset(
-                      imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
                   : Icon(
-                      Icons.lightbulb_outline,
-                      size: 52.sp,
-                      color: const Color(0xFF15DFFE),
-                    ),
+                Icons.lightbulb_outline,
+                size: 52.sp,
+                color: const Color(0xFF15DFFE),
+              ),
 
               SizedBox(height: 10.h),
 
@@ -1455,16 +1364,16 @@ class _ThermostatCard extends StatelessWidget {
             children: [
               imagePath != null
                   ? Image.asset(
-                      imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
                   : Icon(
-                      Icons.thermostat_outlined,
-                      size: 44.sp,
-                      color: const Color(0xFF0088FE),
-                    ),
+                Icons.thermostat_outlined,
+                size: 44.sp,
+                color: const Color(0xFF0088FE),
+              ),
               SizedBox(height: 10.h),
               Expanded(
                 child: Row(
@@ -1593,7 +1502,7 @@ class _BlindCard extends StatelessWidget {
                           width: 13.sp,
                           height: 13.sp,
                           fit: BoxFit.contain,
-                            color: Color(0xFF6B7280),
+                          color: Color(0xFF6B7280),
                         ),
                         size: 35,
                       ),
@@ -1703,16 +1612,16 @@ class _ToggleCardState extends State<_ToggleCard> {
             children: [
               widget.imagePath != null
                   ? Image.asset(
-                      widget.imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
+                widget.imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
                   : Icon(
-                      Icons.water_drop_outlined,
-                      size: 42.sp,
-                      color: const Color(0xFF00C2FF),
-                    ),
+                Icons.water_drop_outlined,
+                size: 42.sp,
+                color: const Color(0xFF00C2FF),
+              ),
               SizedBox(height: 17.h),
               Expanded(
                 child: Text(
@@ -1762,209 +1671,6 @@ class _ToggleCardState extends State<_ToggleCard> {
   }
 }
 
-// ---------------------------
-// Lighting mini cards
-// ---------------------------
-// class _MiniLightingCard extends StatelessWidget {
-//   const _MiniLightingCard({
-//     required this.title,
-//     required this.status,
-//     required this.icon,
-//     required this.showProgress,
-//     required this.mode,
-//   });
-//
-//   final String title;
-//   final String status;
-//   final IconData icon;
-//   final bool showProgress;
-//   final String? mode;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: 132.w,
-//       child: Stack(
-//         children: [
-//           _CardShell(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Icon(icon, size: 38.sp, color: const Color(0xFF111827)),
-//                 SizedBox(height: 4.h),
-//                 Expanded(
-//                   child: Text(
-//                     title,
-//                     style: TextStyle(
-//                       fontSize: 13.sp,
-//                       color: const Color(0xFF111827),
-//                       height: 1.15,
-//                     ),
-//                     maxLines: 2,
-//                     overflow: TextOverflow.ellipsis,
-//                   ),
-//                 ),
-//                 SizedBox(height: 4.h),
-//                 Text(
-//                   status,
-//                   style: TextStyle(
-//                     fontSize: 12.sp,
-//                     fontWeight: FontWeight.w700,
-//                     color: const Color(0xFF111827),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//
-//           if (showProgress)
-//             Positioned(
-//               right: 10.w,
-//               top: 10.w,
-//               child: SizedBox(
-//                 width: 46.w,
-//                 height: 46.w,
-//                 child: CustomPaint(
-//                   painter: _CircularProgressPainter(
-//                     progress: 1,
-//                     strokeWidth: 3,
-//                   ),
-//                   child: Center(
-//                     child: Text(
-//                       '100%',
-//                       style: TextStyle(
-//                         fontSize: 11.sp,
-//                         color: const Color(0xFF111827),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//
-//           if (mode != null)
-//             Positioned(
-//               right: 10.w,
-//               top: 10.w,
-//               child: _ModeBadge(mode: mode!, filled: false),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// ---------------------------
-// Favorites
-// ---------------------------
-// class _FavoritesRow extends StatelessWidget {
-//   const _FavoritesRow({required this.mode, required this.modeFilled});
-//
-//   final String mode;
-//   final bool modeFilled;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         Expanded(
-//           child: Stack(
-//             children: [
-//               ClipRRect(
-//                 borderRadius: BorderRadius.circular(24.r),
-//                 child: Container(
-//                   height: 132.h,
-//                   color: Colors.grey.shade300,
-//                   child: const Center(child: Icon(Icons.videocam_outlined)),
-//                 ),
-//               ),
-//               Positioned(
-//                 left: 12.w,
-//                 bottom: 12.w,
-//                 child: Text(
-//                   'Front Door\nCamera',
-//                   style: TextStyle(
-//                     fontSize: 14.sp,
-//                     fontWeight: FontWeight.w600,
-//                     color: Colors.white,
-//                     shadows: [
-//                       Shadow(
-//                         color: Colors.black.withOpacity(0.35),
-//                         blurRadius: 10,
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//               Positioned(
-//                 right: 10.w,
-//                 top: 10.w,
-//                 child: _ModeBadge(mode: mode, filled: modeFilled),
-//               ),
-//             ],
-//           ),
-//         ),
-//         SizedBox(width: 12.w),
-//         Expanded(
-//           child: Stack(
-//             children: [
-//               Container(
-//                 height: 132.h,
-//                 decoration: BoxDecoration(
-//                   color: const Color(0xFFF3F4F6),
-//                   borderRadius: BorderRadius.circular(24.r),
-//                 ),
-//                 padding: EdgeInsets.all(14.w),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       'Bedroom Thermostat\nparents room',
-//                       style: TextStyle(
-//                         fontSize: 16.sp,
-//                         color: const Color(0xFF111827),
-//                         height: 1.15,
-//                       ),
-//                       maxLines: 2,
-//                       overflow: TextOverflow.ellipsis,
-//                     ),
-//                     const Spacer(),
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         _CircleBtn(
-//                           child: Icon(Icons.remove, size: 20.sp,color: Color(0xFF6B7280), ),
-//                           size: 35,
-//                         ),
-//                         Text(
-//                           '24.6°c',
-//                           style: TextStyle(
-//                             fontSize: 14.sp,
-//                             fontWeight: FontWeight.w700,
-//                           ),
-//                         ),
-//                         _CircleBtn(child: Icon(Icons.add, size: 20.sp,color: Color(0xFF6B7280),)),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               Positioned(
-//                 right: 10.w,
-//                 top: 10.w,
-//                 child: _ModeBadge(mode: mode, filled: modeFilled),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// ---------------------------
-// Chart card
-// ---------------------------
 class _ChartCard extends StatefulWidget {
   const _ChartCard();
 
@@ -2292,1101 +1998,5 @@ class _WaveChartPainter extends CustomPainter {
         oldDelegate.label != label ||
         !listEquals(oldDelegate.mainSeries, mainSeries) ||
         !listEquals(oldDelegate.secondarySeries, secondarySeries);
-  }
-}
-
-// ---------------------------
-// Circular progress painter
-// ---------------------------
-// class _CircularProgressPainter extends CustomPainter {
-//   _CircularProgressPainter({required this.progress, required this.strokeWidth});
-//
-//   final double progress;
-//   final double strokeWidth;
-//
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final center = Offset(size.width / 2, size.height / 2);
-//     final radius = (size.width - strokeWidth) / 2;
-//
-//     final bg = Paint()
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..color = const Color(0xFFE1E1E1);
-//
-//     final fg = Paint()
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..strokeCap = StrokeCap.round
-//       ..color = const Color(0xFF0088FE);
-//
-//     canvas.drawCircle(center, radius, bg);
-//     canvas.drawArc(
-//       Rect.fromCircle(center: center, radius: radius),
-//       -math.pi / 2,
-//       2 * math.pi * progress,
-//       false,
-//       fg,
-//     );
-//   }
-//
-//   @override
-//   bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
-//     return oldDelegate.progress != progress ||
-//         oldDelegate.strokeWidth != strokeWidth;
-//   }
-// }
-
-// Screen body widgets for CustomBottomNavBar
-// class _DevicesBody extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.white,
-//       body: SafeArea(
-//         child: SingleChildScrollView(
-//           padding: EdgeInsets.only(bottom: 18.h),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               // -------- Header (top bar) ----------
-//               Padding(
-//                 padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
-//                 child: Row(
-//                   children: [
-//                     Expanded(
-//                       child: Center(
-//                         child: Text(
-//                           'Devices',
-//                           style: TextStyle(
-//                             fontSize: 18.sp,
-//                             fontWeight: FontWeight.w600,
-//                             color: const Color(0xFF111827),
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                     _CircleIconButton(
-//                       icon: Icons.more_horiz,
-//                       onTap: () {},
-//                     ),
-//                     SizedBox(width: 10.w),
-//                     _CircleIconButton(
-//                       icon: Icons.add,
-//                       bg: const Color(0xFF0088FE),
-//                       iconColor: Colors.white,
-//                       onTap: () {},
-//                     ),
-//                   ],
-//                 ),
-//               ),
-
-//               // -------- Search ----------
-//               Padding(
-//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
-//                 child: _SearchBar(),
-//               ),
-
-//               SizedBox(height: 10.h),
-
-//               // -------- Filter chips ----------
-//               SizedBox(
-//                 height: 34.h,
-//                 child: ListView(
-//                   scrollDirection: Axis.horizontal,
-//                   padding: EdgeInsets.symmetric(horizontal: 14.w),
-//                   children: const [
-//                     _FilterChipPill(label: 'All', selected: true),
-//                     SizedBox(width: 8),
-//                     _FilterChipPill(label: 'Favorites'),
-//                     SizedBox(width: 8),
-//                     _FilterChipPill(label: 'Smart'),
-//                     SizedBox(width: 8),
-//                     _FilterChipPill(label: 'Groups'),
-//                     SizedBox(width: 8),
-//                     _FilterChipPill(label: 'Category'),
-//                   ],
-//                 ),
-//               ),
-
-//               SizedBox(height: 12.h),
-
-//               // -------- Section Title ----------
-//               Padding(
-//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
-//                 child: Text(
-//                   'Devices',
-//                   style: TextStyle(
-//                     fontSize: 16.sp,
-//                     fontWeight: FontWeight.w600,
-//                     color: const Color(0xFF111827),
-//                   ),
-//                 ),
-//               ),
-
-//               SizedBox(height: 8.h),
-
-//               // -------- List (rows) ----------
-//               _DeviceListCard(
-//                 children: [
-//                   // RGBW
-//                   _DeviceRow(
-//                     topRight: const _TimeTag(text: '18:32', blueIcon: true),
-//                     leading: const _GradientCircleIcon(size: 34),
-//                     title: 'RGBW',
-//                     subtitle: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Row(
-//                           children: const [
-//                             _ModeDot(text: 'A', filled: false),
-//                             SizedBox(width: 6),
-//                             _SmallText('Off'),
-//                           ],
-//                         ),
-//                         const SizedBox(height: 2),
-//                         const _TinyGreyText('LCD0C12'),
-//                         const SizedBox(height: 6),
-//                         Row(
-//                           children: const [
-//                             _TagChip(text: 'Lighting', bg: Color(0xFF0088FE)),
-//                             SizedBox(width: 6),
-//                             _TagChip(text: 'Bathroom', bg: Color(0xFFFE019A)),
-//                           ],
-//                         ),
-//                       ],
-//                     ),
-//                     trailing: Row(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: [
-//                         const _CircleMiniBtn(icon: Icons.remove),
-//                         SizedBox(width: 10.w),
-//                         const _CircleMiniBtn(icon: Icons.add),
-//                         SizedBox(width: 10.w),
-//                         const _ToggleSwitch(isOn: true),
-//                       ],
-//                     ),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Alarm
-//                   _DeviceRow(
-//                     leading: const _LockIcon(),
-//                     title: 'Alarm',
-//                     subtitle: const _SmallText('Disarmed'),
-//                     trailing: const _CircleActionBlue(icon: Icons.power_settings_new),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Bathroom
-//                   _DeviceRow(
-//                     leading: const _PowerRingIcon(),
-//                     title: 'Bathroom',
-//                     subtitle: Row(
-//                       children: const [
-//                         _ModeDot(text: 'M', filled: true),
-//                         SizedBox(width: 8),
-//                         Text(
-//                           '24.6°categories',
-//                           style: TextStyle(
-//                             fontSize: 13,
-//                             fontWeight: FontWeight.w600,
-//                             color: Color(0xFF111827),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     trailing: Row(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: [
-//                         const _CircleMiniBtn(icon: Icons.remove),
-//                         SizedBox(width: 10.w),
-//                         const _CircleMiniBtn(icon: Icons.add),
-//                       ],
-//                     ),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Blind Living Room (selected highlight row)
-//                   _DeviceRow(
-//                     selected: true,
-//                     topRight: const _StarTimeTag(time: '20:36'),
-//                     leading: const _BlindGreenIcon(),
-//                     title: 'Blind Living Room',
-//                     subtitle: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: const [
-//                         SizedBox(height: 2),
-//                         _BlindStatsRow(),
-//                         SizedBox(height: 3),
-//                         _TinyGreyText('D012U12'),
-//                       ],
-//                     ),
-//                     trailing: Column(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: const [
-//                         _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-//                         SizedBox(height: 10),
-//                         _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-//                       ],
-//                     ),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Block Irrigation Schedule (blue play row)
-//                   _DeviceRow(
-//                     leading: const _PlayCircleIcon(),
-//                     title: 'Block Irrigation Schedule',
-//                     subtitle: const _SmallText('Blocked'),
-//                     trailing: const _CircleActionBlue(icon: Icons.play_arrow),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Brightness (with pill slider)
-//                   _DeviceRow(
-//                     topRight: const _StarOnly(),
-//                     leading: const _SunIcon(),
-//                     title: 'Brightness',
-//                     subtitle: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: const [
-//                         _BoldSmall('54%'),
-//                         SizedBox(height: 2),
-//                         _TinyGreyText('W5BT'),
-//                       ],
-//                     ),
-//                     trailing: const _BrightnessPill(),
-//                   ),
-
-//                   const _RowDivider(),
-
-//                   // Card Reader(s)
-//                   _DeviceRow(
-//                     leading: const _BulbIcon(),
-//                     title: 'Card Reader(s)',
-//                     subtitle: const _SmallText('Blocked'),
-//                     trailing: const _ToggleSwitch(isOn: false),
-//                   ),
-//                 ],
-//               ),
-
-//               SizedBox(height: 18.h),
-
-//               // -------- Control units ----------
-//               Padding(
-//                 padding: EdgeInsets.symmetric(horizontal: 14.w),
-//                 child: Text(
-//                   'Control units',
-//                   style: TextStyle(
-//                     fontSize: 16.sp,
-//                     fontWeight: FontWeight.w600,
-//                     color: const Color(0xFF111827),
-//                   ),
-//                 ),
-//               ),
-
-//               SizedBox(height: 8.h),
-
-//               _DeviceListCard(
-//                 children: const [
-//                   _ControlUnitRow(
-//                     icon: Icons.memory,
-//                     iconColor: Color(0xFF0088FE),
-//                     title: 'CORE20',
-//                     sub: 'CORE20-4B37-3419-363A',
-//                   ),
-//                   _RowDivider(),
-//                   _ControlUnitRow(
-//                     icon: Icons.warning_amber_rounded,
-//                     iconColor: Color(0xFFFE019A),
-//                     title: 'D012',
-//                     sub: '11 Devices',
-//                     sub2: 'CORE20-4B37-3419-363A',
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-class _AnalyticsBody extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Analytics',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Text(
-          'Analytics Screen',
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-
-// Devices Screen Helper Widgets
-
-
-//
-// class _DeviceListCard extends StatelessWidget {
-//   const _DeviceListCard({required this.children});
-//   final List<Widget> children;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       margin: EdgeInsets.symmetric(horizontal: 14.w),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(18.r),
-//       ),
-//       child: Column(children: children),
-//     );
-//   }
-// }
-//
-// class _DeviceRow extends StatelessWidget {
-//   const _DeviceRow({
-//     required this.leading,
-//     required this.title,
-//     required this.subtitle,
-//     required this.trailing,
-//     this.topRight,
-//     this.selected = false,
-//   });
-//
-//   final Widget leading;
-//   final String title;
-//   final Widget subtitle;
-//   final Widget trailing;
-//   final Widget? topRight;
-//   final bool selected;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-//       padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 10.h),
-//       child: Stack(
-//         children: [
-//           Row(
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               SizedBox(width: 6.w),
-//               SizedBox(
-//                 width: 34.w,
-//                 height: 34.w,
-//                 child: Center(child: leading),
-//               ),
-//               SizedBox(width: 10.w),
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       title,
-//                       style: TextStyle(
-//                         fontSize: 14.sp,
-//                         fontWeight: FontWeight.w600,
-//                         color: const Color(0xFF111827),
-//                       ),
-//                     ),
-//                     SizedBox(height: 4.h),
-//                     subtitle,
-//                   ],
-//                 ),
-//               ),
-//               SizedBox(width: 10.w),
-//               trailing,
-//               SizedBox(width: 4.w),
-//             ],
-//           ),
-//           if (topRight != null) Positioned(right: 0, top: 0, child: topRight!),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class _RowDivider extends StatelessWidget {
-//   const _RowDivider();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 1,
-//       margin: EdgeInsets.only(left: 56.w),
-//       color: const Color(0xFFF1F1F1),
-//     );
-//   }
-// }
-//
-// class _SearchBar extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 40.h,
-//       padding: EdgeInsets.symmetric(horizontal: 12.w),
-//       decoration: BoxDecoration(
-//         color: const Color(0xFFF3F4F6),
-//         borderRadius: BorderRadius.circular(22.r),
-//       ),
-//       child: Row(
-//         children: [
-//           Icon(Icons.search, size: 18.sp, color: const Color(0xFF6B7280)),
-//           SizedBox(width: 8.w),
-//           Text(
-//             'Search',
-//             style: TextStyle(
-//               fontSize: 14.sp,
-//               color: const Color(0xFF9CA3AF),
-//               fontWeight: FontWeight.w400,
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class _FilterChipPill extends StatelessWidget {
-//   const _FilterChipPill({required this.label, this.selected = false});
-//   final String label;
-//   final bool selected;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final border = selected ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB);
-//     final text = selected ? const Color(0xFF0088FE) : const Color(0xFF111827);
-//
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(16.r),
-//         border: Border.all(color: border, width: 1),
-//       ),
-//       child: Text(
-//         label,
-//         style: TextStyle(
-//           fontSize: 12.sp,
-//           color: text,
-//           fontWeight: FontWeight.w500,
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class _CircleIconButton extends StatelessWidget {
-//   const _CircleIconButton({
-//     required this.icon,
-//     required this.onTap,
-//     this.bg = const Color(0xFFF3F4F6),
-//     this.iconColor = const Color(0xFF111827),
-//   });
-//
-//   final IconData icon;
-//   final VoidCallback onTap;
-//   final Color bg;
-//   final Color iconColor;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: onTap,
-//       borderRadius: BorderRadius.circular(999),
-//       child: Container(
-//         width: 32.w,
-//         height: 32.w,
-//         decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-//         alignment: Alignment.center,
-//         child: Icon(icon, size: 18.sp, color: iconColor),
-//       ),
-//     );
-//   }
-// }
-//
-// class _CircleMiniBtn extends StatelessWidget {
-//   const _CircleMiniBtn({required this.icon});
-//   final IconData icon;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 30.w,
-//       height: 30.w,
-//       decoration: BoxDecoration(
-//         color: const Color(0xFFF3F4F6),
-//         shape: BoxShape.circle,
-//       ),
-//       alignment: Alignment.center,
-//       child: Icon(icon, size: 18.sp, color: const Color(0xFF111827)),
-//     );
-//   }
-// }
-//
-// class _CircleActionBlue extends StatelessWidget {
-//   const _CircleActionBlue({required this.icon});
-//   final IconData icon;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFF0088FE),
-//         shape: BoxShape.circle,
-//       ),
-//       alignment: Alignment.center,
-//       child: Icon(icon, size: 18.sp, color: Colors.white),
-//     );
-//   }
-// }
-//
-// class _ToggleSwitch extends StatelessWidget {
-//   const _ToggleSwitch({required this.isOn});
-//   final bool isOn;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 52.w,
-//       height: 30.h,
-//       padding: EdgeInsets.all(2.w),
-//       decoration: BoxDecoration(
-//         color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-//         borderRadius: BorderRadius.circular(99),
-//       ),
-//       child: Align(
-//         alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-//         child: Container(
-//           width: 30.86.w,
-//           height: 30.86.w,
-//           decoration: const BoxDecoration(
-//             color: Colors.white,
-//             shape: BoxShape.circle,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class _SmallText extends StatelessWidget {
-//   const _SmallText(this.text);
-//   final String text;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Text(
-//       text,
-//       style: TextStyle(
-//         fontSize: 12.sp,
-//         fontWeight: FontWeight.w400,
-//         color: const Color(0xFF6B7280),
-//       ),
-//     );
-//   }
-// }
-//
-// class _BoldSmall extends StatelessWidget {
-//   const _BoldSmall(this.text);
-//   final String text;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Text(
-//       text,
-//       style: TextStyle(
-//         fontSize: 12.sp,
-//         fontWeight: FontWeight.w700,
-//         color: const Color(0xFF111827),
-//       ),
-//     );
-//   }
-// }
-//
-// class _TinyGreyText extends StatelessWidget {
-//   const _TinyGreyText(this.text);
-//   final String text;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Text(
-//       text,
-//       style: TextStyle(
-//         fontSize: 10.sp,
-//         fontWeight: FontWeight.w400,
-//         color: const Color(0xFF9CA3AF),
-//       ),
-//     );
-//   }
-// }
-
-// class _ModeDot extends StatelessWidget {
-//   const _ModeDot({required this.text, required this.filled});
-//   final String text;
-//   final bool filled;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 18.w,
-//       height: 18.w,
-//       decoration: BoxDecoration(
-//         color: filled ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
-//         shape: BoxShape.circle,
-//       ),
-//       alignment: Alignment.center,
-//       child: Text(
-//         text,
-//         style: TextStyle(
-//           fontSize: 10.sp,
-//           fontWeight: FontWeight.w700,
-//           color: filled ? Colors.white : const Color(0xFF111827),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-
-// Not working this code; 
-//
-// class _TagChip extends StatelessWidget {
-//   const _TagChip({required this.text, required this.bg});
-//   final String text;
-//   final Color bg;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-//       decoration: BoxDecoration(
-//         color: bg,
-//         borderRadius: BorderRadius.circular(6.r),
-//       ),
-//       child: Text(
-//         text,
-//         style: TextStyle(
-//           fontSize: 10.sp,
-//           fontWeight: FontWeight.w600,
-//           color: Colors.white,
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class _TimeTag extends StatelessWidget {
-//   const _TimeTag({required this.text, this.blueIcon = false});
-//   final String text;
-//   final bool blueIcon;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         Icon(
-//           Icons.wifi,
-//           size: 12.sp,
-//           color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
-//         ),
-//         SizedBox(width: 4.w),
-//         Text(
-//           text,
-//           style: TextStyle(
-//             fontSize: 10.sp,
-//             color: const Color(0xFF6B7280),
-//             fontWeight: FontWeight.w500,
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-//
-// class _StarTimeTag extends StatelessWidget {
-//   const _StarTimeTag({required this.time});
-//   final String time;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       mainAxisSize: MainAxisSize.min,
-//       children: [
-//         Icon(Icons.star, size: 14.sp, color: const Color(0xFFFBBF24)),
-//         SizedBox(width: 4.w),
-//         Text(
-//           time,
-//           style: TextStyle(
-//             fontSize: 10.sp,
-//             color: const Color(0xFF6B7280),
-//             fontWeight: FontWeight.w500,
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-//
-// class _StarOnly extends StatelessWidget {
-//   const _StarOnly();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Icon(Icons.star, size: 14.sp, color: const Color(0xFFFBBF24));
-//   }
-// }
-//
-// class _GradientCircleIcon extends StatelessWidget {
-//   const _GradientCircleIcon({this.size = 34});
-//   final double size;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: size.w,
-//       height: size.w,
-//       decoration: const BoxDecoration(
-//         shape: BoxShape.circle,
-//         gradient: SweepGradient(
-//           colors: [
-//             Color(0xFF15DFFE),
-//             Color(0xFF0088FE),
-//             Color(0xFFFE019A),
-//             Color(0xFFFFD700),
-//             Color(0xFF15DFFE),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
-// class _LockIcon extends StatelessWidget {
-//   const _LockIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFFFE4F1),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.lock_outline,
-//         size: 18.sp,
-//         color: const Color(0xFFFE019A),
-//       ),
-//     );
-//   }
-// }
-//
-// class _PowerRingIcon extends StatelessWidget {
-//   const _PowerRingIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFEAFBF2),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.power_settings_new,
-//         size: 18.sp,
-//         color: const Color(0xFF10B981),
-//       ),
-//     );
-//   }
-// }
-//
-// class _BlindGreenIcon extends StatelessWidget {
-//   const _BlindGreenIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFEAFBF2),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.blinds_outlined,
-//         size: 18.sp,
-//         color: const Color(0xFF84CC16),
-//       ),
-//     );
-//   }
-// }
-//
-// class _PlayCircleIcon extends StatelessWidget {
-//   const _PlayCircleIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFEAF1FF),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.play_arrow,
-//         size: 18.sp,
-//         color: const Color(0xFF0088FE),
-//       ),
-//     );
-//   }
-// }
-//
-// class _SunIcon extends StatelessWidget {
-//   const _SunIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFFFFBEB),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.wb_sunny_outlined,
-//         size: 18.sp,
-//         color: const Color(0xFFFBBF24),
-//       ),
-//     );
-//   }
-// }
-//
-// class _BulbIcon extends StatelessWidget {
-//   const _BulbIcon();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 34.w,
-//       height: 34.w,
-//       decoration: const BoxDecoration(
-//         color: Color(0xFFF3F4F6),
-//         shape: BoxShape.circle,
-//       ),
-//       child: Icon(
-//         Icons.lightbulb_outline,
-//         size: 18.sp,
-//         color: const Color(0xFF84CC16),
-//       ),
-//     );
-//   }
-// }
-//
-// class _BlindStatsRow extends StatelessWidget {
-//   const _BlindStatsRow();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         const _ModeDot(text: 'A', filled: false),
-//         SizedBox(width: 10.w),
-//         Icon(Icons.arrow_downward, size: 14.sp, color: const Color(0xFF111827)),
-//         SizedBox(width: 4.w),
-//         Text(
-//           '0%',
-//           style: TextStyle(
-//             fontSize: 12.sp,
-//             fontWeight: FontWeight.w700,
-//             color: const Color(0xFF111827),
-//           ),
-//         ),
-//         SizedBox(width: 12.w),
-//         Icon(Icons.arrow_upward, size: 14.sp, color: const Color(0xFF111827)),
-//         SizedBox(width: 4.w),
-//         Text(
-//           '50%',
-//           style: TextStyle(
-//             fontSize: 12.sp,
-//             fontWeight: FontWeight.w700,
-//             color: const Color(0xFF111827),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-//
-// class _BrightnessPill extends StatelessWidget {
-//   const _BrightnessPill();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: 150.w,
-//       height: 30.h,
-//       decoration: BoxDecoration(
-//         color: const Color(0xFFF3F4F6),
-//         borderRadius: BorderRadius.circular(99),
-//       ),
-//       child: Row(
-//         children: [
-//           Container(
-//             width: 95.w,
-//             height: 30.h,
-//             decoration: BoxDecoration(
-//               color: Colors.white,
-//               borderRadius: BorderRadius.circular(99),
-//             ),
-//             alignment: Alignment.centerLeft,
-//             padding: EdgeInsets.only(left: 10.w),
-//             child: Icon(
-//               Icons.wb_sunny_outlined,
-//               size: 16.sp,
-//               color: const Color(0xFF111827),
-//             ),
-//           ),
-//           Expanded(child: Container()),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
-// class _ControlUnitRow extends StatelessWidget {
-//   const _ControlUnitRow({
-//     required this.icon,
-//     required this.iconColor,
-//     required this.title,
-//     required this.sub,
-//     this.sub2,
-//   });
-//
-//   final IconData icon;
-//   final Color iconColor;
-//   final String title;
-//   final String sub;
-//   final String? sub2;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
-//       child: Row(
-//         children: [
-//           Container(
-//             width: 34.w,
-//             height: 34.w,
-//             decoration: const BoxDecoration(
-//               color: Color(0xFFF3F4F6),
-//               shape: BoxShape.circle,
-//             ),
-//             alignment: Alignment.center,
-//             child: Icon(icon, size: 18.sp, color: iconColor),
-//           ),
-//           SizedBox(width: 10.w),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   title,
-//                   style: TextStyle(
-//                     fontSize: 13.sp,
-//                     fontWeight: FontWeight.w700,
-//                     color: const Color(0xFF111827),
-//                   ),
-//                 ),
-//                 SizedBox(height: 2.h),
-//                 Text(
-//                   sub,
-//                   style: TextStyle(
-//                     fontSize: 11.sp,
-//                     color: const Color(0xFF6B7280),
-//                   ),
-//                 ),
-//                 if (sub2 != null) ...[
-//                   SizedBox(height: 2.h),
-//                   Text(
-//                     sub2!,
-//                     style: TextStyle(
-//                       fontSize: 10.sp,
-//                       color: const Color(0xFF9CA3AF),
-//                     ),
-//                   ),
-//                 ],
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-class _ToggleColorswitch extends StatelessWidget {
-  const _ToggleColorswitch({required this.isOn});
-  final bool isOn;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 60.w, // ✅ closer to iOS toggle size
-      height: 35.h,
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Align(
-        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 28.w,
-          height: 28.w,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    );
   }
 }
