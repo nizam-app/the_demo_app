@@ -227,7 +227,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(15.w, 6.h, 14.w, 12.h),
+              padding: EdgeInsets.only(left: 15.w, right:  15.w,),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
               
@@ -276,24 +276,29 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 17.h),
-                  Center(
-                    child: _PeriodSegmentedControl(
-                      selected: period,
-                      onChanged: (p) =>
-                          ref.read(_analyticsPeriodProvider.notifier).state = p,
-                    ),
-
-                  ),
+             
+                 
                 ],
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 30.h),
+                padding: EdgeInsets.fromLTRB(15.w, 17.h, 15.w, 30.h),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                 // crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+
+                    Center(
+                      child: _PeriodSegmentedControl(
+                        selected: period,
+                        onChanged: (p) =>
+                        ref.read(_analyticsPeriodProvider.notifier).state = p,
+                      ),
+
+                    ),
+
+                    SizedBox(height: 20.h,),
                     Text(
                       'Activity',
                       style: TextStyle(

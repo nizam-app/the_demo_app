@@ -47,7 +47,7 @@ class _CoresScreenState extends State<CoresScreen> {
             _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 100.h),
+                padding: EdgeInsets.only(bottom: 500.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

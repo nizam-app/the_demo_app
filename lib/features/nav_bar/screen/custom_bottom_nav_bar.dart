@@ -7,10 +7,14 @@ class BottomNavBarWidget extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.onItemTapped,
+    this.backgroundOpacity = 0.74,
   });
 
   final int selectedIndex;
   final ValueChanged<int> onItemTapped;
+
+  /// White wash over content behind the bar (default matches previous look).
+  final double backgroundOpacity;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class BottomNavBarWidget extends StatelessWidget {
       child: Container(
         height: 72.h,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.74),
+          color: Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
           border: const Border(
             top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
           ),
@@ -83,12 +87,20 @@ class CustomBottomNavBar extends StatefulWidget {
     this.initialIndex = 2,
     //this.drawer,
     this.backgroundColor,
+    this.translucentBottomBar = false,
+    this.bottomBarBackgroundOpacity = 0.72,
   });
 
   final List<Widget> children;
   final int initialIndex;
  // final Widget? drawer;
   final Color? backgroundColor;
+
+  /// When true, the shell bottom bar uses a translucent track (dashboard shell).
+  final bool translucentBottomBar;
+
+  /// Used when [translucentBottomBar] is true.
+  final double bottomBarBackgroundOpacity;
 
   static CustomBottomNavBarState? of(BuildContext context) {
     return context.findAncestorStateOfType<CustomBottomNavBarState>();
@@ -145,10 +157,18 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: Container(
           height: 72.h,
           decoration: BoxDecoration(
-            color: Colors.white,
-                // .withOpacity(0.10),
-            border: const Border(
-              top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
+            color: widget.translucentBottomBar
+                ? Colors.white.withOpacity(
+                    widget.bottomBarBackgroundOpacity.clamp(0.0, 1.0),
+                  )
+                : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: widget.translucentBottomBar
+                    ? const Color(0xFFE1E1E1).withOpacity(0.45)
+                    : const Color(0xFFE1E1E1),
+                width: 1,
+              ),
             ),
           ),
           child: LayoutBuilder(

@@ -22,118 +22,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
       body: SafeArea(
-        top: true,
-        child: SingleChildScrollView(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                // Header
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 17.w,
-                    vertical: 10.h,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GlobalCircleIconBtn(
-                        child: Image.asset(
-                          'assets/aro.png',
-                          width: 16.w,
-                          height: 16.h,
-                        ),
-                        onTap: () => Navigator.maybePop(context),
-                      ),
-                      Text(
-                        'Profile',
-                        style: TextStyle(
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                          fontFamily: "Inter",
-                        ),
-                      ),
-                      GlobalCircleIconBtn(
-                        child: Image.asset(
-                          'assets/image 89 (1).png',
-                          width: 22.w,
-                          height: 22.w,
-                          fit: BoxFit.contain,
-                        ),
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
+        //top: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 17.w,
+                  vertical: 10.h,
                 ),
-                SizedBox(height: 15.h),
-
-                // Profile Card
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 14.w),
-                  padding: EdgeInsets.all(20.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(26.r),
-                  ),
-                  child: Row(
-                    children: [
-                      EditableAvatar(
-                        imageAsset:
-                            'assets/b52badd361701e47675a4d4e9fd86fec8d5291c1.png',
-                        cameraAsset: 'assets/image 44.png',
-                        onTapCamera: () {},
-                        size: 68,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GlobalCircleIconBtn(
+                      child: Image.asset(
+                        'assets/aro.png',
+                        width: 16.w,
+                        height: 16.h,
                       ),
+                      onTap: () => Navigator.maybePop(context),
+                    ),
+                    Text(
+                      'Profile',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                        fontFamily: "Inter",
+                      ),
+                    ),
+                    GlobalCircleIconBtn(
+                      child: Image.asset(
+                        'assets/image 89 (1).png',
+                        width: 22.w,
+                        height: 22.w,
+                        fit: BoxFit.contain,
+                      ),
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 15,
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    children: [
+                      // Header
+                    
+                      SizedBox(height: 10.h),
 
-                      SizedBox(width: 16.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      // Profile Card
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 14.w),
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(26.r),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              'Oren Elimelech',
-                              style: TextStyle(
-                                fontSize: 21.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF111827),
-                              ),
+                            EditableAvatar(
+                              imageAsset:
+                                  'assets/b52badd361701e47675a4d4e9fd86fec8d5291c1.png',
+                              cameraAsset: 'assets/image 44.png',
+                              onTapCamera: () {},
+                              size: 68,
                             ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              'oren@aican.co.il',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00D1FF),
-                                borderRadius: BorderRadius.circular(5.r),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Image.asset(
-                                    'assets/Mask group (9).png',
-                                    width: 14.w,
-                                    height: 14.w,
-                                    fit: BoxFit.contain,
-                                  ),
-                                  SizedBox(width: 6.w),
                                   Text(
-                                    'Cloud',
+                                    'Oren Elimelech',
                                     style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
+                                      fontSize: 21.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF111827),
+                                    ),
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    'oren@aican.co.il',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 4.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF00D1FF),
+                                      borderRadius: BorderRadius.circular(5.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Image.asset(
+                                          'assets/Mask group (9).png',
+                                          width: 14.w,
+                                          height: 14.w,
+                                          fit: BoxFit.contain,
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Text(
+                                          'Cloud',
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -142,167 +154,167 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24.h),
+                      SizedBox(height: 24.h),
 
-                // Information Section
-                _Section(
-                  title: 'Information',
-                  child: _CardList(
-                    children: const [
-                      _KeyValueRow(label: 'Name', value: 'Oren Elimelech'),
-                      _DividerLine(),
-                      _KeyValueRow(label: 'Email', value: 'oren@aican.co.il'),
-                      _DividerLine(),
-                      _KeyValueRow(label: 'Phone', value: '0547640189'),
-                      _DividerLine(),
-                      _KeyValueRow(
-                        label: 'Address',
-                        value: 'Margalit 54 Shoham Israel',
-                      ),
-                      _DividerLine(),
-                      _KeyValueRow(label: 'Categories', value: 'Electrician'),
-                    ],
-                  ),
-                ),
-
-                // Account Section
-                _Section(
-                  title: 'Account',
-                  child: _CardList(
-                    children: [
-                      const _KeyValueRow(
-                        label: 'Email',
-                        value: 'oren@aican.co.il',
-                      ),
-                      const _DividerLine(),
-                      const _KeyValueRow(
-                        label: 'Password',
-                        value: '*****************',
-                      ),
-                      const _DividerLine(),
-                      _ToggleCircleRow(
-                        label: 'Roles',
-                        enabled: rolesEnabled,
-                        onTap: () =>
-                            setState(() => rolesEnabled = !rolesEnabled),
-                        image1: 'assets/persion.png',
-                        image2: 'assets/key.png',
-                        image3: 'assets/seting.png',
-                      ),
-                      const _DividerLine(),
-                      _RemoteAccessRow(
-                        enabled: remoteAccessEnabled,
-                        onChanged: (v) =>
-                            setState(() => remoteAccessEnabled = v),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Connect Section
-                _Section(
-                  title: 'Connect',
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 26.w,
-                      vertical: 16.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(26.r),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _ConnectItem(
-                          label: 'Apple',
-                          icon: Image.asset(
-                            'assets/apple.png',
-                            width: 32.w,
-                            height: 32.h,
-                            fit: BoxFit.contain,
-                          ),
+                      // Information Section
+                      _Section(
+                        title: 'Information',
+                        child: _CardList(
+                          children: const [
+                            _KeyValueRow(label: 'Name', value: 'Oren Elimelech'),
+                            _DividerLine(),
+                            _KeyValueRow(label: 'Email', value: 'oren@aican.co.il'),
+                            _DividerLine(),
+                            _KeyValueRow(label: 'Phone', value: '0547640189'),
+                            _DividerLine(),
+                            _KeyValueRow(
+                              label: 'Address',
+                              value: 'Margalit 54 Shoham Israel',
+                            ),
+                            _DividerLine(),
+                            _KeyValueRow(label: 'Categories', value: 'Electrician'),
+                          ],
                         ),
-                        SizedBox(width: 24.w),
-                        _ConnectItem(
-                          label: 'Google',
-                          icon: Image.asset(
-                            'assets/google.png',
-                            width: 29.w,
-                            height: 29.h,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
 
-                // Update Account Button
-                Padding(
-                  padding: EdgeInsets.fromLTRB(30.w, 0, 30.w, 40.h),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 55.h,
-                    child: InkWell(
-                      onTap: () {},
-                      borderRadius: BorderRadius.circular(26.r),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF5D65FF), Color(0xFF0088FE)],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          borderRadius: BorderRadius.circular(26.r),
+                      // Account Section
+                      _Section(
+                        title: 'Account',
+                        child: _CardList(
+                          children: [
+                            const _KeyValueRow(
+                              label: 'Email',
+                              value: 'oren@aican.co.il',
+                            ),
+                            const _DividerLine(),
+                            const _KeyValueRow(
+                              label: 'Password',
+                              value: '*****************',
+                            ),
+                            const _DividerLine(),
+                            _ToggleCircleRow(
+                              label: 'Roles',
+                              enabled: rolesEnabled,
+                              onTap: () =>
+                                  setState(() => rolesEnabled = !rolesEnabled),
+                              image1: 'assets/persion.png',
+                              image2: 'assets/key.png',
+                              image3: 'assets/seting.png',
+                            ),
+                            const _DividerLine(),
+                            _RemoteAccessRow(
+                              enabled: remoteAccessEnabled,
+                              onChanged: (v) =>
+                                  setState(() => remoteAccessEnabled = v),
+                            ),
+                          ],
                         ),
+                      ),
+
+                      // Connect Section
+                      _Section(
+                        title: 'Connect',
                         child: Container(
-                          margin: EdgeInsets.all(1.w),
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 26.w,
+                            vertical: 16.h,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(26.r),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Image.asset(
-                                'assets/download.png',
-                                width: 18.w,
-                                height: 18.w,
-                                fit: BoxFit.contain,
+                              _ConnectItem(
+                                label: 'Apple',
+                                icon: Image.asset(
+                                  'assets/apple.png',
+                                  width: 32.w,
+                                  height: 32.h,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
-                              SizedBox(width: 8.w),
-                              ShaderMask(
-                                shaderCallback: (bounds) =>
-                                    const LinearGradient(
-                                      colors: [
-                                        Color(0xFF0088FE),
-                                        Color(0xFF0088FE),
-                                      ],
-                                    ).createShader(bounds),
-                                child: Text(
-                                  'Update Account',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
+                              SizedBox(width: 24.w),
+                              _ConnectItem(
+                                label: 'Google',
+                                icon: Image.asset(
+                                  'assets/google.png',
+                                  width: 29.w,
+                                  height: 29.h,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
+
+                      // Update Account Button
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(30.w, 0, 30.w, 40.h),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 55.h,
+                          child: InkWell(
+                            onTap: () {},
+                            borderRadius: BorderRadius.circular(26.r),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF5D65FF), Color(0xFF0088FE)],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(26.r),
+                              ),
+                              child: Container(
+                                margin: EdgeInsets.all(1.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(26.r),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/download.png',
+                                      width: 18.w,
+                                      height: 18.w,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    ShaderMask(
+                                      shaderCallback: (bounds) =>
+                                          const LinearGradient(
+                                            colors: [
+                                              Color(0xFF0088FE),
+                                              Color(0xFF0088FE),
+                                            ],
+                                          ).createShader(bounds),
+                                      child: Text(
+                                        'Update Account',
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
