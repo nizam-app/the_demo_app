@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,57 +56,135 @@ class UsersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headerBarHeight = 56.h;
     return Scaffold(
       backgroundColor: _bg,
+      //backgroundColor: Colors.white,
       floatingActionButton: const _FabPlus(),
       body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.only(left: 15.w, right: 15.w,),
+        bottom: false,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            const _TopBar(),
-            SizedBox(height: 16.h),
-             _SearchBar(),
-            SizedBox(height: 22.h),
-
-            const _SectionTitle('Local users'),
-            SizedBox(height: 12.h),
-            _UserCardSingle(
-              data: _UserRowData(
-                name: 'Aican Support',
-                subtitle: 'admin',
-                isActive: true,
-                image:  [
-                  _InlineIcon("assets/images/setting.png",13.h, 13.w,  color: _textDark),
-                  _InlineIcon("assets/images/glog.png",15.h, 15.w,  color: _globeCyan),
-
-                  //Image.asset("assets/images/glog.png", height: 15.h, width: 15.w,fit: BoxFit.contain,color: UsersScreen._globeCyan,)  ,
-                ],
-              ),
-            ),
-
-            SizedBox(height: 22.h),
-            const _SectionTitle('Remote users'),
-            SizedBox(height: 12.h),
-            _UserCardGrouped(
-              top: _UserRowData(
-                name: 'Demo Account',
-                subtitle: 'demo@aican.com',
-                isActive: true,
-                image:  [
+            Column(
+              children: [
                 
-                  _InlineIcon("assets/Mask group (1) copy 2.png",11.h, 11.w,   color: _textDark),
-                  _InlineIcon("assets/images/glog.png", 15.h, 15.w, color: _globeCyan),
-                ],
-              ),
-              bottom: _UserRowData(
-                name: 'Aican Support',
-                subtitle: 'demo@aican.com',
-                isActive: false,
-                isSelected: true,
-                image:  [
-                  _InlineIcon( "assets/key.png",11.h, 11.w,  color: _textDark, ),
-                  _InlineIcon("assets/images/Group 55.png", 13.h, 13.w,),
-                ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      left: 15.w,
+                      right: 15.w,
+                      top: headerBarHeight + 16.h,
+                      bottom: 500.h,
+                    ),
+
+                    child:
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const _SearchBar(),
+                          SizedBox(height: 22.h),
+                          const _SectionTitle('Local users'),
+                          SizedBox(height: 12.h),
+                          _UserCardSingle(
+                            data: _UserRowData(
+                              name: 'Aican Support',
+                              subtitle: 'admin',
+                              isActive: true,
+                              image: [
+                                _InlineIcon(
+                                  'assets/images/setting.png',
+                                  13.h,
+                                  13.w,
+                                  color: _textDark,
+                                ),
+                                _InlineIcon(
+                                  'assets/images/glog.png',
+                                  15.h,
+                                  15.w,
+                                  color: _globeCyan,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 22.h),
+                          const _SectionTitle('Remote users'),
+                          SizedBox(height: 12.h),
+                          _UserCardGrouped(
+                            top: _UserRowData(
+                              name: 'Demo Account',
+                              subtitle: 'demo@aican.com',
+                              isActive: true,
+                              image: [
+                                _InlineIcon(
+                                  'assets/Mask group (1) copy 2.png',
+                                  11.h,
+                                  11.w,
+                                  color: _textDark,
+                                ),
+                                _InlineIcon(
+                                  'assets/images/glog.png',
+                                  15.h,
+                                  15.w,
+                                  color: _globeCyan,
+                                ),
+                              ],
+                            ),
+                            bottom: _UserRowData(
+                              name: 'Aican Support',
+                              subtitle: 'demo@aican.com',
+                              isActive: false,
+                              isSelected: true,
+                              image: [
+                                _InlineIcon(
+                                  'assets/key.png',
+                                  11.h,
+                                  11.w,
+                                  color: _textDark,
+                                ),
+                                _InlineIcon(
+                                  'assets/images/Group 55.png',
+                                  13.h,
+                                  13.w,
+                                ),
+                              ],
+                            ),
+                          ),
+
+
+                        ],
+                      ),
+
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.58),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: const Color(0xFFE5E7EB).withOpacity(0.55),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 15.w,
+                        vertical: 10.h,
+                      ),
+                      child: const _TopBar(),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -149,16 +229,26 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-   _SearchBar();
+class _SearchBar extends StatefulWidget {
+  const _SearchBar();
 
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
   static const _textGrey = Color(0xFF6B7280);
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  // String? _selectedCoreId = 'aican_demo';
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
+  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: _searchFocusNode,

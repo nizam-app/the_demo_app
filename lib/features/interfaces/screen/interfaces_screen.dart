@@ -175,6 +175,7 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
             children: [
               _TopBar(onBack: () => Navigator.maybePop(context)),
               SizedBox(height: 23.h),
+              
               Text(
                 'Manage interfaces',
                 style: TextStyle(

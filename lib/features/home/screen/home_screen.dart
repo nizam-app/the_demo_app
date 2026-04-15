@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -56,54 +57,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeBody() {
+    final headerBarHeight = 56.h;
     return SafeArea(
-      child: Column(
+      bottom: false,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-
-          Padding(
-            padding:  EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h, bottom: 5.h),
-            child: Expanded(
-              flex: 1,
-              child: Builder(
-                builder: (context) => _Header(
-                  onMenuTap: () {
-                    context.push(MenuScreen.routeName);
-                    // CustomBottomNavBar.of(context)?.openDrawer();
-                  },
-                  onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
-
+          CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  16.w,
+                  headerBarHeight + 10.h,
+                  16.w,
+                  24.h,
                 ),
-              ),
-            ),
-          ),
-
-          
-          Expanded(
-            flex: 10,
-            child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10.h),
-
-                        // ✅ Header
-                        // Builder(
-                        //   builder: (context) => _Header(
-                        //     onMenuTap: () {
-                        //       context.push(MenuScreen.routeName);
-                        //      // CustomBottomNavBar.of(context)?.openDrawer();
-                        //     },
-                        //     onEditTap: () => HomeScreen.showEditAddSectionSheet(context),
-                        //
-                        //   ),
-                        // ),
-
-                        // SizedBox(height: 16.h),
-
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                         // ✅ Category pills (Light selected)
                         SizedBox(
                           height: 63.h,
@@ -223,6 +195,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.58),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: const Color(0xFFE5E7EB).withOpacity(0.55),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 8.h),
+                    child: Builder(
+                      builder: (context) => _Header(
+                        onMenuTap: () {
+                          context.push(MenuScreen.routeName);
+                        },
+                        onEditTap: () =>
+                            HomeScreen.showEditAddSectionSheet(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -233,6 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
       initialIndex: 2,
+      translucentBottomBar: true,
+      bottomBarBackgroundOpacity: 0.58,
       // Voice/Home is index 2
       // drawer: Drawer(
       //   child: SafeArea(

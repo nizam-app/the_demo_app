@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -67,95 +69,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
   Widget build(BuildContext context) {
     const bg = Colors.white;
 
+    final headerBarHeight = 54.h;
+
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
-        child: Column(
-          
+        bottom: !widget.showBottomNav,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: EdgeInsets.only(left: 14.w,  right:  14.w, ),
-                child: SizedBox(
-                  height: 36.w,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GlobalCircleIconBtn(
-                          color: Color(0xFFF3F4F6),
-                          child: Image.asset(
-                            'assets/aro.png',
-                            width: 16.w,
-                            height: 16.h,
-                          ),
-                          onTap: () {
-                            if (!widget.showBottomNav) {
-                              final shell = CustomBottomNavBar.of(context);
-                              if (shell != null) {
-                                shell.setSelectedIndex(2);
-                                return;
-                              }
-                            }
-                            if (context.canPop()) {
-                              context.pop();
-                            } else {
-                              context.go('/home');
-                            }
-                          },
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          'Devices',
-                          style: TextStyle(
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _CircleIconButton(
-                              icon: Icons.more_horiz_rounded,
-                              onTap: () => _showEditDeviceBottomSheet(context),
-                              size: 32,
-                              bg: const Color(0xFFF3F4F6),
-                              iconColor: const Color(0xFF111827),
-                              iconSize: 22,
-                            ),
-                            SizedBox(width: 10.w),
-                            _CircleIconButton(
-                              icon: Icons.add_rounded,
-                              onTap: () => _showAssignCategoryPopup(context),
-                              size: 32,
-                              bg: const Color(0xFF111827),
-                              //bg: const Color(0xFF0088FE),
-                              iconColor: Colors.white,
-                              iconSize: 23,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            SingleChildScrollView(
+              padding: EdgeInsets.only(
+                top: headerBarHeight,
+                bottom: widget.showBottomNav ? 18.h : 18.h,
               ),
-            ),
-            
-            Expanded(
-              flex: 10,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 18.h),
-                child: Column(
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // -------- Header (top bar) ----------
@@ -324,20 +252,38 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               SizedBox(height: 2.h),
                               const _TinyGreyText('LCD0C12'),
                               SizedBox(height: 6.h),
-                              Wrap(
-                                spacing: 6.w,
-                                runSpacing: 6.h,
-                                children: const [
-                                  _TagChip(
-                                    text: 'Lighting',
-                                    bg: Color(0xFF0088fe),
-                                    outlined: true,
+                              // Wrap(
+                              //   spacing: 6.w,
+                              //   runSpacing: 6.h,
+                              //   children: const [
+                              //     _TagChip(
+                              //       text: 'Lighting',
+                              //       bg: Color(0xFF0088fe),
+                              //       outlined: true,
+                              //     ),
+                              //     _TagChip(
+                              //       text: 'Bathroom',
+                              //       bg: Color(0xFFFE019A),
+                              //       outlined: false,
+                              //     ),
+                              //   ],
+                              // ),
+
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6.r),
+                                      border: Border.all(color: Color(0xFF0088FE)),
+                                    ),
+                                    child: _TagChip(
+                                      label: 'Lighting',
+                                      bg: Color(0xFFFFFFFF),
+                                      fg: Color(0xFF111827),
+                                    ),
                                   ),
-                                  _TagChip(
-                                    text: 'Bathroom',
-                                    bg: Color(0xFFFE019A),
-                                    outlined: false,
-                                  ),
+                                  SizedBox(width: 5.w),
+                                  _TagChip(label: 'Bathroom', bg: Color(0xFFFF2D92), fg: Colors.white),
                                 ],
                               ),
                             ],
@@ -571,6 +517,98 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   ],
                 ),
               ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.58),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: const Color(0xFFE5E7EB).withOpacity(0.55),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 8.h, bottom: 8.h),
+                      child: SizedBox(
+                        height: 36.w,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GlobalCircleIconBtn(
+                                color: Color(0xFFF3F4F6),
+                                child: Image.asset(
+                                  'assets/aro.png',
+                                  width: 16.w,
+                                  height: 16.h,
+                                ),
+                                onTap: () {
+                                  if (!widget.showBottomNav) {
+                                    final shell = CustomBottomNavBar.of(context);
+                                    if (shell != null) {
+                                      shell.setSelectedIndex(2);
+                                      return;
+                                    }
+                                  }
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go('/home');
+                                  }
+                                },
+                              ),
+                            ),
+                            Center(
+                              child: Text(
+                                'Devices',
+                                style: TextStyle(
+                                  fontSize: 22.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF111827),
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _CircleIconButton(
+                                    icon: Icons.more_horiz_rounded,
+                                    onTap: () => _showEditDeviceBottomSheet(context),
+                                    size: 32,
+                                    bg: const Color(0xFFF3F4F6),
+                                    iconColor: const Color(0xFF111827),
+                                    iconSize: 22,
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  _CircleIconButton(
+                                    icon: Icons.add_rounded,
+                                    onTap: () => _showAssignCategoryPopup(context),
+                                    size: 32,
+                                    bg: const Color(0xFF111827),
+                                    iconColor: Colors.white,
+                                    iconSize: 23,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -579,6 +617,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
           ? BottomNavBarWidget(
               selectedIndex: _selectedNavIndex,
               onItemTapped: _onNavItemTapped,
+              backgroundOpacity: 0.52,
             )
           : null,
     );
@@ -1130,32 +1169,61 @@ class _ModeDot extends StatelessWidget {
   }
 }
 
+// class _TagChip extends StatelessWidget {
+//   const _TagChip({required this.text, required this.bg, this.outlined = false});
+//   final String text;
+//   final Color bg;
+//   final bool outlined;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 22.h,
+//       width: 75.w,
+//       alignment: Alignment.center,
+//       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+//       decoration: BoxDecoration(
+//         color: outlined ? Colors.white : bg,
+//         borderRadius: BorderRadius.circular(4.r),
+//         border: outlined ? Border.all(color: bg, width: 1.5) : null,
+//       ),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontSize: 11.sp,
+//           fontWeight: FontWeight.w600,
+//           color: outlined ? bg : Colors.white,
+//           height: 1.0,
+//           fontFamily: 'Inter',
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class _TagChip extends StatelessWidget {
-  const _TagChip({required this.text, required this.bg, this.outlined = false});
-  final String text;
+  const _TagChip({required this.label, required this.bg, required this.fg});
+
+  final String label;
   final Color bg;
-  final bool outlined;
+  final Color fg;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 22.h,
-      width: 75.w,
-      alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: outlined ? Colors.white : bg,
-        borderRadius: BorderRadius.circular(4.r),
-        border: outlined ? Border.all(color: bg, width: 1.5) : null,
+        color: bg,
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        text,
+        label,
         style: TextStyle(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
-          color: outlined ? bg : Colors.white,
-          height: 1.0,
+          color: fg,
           fontFamily: 'Inter',
+          height: 1.0,
         ),
       ),
     );

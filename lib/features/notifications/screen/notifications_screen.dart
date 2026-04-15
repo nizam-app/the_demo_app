@@ -91,9 +91,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(18.w, 6.h, 18.w, 10.h),
+              padding: EdgeInsets.only(left:  18.w, right:  18.w, bottom:  12.h),
               child: SizedBox(
-                height: 40.h,
+                height: 36.h,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -136,49 +136,50 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 32.h,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 18.w),
-                itemCount: _filters.length,
-                separatorBuilder: (_, __) => SizedBox(width: 10.w),
-                itemBuilder: (context, index) {
-                  final label = _filters[index];
-                  final selected = _selectedFilter == label;
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedFilter = label),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, ),
-                      decoration: BoxDecoration(
-                        color: selected ? _chipActiveBg : Colors.white,
-                        borderRadius: BorderRadius.circular(26.r),
-                        border: Border.all(
-                          color: selected ? _chipActiveBg.withOpacity(0.72) : _chipInactiveBorder.withOpacity(0.72),
-                          width: 1.w,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: _textPrimary,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 10.h),
+            
             Expanded(
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 children: [
+
+                  SizedBox(
+                    height: 32.h,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                     // padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      itemCount: _filters.length,
+                      separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                      itemBuilder: (context, index) {
+                        final label = _filters[index];
+                        final selected = _selectedFilter == label;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selectedFilter = label),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: EdgeInsets.symmetric(horizontal: 14.w, ),
+                            decoration: BoxDecoration(
+                              color: selected ? _chipActiveBg : Colors.white,
+                              borderRadius: BorderRadius.circular(26.r),
+                              border: Border.all(
+                                color: selected ? _chipActiveBg.withOpacity(0.72) : _chipInactiveBorder.withOpacity(0.72),
+                                width: 1.w,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w400,
+                                color: _textPrimary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   if (_showSection('Errors')) ...[
                     _SectionHeader(
                       title: 'Errors',
