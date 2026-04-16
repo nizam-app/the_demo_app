@@ -58,6 +58,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// Dashboard category pills (0 Light … 3 Security).
+  int _homeCategoryIndex = 0;
+
+  double _bedroomDimmer = 0.72;
+  double _bathroomThermostat = 24.6;
+  int _blindNorthDown = 0;
+  int _blindNorthUp = 72;
+  final List<int> _shadeDown = [100, 100, 100];
+  final List<int> _shadeUp = [50, 50, 50];
+  double _favThermostatM = 24.6;
+  double _favThermostatA = 24.6;
+
   Widget _buildHomeBody(BuildContext context) {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
@@ -98,36 +110,37 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               _CategoryPill(
                                 label: 'Light',
-                                isSelected: true,
+                                isSelected: _homeCategoryIndex == 0,
                                 icon: Icons.lightbulb_outline,
                                 imagePath: 'assets/Mask group (3).png',
                                 onTap: () {
+                                  setState(() => _homeCategoryIndex = 0);
                                   context.push(LightDinningRoomScreen.routeName);
                                 },
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
                                 label: 'Shading',
-                                isSelected: false,
+                                isSelected: _homeCategoryIndex == 1,
                                 icon: Icons.blinds_outlined,
                                 imagePath: 'assets/Mask group (2).png',
-                                onTap: () {},
+                                onTap: () => setState(() => _homeCategoryIndex = 1),
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
                                 label: 'HVAC',
-                                isSelected: false,
+                                isSelected: _homeCategoryIndex == 2,
                                 icon: Icons.ac_unit_outlined,
                                 imagePath: 'assets/Mask group (4).png',
-                                onTap: () {},
+                                onTap: () => setState(() => _homeCategoryIndex = 2),
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
                                 label: 'Security',
-                                isSelected: false,
+                                isSelected: _homeCategoryIndex == 3,
                                 icon: Icons.ac_unit_outlined,
                                 imagePath: 'assets/securety.png',
-                                onTap: () {},
+                                onTap: () => setState(() => _homeCategoryIndex = 3),
                               ),
                             ],
                           ),
@@ -148,15 +161,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Expanded(
                                   child: SizedBox(
                                     height: 185.h,
-                                    child: InkWell(
-                                      onTap: ()=>context.push(LightDinningRoomScreen.routeName),
-                                      child: const _LightDimmerCard(
-                                        title:
-                                            'Bedroom spot light\nsmall patio blue light',
-                                        percent: 0.72,
-                                        mode: 'A',
-                                        modeFilled: false,
-                                        imagePath: 'assets/Mask group (5).png',
+                                    child: _LightDimmerCard(
+                                      title:
+                                          'Bedroom spot light\nsmall patio blue light',
+                                      percent: _bedroomDimmer,
+                                      mode: 'A',
+                                      modeFilled: false,
+                                      imagePath: 'assets/Mask group (5).png',
+                                      onPercentChanged: (v) => setState(
+                                        () => _bedroomDimmer = v.clamp(0.0, 1.0),
+                                      ),
+                                      onNavigate: () => context.push(
+                                        LightDinningRoomScreen.routeName,
                                       ),
                                     ),
                                   ),
@@ -165,13 +181,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Expanded(
                                   child: SizedBox(
                                     height: 185.h,
-                                    child: const _ThermostatCard(
+                                    child: _ThermostatCard(
                                       title:
                                           'Bathroom heating and boiler thermostat',
-                                      value: 24.6,
+                                      value: _bathroomThermostat,
                                       mode: 'M',
                                       modeFilled: true,
                                       imagePath: 'assets/Mask group (6).png',
+                                      onMinus: () => setState(() {
+                                        _bathroomThermostat =
+                                            (_bathroomThermostat - 0.5)
+                                                .clamp(10.0, 35.0);
+                                      }),
+                                      onPlus: () => setState(() {
+                                        _bathroomThermostat =
+                                            (_bathroomThermostat + 0.5)
+                                                .clamp(10.0, 35.0);
+                                      }),
                                     ),
                                   ),
                                 ),
@@ -184,13 +210,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Expanded(
                                   child: SizedBox(
                                     height: 185.h,
-                                    child: const _BlindCard(
+                                    child: _BlindCard(
                                       title: 'Blind Living Room\nnorth window',
-                                      downPercent: 0,
-                                      upPercent: 72,
+                                      downPercent: _blindNorthDown,
+                                      upPercent: _blindNorthUp,
                                       mode: 'M',
                                       modeFilled: true,
                                       imagePath: 'assets/Rectangle 823.png',
+                                      onDown: () => setState(() {
+                                        _blindNorthDown =
+                                            (_blindNorthDown + 5).clamp(0, 100);
+                                      }),
+                                      onUp: () => setState(() {
+                                        _blindNorthUp =
+                                            (_blindNorthUp + 5).clamp(0, 100);
+                                      }),
                                     ),
                                   ),
                                 ),
@@ -399,27 +433,24 @@ class _HomeScreenState extends State<HomeScreen> {
         const _SectionTitle('Shading'),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 0,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'M',
           modeFilled: true,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 1,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'A',
           modeFilled: false,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 2,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'M',
           modeFilled: true,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 18.h),
         // _buildTemperatureSetPointCard(),
@@ -428,12 +459,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildShadingControl({
+    required int rowIndex,
     required String deviceName,
     required String mode,
     required bool modeFilled,
-    required int downPercent,
-    required int upPercent,
   }) {
+    final downPercent = _shadeDown[rowIndex];
+    final upPercent = _shadeUp[rowIndex];
     return Container(
       height: 90.h, // ✅ slimmer like image
       decoration: BoxDecoration(
@@ -533,6 +565,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _CircleBtn(
                     size: 35,
+                    onTap: () => setState(() {
+                      _shadeDown[rowIndex] =
+                          (_shadeDown[rowIndex] - 5).clamp(0, 100);
+                    }),
                     child: Image.asset(
                       'assets/Mask group (17).png',
                       width: 13.w,
@@ -543,6 +579,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(width: 17.w),
                   _CircleBtn(
                     size: 35,
+                    onTap: () => setState(() {
+                      _shadeUp[rowIndex] =
+                          (_shadeUp[rowIndex] + 5).clamp(0, 100);
+                    }),
                     child: Transform.rotate(
                       angle: math.pi,
                       child: Image.asset(
@@ -574,7 +614,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(child: _buildCameraCard()), // ✅ equal
             SizedBox(width: 12.w),
-            Expanded(child: _buildThermostatCard(mode: 'M', filled: true)),
+            Expanded(
+              child: _buildThermostatCard(
+                mode: 'M',
+                filled: true,
+                value: _favThermostatM,
+                onMinus: () => setState(() {
+                  _favThermostatM =
+                      (_favThermostatM - 0.5).clamp(10.0, 35.0);
+                }),
+                onPlus: () => setState(() {
+                  _favThermostatM =
+                      (_favThermostatM + 0.5).clamp(10.0, 35.0);
+                }),
+              ),
+            ),
           ],
         ),
 
@@ -585,7 +639,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(child: _buildCameraCard()),
             SizedBox(width: 12.w),
-            Expanded(child: _buildThermostatCard(mode: 'A', filled: false)),
+            Expanded(
+              child: _buildThermostatCard(
+                mode: 'A',
+                filled: false,
+                value: _favThermostatA,
+                onMinus: () => setState(() {
+                  _favThermostatA =
+                      (_favThermostatA - 0.5).clamp(10.0, 35.0);
+                }),
+                onPlus: () => setState(() {
+                  _favThermostatA =
+                      (_favThermostatA + 0.5).clamp(10.0, 35.0);
+                }),
+              ),
+            ),
           ],
         ),
       ],
@@ -639,7 +707,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildThermostatCard({required String mode, required bool filled}) {
+  Widget _buildThermostatCard({
+    required String mode,
+    required bool filled,
+    required double value,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+  }) {
     return Stack(
       children: [
         Container(
@@ -676,11 +750,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Row(
                 children: [
-                  _CircleBtn(child: Icon(Icons.remove, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
+                  _CircleBtn(
+                    onTap: onMinus,
+                    size: 35,
+                    child: Icon(
+                      Icons.remove,
+                      size: 20.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                   Expanded(
                     child: Center(
                       child: Text(
-                        '24.6°c',
+                        '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -689,7 +771,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  _CircleBtn(child: Icon(Icons.add, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
+                  _CircleBtn(
+                    onTap: onPlus,
+                    size: 35,
+                    child: Icon(
+                      Icons.add,
+                      size: 20.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1355,15 +1445,16 @@ class _ModeBadge extends StatelessWidget {
 }
 
 class _CircleBtn extends StatelessWidget {
-  const _CircleBtn({required this.child, this.size});
+  const _CircleBtn({required this.child, this.size, this.onTap});
 
   final Widget child;
   final double? size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final s = size ?? 32;
-    return Container(
+    final circle = Container(
       width: s.w,
       height: s.h,
       decoration: const BoxDecoration(
@@ -1372,6 +1463,15 @@ class _CircleBtn extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: child,
+    );
+    if (onTap == null) return circle;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: circle,
+      ),
     );
   }
 }
@@ -1386,6 +1486,8 @@ class _LightDimmerCard extends StatelessWidget {
     required this.mode,
     required this.modeFilled,
     this.imagePath,
+    this.onPercentChanged,
+    this.onNavigate,
   });
 
   final String title;
@@ -1393,47 +1495,59 @@ class _LightDimmerCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final ValueChanged<double>? onPercentChanged;
+  final VoidCallback? onNavigate;
 
   @override
   Widget build(BuildContext context) {
+    final top = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        imagePath != null
+            ? Image.asset(
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.lightbulb_outline,
+                size: 52.sp,
+                color: const Color(0xFF15DFFE),
+              ),
+        SizedBox(height: 10.h),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF111827),
+            height: 1.18,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ icon size like image-1
-              imagePath != null
-                  ? Image.asset(
-                      imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.lightbulb_outline,
-                      size: 52.sp,
-                      color: const Color(0xFF15DFFE),
-                    ),
-
-              SizedBox(height: 10.h),
-
-              // ✅ title like image-1 (NOT huge)
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF111827),
-                  height: 1.18,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
+              if (onNavigate != null)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onNavigate,
+                    borderRadius: BorderRadius.circular(18.r),
+                    child: top,
+                  ),
+                )
+              else
+                top,
               const Spacer(),
-
-              // ✅ bottom row: 72% + pill slider (sun inside)
               Row(
                 children: [
                   Text(
@@ -1445,13 +1559,17 @@ class _LightDimmerCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  Expanded(child: _DimmerPill(percent: percent)),
+                  Expanded(
+                    child: _DimmerPill(
+                      percent: percent,
+                      onChanged: onPercentChanged,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
-
         Positioned(
           right: 12.w,
           top: 12.w,
@@ -1463,23 +1581,24 @@ class _LightDimmerCard extends StatelessWidget {
 }
 
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent});
+  const _DimmerPill({required this.percent, this.onChanged});
   final double percent;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
+    final w = 133.w;
 
-    return Container(
-      height: 35.h, // ✅ image-1 height
-      width: 133.w,
+    final pill = Container(
+      height: 35.h,
+      width: w,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Stack(
         children: [
-          // ✅ right grey segment (remaining)
           Align(
             alignment: Alignment.centerRight,
             child: FractionallySizedBox(
@@ -1488,15 +1607,13 @@ class _DimmerPill extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFD1D5DB),
                   borderRadius: BorderRadius.horizontal(
-                    right: Radius.circular(999),
+                    right: const Radius.circular(999),
                     left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
                   ),
                 ),
               ),
             ),
           ),
-
-          // ✅ sun icon (left)
           Align(
             alignment: Alignment.centerLeft,
             child: Padding(
@@ -1504,12 +1621,25 @@ class _DimmerPill extends StatelessWidget {
               child: Icon(
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
-                color: Color(0xFF6B7280),
+                color: const Color(0xFF6B7280),
               ),
             ),
           ),
         ],
       ),
+    );
+
+    if (onChanged == null) return pill;
+
+    void applyDx(double dx) {
+      onChanged!((dx / w).clamp(0.0, 1.0));
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
+      child: pill,
     );
   }
 }
@@ -1520,6 +1650,8 @@ class _ThermostatCard extends StatelessWidget {
     required this.value,
     required this.mode,
     required this.modeFilled,
+    required this.onMinus,
+    required this.onPlus,
     this.imagePath,
   });
 
@@ -1528,6 +1660,8 @@ class _ThermostatCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
 
   @override
   Widget build(BuildContext context) {
@@ -1592,7 +1726,15 @@ class _ThermostatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _CircleBtn(size: 35, child: Icon(Icons.remove, size: 23.sp, color: Color(0xFF6B7280),)),
+                  _CircleBtn(
+                    size: 35,
+                    onTap: onMinus,
+                    child: Icon(
+                      Icons.remove,
+                      size: 23.sp,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
@@ -1601,7 +1743,15 @@ class _ThermostatCard extends StatelessWidget {
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  _CircleBtn(size: 35, child: Icon(Icons.add, size: 23.sp, color: Color(0xFF6B7280),), ),
+                  _CircleBtn(
+                    size: 35,
+                    onTap: onPlus,
+                    child: Icon(
+                      Icons.add,
+                      size: 23.sp,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1624,6 +1774,8 @@ class _BlindCard extends StatelessWidget {
     required this.upPercent,
     required this.mode,
     required this.modeFilled,
+    required this.onDown,
+    required this.onUp,
     this.imagePath,
   });
 
@@ -1633,6 +1785,8 @@ class _BlindCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final VoidCallback onDown;
+  final VoidCallback onUp;
 
   @override
   Widget build(BuildContext context) {
@@ -1672,6 +1826,7 @@ class _BlindCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _CircleBtn(
+                        onTap: onDown,
                         child: Image.asset(
                           'assets/Mask group (17).png',
                           width: 13.sp,
@@ -1715,6 +1870,7 @@ class _BlindCard extends StatelessWidget {
                       ),
                       SizedBox(width: 7.w),
                       _CircleBtn(
+                        onTap: onUp,
                         child: Image.asset(
                           'assets/Mask group (16).png',
                           width: 13.sp,
