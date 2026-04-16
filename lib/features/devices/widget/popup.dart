@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'assign_category_zone.dart';
+
 /// Public widget
 class EditDeviceSheetContent extends StatelessWidget {
   const EditDeviceSheetContent({super.key});
@@ -67,6 +69,20 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   // bool select = true;
   // late  ValueChanged<bool> onChanged;
+
+
+
+
+  void _showAssignCategoryPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return const AssignCategoryZoneSheet();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +213,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                   ),
                                 ],
                               ),
-                              onTap: () {},
+                              onTap: () => _showAssignCategoryPopup(context),
                             ),
 
                             SizedBox(height: 10.h),

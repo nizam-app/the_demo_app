@@ -1,4 +1,7 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
@@ -29,178 +32,222 @@ class _CoreScreenState extends State<CoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _screenBg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildAppBar(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 28.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _sectionTitle('Information'),
-                    SizedBox(height: 18.h),
-                    _whiteCard(
-                      child: Column(
-                        children: [
-                          _kvRow('Version', '2025.1.31472'),
-                          _divider(),
-                          _kvRow('Core Process Uptime', '0d 10h 7m 32s'),
-                          _divider(),
-                          _kvRow('OS Image Version', '2.4(lh)'),
-                          _divider(),
-                          _kvRow('Current Time', '08.05.2025 10:08:02'),
-                          _divider(),
-                          _kvRow('IP Address', '192.168.103.192'),
-                          _divider(),
-                          _kvRow('Mac Address', '00:81:14:72:72:D0'),
-                          _divider(),
-                          _kvRow('mDNS Name', 'Demo-Account.local'),
-                          _divider(),
-                          _accessTokenRow(),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 30.h),
-                    _sectionTitle('Connected users'),
-                    SizedBox(height: 18.h),
-                    _whiteCard(
-                      child: _connectedUserRow(),
-                    ),
-                    SizedBox(height: 18.h),
-                    _sectionTitle('Inputs'),
-                    SizedBox(height: 21.h),
-                    _whiteCard(
-                      child: Column(
-                        children: [
-                          _chevronRow('Latitude', '48.208579°'),
-                          _divider(),
-                          _chevronRow('Longitude', '16.374124°'),
-                          _divider(),
-                          _chevronRow('Timezone', 'Europe/Berlin'),
-                          _divider(),
-                          _languageRow(),
-                          _divider(),
-                          _kvRow('Currency', '\$'),
-                          _divider(),
-                          _kvRow('Currency position', '123.45\$'),
-                          _divider(),
-                          _linkChevronRow('Date Periods'),
-                          _divider(),
-                          _linkChevronRow('Media Library'),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 39.h),
-                    _sectionTitle('Network'),
-                    SizedBox(height: 6.h),
-                    _dhcpRow(),
-                    SizedBox(height: 10.h),
-                    _whiteCard(
-                      child: Column(
-                        children: [
-                          _kvRow('Ip Address', '192.168.103.192'),
-                          _divider(),
-                          _kvRow('Network Mask', '255.255.255.0'),
-                          _divider(),
-                          _kvRow('Gateway', '192.168.103.1'),
-                          _divider(),
-                          _kvRow('DNS Server', '192.168.103.1'),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 28.h),
-                    _sectionTitle('Backup & Restore'),
-                    SizedBox(height: 10.h),
-                    _whiteCard(
-                      child: Column(
-                        children: [
-                          _linkOnlyRow('Create a backup'),
-                          _divider(),
-                          _linkOnlyRow('Restore from backup'),
-                          _divider(),
-                          _linkOnlyRow('Clone control unit from backup'),
-                          _divider(),
-                          _linkOnlyRow('Factory reset'),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 30.h),
-                    _sectionTitle('Log'),
-                    SizedBox(height: 10.h),
-                    _whiteCard(
-                      child: _chevronRowSimple('User and Updates'),
-                    ),
-                    SizedBox(height: 26.h),
-                    _outlineActionButton(
-                      label: 'Update firmware',
-                      image: "assets/download.png",
-                      onTap: () {},
-                    ),
-                    SizedBox(height: 10.h),
-                    _outlineActionButton(
-                      label: 'Restart Core',
-                      image: "assets/images/reload_icon.png",
-                      onTap: () {},
-                    ),
-                  ],
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _screenBg,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: _screenBg),
                 ),
               ),
-            ),
-          ],
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    scrollTopPadding,
+                    16.w,
+                    28.h + bottomInset,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionTitle('Information'),
+                      SizedBox(height: 18.h),
+                      _whiteCard(
+                        child: Column(
+                          children: [
+                            _kvRow('Version', '2025.1.31472'),
+                            _divider(),
+                            _kvRow('Core Process Uptime', '0d 10h 7m 32s'),
+                            _divider(),
+                            _kvRow('OS Image Version', '2.4(lh)'),
+                            _divider(),
+                            _kvRow('Current Time', '08.05.2025 10:08:02'),
+                            _divider(),
+                            _kvRow('IP Address', '192.168.103.192'),
+                            _divider(),
+                            _kvRow('Mac Address', '00:81:14:72:72:D0'),
+                            _divider(),
+                            _kvRow('mDNS Name', 'Demo-Account.local'),
+                            _divider(),
+                            _accessTokenRow(),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
+                      _sectionTitle('Connected users'),
+                      SizedBox(height: 18.h),
+                      _whiteCard(child: _connectedUserRow()),
+                      SizedBox(height: 18.h),
+                      _sectionTitle('Inputs'),
+                      SizedBox(height: 21.h),
+                      _whiteCard(
+                        child: Column(
+                          children: [
+                            _chevronRow('Latitude', '48.208579°'),
+                            _divider(),
+                            _chevronRow('Longitude', '16.374124°'),
+                            _divider(),
+                            _chevronRow('Timezone', 'Europe/Berlin'),
+                            _divider(),
+                            _languageRow(),
+                            _divider(),
+                            _kvRow('Currency', '\$'),
+                            _divider(),
+                            _kvRow('Currency position', '123.45\$'),
+                            _divider(),
+                            _linkChevronRow('Date Periods'),
+                            _divider(),
+                            _linkChevronRow('Media Library'),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 39.h),
+                      _sectionTitle('Network'),
+                      SizedBox(height: 6.h),
+                      _dhcpRow(),
+                      SizedBox(height: 10.h),
+                      _whiteCard(
+                        child: Column(
+                          children: [
+                            _kvRow('Ip Address', '192.168.103.192'),
+                            _divider(),
+                            _kvRow('Network Mask', '255.255.255.0'),
+                            _divider(),
+                            _kvRow('Gateway', '192.168.103.1'),
+                            _divider(),
+                            _kvRow('DNS Server', '192.168.103.1'),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 28.h),
+                      _sectionTitle('Backup & Restore'),
+                      SizedBox(height: 10.h),
+                      _whiteCard(
+                        child: Column(
+                          children: [
+                            _linkOnlyRow('Create a backup'),
+                            _divider(),
+                            _linkOnlyRow('Restore from backup'),
+                            _divider(),
+                            _linkOnlyRow('Clone control unit from backup'),
+                            _divider(),
+                            _linkOnlyRow('Factory reset'),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30.h),
+                      _sectionTitle('Log'),
+                      SizedBox(height: 10.h),
+                      _whiteCard(child: _chevronRowSimple('User and Updates')),
+                      SizedBox(height: 26.h),
+                      _outlineActionButton(
+                        label: 'Update firmware',
+                        image: "assets/download.png",
+                        onTap: () {},
+                      ),
+                      SizedBox(height: 10.h),
+                      _outlineActionButton(
+                        label: 'Restart Core',
+                        image: "assets/images/reload_icon.png",
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: _buildAppBar(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
-      child: SizedBox(
-        height: 40.h,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GlobalCircleIconBtn(
-                color: Colors.white,
-                child: Image.asset(
-                  'assets/aro.png',
-                  width: 16.w,
-                  height: 16.h,
-                ),
-                onTap: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  } else {
-                    context.go('/settings');
-                  }
-                },
-              ),
+    return SizedBox(
+      height: 40.h,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GlobalCircleIconBtn(
+              color: const Color(0xFFF3F4F6),
+              child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+              onTap: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  context.go('/settings');
+                }
+              },
             ),
-            Text(
-              'Core',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w600,
-                color: _titleColor,
-              ),
+          ),
+          Text(
+            'Core',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w600,
+              color: _titleColor,
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GlobalCircleIconBtn(
-                    child: Icon(Icons.more_horiz_rounded, color: Colors.black),
-                    onTap: () {},
-                  ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GlobalCircleIconBtn(
+              color: const Color(0xFFF3F4F6),
+              child: Icon(Icons.more_horiz_rounded, color: Colors.black),
+              onTap: () {},
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -232,10 +279,7 @@ class _CoreScreenState extends State<CoreScreen> {
         //   ),
         // ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26.r),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(26.r), child: child),
     );
   }
 
@@ -303,7 +347,7 @@ class _CoreScreenState extends State<CoreScreen> {
           ),
           Container(
             height: 23.h,
-            padding: EdgeInsets.symmetric(horizontal: 6.w, ),
+            padding: EdgeInsets.symmetric(horizontal: 6.w),
             decoration: BoxDecoration(
               color: _badgeGreyBg,
               borderRadius: BorderRadius.circular(3.r),
@@ -343,7 +387,7 @@ class _CoreScreenState extends State<CoreScreen> {
           ),
           Container(
             height: 23.h,
-            padding: EdgeInsets.symmetric(horizontal: 10.w, ),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             decoration: BoxDecoration(
               color: _cloudBadgeBg,
               borderRadius: BorderRadius.circular(6.r),
@@ -352,7 +396,12 @@ class _CoreScreenState extends State<CoreScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                 Image.asset("assets/images/glog.png", height: 13.h, width: 13.w,color: Colors.white, ),
+                Image.asset(
+                  "assets/images/glog.png",
+                  height: 13.h,
+                  width: 13.w,
+                  color: Colors.white,
+                ),
                 SizedBox(width: 4.w),
                 Text(
                   'Cloud',
@@ -399,7 +448,12 @@ class _CoreScreenState extends State<CoreScreen> {
               ),
             ),
             SizedBox(width: 6.w),
-            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,),
+            Image.asset(
+              "assets/back_arro.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),
@@ -442,8 +496,13 @@ class _CoreScreenState extends State<CoreScreen> {
                 ],
               ),
             ),
-            SizedBox(width: 10.w,),
-            Image.asset('assets/back_arro.png', height: 13.h, width: 13.w, fit: BoxFit.cover,)
+            SizedBox(width: 10.w),
+            Image.asset(
+              'assets/back_arro.png',
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),
@@ -468,7 +527,13 @@ class _CoreScreenState extends State<CoreScreen> {
                 ),
               ),
             ),
-            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover, color: _linkBlue,)
+            Image.asset(
+              "assets/back_arro.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+              color: _linkBlue,
+            ),
           ],
         ),
       ),
@@ -514,7 +579,12 @@ class _CoreScreenState extends State<CoreScreen> {
                 ),
               ),
             ),
-            Image.asset("assets/back_arro.png", height: 13.h, width: 13.w, fit: BoxFit.cover,),
+            Image.asset(
+              "assets/back_arro.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),
@@ -573,7 +643,12 @@ class _CoreScreenState extends State<CoreScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(image, height: 18.h, width: 18.w, fit: BoxFit.cover,),
+                Image.asset(
+                  image,
+                  height: 18.h,
+                  width: 18.w,
+                  fit: BoxFit.cover,
+                ),
                 SizedBox(width: 7.w),
                 Text(
                   label,

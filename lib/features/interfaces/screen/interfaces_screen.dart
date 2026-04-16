@@ -1,5 +1,8 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -154,67 +157,129 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final scrollBottomPad = 92.h + bottomInset + 10.h;
 
-      floatingActionButton: _FabPlus(
-        onTap: () => showSelectInterfaceBottomSheet(context),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
       ),
-
-      bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedNavIndex,
-        notificationCount: 12,
-        onTap: _onNavItemTapped,
-      ),
-
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 10.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Scaffold(
+        backgroundColor: _bg,
+        floatingActionButton: _FabPlus(
+          onTap: () => showSelectInterfaceBottomSheet(context),
+        ),
+        bottomNavigationBar: _BottomNav(
+          selectedIndex: _selectedNavIndex,
+          notificationCount: 12,
+          onTap: _onNavItemTapped,
+        ),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              _TopBar(onBack: () => Navigator.maybePop(context)),
-              SizedBox(height: 23.h),
-              
-              Text(
-                'Manage interfaces',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _textDark,
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(color: _bg),
                 ),
               ),
-              SizedBox(height: 16.h),
-              Expanded(
-                child: ListView.separated(
-                  padding: EdgeInsets.only(bottom: 92.h),
-                  itemCount: _items.length,
-                  separatorBuilder: (_, __) => SizedBox(height: 14.h),
-                  itemBuilder: (_, i) {
-                    void toggleStatus() {
-                      setState(() {
-                        _itemStatuses[i] =
-                            _itemStatuses[i] == _InterfaceStatus.ok
-                            ? _InterfaceStatus.warn
-                            : _InterfaceStatus.ok;
-                      });
-                    }
-
-                    return _InterfaceCard(
-                      item: _items[i],
-                      status: _itemStatuses[i],
-                      onStatusTap: toggleStatus,
-                      onTap: toggleStatus,
-                      onMore: () {},
-                      bg: _card,
-                      textDark: _textDark,
-                      textGrey: _textGrey,
-                      pillGrey: _pillGrey,
-                      blue: _blue,
-                      magenta: _magenta,
-                    );
-                  },
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    20.w,
+                    scrollTopPadding,
+                    20.w,
+                    scrollBottomPad,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Manage interfaces',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _textDark,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      for (int i = 0; i < _items.length; i++) ...[
+                        if (i > 0) SizedBox(height: 14.h),
+                        _InterfaceCard(
+                          item: _items[i],
+                          status: _itemStatuses[i],
+                          onStatusTap: () {
+                            setState(() {
+                              _itemStatuses[i] =
+                                  _itemStatuses[i] == _InterfaceStatus.ok
+                                  ? _InterfaceStatus.warn
+                                  : _InterfaceStatus.ok;
+                            });
+                          },
+                          onTap: () {
+                            setState(() {
+                              _itemStatuses[i] =
+                                  _itemStatuses[i] == _InterfaceStatus.ok
+                                  ? _InterfaceStatus.warn
+                                  : _InterfaceStatus.ok;
+                            });
+                          },
+                          onMore: () {},
+                          bg: _card,
+                          textDark: _textDark,
+                          textGrey: _textGrey,
+                          pillGrey: _pillGrey,
+                          blue: _blue,
+                          magenta: _magenta,
+                        ),
+                      ],
+                      SizedBox(height:400.h),  
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: SizedBox(
+                          height: 32.h,
+                          child: _TopBar(
+                            onBack: () => Navigator.maybePop(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -234,43 +299,40 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 40),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(26.r),
-            onTap: onBack,
-            child: Container(
-              width: 32.w,
-              height: 32.h,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: AppAssetIcon('assets/aro.png', color: _textDark),
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(26.r),
+          onTap: onBack,
+          child: Container(
+            width: 32.w,
+            height: 32.h,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF3F4F6),
+              shape: BoxShape.circle,
             ),
-          ),
-          Expanded(
             child: Center(
-              child: Text(
-                'Interfaces',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _textDark,
-                ),
+              child: AppAssetIcon('assets/aro.png', color: _textDark),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              'Interfaces',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w600,
+                color: _textDark,
               ),
             ),
           ),
-          //SizedBox(width: 44.w),
-        ],
-      ),
+        ),
+        SizedBox(width: 32.w),
+      ],
     );
   }
 }

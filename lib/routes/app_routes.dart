@@ -100,7 +100,11 @@ class AppRouter {
       GoRoute(
         path: Zone_Category_Screen.routeName,
         name: Zone_Category_Screen.routeName,
-        builder: (context, state) => const Zone_Category_Screen(),
+        builder: (context, state) {
+          final q = state.uri.queryParameters['title'];
+          final t = (q == null || q.isEmpty) ? 'Zone/Categories' : q;
+          return Zone_Category_Screen(screenTitle: t);
+        },
       ),
       GoRoute(
         path: AnalyticsScreen.routeName,

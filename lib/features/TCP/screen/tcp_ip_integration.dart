@@ -1,5 +1,8 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/features/TCP/widget/add_expose_devices.dart';
 
@@ -87,12 +90,7 @@ class TcpIpIntegrationController extends ChangeNotifier {
 
 /// -------------------- Asset icon helper (replace with your assets) --------------------
 class AppAssetIcon extends StatelessWidget {
-  const AppAssetIcon(
-      this.asset, {
-        super.key,
-        required this.size,
-        this.color,
-      });
+  const AppAssetIcon(this.asset, {super.key, required this.size, this.color});
 
   final String asset;
   final double size;
@@ -153,122 +151,180 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-      floatingActionButton: _RoundFab(
-        onTap: () => showAddExposeDeviceBottomSheet(context),
-      ),
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
 
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Expanded(
-                flex: 1,
-              child: Padding(
-                padding: EdgeInsets.only(left:  18.w, right: 18.w),
-                child: _TopBar(
-                  title: 'TCP/IP Integration',
-                  onBack: () => Navigator.maybePop(context),
-                  onMenu: _openMenu,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _bg,
+        floatingActionButton: _RoundFab(
+          onTap: () => showAddExposeDeviceBottomSheet(context),
+        ),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(color: _bg),
                 ),
               ),
-            ),
-
-            Expanded(
-              flex: 15,
-              child: AnimatedBuilder(
-                animation: controller,
-                builder: (context, _) {
-                  return ListView(
-                    padding: EdgeInsets.only(left:  18.w, right:  14.w,bottom:  120.h),
-                    children: [
-                      Text(
-                        'Inputs',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textDark,
-                        ),
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, _) {
+                    return ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        18.w,
+                        scrollTopPadding,
+                        14.w,
+                        120.h + bottomInset,
                       ),
-                      SizedBox(height: 8.h),
+                      children: [
+                        Text(
+                          'Inputs',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w600,
+                            color: _textDark,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
 
-                      _CardContainer(
-                        child: Column(
-                          children: [
-                            _SettingsRow(
-                              title: 'Interface ID',
-                              rightText: '${controller.interfaceId}',
-                              showChevron: true,
-                              onTap: () {
-                                // demo: cycle 1..3
-                                final next = controller.interfaceId == 3 ? 1 : controller.interfaceId + 1;
-                                controller.setInterfaceId(next);
-                              },
-                            ),
-                            const _Line(),
-                            _SettingsRow(
-                              title: 'Auto send (Push All)',
-                              trailing: CupertinoSwitch(
-                                value: _sliderWidget,
-                                onChanged: (v) => setState(() => _sliderWidget = v),
-                                activeColor: _blue,
+                        _CardContainer(
+                          child: Column(
+                            children: [
+                              _SettingsRow(
+                                title: 'Interface ID',
+                                rightText: '${controller.interfaceId}',
+                                showChevron: true,
+                                onTap: () {
+                                  // demo: cycle 1..3
+                                  final next = controller.interfaceId == 3
+                                      ? 1
+                                      : controller.interfaceId + 1;
+                                  controller.setInterfaceId(next);
+                                },
                               ),
-                            ),
-                            const _Line(),
-                            _SettingsRow(
-                              title: 'Header',
-                              trailing: CupertinoSwitch(
-                                value: _sliderWidgets,
-                                onChanged: (v) => setState(() => _sliderWidgets = v),
-                                activeColor: _blue,
+                              const _Line(),
+                              _SettingsRow(
+                                title: 'Auto send (Push All)',
+                                trailing: CupertinoSwitch(
+                                  value: _sliderWidget,
+                                  onChanged: (v) =>
+                                      setState(() => _sliderWidget = v),
+                                  activeColor: _blue,
+                                ),
                               ),
-                            ),
-                            const _Line(),
-                            _SettingsRow(
-                              title: 'TCP Port',
-                              rightText: '${controller.tcpPort}',
-                              showChevron: true,
-                              onTap: () {
-                                // demo change
-                                controller.setTcpPort(controller.tcpPort == 10000 ? 10001 : 10000);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 22.h),
-
-                      Text(
-                        'Expose devices',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textDark,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-
-                      _CardContainer(
-                        child: Column(
-                          children: [
-                            for (int i = 0; i < controller.devices.length; i++) ...[
-                              _ExposeDeviceRow(device: controller.devices[i]),
-                              if (i != controller.devices.length - 1) const _ExposeLine(),
+                              const _Line(),
+                              _SettingsRow(
+                                title: 'Header',
+                                trailing: CupertinoSwitch(
+                                  value: _sliderWidgets,
+                                  onChanged: (v) =>
+                                      setState(() => _sliderWidgets = v),
+                                  activeColor: _blue,
+                                ),
+                              ),
+                              const _Line(),
+                              _SettingsRow(
+                                title: 'TCP Port',
+                                rightText: '${controller.tcpPort}',
+                                showChevron: true,
+                                onTap: () {
+                                  // demo change
+                                  controller.setTcpPort(
+                                    controller.tcpPort == 10000 ? 10001 : 10000,
+                                  );
+                                },
+                              ),
                             ],
-                          ],
+                          ),
+                        ),
+
+                        SizedBox(height: 22.h),
+
+                        Text(
+                          'Expose devices',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w600,
+                            color: _textDark,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+
+                        _CardContainer(
+                          child: Column(
+                            children: [
+                              for (
+                                int i = 0;
+                                i < controller.devices.length;
+                                i++
+                              ) ...[
+                                _ExposeDeviceRow(device: controller.devices[i]),
+                                if (i != controller.devices.length - 1)
+                                  const _ExposeLine(),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
                         ),
                       ),
-                    ],
-                  );
-                },
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: SizedBox(
+                          height: 36.h,
+                          child: _TopBar(
+                            title: 'TCP/IP Integration',
+                            onBack: () => Navigator.maybePop(context),
+                            onMenu: _openMenu,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -299,9 +355,17 @@ class _TopBar extends StatelessWidget {
           child: Container(
             width: 32.w,
             height: 32.w,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF3F4F6),
+              shape: BoxShape.circle,
+            ),
             child: Center(
-              child: Image.asset( "assets/aro.png", color: _textDark, height: 16.h, width: 16.w,),
+              child: Image.asset(
+                "assets/aro.png",
+                color: _textDark,
+                height: 16.h,
+                width: 16.w,
+              ),
               //child: Icon(Icons.chevron_left_rounded, size: 22.sp, color: _textDark),
             ),
           ),
@@ -325,9 +389,16 @@ class _TopBar extends StatelessWidget {
           child: Container(
             width: 32.w,
             height: 32.w,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF3F4F6),
+              shape: BoxShape.circle,
+            ),
             child: Center(
-              child: Icon(Icons.more_horiz_rounded, size: 22.sp, color: _textDark),
+              child: Icon(
+                Icons.more_horiz_rounded,
+                size: 22.sp,
+                color: _textDark,
+              ),
             ),
           ),
         ),
@@ -348,10 +419,7 @@ class _CardContainer extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26.r),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(26.r), child: child),
     );
   }
 }
@@ -379,7 +447,7 @@ class _SettingsRow extends StatelessWidget {
     final content = Container(
       height: 55.h,
       child: Padding(
-        padding: EdgeInsets.only(right: 14.w, left: 18.w, ),
+        padding: EdgeInsets.only(right: 14.w, left: 18.w),
         child: Row(
           children: [
             Expanded(
@@ -408,8 +476,12 @@ class _SettingsRow extends StatelessWidget {
             if (trailing != null) trailing!,
             if (showChevron) ...[
               SizedBox(width: 10.w),
-              Image.asset("assets/Mask group copy 4.png", height: 13.h, width: 13.w,fit: BoxFit.cover,)
-
+              Image.asset(
+                "assets/Mask group copy 4.png",
+                height: 13.h,
+                width: 13.w,
+                fit: BoxFit.cover,
+              ),
             ],
           ],
         ),
@@ -418,10 +490,7 @@ class _SettingsRow extends StatelessWidget {
 
     if (onTap == null) return content;
 
-    return InkWell(
-      onTap: onTap,
-      child: content,
-    );
+    return InkWell(onTap: onTap, child: content);
   }
 }
 
@@ -438,7 +507,12 @@ class _ExposeDeviceRow extends StatelessWidget {
     return InkWell(
       onTap: () {},
       child: Padding(
-        padding: EdgeInsets.only(top: 15.h, right: 14.w, left: 18.w, bottom: 15.h),
+        padding: EdgeInsets.only(
+          top: 15.h,
+          right: 14.w,
+          left: 18.w,
+          bottom: 15.h,
+        ),
         child: Row(
           children: [
             // left icon
@@ -501,7 +575,12 @@ class _ExposeDeviceRow extends StatelessWidget {
               ),
             ),
             SizedBox(width: 10.w),
-            Image.asset("assets/Mask group copy 4.png", height: 13.h, width: 13.w,fit: BoxFit.cover,)
+            Image.asset(
+              "assets/Mask group copy 4.png",
+              height: 13.h,
+              width: 13.w,
+              fit: BoxFit.cover,
+            ),
             //Icon(Icons.chevron_right_rounded, size: 26.sp, color: _textGrey),
           ],
         ),
@@ -516,10 +595,10 @@ class _Line extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(right: 14.w, left: 18.w,),
+      padding: EdgeInsets.only(right: 14.w, left: 18.w),
       child: Divider(
         height: 1.h,
-         thickness: 1.h,
+        thickness: 1.h,
         color: const Color(0xFFE5E7EB),
       ),
     );
@@ -532,7 +611,7 @@ class _ExposeLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(right: 14.w, left: 62.w,),
+      padding: EdgeInsets.only(right: 14.w, left: 62.w),
       child: Divider(
         height: 1.h,
         thickness: 1.h,
@@ -542,10 +621,9 @@ class _ExposeLine extends StatelessWidget {
   }
 }
 
-
 class _RoundFab extends StatelessWidget {
   const _RoundFab({required this.onTap});
-  
+
   final VoidCallback onTap;
 
   @override
