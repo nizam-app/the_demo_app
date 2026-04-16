@@ -1,4 +1,7 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
@@ -7,7 +10,6 @@ import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
-import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
 import 'package:workpleis/features/weather/screen/weather_screen.dart';
 import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
@@ -32,7 +34,7 @@ class MenuScreen extends StatelessWidget {
   static const String routeName = '/menu';
 
   // colors (match screenshot)
-  static const _bg = Color(0xFFFFFFFF);
+  static const _bg = Color(0xFFF3F4F6);
   static const _card = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -43,65 +45,50 @@ class MenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headerBarHeight = 56.h;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: _bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ✅ Header
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-              child: Row(
-                children:[
-                  GlobalCircleIconBtn(
-                    color: Color(0xFFF3F4F6),
-                    child: Image.asset(
-                      'assets/aro.png',
-                      width: 16.w,
-                      height: 16.h,
-                     
-                    ),
-                 onTap: () => context.pop(),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Menu',
-                        style: TextStyle(
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _primary,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 36.w),
-                ],
-              ),
-            ),
- 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 22.h),
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarContrastEnforced: false,
+        ),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  topInset + headerBarHeight + 10.h,
+                  0,
+                  22.h + bottomInset,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 10.h),
+                      padding: EdgeInsets.only(left: 16.w, right: 16.w),
                       child: Container(
                         padding: EdgeInsets.all(10.w),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(26.r),
                           border: Border.all(color: Colors.white, width: 2.h),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: Colors.black.withOpacity(0.1),
+                          //     blurRadius: 10,
+                          //     offset: const Offset(0, 4),
+                          //   ),
+                          // ],
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -175,8 +162,7 @@ class MenuScreen extends StatelessWidget {
                     // ✅ Overview
                     const _SectionTitle(title: 'Overview'),
                     _CardBlock(
-                      children:  [
-
+                      children: [
                         // _MenuItemRow(
                         //   imagePath: 'assets/images/profile_icon.png',
                         //   title: 'Profile',
@@ -188,14 +174,14 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',
                           iconSize: 17.5,
-                          onTap: ()=> context.go(SettingScreen.routeName),
+                          onTap: () => context.go(SettingScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/bar 5 copy.png',
                           title: 'Analytics',
                           iconSize: 17.5,
-                          onTap: ()=> context.go(AnalyticsScreen.routeName),
+                          onTap: () => context.go(AnalyticsScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -203,15 +189,16 @@ class MenuScreen extends StatelessWidget {
                           title: 'Weather',
                           iconWidth: 22,
                           iconHeight: 23.5,
-                          
-                          onTap: ()=> context.go(WeatherScreen.routeName),
+
+                          onTap: () => context.go(WeatherScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
                           imagePath: 'assets/Group 43.png',
                           title: 'Notifications',
                           badgeText: '12',
-                          onTap: () => context.go(NotificationsScreen.routeName),
+                          onTap: () =>
+                              context.go(NotificationsScreen.routeName),
                           iconSize: 22,
                         ),
                       ],
@@ -254,45 +241,67 @@ class MenuScreen extends StatelessWidget {
 
                     // ✅ Categories
                     InkWell(
-                        onTap: ()=>context.push(Zone_Category_Screen.routeName),
-                        child: const _SectionTitle(title: 'Categories')),
+                      onTap: () => context.push(
+                        Zone_Category_Screen.routeWithTitle('Categories'),
+                      ),
+                      child: const _SectionTitle(title: 'Categories'),
+                    ),
                     _CardBlock(
                       children: [
-                         _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask group.png',
                           title: 'Lighting',
                           iconSize: 22,
-                          onTap: ()=>context.push(LightDinningRoomScreen.routeName),
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Lighting'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask g.png',
                           title: 'Shading',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Shading'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask gr.png',
                           title: 'Heating/Cooling',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle(
+                              'Heating/Cooling',
+                            ),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/make.png',
                           title: 'Ventilation',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Ventilation'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask group (.png',
                           title: 'Security',
                           iconSize: 23,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Security'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask group (5) copy.png',
                           title: 'Irrigation',
                           iconSize: 24,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Irrigation'),
+                          ),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -308,44 +317,65 @@ class MenuScreen extends StatelessWidget {
 
                     // ✅ Zones
                     InkWell(
-                        onTap: ()=>context.push(Zone_Category_Screen.routeName),
-                        child: const _SectionTitle(title: 'Zones')),
+                      onTap: () => context.push(
+                        Zone_Category_Screen.routeWithTitle('Zones'),
+                      ),
+                      child: const _SectionTitle(title: 'Zones'),
+                    ),
                     _CardBlock(
                       children: [
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/room 1.png',
                           title: 'Whole house',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Whole house'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/Mask group (1).png',
                           title: 'Living room',
                           iconSize: 22,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Living room'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/kitchen(1) 1.png',
                           title: 'Kitchen',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Kitchen'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/image 108.png',
                           title: 'Bedroom',
                           iconSize: 20,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Bedroom'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/image 110.png',
                           title: 'Kids room',
                           iconSize: 23,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Kids room'),
+                          ),
                         ),
                         const _InnerDivider(),
-                        const _MenuItemRow(
+                        _MenuItemRow(
                           imagePath: 'assets/image 111.png',
                           title: 'Garden',
                           iconSize: 24,
+                          onTap: () => context.push(
+                            Zone_Category_Screen.routeWithTitle('Garden'),
+                          ),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -403,15 +433,69 @@ class MenuScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          16.w,
+                          topInset + 10.h,
+                          16.w,
+                          10.h,
+                        ),
+                        child: Row(
+                          children: [
+                            GlobalCircleIconBtn(
+                              color: const Color(0xFFF3F4F6),
+                              child: Image.asset(
+                                'assets/aro.png',
+                                width: 16.w,
+                                height: 16.h,
+                              ),
+                              onTap: () => context.pop(),
+                            ),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  'Menu',
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: _primary,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 36.w),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-
 
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
@@ -465,9 +549,9 @@ class MegaIconCircle extends StatelessWidget {
     );
   }
 }
+
 class _MenuIcon extends StatelessWidget {
-  const
-  _MenuIcon(
+  const _MenuIcon(
     this.imagePath, {
     this.iconBg,
     this.borderRadius,
@@ -655,14 +739,14 @@ class _CardBlock extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
-        border: Border.all(width: 1.h, color: Colors.white) ,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(width: 1.h, color: Colors.white),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.1),
+        //     blurRadius: 10,
+        //     offset: const Offset(0, 4),
+        //   ),
+        // ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22.r),
@@ -714,10 +798,7 @@ class _InnerDivider extends StatelessWidget {
     final leftInset = (left - 7.w).clamp(0.0, double.infinity).toDouble();
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(
-        left: leftInset,
-        right: 17.w,
-      ),
+      margin: EdgeInsets.only(left: leftInset, right: 17.w),
       color: const Color(0xFFE5E7EB),
     );
   }
@@ -737,13 +818,11 @@ class _MenuItemRow extends StatelessWidget {
     this.iconSize,
     this.iconWidth,
     this.iconHeight,
-  
   }) : assert(imagePath != null);
 
   final String title;
   final String? imagePath;
   final VoidCallback? onTap;
-  
 
   final Color? iconBg;
   final String? badgeText; // pink
@@ -758,7 +837,6 @@ class _MenuItemRow extends StatelessWidget {
   final double? iconSize;
   final double? iconWidth;
   final double? iconHeight;
-
 
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -813,7 +891,11 @@ class _MenuItemRow extends StatelessWidget {
             ],
 
             if (showChevron)
-              Image.asset('assets/Mask group copy 4.png', width: 13.w, height: 13.h,),
+              Image.asset(
+                'assets/Mask group copy 4.png',
+                width: 13.w,
+                height: 13.h,
+              ),
           ],
         ),
       ),

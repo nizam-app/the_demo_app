@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
 import '../../home/widget/Add_section.dart';
@@ -19,9 +20,18 @@ import '../../settings/screen/settings_screen.dart';
 
 
 class Zone_Category_Screen extends StatefulWidget {
-  const Zone_Category_Screen({super.key});
+  const Zone_Category_Screen({
+    super.key,
+    this.screenTitle = 'Zone/Categories',
+  });
+
+  /// Shown in the top app bar; driven by menu query `?title=`.
+  final String screenTitle;
 
   static const String routeName = '/zone_category';
+
+  static String routeWithTitle(String title) =>
+      '$routeName?title=${Uri.encodeComponent(title)}';
 
 
   static void showEditAddSectionSheet(BuildContext context) {
@@ -67,6 +77,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               flex: 1,
               child: Builder(
                 builder: (context) => _Header(
+                  title: widget.screenTitle,
                   onMenuTap: () {
                     context.push(MenuScreen.routeName);
                     // CustomBottomNavBar.of(context)?.openDrawer();
@@ -159,13 +170,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                             mainAxisSpacing: 12.h,
                             childAspectRatio: 195 / 185, // ✅ FIX: image-1 ratio
                           ),
-                          children: const [
+                          children:  [
                             _LightDimmerCard(
                               title: 'Bedroom spot light\nsmall patio blue light',
                               percent: 0.72,
                               mode: 'A',
                               modeFilled: false,
                               imagePath: 'assets/Mask group (5).png',
+                              onTap:()=>context.push(LightDinningRoomScreen.routeName),
                             ),
                             _ThermostatCard(
                               title: 'Bathroom heating and boiler thermostat',
@@ -655,6 +667,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 status: 'All On',
                 iconImage:
                 'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -664,6 +678,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 status: '100%',
                 iconImage:
                 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -680,6 +696,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
+                          onTap: () =>
+                              context.push(LightDinningRoomScreen.routeName),
                         ),
                       ),
                     ],
@@ -704,6 +722,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 status: 'All On',
                 iconImage:
                 'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -713,6 +733,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 status: '100%',
                 iconImage:
                 'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -729,6 +751,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
+                          onTap: () =>
+                              context.push(LightDinningRoomScreen.routeName),
                         ),
                       ),
                     ],
@@ -752,11 +776,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     required String status,
     required String iconImage,
     bool progressCircle = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    final radius = BorderRadius.circular(26.r);
+    final card = Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(26.r),
+        borderRadius: radius,
       ),
       padding: EdgeInsets.all(12.w),
       child: Column(
@@ -808,6 +835,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         ],
       ),
     );
+    if (onTap == null) return card;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: card,
+      ),
+    );
   }
 
   Widget _lightingProgress100() {
@@ -855,9 +891,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
 class _Header extends StatelessWidget {
   const _Header({
+    required this.title,
     required this.onMenuTap,
     required this.onEditTap});
 
+  final String title;
   final VoidCallback onMenuTap;
   final VoidCallback onEditTap;
 
@@ -895,8 +933,10 @@ class _Header extends StatelessWidget {
         Expanded(
           child: Center(
             child: Text(
-              'Zone/Categories',
+              title,
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w600,
@@ -1211,6 +1251,7 @@ class _LightDimmerCard extends StatelessWidget {
     required this.mode,
     required this.modeFilled,
     this.imagePath,
+    this.onTap, 
   });
 
   final String title;
@@ -1218,6 +1259,7 @@ class _LightDimmerCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final VoidCallback? onTap; 
 
   @override
   Widget build(BuildContext context) {

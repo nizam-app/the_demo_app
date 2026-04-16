@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
@@ -68,21 +69,34 @@ class _DevicesScreenState extends State<DevicesScreen> {
   @override
   Widget build(BuildContext context) {
     const bg = Colors.white;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final headerRowHeight = 36.w;
+    final headerExtent = topInset + 8.h + headerRowHeight + 8.h;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    // Shell uses CustomBottomNavBar with extendBody — content draws under the 72px
+    // track; keep the same bottom inset when this screen shows BottomNavBarWidget.
+    final scrollBottomPad = 18.h + 72.h + bottomInset;
 
-    final headerBarHeight = 54.h;
-
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        bottom: !widget.showBottomNav,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.only(
-                top: headerBarHeight,
-                bottom: widget.showBottomNav ? 18.h : 18.h,
-              ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: bg,
+        body: SafeArea(
+          top: false,
+          bottom: !widget.showBottomNav,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: headerExtent,
+                  bottom: scrollBottomPad,
+                ),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -280,10 +294,16 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                       label: 'Lighting',
                                       bg: Color(0xFFFFFFFF),
                                       fg: Color(0xFF111827),
+                                      onTap: () => _showAssignCategoryPopup(context),
                                     ),
                                   ),
                                   SizedBox(width: 5.w),
-                                  _TagChip(label: 'Bathroom', bg: Color(0xFFFF2D92), fg: Colors.white),
+                                  _TagChip(
+                                    label: 'Bathroom',
+                                    bg: Color(0xFFFF2D92),
+                                    fg: Colors.white,
+                                    onTap: () => _showAssignCategoryPopup(context),
+                                  ),
                                 ],
                               ),
                             ],
@@ -524,20 +544,25 @@ class _DevicesScreenState extends State<DevicesScreen> {
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: DecoratedBox(
+                    child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.58),
+                      color: Colors.white.withOpacity(0.20),
                       border: Border(
                         bottom: BorderSide(
-                          color: const Color(0xFFE5E7EB).withOpacity(0.55),
+                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
                           width: 1,
                         ),
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.only(left: 14.w, right: 14.w, top: 8.h, bottom: 8.h),
+                      padding: EdgeInsets.only(
+                        left: 14.w,
+                        right: 14.w,
+                        top: topInset + 8.h,
+                        bottom: 12.h,
+                      ),
                       child: SizedBox(
-                        height: 36.w,
+                        height: headerRowHeight,
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
@@ -582,22 +607,30 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _CircleIconButton(
-                                    icon: Icons.more_horiz_rounded,
-                                    onTap: () => _showEditDeviceBottomSheet(context),
-                                    size: 32,
-                                    bg: const Color(0xFFF3F4F6),
-                                    iconColor: const Color(0xFF111827),
-                                    iconSize: 22,
+                                  Container(
+                                    height:36.h,
+                                    width: 36.w,
+                                    child: _CircleIconButton(
+                                      icon: Icons.more_horiz_rounded,
+                                      onTap: () => _showEditDeviceBottomSheet(context),
+                                      size: 22,
+                                      bg: const Color(0xFFF3F4F6),
+                                      iconColor: const Color(0xFF111827),
+                                      iconSize: 22,
+                                    ),
                                   ),
-                                  SizedBox(width: 10.w),
-                                  _CircleIconButton(
-                                    icon: Icons.add_rounded,
-                                    onTap: () => _showAssignCategoryPopup(context),
-                                    size: 32,
-                                    bg: const Color(0xFF111827),
-                                    iconColor: Colors.white,
-                                    iconSize: 23,
+                                  SizedBox(width: 12.w),
+                                  Container(
+                                    height: 36.h,
+                                    width: 36.w,
+                                    child: _CircleIconButton(
+                                      icon: Icons.add_rounded,
+                                      onTap: () {},
+                                      size: 23,
+                                      bg: const Color(0xFF111827),
+                                      iconColor: Colors.white,
+                                      iconSize: 23,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -610,16 +643,22 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 ),
               ),
             ),
+            if (widget.showBottomNav)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BottomNavBarWidget(
+                  selectedIndex: _selectedNavIndex,
+                  onItemTapped: _onNavItemTapped,
+                  backgroundOpacity: 0.10,
+                  useBackdropBlur: true,
+                ),
+              ),
           ],
         ),
       ),
-      bottomNavigationBar: widget.showBottomNav
-          ? BottomNavBarWidget(
-              selectedIndex: _selectedNavIndex,
-              onItemTapped: _onNavItemTapped,
-              backgroundOpacity: 0.52,
-            )
-          : null,
+      ),
     );
   }
 }
@@ -977,14 +1016,14 @@ class _CircleMiniBtn extends StatelessWidget {
         icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
 
     return Container(
-      width: 35.w, // ✅ closer to Image-1
-      height: 35.h,
+      width: 36.w, // ✅ closer to Image-1
+      height: 36.h,
       decoration: const BoxDecoration(
         color: Color(0xFFF3F4F6),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: Icon(icon, size: (isArrow ? 26 : 22).sp, color: Color(0xFF6B7280)),
+      child: Icon(icon, size: (isArrow ? 36 : 22).sp, color: Color(0xFF6B7280)),
     );
   }
 }
@@ -1202,15 +1241,21 @@ class _ModeDot extends StatelessWidget {
 // }
 
 class _TagChip extends StatelessWidget {
-  const _TagChip({required this.label, required this.bg, required this.fg});
+  const _TagChip({
+    required this.label,
+    required this.bg,
+    required this.fg,
+    this.onTap,
+  });
 
   final String label;
   final Color bg;
   final Color fg;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final chip = Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: bg,
@@ -1226,6 +1271,12 @@ class _TagChip extends StatelessWidget {
           height: 1.0,
         ),
       ),
+    );
+    if (onTap == null) return chip;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: chip,
     );
   }
 }

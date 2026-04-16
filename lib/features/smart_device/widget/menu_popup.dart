@@ -1,6 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
 /// Public widget
 class EditDeviceSheetContent extends StatelessWidget {
@@ -64,33 +67,60 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     }
   }
 
+  void _showAssignCategoryPopup(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AssignCategoryZoneSheet(),
+    );
+  }
+
   // bool select = true;
   // late  ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final topPad = MediaQuery.viewPaddingOf(context).top;
+    final headerH = 56.h;
+
     return Container(
       decoration: BoxDecoration(
-        color: _kSheetBg.withOpacity(0.74),
+        color: Colors.transparent,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
         ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // ===== Main content =====
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(context),
-
-                Padding(
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.hardEdge,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _kSheetBg.withOpacity(0.42),
+                  ),
+                ),
+              ),
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  topPad + headerH + 8.h,
+                  0,
+                  16.h,
+                ),
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Rename Card
                       _Card(
@@ -196,7 +226,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                   ),
                                 ],
                               ),
-                              onTap: () {},
+                              onTap: () => _showAssignCategoryPopup(context),
                             ),
 
                             SizedBox(height: 10.h),
@@ -252,8 +282,33 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: topPad),
+                        child: _buildHeader(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             // ===== Outside tap closes dropdown =====
             if (_dashboardDropdownOpen)
@@ -282,6 +337,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

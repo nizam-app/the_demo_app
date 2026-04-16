@@ -1,6 +1,8 @@
 import 'dart:math' show min;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -221,176 +223,230 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final menuPadH = 10.w;
     final menuPadV = 14.h;
 
-    return Scaffold(
-      backgroundColor: _AnalyticsColors.pageBg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 15.w, right:  15.w,),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-              
-                children: [
-                  SizedBox(
-                    height: 32.w,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: GlobalCircleIconBtn(
-                            color: _AnalyticsColors.cardBg,
-                            child: Image.asset(
-                              'assets/aro.png',
-                              width: 16.w,
-                              height: 16.h,
-                            ),
-                            onTap: () {
-                              if (!widget.showBottomNav) {
-                                final shell = CustomBottomNavBar.of(context);
-                                if (shell != null) {
-                                  shell.setSelectedIndex(2);
-                                  return;
-                                }
-                              }
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                context.go('/home');
-                              }
-                            },
-                          ),
-                        ),
-                        Center(
-                          child: Text(
-                            'Analytics',
-                            style: TextStyle(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.w600,
-                              color: _AnalyticsColors.title,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final scrollBottomPad =
+        30.h + bottomInset + (widget.showBottomNav ? 18.h + 72.h : 0);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _AnalyticsColors.pageBg,
+        body: SafeArea(
+          top: false,
+          bottom: !widget.showBottomNav,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: _AnalyticsColors.pageBg,
                   ),
-             
-                 
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(15.w, 17.h, 15.w, 30.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                 // crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    Center(
-                      child: _PeriodSegmentedControl(
-                        selected: period,
-                        onChanged: (p) =>
-                        ref.read(_analyticsPeriodProvider.notifier).state = p,
-                      ),
-
-                    ),
-
-                    SizedBox(height: 20.h,),
-                    Text(
-                      'Activity',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                        color: _AnalyticsColors.title,
-                        height: 1.2,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'Today, 24 June',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w400,
-                        color: _AnalyticsColors.subtitle,
-                        height: 1.3,
-                      ),
-                    ),
-                    SizedBox(height: 14.h),
-                    _ActivityCard(period: period),
-                    SizedBox(height: 24.h),
-                    Row(
-                      children: [
-                        Text(
-                          'Device usage',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w600,
-                            color: _AnalyticsColors.title,
-                          ),
-                        ),
-                        const Spacer(),
-                        KeyedSubtree(
-                          key: _categoriesMenuAnchorKey,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => _openCategoryDropdown(
-                              menuOuterW: menuOuterW,
-                              menuPadH: menuPadH,
-                              menuPadV: menuPadV,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Categories ',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: _AnalyticsColors.linkBlue,
-                                  ),
-                                ),
-                                Image.asset(
-                                  'assets/images/back_arro.png',
-                                  height: 11.h,
-                                  width: 11.w,
-                                  fit: BoxFit.cover,
-                                  color: _AnalyticsColors.linkBlue,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 14.h),
-                    _DeviceUsageCard(
-                      selectedIndex: selectedDevice,
-                      onSelect: (i) =>
-                          ref
-                                  .read(
-                                    _analyticsSelectedDeviceIndexProvider
-                                        .notifier,
-                                  )
-                                  .state =
-                              i,
-                    ),
-                  ],
                 ),
               ),
-            ),
-          ],
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    scrollTopPadding,
+                    15.w,
+                    scrollBottomPad,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: _PeriodSegmentedControl(
+                          selected: period,
+                          onChanged: (p) =>
+                              ref
+                                      .read(_analyticsPeriodProvider.notifier)
+                                      .state =
+                                  p,
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        'Activity',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: _AnalyticsColors.title,
+                          height: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Today, 24 June',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: _AnalyticsColors.subtitle,
+                          height: 1.3,
+                        ),
+                      ),
+                      SizedBox(height: 14.h),
+                      _ActivityCard(period: period),
+                      SizedBox(height: 24.h),
+                      Row(
+                        children: [
+                          Text(
+                            'Device usage',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _AnalyticsColors.title,
+                            ),
+                          ),
+                          const Spacer(),
+                          KeyedSubtree(
+                            key: _categoriesMenuAnchorKey,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _openCategoryDropdown(
+                                menuOuterW: menuOuterW,
+                                menuPadH: menuPadH,
+                                menuPadV: menuPadV,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Categories ',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: _AnalyticsColors.linkBlue,
+                                    ),
+                                  ),
+                                  Image.asset(
+                                    'assets/images/back_arro.png',
+                                    height: 11.h,
+                                    width: 11.w,
+                                    fit: BoxFit.cover,
+                                    color: _AnalyticsColors.linkBlue,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 14.h),
+                      _DeviceUsageCard(
+                        selectedIndex: selectedDevice,
+                        onSelect: (i) =>
+                            ref
+                                    .read(
+                                      _analyticsSelectedDeviceIndexProvider
+                                          .notifier,
+                                    )
+                                    .state =
+                                i,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: SizedBox(
+                          height: 32.w,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: GlobalCircleIconBtn(
+                                  color: const Color(0xFFF3F4F6),
+                                  child: Image.asset(
+                                    'assets/aro.png',
+                                    width: 16.w,
+                                    height: 16.h,
+                                  ),
+                                  onTap: () {
+                                    if (!widget.showBottomNav) {
+                                      final shell = CustomBottomNavBar.of(
+                                        context,
+                                      );
+                                      if (shell != null) {
+                                        shell.setSelectedIndex(2);
+                                        return;
+                                      }
+                                    }
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/home');
+                                    }
+                                  },
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  'Analytics',
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: _AnalyticsColors.title,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+        bottomNavigationBar: widget.showBottomNav
+            ? BottomNavBarWidget(
+                selectedIndex: 1,
+                onItemTapped: _onNavItemTapped,
+                backgroundOpacity: 0.10,
+                useBackdropBlur: true,
+              )
+            : null,
       ),
-      bottomNavigationBar: widget.showBottomNav
-          ? BottomNavBarWidget(selectedIndex: 1, onItemTapped: _onNavItemTapped)
-          : null,
     );
   }
 }
@@ -522,322 +578,319 @@ class _ActivityCard extends StatelessWidget {
           SizedBox(height: 18.h),
 
           /// Top chart
-         /// Top chart - same box/table style like image 1
-SizedBox(
-  height: 150.h,
-  width: 400.w,
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.only(left: 4.w),
-          child: Stack(
-            children: [
-              CustomPaint(
-                size: Size(double.infinity, 150.h),
-                painter: _WeeklyBarsPainter(
-                  normalizedHeights: _weekHeights,
-                  gridColor: const Color(0xFFE5E7EB),
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 150.h,
-                ),
-              ),
-
-              /// labels inside bottom row of the same chart box
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 8.h,
-                child: Row(
-                  children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-                      .map(
-                        (d) => Expanded(
-                          child: Center(
-                            child: Text(
-                              d,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
+          /// Top chart - same box/table style like image 1
+          SizedBox(
+            height: 150.h,
+            width: 400.w,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 4.w),
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          size: Size(double.infinity, 150.h),
+                          painter: _WeeklyBarsPainter(
+                            normalizedHeights: _weekHeights,
+                            gridColor: const Color(0xFFE5E7EB),
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 150.h,
                           ),
                         ),
-                      )
-                      .toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      SizedBox(width: 0.2.w),
 
-      
-      Column(
-        children: [
-          Expanded(
-            flex: 9,
-            child: SizedBox(
-              width: 35.w,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final double totalH = constraints.maxHeight;
-                  final double chartH = totalH - _analyticsChartLabelRowHeight;
-                  const labels = ['24h', '18h', '12h', '6h', '0'];
-
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      for (int i = 0; i < labels.length; i++)
+                        /// labels inside bottom row of the same chart box
                         Positioned(
-                          top: _analyticsChartGridLineY(chartH, i),
-                          right: 5.w,
-                          child: Transform.translate(
-                            offset: Offset(1, -10.sp), // 👈 perfect center adjust
-                            child: Text(
-                              labels[i],
-                              textAlign: TextAlign.start, // 👈 important
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
+                          left: 0,
+                          right: 0,
+                          bottom: 8.h,
+                          child: Row(
+                            children: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+                                .map(
+                                  (d) => Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        d,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: const Color(0xFF6B7280),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-          Expanded(
-                 flex: 1,
-              child: Container(
-            
-          ))
-        ],
-      ),
-
-      /// old code,
-      // SizedBox(
-      //   width: 35.w,
-      //   child: LayoutBuilder(
-      //     builder: (context, constraints) {
-      //       final double totalH = constraints.maxHeight;
-      //       final double chartH = totalH - _analyticsChartLabelRowHeight;
-      //       const labels = ['24h', '18h', '12h', '6h', '0'];
-      //       return Stack(
-      //         clipBehavior: Clip.none,
-      //         children: [
-      //           for (int i = 0; i < labels.length; i++)
-      //             Positioned(
-      //               top: _analyticsChartGridLineY(chartH, i) -15.sp * 1,
-      //               right: 5.w,
-      //               bottom:5.h ,
-      //               child: Text(
-      //                 labels[i],
-      //                 style: TextStyle(
-      //                   fontFamily: 'Inter',
-      //                   fontSize: 14.sp,
-      //                   fontWeight: FontWeight.w400,
-      //                   color: const Color(0xFF6B7280),
-      //                 ),
-      //               ),
-      //             ),
-      //         ],
-      //       );
-      //     },
-      //   ),
-      // ),
-    ],
-  ),
-),
-
-SizedBox(height: 18.h),
-
-SizedBox(
-  height: 135.h,
-  width: 400.w,
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Expanded(
-        child: Padding(
-          padding: EdgeInsets.only(left: 2.w, right: 2.w),
-          child: Stack(
-            children: [
-              CustomPaint(
-                painter: _DailyStackPainter(
-                  gridColor: const Color(0xFFE5E7EB),
-                  barWidth: 11.w,
+                      ],
+                    ),
+                  ),
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 135.h,
-                ),
-              ),
+                SizedBox(width: 0.2.w),
 
-              /// x-axis labels — centered under each 6h column (matches grid).
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 8.h,
-                child: Row(
+                Column(
                   children: [
                     Expanded(
-                      child: Center(
-                        child: Text(
-                          '00:00',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF6B7280),
-                          ),
+                      flex: 9,
+                      child: SizedBox(
+                        width: 35.w,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double totalH = constraints.maxHeight;
+                            final double chartH =
+                                totalH - _analyticsChartLabelRowHeight;
+                            const labels = ['24h', '18h', '12h', '6h', '0'];
+
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                for (int i = 0; i < labels.length; i++)
+                                  Positioned(
+                                    top: _analyticsChartGridLineY(chartH, i),
+                                    right: 5.w,
+                                    child: Transform.translate(
+                                      offset: Offset(
+                                        1,
+                                        -10.sp,
+                                      ), // 👈 perfect center adjust
+                                      child: Text(
+                                        labels[i],
+                                        textAlign:
+                                            TextAlign.start, // 👈 important
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: const Color(0xFF6B7280),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '6:00',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '12:00',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '18:00',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF6B7280),
-                          ),
-                        ),
-                      ),
-                    ),
+                    Expanded(flex: 1, child: Container()),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      SizedBox(width: 0.2.w),
-      Column(
-        
-        children: [
-          Expanded(
-            flex: 9,
-            child: SizedBox(
-              width: 35.w,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final double totalH = constraints.maxHeight;
-                  final double chartH = totalH - _analyticsChartLabelRowHeight;
-                  const labels = ['100%', '75%', '50%', '25%', '0'];
 
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      for (int i = 0; i < labels.length; i++)
-                        Positioned(
-                          top: _analyticsChartGridLineY(chartH, i),
-                          right: 5,
-                          child: Transform.translate(
-                            offset: Offset(5, -10.sp), // 👈 center fix
-                            child: Text(
-                              labels[i],
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B7280),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                /// old code,
+                // SizedBox(
+                //   width: 35.w,
+                //   child: LayoutBuilder(
+                //     builder: (context, constraints) {
+                //       final double totalH = constraints.maxHeight;
+                //       final double chartH = totalH - _analyticsChartLabelRowHeight;
+                //       const labels = ['24h', '18h', '12h', '6h', '0'];
+                //       return Stack(
+                //         clipBehavior: Clip.none,
+                //         children: [
+                //           for (int i = 0; i < labels.length; i++)
+                //             Positioned(
+                //               top: _analyticsChartGridLineY(chartH, i) -15.sp * 1,
+                //               right: 5.w,
+                //               bottom:5.h ,
+                //               child: Text(
+                //                 labels[i],
+                //                 style: TextStyle(
+                //                   fontFamily: 'Inter',
+                //                   fontSize: 14.sp,
+                //                   fontWeight: FontWeight.w400,
+                //                   color: const Color(0xFF6B7280),
+                //                 ),
+                //               ),
+                //             ),
+                //         ],
+                //       );
+                //     },
+                //   ),
+                // ),
+              ],
             ),
           ),
-          Expanded(
-              flex: 1,
-              child: Container(
 
-              ))
-        ],
-      ), 
-    
-          // SizedBox(
-          //   width: 35.w,
-          //   child: LayoutBuilder(
-          //     builder: (context, constraints) {
-          //       final double totalH = constraints.maxHeight;
-          //       final double chartH = totalH - _analyticsChartLabelRowHeight;
-          //       const labels = ['100%', '75%', '50%', '25%', '0'];
-          //       return Stack(
-          //         clipBehavior: Clip.none,
-          //         children: [
-          //           for (int i = 0; i < labels.length; i++)
-          //             Positioned(
-          //               top: _analyticsChartGridLineY(chartH, i) - 1.sp * 0.52,
-          //               right: 0,
-          //               child: Text(
-          //                 labels[i],
-          //                 style: TextStyle(
-          //                   fontFamily: 'Inter',
-          //                   fontSize: 12.sp,
-          //                   fontWeight: FontWeight.w400,
-          //                   color: const Color(0xFF6B7280),
-          //                 ),
-          //               ),
-          //             ),
-          //         ],
-          //       );
-          //     },
-          //   ),
-          // ),
-      
-    ],
-  ),
-),
+          SizedBox(height: 18.h),
 
-// SizedBox(height: 12.h),
-// const Divider(height: 1, color: Color(0xFFF1F3F5)),
-// SizedBox(height: 12.h),
-// const Divider(height: 1, color: Color(0xFFF1F3F5)),  
-          
+          SizedBox(
+            height: 135.h,
+            width: 400.w,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 2.w, right: 2.w),
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          painter: _DailyStackPainter(
+                            gridColor: const Color(0xFFE5E7EB),
+                            barWidth: 11.w,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 135.h,
+                          ),
+                        ),
+
+                        /// x-axis labels — centered under each 6h column (matches grid).
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 8.h,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '00:00',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '6:00',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '12:00',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    '18:00',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 0.2.w),
+                Column(
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: SizedBox(
+                        width: 35.w,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double totalH = constraints.maxHeight;
+                            final double chartH =
+                                totalH - _analyticsChartLabelRowHeight;
+                            const labels = ['100%', '75%', '50%', '25%', '0'];
+
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                for (int i = 0; i < labels.length; i++)
+                                  Positioned(
+                                    top: _analyticsChartGridLineY(chartH, i),
+                                    right: 5,
+                                    child: Transform.translate(
+                                      offset: Offset(
+                                        5,
+                                        -10.sp,
+                                      ), // 👈 center fix
+                                      child: Text(
+                                        labels[i],
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: const Color(0xFF6B7280),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(flex: 1, child: Container()),
+                  ],
+                ),
+
+                // SizedBox(
+                //   width: 35.w,
+                //   child: LayoutBuilder(
+                //     builder: (context, constraints) {
+                //       final double totalH = constraints.maxHeight;
+                //       final double chartH = totalH - _analyticsChartLabelRowHeight;
+                //       const labels = ['100%', '75%', '50%', '25%', '0'];
+                //       return Stack(
+                //         clipBehavior: Clip.none,
+                //         children: [
+                //           for (int i = 0; i < labels.length; i++)
+                //             Positioned(
+                //               top: _analyticsChartGridLineY(chartH, i) - 1.sp * 0.52,
+                //               right: 0,
+                //               child: Text(
+                //                 labels[i],
+                //                 style: TextStyle(
+                //                   fontFamily: 'Inter',
+                //                   fontSize: 12.sp,
+                //                   fontWeight: FontWeight.w400,
+                //                   color: const Color(0xFF6B7280),
+                //                 ),
+                //               ),
+                //             ),
+                //         ],
+                //       );
+                //     },
+                //   ),
+                // ),
+              ],
+            ),
+          ),
+
+          // SizedBox(height: 12.h),
+          // const Divider(height: 1, color: Color(0xFFF1F3F5)),
+          // SizedBox(height: 12.h),
+          // const Divider(height: 1, color: Color(0xFFF1F3F5)),
           SizedBox(height: 12.h),
 
           Row(
@@ -967,21 +1020,13 @@ class _WeeklyBarsPainter extends CustomPainter {
     // outer vertical lines (full height including label row)
     for (int i = 0; i <= barCount; i++) {
       final x = columnWidth * i;
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        grid,
-      );
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     }
 
     // horizontal lines for chart area only
     for (int i = 0; i <= 4; i++) {
       final y = chartHeight * (i / 4);
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        grid,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
     }
 
     // separator line between chart and weekday row
@@ -1011,11 +1056,7 @@ class _WeeklyBarsPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [
-              Color(0xFF0088FE),
-            Color(0xFF00D1FF),
-          
-          ],
+          colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
         ).createShader(rect);
 
       canvas.drawRRect(rrect, paint);
@@ -1028,11 +1069,9 @@ class _WeeklyBarsPainter extends CustomPainter {
         oldDelegate.gridColor != gridColor;
   }
 }
+
 class _DailyStackPainter extends CustomPainter {
-  _DailyStackPainter({
-    required this.gridColor,
-    required this.barWidth,
-  });
+  _DailyStackPainter({required this.gridColor, required this.barWidth});
 
   final Color gridColor;
   final double barWidth;
@@ -1069,21 +1108,13 @@ class _DailyStackPainter extends CustomPainter {
     // vertical lines full height including label row
     for (int i = 0; i <= 4; i++) {
       final x = size.width * (i / 4);
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        grid,
-      );
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
     }
 
     // horizontal lines only for chart area
     for (int i = 0; i <= 4; i++) {
       final y = chartHeight * (i / 4);
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        grid,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
     }
 
     // separator between chart and x-axis label row
@@ -1107,8 +1138,7 @@ class _DailyStackPainter extends CustomPainter {
         final double auto = stack[1];
         final double off = stack[2];
 
-        final double xCenter =
-            segmentLeft + slotWidth * (h + 0.5);
+        final double xCenter = segmentLeft + slotWidth * (h + 0.5);
         final double x = xCenter - drawBarWidth / 2;
 
         final double onH = chartHeight * on;

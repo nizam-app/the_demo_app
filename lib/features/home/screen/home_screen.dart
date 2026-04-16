@@ -5,9 +5,11 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
@@ -56,22 +58,33 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Widget _buildHomeBody() {
-    final headerBarHeight = 56.h;
-    return SafeArea(
-      bottom: false,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(
-                  16.w,
-                  headerBarHeight + 10.h,
-                  16.w,
-                  24.h,
-                ),
+  Widget _buildHomeBody(BuildContext context) {
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    scrollTopPadding,
+                    16.w,
+                    24.h,
+                  ),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isSelected: true,
                                 icon: Icons.lightbulb_outline,
                                 imagePath: 'assets/Mask group (3).png',
-                                onTap: () {},
+                                onTap: () {
+                                  context.push(LightDinningRoomScreen.routeName);
+                                },
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
@@ -123,45 +138,77 @@ class _HomeScreenState extends State<HomeScreen> {
                         const _SectionTitle('Light'),
                         SizedBox(height: 12.h),
 
-                        // ✅ Light section grid 2x2
-                        GridView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12.w,
-                            mainAxisSpacing: 12.h,
-                            childAspectRatio: 195 / 185, // ✅ FIX: image-1 ratio
-                          ),
-                          children: const [
-                            _LightDimmerCard(
-                              title: 'Bedroom spot light\nsmall patio blue light',
-                              percent: 0.72,
-                              mode: 'A',
-                              modeFilled: false,
-                              imagePath: 'assets/Mask group (5).png',
+                        // ✅ Light section 2x2 (same spacing as prior GridView)
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: InkWell(
+                                      onTap: ()=>context.push(LightDinningRoomScreen.routeName),
+                                      child: const _LightDimmerCard(
+                                        title:
+                                            'Bedroom spot light\nsmall patio blue light',
+                                        percent: 0.72,
+                                        mode: 'A',
+                                        modeFilled: false,
+                                        imagePath: 'assets/Mask group (5).png',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: const _ThermostatCard(
+                                      title:
+                                          'Bathroom heating and boiler thermostat',
+                                      value: 24.6,
+                                      mode: 'M',
+                                      modeFilled: true,
+                                      imagePath: 'assets/Mask group (6).png',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            _ThermostatCard(
-                              title: 'Bathroom heating and boiler thermostat',
-                              value: 24.6,
-                              mode: 'M',
-                              modeFilled: true,
-                              imagePath: 'assets/Mask group (6).png',
-                            ),
-                            _BlindCard(
-                              title: 'Blind Living Room\nnorth window',
-                              downPercent: 0,
-                              upPercent: 72,
-                              mode: 'M',
-                              modeFilled: true,
-                              imagePath: 'assets/Rectangle 823.png',
-                            ),
-                            _ToggleCard(
-                              title: 'Irrigation entry and front home two valve',
-                              isOn: true,
-                              mode: 'A',
-                              modeFilled: false,
-                              imagePath: 'assets/Mask group (7).png',
+                            SizedBox(height: 12.h),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: const _BlindCard(
+                                      title: 'Blind Living Room\nnorth window',
+                                      downPercent: 0,
+                                      upPercent: 72,
+                                      mode: 'M',
+                                      modeFilled: true,
+                                      imagePath: 'assets/Rectangle 823.png',
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: const _ToggleCard(
+                                      title:
+                                          'Irrigation entry and front home two valve',
+                                      isOn: true,
+                                      mode: 'A',
+                                      modeFilled: false,
+                                      imagePath: 'assets/Mask group (7).png',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -204,23 +251,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.58),
+                    color: Colors.white.withOpacity(0.20),
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFFE5E7EB).withOpacity(0.55),
+                        color: const Color(0xFFE5E7EB).withOpacity(0.18),
                         width: 1,
                       ),
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 8.h),
+                    padding: EdgeInsets.fromLTRB(
+                      15.w,
+                      topInset + 10.h,
+                      15.w,
+                      8.h,
+                    ),
                     child: Builder(
-                      builder: (context) => _Header(
+                      builder: (ctx) => _Header(
                         onMenuTap: () {
-                          context.push(MenuScreen.routeName);
+                          ctx.push(MenuScreen.routeName);
                         },
                         onEditTap: () =>
-                            HomeScreen.showEditAddSectionSheet(context),
+                            HomeScreen.showEditAddSectionSheet(ctx),
                       ),
                     ),
                   ),
@@ -230,6 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -238,7 +291,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return CustomBottomNavBar(
       initialIndex: 2,
       translucentBottomBar: true,
-      bottomBarBackgroundOpacity: 0.58,
+      bottomBarBackgroundOpacity: 0.10,
+      backgroundColor: Colors.white,
       // Voice/Home is index 2
       // drawer: Drawer(
       //   child: SafeArea(
@@ -329,9 +383,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: AnalyticsScreen(showBottomNav: false),
         ),
         // Index 2: Home/Voice
-        RepaintBoundary(child: _buildHomeBody()),
+        RepaintBoundary(child: _buildHomeBody(context)),
         // Index 3: Notifications
-        RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
+        RepaintBoundary(child: NotificationsScreen(showBottomNav: true)),
         // Index 4: Settings
         const RepaintBoundary(child: SettingsScreen()),
       ],
@@ -663,6 +717,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -672,6 +728,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -688,6 +746,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconImage:
                               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
+                          onTap: () =>
+                              context.push(LightDinningRoomScreen.routeName),
                         ),
                       ),
                     ],
@@ -712,6 +772,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -721,6 +783,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () =>
+                    context.push(LightDinningRoomScreen.routeName),
               ),
             ),
             SizedBox(width: 12.w),
@@ -737,6 +801,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconImage:
                               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
+                          onTap: () =>
+                              context.push(LightDinningRoomScreen.routeName),
                         ),
                       ),
                     ],
@@ -760,11 +826,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required String status,
     required String iconImage,
     bool progressCircle = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
+    final radius = BorderRadius.circular(26.r);
+    final card = Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(26.r),
+        borderRadius: radius,
       ),
       padding: EdgeInsets.all(12.w),
       child: Column(
@@ -814,6 +883,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+    if (onTap == null) return card;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: radius,
+        child: card,
       ),
     );
   }

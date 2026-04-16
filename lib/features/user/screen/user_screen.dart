@@ -57,11 +57,14 @@ class UsersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final headerBarHeight = 56.h;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final scrollTopPadding = topInset + headerBarHeight + 16.h;
     return Scaffold(
       backgroundColor: _bg,
       //backgroundColor: Colors.white,
       floatingActionButton: const _FabPlus(),
       body: SafeArea(
+        top: false,
         bottom: false,
         child: Stack(
           fit: StackFit.expand,
@@ -74,7 +77,7 @@ class UsersScreen extends StatelessWidget {
                     padding: EdgeInsets.only(
                       left: 15.w,
                       right: 15.w,
-                      top: headerBarHeight + 16.h,
+                      top: scrollTopPadding,
                       bottom: 500.h,
                     ),
 
@@ -168,7 +171,14 @@ class UsersScreen extends StatelessWidget {
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.58),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          _bg.withOpacity(0.28),
+                          _bg.withOpacity(0.90),
+                        ],
+                      ),
                       border: Border(
                         bottom: BorderSide(
                           color: const Color(0xFFE5E7EB).withOpacity(0.55),
@@ -177,9 +187,11 @@ class UsersScreen extends StatelessWidget {
                       ),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 15.w,
-                        vertical: 10.h,
+                      padding: EdgeInsets.fromLTRB(
+                        15.w,
+                        topInset + 10.h,
+                        15.w,
+                        10.h,
                       ),
                       child: const _TopBar(),
                     ),

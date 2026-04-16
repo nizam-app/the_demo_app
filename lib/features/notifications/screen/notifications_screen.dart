@@ -1,4 +1,7 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
@@ -62,6 +65,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _alertsItems = List<_NotifItem>.from(_kAlertsSeed);
     _systemItems = List<_NotifItem>.from(_kSystemSeed);
   }
+
   void _clearSection(_NotifSection section) {
     setState(() {
       switch (section) {
@@ -84,165 +88,231 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _screenBg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left:  18.w, right:  18.w, bottom:  12.h),
-              child: SizedBox(
-                height: 36.h,
-                child: Stack(
-                  alignment: Alignment.center,
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final scrollBottomPad = widget.showBottomNav
+        ? 18.h + 72.h + bottomInset
+        : 24.h + bottomInset;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _screenBg,
+        body: SafeArea(
+          top: false,
+          bottom: !widget.showBottomNav,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(color: _screenBg),
+                ),
+              ),
+              Positioned.fill(
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    18.w,
+                    scrollTopPadding,
+                    18.w,
+                    scrollBottomPad,
+                  ),
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GlobalCircleIconBtn(
-                        color: const Color(0xFFF3F4F6),
-                        child: Image.asset(
-                          'assets/aro.png',
-                          width: 16.w,
-                          height: 16.h,
-                        ),
-                        onTap: () {
-                          if (!widget.showBottomNav) {
-                            final shell = CustomBottomNavBar.of(context);
-                            if (shell != null) {
-                              shell.setSelectedIndex(2);
-                              return;
-                            }
-                          }
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/home');
-                          }
+                    SizedBox(
+                      height: 32.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _filters.length,
+                        separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                        itemBuilder: (context, index) {
+                          final label = _filters[index];
+                          final selected = _selectedFilter == label;
+                          return GestureDetector(
+                            onTap: () =>
+                                setState(() => _selectedFilter = label),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: EdgeInsets.symmetric(horizontal: 14.w),
+                              decoration: BoxDecoration(
+                                color: selected ? _chipActiveBg : Colors.white,
+                                borderRadius: BorderRadius.circular(26.r),
+                                border: Border.all(
+                                  color: selected
+                                      ? _chipActiveBg.withOpacity(0.72)
+                                      : _chipInactiveBorder.withOpacity(0.72),
+                                  width: 1.w,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                label,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: _textPrimary,
+                                ),
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ),
-                    Text(
-                      'Notifications',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w600,
-                        color: _textPrimary,
-                        height: 1.2,
+                    if (_showSection('Errors')) ...[
+                      _SectionHeader(
+                        title: 'Errors',
+                        onClear: () => _clearSection(_NotifSection.errors),
+                        clearColor: _clearText,
                       ),
-                    ),
+                      SizedBox(height: 12.h),
+                      ..._errorsItems.map(
+                        (e) => Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: _NotificationCard(item: e),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+                    if (_showSection('Security')) ...[
+                      _SectionHeader(
+                        title: 'Security',
+                        onClear: () => _clearSection(_NotifSection.security),
+                        clearColor: _clearText,
+                      ),
+                      SizedBox(height: 12.h),
+                      ..._securityItems.map(
+                        (e) => Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: _NotificationCard(item: e),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+                    if (_showSection('Alerts')) ...[
+                      _SectionHeader(
+                        title: 'Alerts',
+                        onClear: () => _clearSection(_NotifSection.alerts),
+                        clearColor: _clearText,
+                      ),
+                      SizedBox(height: 12.h),
+                      ..._alertsItems.map(
+                        (e) => Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: _NotificationCard(item: e),
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+                    if (_showSection('System')) ...[
+                      _SectionHeader(
+                        title: 'System',
+                        onClear: () => _clearSection(_NotifSection.system),
+                        clearColor: _clearText,
+                      ),
+                      SizedBox(height: 12.h),
+                      ..._systemItems.map(
+                        (e) => Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: _NotificationCard(item: e),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-            ),
-            
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: 18.w),
-                children: [
-
-                  SizedBox(
-                    height: 32.h,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                     // padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      itemCount: _filters.length,
-                      separatorBuilder: (_, __) => SizedBox(width: 10.w),
-                      itemBuilder: (context, index) {
-                        final label = _filters[index];
-                        final selected = _selectedFilter == label;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedFilter = label),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: EdgeInsets.symmetric(horizontal: 14.w, ),
-                            decoration: BoxDecoration(
-                              color: selected ? _chipActiveBg : Colors.white,
-                              borderRadius: BorderRadius.circular(26.r),
-                              border: Border.all(
-                                color: selected ? _chipActiveBg.withOpacity(0.72) : _chipInactiveBorder.withOpacity(0.72),
-                                width: 1.w,
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: _textPrimary,
-                              ),
-                            ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: SizedBox(
+                          height: 36.h,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: GlobalCircleIconBtn(
+                                  color: const Color(0xFFF3F4F6),
+                                  child: Image.asset(
+                                    'assets/aro.png',
+                                    width: 16.w,
+                                    height: 16.h,
+                                  ),
+                                  onTap: () {
+                                    if (!widget.showBottomNav) {
+                                      final shell = CustomBottomNavBar.of(
+                                        context,
+                                      );
+                                      if (shell != null) {
+                                        shell.setSelectedIndex(2);
+                                        return;
+                                      }
+                                    }
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/home');
+                                    }
+                                  },
+                                ),
+                              ),
+                              Text(
+                                'Notifications',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 22.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: _textPrimary,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  if (_showSection('Errors')) ...[
-                    _SectionHeader(
-                      title: 'Errors',
-                      onClear: () => _clearSection(_NotifSection.errors),
-                      clearColor: _clearText,
-                    ),
-                    SizedBox(height: 12.h),
-                    ..._errorsItems.map((e) => Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
-                          child: _NotificationCard(item: e),
-                        )),
-                    SizedBox(height: 20.h),
-                  ],
-                  if (_showSection('Security')) ...[
-                    _SectionHeader(
-                      title: 'Security',
-                      onClear: () => _clearSection(_NotifSection.security),
-                      clearColor: _clearText,
-                    ),
-                    SizedBox(height: 12.h),
-                    ..._securityItems.map((e) => Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
-                          child: _NotificationCard(item: e),
-                        )),
-                    SizedBox(height: 20.h),
-                  ],
-                  if (_showSection('Alerts')) ...[
-                    _SectionHeader(
-                      title: 'Alerts',
-                      onClear: () => _clearSection(_NotifSection.alerts),
-                      clearColor: _clearText,
-                    ),
-                    SizedBox(height: 12.h),
-                    ..._alertsItems.map((e) => Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
-                          child: _NotificationCard(item: e),
-                        )),
-                    SizedBox(height: 20.h),
-                  ],
-                  if (_showSection('System')) ...[
-                    _SectionHeader(
-                      title: 'System',
-                      onClear: () => _clearSection(_NotifSection.system),
-                      clearColor: _clearText,
-                    ),
-                    SizedBox(height: 12.h),
-                    ..._systemItems.map((e) => Padding(
-                          padding: EdgeInsets.only(bottom: 10.h),
-                          child: _NotificationCard(item: e),
-                        )),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        bottomNavigationBar: widget.showBottomNav
+            ? BottomNavBarWidget(
+                selectedIndex: _selectedNavIndex,
+                onItemTapped: _onNavItemTapped,
+                backgroundOpacity: 0.10,
+                useBackdropBlur: true,
+              )
+            : null,
       ),
-      bottomNavigationBar: widget.showBottomNav
-          ? BottomNavBarWidget(
-              selectedIndex: _selectedNavIndex,
-              onItemTapped: _onNavItemTapped,
-            )
-          : null,
     );
   }
 }
@@ -256,9 +326,7 @@ class _NotifItem {
     required this.description,
     this.asset,
     this.width,
-    this.height
-
-    
+    this.height,
   });
 
   final String title;
@@ -266,30 +334,26 @@ class _NotifItem {
   final String description;
   final String? asset;
   final double? width;
-  final double? height; 
-
+  final double? height;
 }
 
 const List<_NotifItem> _kErrorsSeed = [
-
-  //Errors items; 
+  //Errors items;
   _NotifItem(
     title: 'Badroom spot light',
     time: 'Yesterday 13:25',
-    description:
-        'BUS error please check wiring and reset module.',
+    description: 'BUS error please check wiring and reset module.',
     asset: "assets/images/heating_cooling.png",
     height: 39,
-    width:39, 
+    width: 39,
   ),
   _NotifItem(
     title: 'Bathroom heating',
     time: 'Yesterday 13:25',
-    description:
-        'Something may wrong the heating ON over 4 hours.',
+    description: 'Something may wrong the heating ON over 4 hours.',
     asset: 'assets/images/bathroom.png',
     height: 39,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Living room lamp',
@@ -298,7 +362,7 @@ const List<_NotifItem> _kErrorsSeed = [
         'Communication error with control unit, some wire maybe disconnected.',
     asset: 'assets/Mask group (5).png',
     height: 39,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Blind living room',
@@ -307,7 +371,7 @@ const List<_NotifItem> _kErrorsSeed = [
         'Blind in error state please check if some object prevent from blind to roll up.',
     asset: 'assets/images/livingRoom.png',
     height: 49,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Garden entry irrigation',
@@ -316,11 +380,11 @@ const List<_NotifItem> _kErrorsSeed = [
         'You forgot to turn off the irrigation please use weekly timer to automate it.',
     asset: 'assets/images/irrigation.png',
     height: 39,
-    width:39,
+    width: 39,
   ),
 ];
 
-// Security items ; 
+// Security items ;
 
 const List<_NotifItem> _kSecuritySeed = [
   _NotifItem(
@@ -330,7 +394,7 @@ const List<_NotifItem> _kSecuritySeed = [
         'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
     asset: "assets/images/LED_light.png",
     height: 41,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'RGB light',
@@ -339,7 +403,7 @@ const List<_NotifItem> _kSecuritySeed = [
         'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
     asset: "assets/images/Rectangle.png",
     height: 39,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Badroom thermostat',
@@ -348,11 +412,11 @@ const List<_NotifItem> _kSecuritySeed = [
         'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
     asset: "assets/images/6376d7bf4226592678854fa38ee9afdd47741881.png",
     height: 39,
-    width:39,
+    width: 39,
   ),
 ];
 
-// Alerts items; 
+// Alerts items;
 const List<_NotifItem> _kAlertsSeed = [
   _NotifItem(
     title: 'Living room lamp',
@@ -361,7 +425,7 @@ const List<_NotifItem> _kAlertsSeed = [
         'Communication error with control unit, some wire maybe disconnected.',
     asset: 'assets/Mask group (5).png',
     height: 39,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Blind living room',
@@ -370,7 +434,7 @@ const List<_NotifItem> _kAlertsSeed = [
         'Blind in error state please check if some object prevent from blind to roll up.',
     asset: 'assets/images/livingRoom.png',
     height: 49,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Garden entry irrigation',
@@ -379,21 +443,21 @@ const List<_NotifItem> _kAlertsSeed = [
         'You forgot to OFF the irrigation please use weekly timer to automate it.',
     asset: 'assets/images/irrigation.png',
     height: 39,
-    width:39,
+    width: 39,
   ),
 
   _NotifItem(
     title: 'LED light',
     time: 'Yesterday 13:25',
     description:
-    'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+        'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
     asset: "assets/images/LED_light.png",
     height: 39,
-    width:39,
+    width: 39,
   ),
 ];
 
-// System items;  
+// System items;
 
 const List<_NotifItem> _kSystemSeed = [
   _NotifItem(
@@ -403,7 +467,7 @@ const List<_NotifItem> _kSystemSeed = [
         'Communication error with control unit, some wire maybe disconnected.',
     asset: 'assets/Mask group (5).png',
     height: 39,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Blind living room',
@@ -412,7 +476,7 @@ const List<_NotifItem> _kSystemSeed = [
         'Blind in error state please check if some object prevent from blind to roll up.',
     asset: 'assets/images/livingRoom.png',
     height: 49,
-    width:39,
+    width: 39,
   ),
   _NotifItem(
     title: 'Garden entry irrigation',
@@ -421,8 +485,7 @@ const List<_NotifItem> _kSystemSeed = [
         'You forgot to OFF the irrigation please use weekly timer to automate it.',
     asset: 'assets/images/irrigation.png',
     height: 39,
-    width:39,
-    
+    width: 39,
   ),
   _NotifItem(
     title: 'LED light',
@@ -431,8 +494,7 @@ const List<_NotifItem> _kSystemSeed = [
         'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
     asset: "assets/images/LED_light.png",
     height: 39,
-    width:39,
-   
+    width: 39,
   ),
 ];
 
@@ -467,8 +529,7 @@ class _SectionHeader extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26.r),
-              color: Color(0xFFF3F4F6).withOpacity(0.74)
-              
+              color: Color(0xFFF3F4F6).withOpacity(0.74),
             ),
             height: 23.h,
             padding: EdgeInsets.only(left: 8.w, right: 8.w),
@@ -481,11 +542,16 @@ class _SectionHeader extends StatelessWidget {
                     fontFamily: 'Inter',
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
-                    color:Color(0xFF111827),
+                    color: Color(0xFF111827),
                   ),
                 ),
-                SizedBox(width: 5.w,),
-                Image.asset("assets/images/clearBrsh.png", height: 18.h,width: 18.w,fit: BoxFit.cover,)
+                SizedBox(width: 5.w),
+                Image.asset(
+                  "assets/images/clearBrsh.png",
+                  height: 18.h,
+                  width: 18.w,
+                  fit: BoxFit.cover,
+                ),
               ],
             ),
           ),
@@ -503,72 +569,70 @@ class _NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 18.h),
-        decoration: BoxDecoration(
-          color: Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(26.r),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.04),
-          //     blurRadius: 12.r,
-          //     offset: Offset(0, 4.h),
-          //   ),
-          // ],
-        ),
-        child: Row(
-          //crossAxisAlignment: CrossAxisAlignment.start,
-          
-          children: [
-            _NotificationLeading(
-                item: item),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                            height: 1.25,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        item.time,
+      padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 18.h),
+      decoration: BoxDecoration(
+        color: Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(26.r),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.04),
+        //     blurRadius: 12.r,
+        //     offset: Offset(0, 4.h),
+        //   ),
+        // ],
+      ),
+      child: Row(
+        //crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _NotificationLeading(item: item),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.title,
                         style: TextStyle(
                           fontFamily: 'Inter',
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF6B7280),
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          height: 1.25,
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    item.description,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                      height: 1,
-                      color: const Color(0xFF6B7280),
                     ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      item.time,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  item.description,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 1,
+                    color: const Color(0xFF6B7280),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -578,20 +642,18 @@ class _NotificationLeading extends StatelessWidget {
 
   final _NotifItem item;
 
-  final  double imagewidth = 39;
-  final double imageheight=39;
+  final double imagewidth = 39;
+  final double imageheight = 39;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child:  Image.asset(
+      child: Image.asset(
         item.asset!,
-        width: imagewidth, 
+        width: imagewidth,
         height: imageheight,
         fit: BoxFit.contain,
-      )
-          
+      ),
     );
-    
   }
 }

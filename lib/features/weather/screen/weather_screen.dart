@@ -1,11 +1,11 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_launcher_icons/xml_templates.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 
@@ -130,204 +130,258 @@ class WeatherScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weather = ref.watch(_weatherScreenProvider);
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final scrollBottomPad =
+        24.h + bottomInset + (showBottomNav ? 18.h + 72.h : 0);
 
-    return Scaffold(
-      backgroundColor: _skyBottom,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [_skyTop, _skyBottom],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(23.w, 6.h, 14.w, 0),
-                child: SizedBox(
-                  height: 32.h,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GlobalCircleIconBtn(
-                          color: const Color(0xFF205BB5),
-                          child: Image.asset(
-                            'assets/aro.png',
-                            width: 16.w,
-                            height: 16.h,
-                            color: Colors.white,
-                          ),
-                          onTap: () {
-                            if (context.canPop()) {
-                              context.pop();
-                            } else {
-                              context.go('/menu');
-                            }
-                          },
-                        ),
-                      ),
-                      Text(
-                        'Weather',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF002172),
-                        ),
-                      ),
-                    ],
-                  ),
+    const gradientDecoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [_skyTop, _skyBottom],
+      ),
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _skyBottom,
+        body: Container(
+          decoration: gradientDecoration,
+          child: SafeArea(
+            top: false,
+            bottom: !showBottomNav,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: DecoratedBox(decoration: gradientDecoration),
                 ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(15.w, 10.h, 15.w, 24.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 172.w,
-                              height: 132.h,
-                              child: const _WeatherHeroIllustration(),
-                            ),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 10.h),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      weather.location,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 22.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: _textPrimary,
-                                        height: 1.5,
+                Positioned.fill(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      15.w,
+                      scrollTopPadding,
+                      15.w,
+                      scrollBottomPad,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 172.w,
+                                height: 132.h,
+                                child: const _WeatherHeroIllustration(),
+                              ),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 10.h),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        weather.location,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 22.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: _textPrimary,
+                                          height: 1.5,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 2.h),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          weather.temperature,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 60.sp,
-                                            fontWeight: FontWeight.w300,
-                                            color: _textPrimary,
-                                            height: 0.95,
-                                          ),
-                                        ),
-                                        // SizedBox(width: 2.w,),
-                                        Text(
-                                          '°',
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 50.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: _textPrimary,
-                                            height: 0.80,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10.h),
-
-                                    Transform.translate(
-                                      offset: Offset(0.w, -10.h),
-                                      child: Column(
+                                      SizedBox(height: 2.h),
+                                      Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
-                                            weather.condition,
+                                            weather.temperature,
                                             style: TextStyle(
                                               fontFamily: 'Inter',
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w500,
+                                              fontSize: 60.sp,
+                                              fontWeight: FontWeight.w300,
                                               color: _textPrimary,
+                                              height: 0.95,
                                             ),
                                           ),
-                                          //SizedBox(height: 10.h),
+                                          // SizedBox(width: 2.w,),
                                           Text(
-                                            weather.highLow,
+                                            '°',
                                             style: TextStyle(
                                               fontFamily: 'Inter',
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: 50.sp,
+                                              fontWeight: FontWeight.w400,
                                               color: _textPrimary,
+                                              height: 0.80,
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(height: 10.h),
+
+                                      Transform.translate(
+                                        offset: Offset(0.w, -10.h),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              weather.condition,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: _textPrimary,
+                                              ),
+                                            ),
+                                            //SizedBox(height: 10.h),
+                                            Text(
+                                              weather.highLow,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: _textPrimary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 20.h),
-                      _WeatherSummaryCard(
-                        summary: weather.summary,
-                        items: weather.currentInfo,
-                      ),
-                      SizedBox(height: 12.h),
-                      _OutlookCard(forecast: weather.forecast),
-                      SizedBox(height: 12.h),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final itemWidth = (constraints.maxWidth - 10.w) / 2;
-                          return Wrap(
-                            spacing: 10.w,
-                            runSpacing: 10.h,
-                            children: weather.metrics
-                                .map(
-                                  (metric) => SizedBox(
-                                    width: itemWidth,
-                                    child: _MetricCard(metric: metric),
-                                  ),
-                                )
-                                .toList(),
-                          );
-                        },
-                      ),
-                      SizedBox(height: 12.h),
-                      _LocationMapCard(
-                        latitude: weather.latitude,
-                        longitude: weather.longitude,
-                      ),
-                      SizedBox(height: showBottomNav ? 10.h : 0),
-                    ],
+                        SizedBox(height: 20.h),
+                        _WeatherSummaryCard(
+                          summary: weather.summary,
+                          items: weather.currentInfo,
+                        ),
+                        SizedBox(height: 12.h),
+                        _OutlookCard(forecast: weather.forecast),
+                        SizedBox(height: 12.h),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final itemWidth = (constraints.maxWidth - 10.w) / 2;
+                            return Wrap(
+                              spacing: 10.w,
+                              runSpacing: 10.h,
+                              children: weather.metrics
+                                  .map(
+                                    (metric) => SizedBox(
+                                      width: itemWidth,
+                                      child: _MetricCard(metric: metric),
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 12.h),
+                        _LocationMapCard(
+                          latitude: weather.latitude,
+                          longitude: weather.longitude,
+                        ),
+                        SizedBox(height: showBottomNav ? 10.h : 0),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.20),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            15.w,
+                            topInset + 10.h,
+                            15.w,
+                            8.h,
+                          ),
+                          child: SizedBox(
+                            height: 32.h,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: GlobalCircleIconBtn(
+                                    color: const Color(0xFF205BB5),
+                                    child: Image.asset(
+                                      'assets/aro.png',
+                                      width: 16.w,
+                                      height: 16.h,
+                                      color: Colors.white,
+                                    ),
+                                    onTap: () {
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      } else {
+                                        context.go('/menu');
+                                      }
+                                    },
+                                  ),
+                                ),
+                                Text(
+                                  'Weather',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF002172),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+        bottomNavigationBar: showBottomNav
+            ? BottomNavBarWidget(
+                selectedIndex: 2,
+                onItemTapped: (index) => _onNavItemTapped(context, index),
+                backgroundOpacity: 0.10,
+                useBackdropBlur: true,
+              )
+            : null,
       ),
-      bottomNavigationBar: showBottomNav
-          ? BottomNavBarWidget(
-              selectedIndex: -1,
-              onItemTapped: (index) => _onNavItemTapped(context, index),
-            )
-          : null,
     );
   }
 }
@@ -648,13 +702,12 @@ class _MetricCard extends StatelessWidget {
   double get _cardHeight {
     switch (metric.iconType) {
       case _MetricIconType.pressure:
-      
         return 182.h;
       case _MetricIconType.wind:
         // Taller than default: header + large primary + 2-line secondary needs room.
         return 182.h;
       default:
-    //case _MetricIconType.uv:
+        //case _MetricIconType.uv:
         return 173.h;
     }
   }
@@ -667,7 +720,7 @@ class _MetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: WeatherScreen._panelSoft,
         borderRadius: BorderRadius.circular(26.r),
-        border: Border.all(width: 1.h, color:Colors.white),  
+        border: Border.all(width: 1.h, color: Colors.white),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -690,7 +743,8 @@ class _MetricCard extends StatelessWidget {
             ],
           ),
           SizedBox(
-            height: (metric.iconType == _MetricIconType.pressure ||
+            height:
+                (metric.iconType == _MetricIconType.pressure ||
                     metric.iconType == _MetricIconType.uv)
                 ? 8.h
                 : 12.h,
@@ -718,7 +772,7 @@ class _MetricCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         metric.primary,
@@ -745,7 +799,7 @@ class _MetricCard extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8.h),
-                  Divider(height: 1.h, color: Colors.white,),
+                  Divider(height: 1.h, color: Colors.white),
                   SizedBox(height: 8.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -775,7 +829,7 @@ class _MetricCard extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8.h),
-                  Divider(height: 1.h, color: Colors.white,),
+                  Divider(height: 1.h, color: Colors.white),
                   SizedBox(height: 8.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -808,8 +862,8 @@ class _MetricCard extends StatelessWidget {
               ),
             )
           else ...[
-              SizedBox(height: 12.h,),
-              Text(
+            SizedBox(height: 12.h),
+            Text(
               metric.primary,
               style: TextStyle(
                 fontFamily: 'Inter',
@@ -819,7 +873,7 @@ class _MetricCard extends StatelessWidget {
                 height: 1.0,
               ),
             ),
-               SizedBox(height: 12.h,),
+            SizedBox(height: 12.h),
             Text(
               metric.secondary,
               style: TextStyle(
@@ -850,7 +904,7 @@ class _LocationMapCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: WeatherScreen._textPrimary,
         borderRadius: BorderRadius.circular(26.r),
-        border: Border.all(width: 1.w, color: Colors.white)
+        border: Border.all(width: 1.w, color: Colors.white),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -895,7 +949,7 @@ class _LocationMapCard extends StatelessWidget {
           SizedBox(height: 10.h),
           _LatLngRow(label: 'Latitude', value: latitude),
           SizedBox(height: 6.h),
-          Divider(height: 1.h, color: Colors.white,),
+          Divider(height: 1.h, color: Colors.white),
           SizedBox(height: 6.h),
           _LatLngRow(label: 'Longitude', value: longitude),
         ],
@@ -951,11 +1005,7 @@ class _MetricLeadingIcon extends StatelessWidget {
       width: _kIcon.w,
       height: _kIcon.h,
       child: Center(
-        child: Image.asset(
-          path,
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
-        ),
+        child: Image.asset(path, fit: BoxFit.contain, gaplessPlayback: true),
       ),
     );
   }
@@ -1003,13 +1053,16 @@ class _PressureGauge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-     
       children: [
-        Center(child: Image.asset("assets/images/presure_bigicon.png",
-          height: 88.h,
-         // width: 170.w,
-          fit: BoxFit.cover,)),
-        
+        Center(
+          child: Image.asset(
+            "assets/images/presure_bigicon.png",
+            height: 88.h,
+            // width: 170.w,
+            fit: BoxFit.cover,
+          ),
+        ),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1025,9 +1078,9 @@ class _PressureGauge extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-             //SizedBox(width: 10.w,),
+            //SizedBox(width: 10.w,),
             Text(
-            //  "High",
+              //  "High",
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1267,7 +1320,7 @@ class _ForecastDay {
 }
 
 class _MetricData {
-  const _MetricData({    
+  const _MetricData({
     required this.title,
     required this.primary,
     required this.secondary,

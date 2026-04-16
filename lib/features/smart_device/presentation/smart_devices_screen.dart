@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
 import '../widget/addSmartDevicesPopup.dart';
 import '../widget/menu_popup.dart';
@@ -81,6 +82,15 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
         expand: false,
         builder: (_, controller) => AddSmartDeviceSheet(scrollController: controller),
       ),
+    );
+  }
+
+  void _showAssignCategoryPopup(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AssignCategoryZoneSheet(),
     );
   }
 
@@ -427,10 +437,16 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                       label: 'Lighting',
                       bg: Color(0xFFFFFFFF),
                       fg: _primary,
+                      onTap: () => _showAssignCategoryPopup(context),
                     ),
                   ),
                   SizedBox(width: 5.w),
-                  _TagChip(label: 'Bathroom', bg: _pink, fg: Colors.white),
+                  _TagChip(
+                    label: 'Bathroom',
+                    bg: _pink,
+                    fg: Colors.white,
+                    onTap: () => _showAssignCategoryPopup(context),
+                  ),
                 ],
               ),
             ],
@@ -743,15 +759,21 @@ class _InlineText extends StatelessWidget {
 }
 
 class _TagChip extends StatelessWidget {
-  const _TagChip({required this.label, required this.bg, required this.fg});
+  const _TagChip({
+    required this.label,
+    required this.bg,
+    required this.fg,
+    this.onTap,
+  });
 
   final String label;
   final Color bg;
   final Color fg;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final chip = Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: bg,
@@ -767,6 +789,12 @@ class _TagChip extends StatelessWidget {
           height: 1.0,
         ),
       ),
+    );
+    if (onTap == null) return chip;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: chip,
     );
   }
 }
