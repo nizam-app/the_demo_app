@@ -27,6 +27,17 @@ class _DevicesScreenState extends State<DevicesScreen> {
       'Blind Living Room'; // Track selected device, initially "Blind Living Room"
   String _selectedFilter = 'All'; // Track selected filter chip
 
+  // Local demo state for list controls (no backend).
+  bool _rgbwOn = true;
+  int _rgbwLevel = 50;
+  bool _alarmDisarmed = true;
+  double _bathroomTemp = 24.6;
+  int _blindPctDown = 0;
+  int _blindPctUp = 50;
+  bool _irrigationPlaying = false;
+  int _brightnessPct = 54;
+  bool _cardReaderOn = false;
+
   void _onNavItemTapped(int index) {
     final routes = [
       '/devices',
@@ -258,13 +269,15 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const _ModeDot(text: 'A', filledA: false),
+                                  _ModeDot(text: 'A', filledA: _rgbwOn),
                                   SizedBox(width: 6.w),
-                                  const _SmallText('Off'),
+                                  _SmallText(_rgbwOn ? 'On' : 'Off'),
                                 ],
                               ),
                               SizedBox(height: 2.h),
                               const _TinyGreyText('LCD0C12'),
+                              SizedBox(height: 4.h),
+                              _TinyGreyText('Level $_rgbwLevel%'),
                               SizedBox(height: 6.h),
                               // Wrap(
                               //   spacing: 6.w,
@@ -311,11 +324,24 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const _CircleMiniBtn(icon: Icons.remove),
+                              _CircleMiniBtn(
+                                icon: Icons.remove,
+                                onTap: () => setState(() {
+                                  _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100);
+                                }),
+                              ),
                               SizedBox(width: 14.w),
-                              const _CircleMiniBtn(icon: Icons.add),
+                              _CircleMiniBtn(
+                                icon: Icons.add,
+                                onTap: () => setState(() {
+                                  _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100);
+                                }),
+                              ),
                               SizedBox(width: 8.w),
-                              const _ToggleColorswitch(isOn: true),
+                              _ToggleColorswitch(
+                                value: _rgbwOn,
+                                onChanged: (v) => setState(() => _rgbwOn = v),
+                              ),
                               SizedBox(width: 8.w),
                             ],
                           ),
@@ -331,11 +357,16 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           title: 'Alarm',
                           selected: _selectedDeviceTitle == 'Alarm',
                           onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
-                          subtitle: const _SmallText('Disarmed'),
+                          subtitle: _SmallText(
+                            _alarmDisarmed ? 'Disarmed' : 'Armed',
+                          ),
                           trailing: Padding(
                             padding: EdgeInsets.only(right: 20.w),
                             child: _CircleActionBlue(
                               imagePath: 'assets/Mask group (15).png',
+                              onTap: () => setState(
+                                () => _alarmDisarmed = !_alarmDisarmed,
+                              ),
                             ),
                           ),
                         ),
@@ -365,9 +396,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                 fit: BoxFit.contain,
                               ),
                               const SizedBox(width: 6),
-                              const Text(
-                                '24.6°C',
-                                style: TextStyle(
+                              Text(
+                                '${_bathroomTemp.toStringAsFixed(1)}°C',
+                                style: const TextStyle(
                                   fontSize: 14, // screenshot vibe
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFF111827),
@@ -379,9 +410,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const _CircleMiniBtn(icon: Icons.remove),
+                              _CircleMiniBtn(
+                                icon: Icons.remove,
+                                onTap: () => setState(() {
+                                  _bathroomTemp = (_bathroomTemp - 0.5)
+                                      .clamp(10.0, 35.0);
+                                }),
+                              ),
                               SizedBox(width: 14.w),
-                              const _CircleMiniBtn(icon: Icons.add),
+                              _CircleMiniBtn(
+                                icon: Icons.add,
+                                onTap: () => setState(() {
+                                  _bathroomTemp = (_bathroomTemp + 0.5)
+                                      .clamp(10.0, 35.0);
+                                }),
+                              ),
                             ],
                           ),
                         ),
@@ -404,10 +447,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              SizedBox(height: 2),
-                              _BlindStatsRow(),
-                              _TinyGreyText('D012U12'),
+                            children: [
+                              const SizedBox(height: 2),
+                              _BlindStatsRow(
+                                closedPct: _blindPctDown,
+                                openPct: _blindPctUp,
+                              ),
+                              const _TinyGreyText('D012U12'),
                             ],
                           ),
                           trailing: Padding(
@@ -415,9 +461,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
+                                _CircleMiniBtn(
+                                  icon: Icons.keyboard_arrow_up,
+                                  onTap: () => setState(() {
+                                    _blindPctUp =
+                                        (_blindPctUp + 5).clamp(0, 100);
+                                  }),
+                                ),
                                 SizedBox(width: 14.w),
-                                _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
+                                _CircleMiniBtn(
+                                  icon: Icons.keyboard_arrow_down,
+                                  onTap: () => setState(() {
+                                    _blindPctDown =
+                                        (_blindPctDown + 5).clamp(0, 100);
+                                  }),
+                                ),
                                 SizedBox(width: 10.w),
                               ],
                             ),
@@ -440,10 +498,15 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           onTap: () => setState(
                             () => _selectedDeviceTitle = 'Block Irrigation Schedule',
                           ),
-                          subtitle: const _SmallText('Blocked'),
+                          subtitle: _SmallText(
+                            _irrigationPlaying ? 'Running' : 'Blocked',
+                          ),
                           trailing: _CircleActionBlue(
                             imagePath: 'assets/play.png',
                             isPlay: true,
+                            onTap: () => setState(
+                              () => _irrigationPlaying = !_irrigationPlaying,
+                            ),
                           ),
                         ),
 
@@ -465,15 +528,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               setState(() => _selectedDeviceTitle = 'Brightness'),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              _BoldSmall('54%'),
-                              SizedBox(height: 2),
-                              _TinyGreyText('W5BT'),
+                            children: [
+                              _BoldSmall('$_brightnessPct%'),
+                              const SizedBox(height: 2),
+                              const _TinyGreyText('W5BT'),
                             ],
                           ),
                           trailing: Padding(
                             padding: EdgeInsets.only(top: 15.h, right: 15.w),
-                            child: const _BrightnessPill(),
+                            child: _BrightnessPill(
+                              value: _brightnessPct / 100.0,
+                              onChanged: (v) => setState(
+                                () => _brightnessPct =
+                                    (v * 100).round().clamp(0, 100),
+                              ),
+                            ),
                           ),
                         ),
                         const _RowDivider(),
@@ -490,8 +559,14 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           selected: _selectedDeviceTitle == 'Card Reader(s)',
                           onTap: () =>
                               setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
-                          subtitle: const _SmallText('Blocked'),
-                          trailing: const _ToggleSwitch(isOn: false),
+                          subtitle: _SmallText(
+                            _cardReaderOn ? 'Active' : 'Blocked',
+                          ),
+                          trailing: _ToggleSwitch(
+                            value: _cardReaderOn,
+                            onChanged: (v) =>
+                                setState(() => _cardReaderOn = v),
+                          ),
                         ),
                       ],
                     ),
@@ -625,7 +700,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                     width: 36.w,
                                     child: _CircleIconButton(
                                       icon: Icons.add_rounded,
-                                      onTap: () {},
+                                      onTap: () => _showAssignCategoryPopup(context),
                                       size: 23,
                                       bg: const Color(0xFF111827),
                                       iconColor: Colors.white,
@@ -720,57 +795,60 @@ class _DeviceRow extends StatelessWidget {
           )
         : basePadding;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-        padding: finalPadding,
-        child: Stack(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // ✅ bigger leading slot like Image-1
-                SizedBox(
-                  width: 46.w,
-                  height: 46.w,
-                  child: Center(child: leading),
-                ),
-
-                SizedBox(width: 12.w),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      color: selected ? const Color(0xFFEAF1FF) : Colors.white,
+      padding: finalPadding,
+      child: Stack(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: brightness ? 11.h : 0.h),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF111827),
-                            height: 1.05,
-                            fontFamily: 'Inter',
-                          ),
+                      SizedBox(
+                        width: 46.w,
+                        height: 46.w,
+                        child: Center(child: leading),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: brightness ? 11.h : 0.h),
+                              child: Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF111827),
+                                  height: 1.05,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            subtitle,
+                          ],
                         ),
                       ),
-                      SizedBox(height: 4.h),
-                      subtitle,
                     ],
                   ),
                 ),
-
-                SizedBox(width: 12.w),
-                trailing,
-              ],
-            ),
-
-            if (topRight != null)
-              Positioned(right: 0, top: 0, child: topRight!),
-          ],
-        ),
+              ),
+              SizedBox(width: 12.w),
+              trailing,
+            ],
+          ),
+          if (topRight != null)
+            Positioned(right: 0, top: 0, child: topRight!),
+        ],
       ),
     );
   }
@@ -1007,64 +1085,91 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _CircleMiniBtn extends StatelessWidget {
-  const _CircleMiniBtn({required this.icon});
+  const _CircleMiniBtn({required this.icon, this.onTap});
   final IconData icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final isArrow =
         icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
 
-    return Container(
-      width: 36.w, // ✅ closer to Image-1
-      height: 36.h,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Ink(
+          width: 36.w,
+          height: 36.h,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF3F4F6),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            size: (isArrow ? 36 : 22).sp,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
       ),
-      alignment: Alignment.center,
-      child: Icon(icon, size: (isArrow ? 36 : 22).sp, color: Color(0xFF6B7280)),
     );
   }
 }
 
 class _CircleActionBlue extends StatelessWidget {
-  _CircleActionBlue({this.icon, this.imagePath, this.isPlay = false})
-    : assert(
-        icon != null || imagePath != null,
-        'Either icon or imagePath must be provided',
-      );
+  _CircleActionBlue({
+    this.icon,
+    this.imagePath,
+    this.isPlay = false,
+    this.onTap,
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   final IconData? icon;
   final String? imagePath;
   final bool isPlay;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // ✅ Screenshot-এর real size (56 ❌)
-      width: 44.w,
-      height: 44.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFF0088FE),
-        shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Ink(
+          width: 44.w,
+          height: 44.w,
+          decoration: const BoxDecoration(
+            color: Color(0xFF0088FE),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: isPlay ? 27.sp : 21.sp,
+                    height: isPlay ? 24.sp : 20.sp,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: 20.sp, color: Colors.white),
+          ),
+        ),
       ),
-      alignment: Alignment.center,
-      child: imagePath != null
-          ? Image.asset(
-              imagePath!,
-              width: isPlay ? 27.sp : 21.sp,
-              height: isPlay ? 24.sp : 20.sp,
-              fit: BoxFit.contain,
-            )
-          : Icon(icon!, size: 20.sp, color: Colors.white),
     );
   }
 }
 
 class _ToggleSwitch extends StatelessWidget {
-  const _ToggleSwitch({required this.isOn});
-  final bool isOn;
+  const _ToggleSwitch({
+    required this.value,
+    required this.onChanged,
+  });
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1072,8 +1177,8 @@ class _ToggleSwitch extends StatelessWidget {
       height: 35.h,
       width: 60.w,
       child: CupertinoSwitch(
-        value: isOn,
-        onChanged: (_) {},
+        value: value,
+        onChanged: onChanged,
         activeColor: const Color(0xFF0088FE),
       ),
     );
@@ -1081,8 +1186,12 @@ class _ToggleSwitch extends StatelessWidget {
 }
 
 class _ToggleColorswitch extends StatelessWidget {
-  const _ToggleColorswitch({required this.isOn});
-  final bool isOn;
+  const _ToggleColorswitch({
+    required this.value,
+    required this.onChanged,
+  });
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -1090,8 +1199,8 @@ class _ToggleColorswitch extends StatelessWidget {
       height: 35.h,
       width: 60.w,
       child: CupertinoSwitch(
-        value: isOn,
-        onChanged: (_) {},
+        value: value,
+        onChanged: onChanged,
         activeColor: const Color(0xFF0088FE),
       ),
     );
@@ -1105,7 +1214,13 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked' || v == "off";
+    final isStrong = v == 'disarmed' ||
+        v == 'armed' ||
+        v == 'blocked' ||
+        v == 'active' ||
+        v == 'running' ||
+        v == 'off' ||
+        v == 'on';
 
     return Text(
       text,
@@ -1584,7 +1699,13 @@ class _BulbIcon extends StatelessWidget {
 /* ---------------- Blind stats row ---------------- */
 
 class _BlindStatsRow extends StatelessWidget {
-  const _BlindStatsRow();
+  const _BlindStatsRow({
+    required this.closedPct,
+    required this.openPct,
+  });
+
+  final int closedPct;
+  final int openPct;
 
   @override
   Widget build(BuildContext context) {
@@ -1620,7 +1741,7 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '0%',
+          '${closedPct.clamp(0, 100)}%',
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
@@ -1639,7 +1760,7 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '50%',
+          '${openPct.clamp(0, 100)}%',
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
@@ -1727,49 +1848,55 @@ class _WedgePainter extends CustomPainter {
 /* ---------------- Brightness pill slider ---------------- */
 
 class _BrightnessPill extends StatelessWidget {
-  const _BrightnessPill({this.leftFactor = 0.52});
+  const _BrightnessPill({
+    required this.value,
+    this.onChanged,
+  });
 
-  /// left side width ratio (0.0 - 1.0)
-  final double leftFactor;
+  /// Filled portion 0.0 - 1.0 (brighter / higher level to the left).
+  final double value;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 150.w,
-      height: 34.h, // ছবির মতো একটু বেশি height
+    final f = value.clamp(0.0, 1.0);
+    final w = 150.w;
+    final h = 34.h;
+
+    void applyFromDx(double dx) {
+      if (onChanged == null) return;
+      onChanged!((dx / w).clamp(0.0, 1.0));
+    }
+
+    final pill = SizedBox(
+      width: w,
+      height: h,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(999.r),
         child: Stack(
           children: [
-            // Right (darker) background
             Container(color: const Color(0xFFE5E7EB)),
-
-            // Left (lighter) section
             Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: leftFactor.clamp(0.0, 1.0),
+                widthFactor: f,
                 child: Container(color: const Color(0xFFF3F4F6)),
               ),
             ),
-
-            // Middle divider (subtle)
             Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: leftFactor.clamp(0.0, 1.0),
+                widthFactor: f,
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Container(
                     width: 1.w,
                     height: double.infinity,
-                    color: const Color(0xFFD1D5DB), // subtle line
+                    color: const Color(0xFFD1D5DB),
                   ),
                 ),
               ),
             ),
-
-            // Sun icon on left
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -1777,13 +1904,22 @@ class _BrightnessPill extends StatelessWidget {
                 child: Icon(
                   Icons.wb_sunny_outlined,
                   size: 20.sp,
-                  color: Color(0xFF6B7280),
+                  color: const Color(0xFF6B7280),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+
+    if (onChanged == null) return pill;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) => applyFromDx(d.localPosition.dx),
+      onHorizontalDragUpdate: (d) => applyFromDx(d.localPosition.dx),
+      child: pill,
     );
   }
 }

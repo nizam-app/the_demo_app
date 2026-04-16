@@ -20,6 +20,21 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
+  // Local UI state for list controls (demo / no backend).
+  bool _alarmPaused = false;
+  bool _bathroomComfortOn = false;
+  bool _irrigationBoostOn = false;
+  int _fanLevel = 0; // 0 = Off, 1–3 = levels
+  double _heatSetpoint = 21.0;
+  int _irrigationMinutes = 0;
+  double _kitchenTemp = 24.6;
+  int _kitchenHumidityPct = 35;
+
+  /// Which device row is highlighted (persists until another row is tapped).
+  String _selectedDeviceId = 'heating';
+
+  static const _selectedRowBg = Color(0xFFEAF1FF);
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -107,9 +122,16 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(bottom: 20.h),
-                child: Column(children: [_buildDeviceList()]),
+                child: Column(
+                  children: [
+                    _buildDeviceList(), 
+                    
+                    ]),
               ),
             ),
+            
+                    
+            
           ],
         ),
       ),
@@ -335,37 +357,50 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
-  // ✅ Reusable row
+  // ✅ Reusable row (selection highlight + tap on main area only; trailing stays independent).
   Widget _buildDeviceRow({
+    required String selectionId,
     required Widget leading,
     required String title,
     required Widget subtitle,
     required Widget trailing,
-    Color? backgroundColor,
   }) {
+    final selected = _selectedDeviceId == selectionId;
     return Container(
-      color: backgroundColor ?? Colors.white,
+      color: selected ? _selectedRowBg : Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          leading,
-          SizedBox(width: 12.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                    fontFamily: 'Inter',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => setState(() => _selectedDeviceId = selectionId),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  leading,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        subtitle,
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 4.h),
-                subtitle,
-              ],
+                ],
+              ),
             ),
           ),
           trailing,
@@ -415,6 +450,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       children: [
         // 1) Alarm
         _buildDeviceRow(
+          selectionId: 'alarm',
           leading: _leftIconAsset(
             imagePath: _icAlarm,
             ringColor: _pink,
@@ -424,7 +460,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _InlineText('Disarmed'),
+              _InlineText(_alarmPaused ? 'Paused' : 'Disarmed'),
               SizedBox(height: 5.h),
               Row(
                 children: [
@@ -476,18 +512,25 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 ],
               ),
 
-              SizedBox(width: 10.w),
-              Container(
-                width: 44.w,
-                height: 44.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.pause_rounded,
-                  size: 20.sp,
-                  color: _muted,
+              SizedBox(height: 8.h),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () => setState(() => _alarmPaused = !_alarmPaused),
+                  child: Ink(
+                    width: 44.w,
+                    height: 44.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3F4F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _alarmPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                      size: 20.sp,
+                      color: _muted,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -497,6 +540,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
 
         // 2) Bathroom
         _buildDeviceRow(
+          selectionId: 'bathroom',
           leading: _leftIconAsset(
             imagePath: _icBathroom,
             ringColor: const Color(0xFF8B5CF6),
@@ -514,7 +558,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
               SizedBox(width: 6.w),
               Text(
-                'Off',
+                _bathroomComfortOn ? 'On' : 'Off',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: Colors.black,
@@ -524,17 +568,33 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
             ],
           ),
-          trailing: Container(
-            margin: EdgeInsets.only(right: 8.w),
-            width: 152.w,
-            height: 39.h,
-            padding: EdgeInsets.only(left: 16.w,),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
+          trailing: Material(
+            color: Colors.transparent,
+            child: InkWell(
               borderRadius: BorderRadius.circular(999.r),
+              onTap: () =>
+                  setState(() => _bathroomComfortOn = !_bathroomComfortOn),
+              child: Container(
+                margin: EdgeInsets.only(right: 8.w),
+                width: 152.w,
+                height: 39.h,
+                padding: EdgeInsets.only(left: 16.w),
+                decoration: BoxDecoration(
+                  color: _bathroomComfortOn
+                      ? const Color(0xFFE0F2FE)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(999.r),
+                ),
+                alignment: Alignment.centerLeft,
+                child: Image.asset(
+                  'assets/images/Group 48 (1).png',
+                  width: 20.w,
+                  height: 20.h,
+                  fit: BoxFit.contain,
+                  color: _bathroomComfortOn ? _blue : _muted,
+                ),
+              ),
             ),
-            alignment: Alignment.centerLeft,
-            child: Image.asset("assets/images/Group 48 (1).png",width: 20.w, height: 20.h, fit: BoxFit.contain,color: _muted,),
           ),
         ),
        
@@ -542,6 +602,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
 
         // 3) Block Irrigation Schedule
         _buildDeviceRow(
+          selectionId: 'block_irrigation',
           leading: _leftIconAsset(
             imagePath: _icPlay,
             ringColor: const Color(0xFF0EA5E9),
@@ -550,17 +611,33 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             iconHeight: 36,
           ),
           title: 'Block Irrigation Schedule',
-          subtitle: const _InlineText('Active', bold: true),
+          subtitle: _InlineText(
+            _irrigationBoostOn ? 'Boost on' : 'Active',
+            bold: true,
+          ),
           trailing: Padding(
-            padding:  EdgeInsets.only(right: 10.w),
-            child: Container(
-              width: 42.w,
-              height: 42.w,
-              decoration: const BoxDecoration(
-                color: _green,
-                shape: BoxShape.circle,
+            padding: EdgeInsets.only(right: 10.w),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () =>
+                    setState(() => _irrigationBoostOn = !_irrigationBoostOn),
+                child: Ink(
+                  width: 42.w,
+                  height: 42.w,
+                  decoration: BoxDecoration(
+                    color: _irrigationBoostOn ? _blue : _green,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/charge.png',
+                      height: 22.h,
+                    ),
+                  ),
+                ),
               ),
-              child: Image.asset("assets/images/charge.png", height: 22.h),
             ),
           ),
         ),
@@ -568,6 +645,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
 
         // 4) Fan
         _buildDeviceRow(
+          selectionId: 'fan',
           leading: _leftIconAsset(
             imagePath: _icFan,
             ringColor: const Color(0xFF0EA5E9),
@@ -581,7 +659,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               const _SmallCircleText('M'),
               SizedBox(width: 8.w),
               Text(
-                'Off',
+                _fanLevel == 0 ? 'Off' : 'Level $_fanLevel',
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -619,15 +697,21 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _deviceControlPairAssets(
                 leftAsset: _icFanUp,
                 rightAsset: _icFanDown,
+                onLeft: () => setState(() {
+                  _fanLevel = (_fanLevel + 1).clamp(0, 3);
+                }),
+                onRight: () => setState(() {
+                  _fanLevel = (_fanLevel - 1).clamp(0, 3);
+                }),
               ),
             ],
           ),
         ),
         _buildDivider(),
 
-        // 5) Heating & Cooling (selected)
+        // 5) Heating & Cooling
         _buildDeviceRow(
-          backgroundColor: const Color(0xFFEAF1FF),
+          selectionId: 'heating',
           leading: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -638,52 +722,70 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 iconWidth: 39,
                 iconHeight: 36,
               ),
-              Positioned(
-                right: -4.w,
-                bottom: -2.h,
-                child: Container(
-                  width: 22.w,
-                  height: 22.w,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF0088FE),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check_rounded,
-                    size: 16.sp,
-                    color: Colors.white,
+              if (_selectedDeviceId == 'heating')
+                Positioned(
+                  right: -4.w,
+                  bottom: -2.h,
+                  child: Container(
+                    width: 22.w,
+                    height: 22.w,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF0088FE),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 16.sp,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           title: 'Heating & Cooling',
-          subtitle: const _InlineText('Heating', bold: true),
+          subtitle: _InlineText(
+            'Heating · ${_heatSetpoint.toStringAsFixed(1)}°C',
+            bold: true,
+          ),
           trailing: _deviceControlPair(
             left: Icons.remove_rounded,
             right: Icons.add_rounded,
+            onLeft: () => setState(() {
+              _heatSetpoint = (_heatSetpoint - 0.5).clamp(5.0, 35.0);
+            }),
+            onRight: () => setState(() {
+              _heatSetpoint = (_heatSetpoint + 0.5).clamp(5.0, 35.0);
+            }),
           ),
         ),
         _buildDivider(),
 
         // 6) Irrigation
         _buildDeviceRow(
+          selectionId: 'irrigation',
           leading: _leftIconAsset(
             imagePath: _icIrrigation,
             ringColor: _green,
             fallbackIcon: Icons.local_florist_rounded,
           ),
           title: 'Irrigation',
-          subtitle: const _InlineText('0', bold: true),
+          subtitle: _InlineText('$_irrigationMinutes', bold: true),
           trailing: _deviceControlPairAssets(
             leftAsset: _icIrrigationLeft,
             rightAsset: _icIrrigationRight,
+            onLeft: () => setState(() {
+              _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 180);
+            }),
+            onRight: () => setState(() {
+              _irrigationMinutes = (_irrigationMinutes + 5).clamp(0, 180);
+            }),
           ),
         ),
         _buildDivider(),
 
         // 7) Kitchen
         _buildDeviceRow(
+          selectionId: 'kitchen',
           leading: _leftIconAsset(
             imagePath: _icKitchen,
             ringColor: _green,
@@ -701,7 +803,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
               SizedBox(width: 4.w),
               Text(
-                '24.6°C',
+                '${_kitchenTemp.toStringAsFixed(1)}°C',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: _primary,
@@ -713,7 +815,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Image.asset("assets/images/fire.png"),
               SizedBox(width: 4.w),
               Text(
-                '35%',
+                '$_kitchenHumidityPct%',
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -726,8 +828,19 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: _deviceControlPair(
             left: Icons.remove_rounded,
             right: Icons.add_rounded,
+            onLeft: () => setState(() {
+              _kitchenTemp = (_kitchenTemp - 0.5).clamp(10.0, 35.0);
+              _kitchenHumidityPct =
+                  (_kitchenHumidityPct - 2).clamp(0, 100);
+            }),
+            onRight: () => setState(() {
+              _kitchenTemp = (_kitchenTemp + 0.5).clamp(10.0, 35.0);
+              _kitchenHumidityPct =
+                  (_kitchenHumidityPct + 2).clamp(0, 100);
+            }),
           ),
         ),
+        //Sizedbox(height:200.h),  
       ],
     );
   }
