@@ -72,25 +72,25 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         children: [
           
           Padding(
-            padding:  EdgeInsets.only(left: 15.w, right: 15.w, top: 10.h, bottom: 5.h),
-            child: Expanded(
-              flex: 1,
-              child: Builder(
-                builder: (context) => _Header(
-                  title: widget.screenTitle,
-                  onMenuTap: () {
-                    context.push(MenuScreen.routeName);
-                    // CustomBottomNavBar.of(context)?.openDrawer();
-                  },
-                  onEditTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
-
-                ),
+            padding: EdgeInsets.only(
+              left: 15.w,
+              right: 15.w,
+              top: 10.h,
+              bottom: 5.h,
+            ),
+            child: Builder(
+              builder: (context) => _Header(
+                title: widget.screenTitle,
+                onMenuTap: () {
+                  context.push(MenuScreen.routeName);
+                  // CustomBottomNavBar.of(context)?.openDrawer();
+                },
+                onEditTap: () =>
+                    Zone_Category_Screen.showEditAddSectionSheet(context),
               ),
             ),
           ),
-          
           Expanded(
-            flex: 10,
             child: CustomScrollView(
               slivers: [
                 SliverPadding(
