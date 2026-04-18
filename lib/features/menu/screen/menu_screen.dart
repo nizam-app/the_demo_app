@@ -34,7 +34,7 @@ class MenuScreen extends StatelessWidget {
   static const String routeName = '/menu';
 
   // colors (match screenshot)
-  static const _bg = Color(0xFFF3F4F6);
+  static const _bg = Color(0xFFFFFFFF);
   static const _card = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -82,13 +82,13 @@ class MenuScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(26.r),
                           border: Border.all(color: Colors.white, width: 2.h),
-                          // boxShadow: [
-                          //   BoxShadow(
-                          //     color: Colors.black.withOpacity(0.1),
-                          //     blurRadius: 10,
-                          //     offset: const Offset(0, 4),
-                          //   ),
-                          // ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.20),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -740,13 +740,13 @@ class _CardBlock extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
         border: Border.all(width: 1.h, color: Colors.white),
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.black.withOpacity(0.1),
-        //     blurRadius: 10,
-        //     offset: const Offset(0, 4),
-        //   ),
-        // ],
+        boxShadow: [
+          BoxShadow(
+           color: Colors.grey.withOpacity(0.20),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22.r),
