@@ -8,6 +8,7 @@ import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/core/screen/core_screen.dart';
 import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 
 import '../../profile/screen/profile_screen.dart';
@@ -21,7 +22,6 @@ class SettingsScreen extends StatelessWidget {
   static const String routeName = '/settings';
 
   // Colors (match design)
-  static const _bg = Color(0xFFF3F4F6);
   static const _card = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -34,7 +34,9 @@ class SettingsScreen extends StatelessWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
-    final scrollBottomPad = 22.h + bottomInset;
+    final inHomeShell = CustomBottomNavBar.of(context) != null;
+    final scrollBottomPad =
+        22.h + bottomInset + (inHomeShell ? 72.h : 0);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -44,18 +46,13 @@ class SettingsScreen extends StatelessWidget {
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: _bg,
+        backgroundColor: Colors.white,
         body: SafeArea(
           top: false,
           bottom: false,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(color: _bg),
-                ),
-              ),
               Positioned.fill(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(
@@ -87,7 +84,7 @@ class SettingsScreen extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
+                        color: Colors.transparent,
                         border: Border(
                           bottom: BorderSide(
                             color: const Color(0xFFE5E7EB).withOpacity(0.18),

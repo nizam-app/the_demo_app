@@ -48,7 +48,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
-  static const Color _kSheetBg = Color(0xFFF3F4F6);
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
@@ -104,9 +103,14 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
             clipBehavior: Clip.hardEdge,
             children: [
               Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _kSheetBg.withOpacity(0.42),
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                    ),
                   ),
                 ),
               ),

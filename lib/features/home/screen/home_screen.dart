@@ -285,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.20),
+                    color: Colors.transparent,
                     border: Border(
                       bottom: BorderSide(
                         color: const Color(0xFFE5E7EB).withOpacity(0.18),
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return CustomBottomNavBar(
       initialIndex: 2,
       translucentBottomBar: true,
-      bottomBarBackgroundOpacity: 0.10,
+      bottomBarBackgroundOpacity: 0,
       backgroundColor: Colors.white,
       // Voice/Home is index 2
       // drawer: Drawer(
