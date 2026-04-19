@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF3F4F6),
         body: SafeArea(
           top: false,
           bottom: false,
@@ -116,7 +116,7 @@ class SettingsScreen extends StatelessWidget {
     return Row(
       children: [
         GlobalCircleIconBtn(
-          color: const Color(0xFFF3F4F6),
+          color: _card,
           child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
           onTap: () {
             if (Navigator.of(context).canPop()) {

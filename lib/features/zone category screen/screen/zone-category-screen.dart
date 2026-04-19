@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
@@ -66,140 +68,166 @@ class Zone_Category_Screen extends StatefulWidget {
 }
 
 class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
-  Widget _buildHomeBody() {
-    return SafeArea(
-      child: Column(
-        children: [
-          
-          Padding(
-            padding: EdgeInsets.only(
-              left: 15.w,
-              right: 15.w,
-              top: 10.h,
-              bottom: 5.h,
-            ),
-            child: Builder(
-              builder: (context) => _Header(
-                title: widget.screenTitle,
-                onMenuTap: () {
-                  context.push(MenuScreen.routeName);
-                  // CustomBottomNavBar.of(context)?.openDrawer();
-                },
-                onEditTap: () =>
-                    Zone_Category_Screen.showEditAddSectionSheet(context),
-              ),
-            ),
-          ),
-          Expanded(
-            child: CustomScrollView(
+  late int _categoryPillIndex;
+
+  double _bedroomDimmer = 0.72;
+  double _bathroomThermostat = 24.6;
+  int _blindNorthDown = 0;
+  int _blindNorthUp = 72;
+  final List<int> _shadeDown = [100, 100, 100];
+  final List<int> _shadeUp = [50, 50, 50];
+  double _favThermostatM = 24.6;
+  double _favThermostatA = 24.6;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryPillIndex = _categoryPillIndexForTitle(widget.screenTitle);
+  }
+
+  @override
+  void didUpdateWidget(covariant Zone_Category_Screen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.screenTitle != widget.screenTitle) {
+      _categoryPillIndex = _categoryPillIndexForTitle(widget.screenTitle);
+    }
+  }
+
+  static int _categoryPillIndexForTitle(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('security')) return 3;
+    if (t.contains('shading')) return 1;
+    if (t.contains('ventilation') || t.contains('hvac')) return 2;
+    return 0;
+  }
+
+  Widget _buildHomeBody(BuildContext context) {
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    scrollTopPadding,
+                    16.w,
+                    24.h,
+                  ),
                   sliver: SliverToBoxAdapter(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // SizedBox(height: 8.h),
-                        //
-                        // // ✅ Header
-                        // Builder(
-                        //   builder: (context) => _Header(
-                        //     onMenuTap: () {
-                        //       context.push(MenuScreen.routeName);
-                        //       // CustomBottomNavBar.of(context)?.openDrawer();
-                        //     },
-                        //     onEditTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
-                        //
-                        //   ),
-                        // ),
-
-                        SizedBox(height: 10.h),
-
-                        // ✅ Category pills (Light selected)
-                        // SizedBox(
-                        //   height: 63.h,
-                        //   child: ListView(
-                        //     scrollDirection: Axis.horizontal,
-                        //     // padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        //     children: [
-                        //       _CategoryPill(
-                        //         label: 'Light',
-                        //         isSelected: true,
-                        //         icon: Icons.lightbulb_outline,
-                        //         imagePath: 'assets/Mask group (3).png',
-                        //         onTap: () {},
-                        //       ),
-                        //       SizedBox(width: 12.w),
-                        //       _CategoryPill(
-                        //         label: 'Shading',
-                        //         isSelected: false,
-                        //         icon: Icons.blinds_outlined,
-                        //         imagePath: 'assets/Mask group (2).png',
-                        //         onTap: () {},
-                        //       ),
-                        //       SizedBox(width: 12.w),
-                        //       _CategoryPill(
-                        //         label: 'HVAC',
-                        //         isSelected: false,
-                        //         icon: Icons.ac_unit_outlined,
-                        //         imagePath: 'assets/Mask group (4).png',
-                        //         onTap: () {},
-                        //       ),
-                        //       SizedBox(width: 12.w),
-                        //       _CategoryPill(
-                        //         label: 'Security',
-                        //         isSelected: false,
-                        //         icon: Icons.ac_unit_outlined,
-                        //         imagePath: 'assets/securety.png',
-                        //         onTap: () {},
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
+                        
 
                         const _SectionTitle('Light'),
                         SizedBox(height: 12.h),
 
-                        // ✅ Light section grid 2x2
-                        GridView(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12.w,
-                            mainAxisSpacing: 12.h,
-                            childAspectRatio: 195 / 185, // ✅ FIX: image-1 ratio
-                          ),
-                          children:  [
-                            _LightDimmerCard(
-                              title: 'Bedroom spot light\nsmall patio blue light',
-                              percent: 0.72,
-                              mode: 'A',
-                              modeFilled: false,
-                              imagePath: 'assets/Mask group (5).png',
-                              onTap:()=>context.push(LightDinningRoomScreen.routeName),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _LightDimmerCard(
+                                      title:
+                                          'Bedroom spot light\nsmall patio blue light',
+                                      percent: _bedroomDimmer,
+                                      mode: 'A',
+                                      modeFilled: false,
+                                      imagePath: 'assets/Mask group (5).png',
+                                      onPercentChanged: (v) => setState(
+                                        () => _bedroomDimmer = v.clamp(0.0, 1.0),
+                                      ),
+                                      onNavigate: () => context.push(
+                                        LightDinningRoomScreen.routeName,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _ThermostatCard(
+                                      title:
+                                          'Bathroom heating and boiler thermostat',
+                                      value: _bathroomThermostat,
+                                      mode: 'M',
+                                      modeFilled: true,
+                                      imagePath: 'assets/Mask group (6).png',
+                                      onMinus: () => setState(() {
+                                        _bathroomThermostat =
+                                            (_bathroomThermostat - 0.5)
+                                                .clamp(10.0, 35.0);
+                                      }),
+                                      onPlus: () => setState(() {
+                                        _bathroomThermostat =
+                                            (_bathroomThermostat + 0.5)
+                                                .clamp(10.0, 35.0);
+                                      }),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            _ThermostatCard(
-                              title: 'Bathroom heating and boiler thermostat',
-                              value: 24.6,
-                              mode: 'M',
-                              modeFilled: true,
-                              imagePath: 'assets/Mask group (6).png',
-                            ),
-                            _BlindCard(
-                              title: 'Blind Living Room\nnorth window',
-                              downPercent: 0,
-                              upPercent: 72,
-                              mode: 'M',
-                              modeFilled: true,
-                              imagePath: 'assets/Rectangle 823.png',
-                            ),
-                            _ToggleCard(
-                              title: 'Irrigation entry and front home two valve',
-                              isOn: true,
-                              mode: 'A',
-                              modeFilled: false,
-                              imagePath: 'assets/Mask group (7).png',
+                            SizedBox(height: 12.h),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _BlindCard(
+                                      title: 'Blind Living Room\nnorth window',
+                                      downPercent: _blindNorthDown,
+                                      upPercent: _blindNorthUp,
+                                      mode: 'M',
+                                      modeFilled: true,
+                                      imagePath: 'assets/Rectangle 823.png',
+                                      onDown: () => setState(() {
+                                        _blindNorthDown =
+                                            (_blindNorthDown + 5).clamp(0, 100);
+                                      }),
+                                      onUp: () => setState(() {
+                                        _blindNorthUp =
+                                            (_blindNorthUp + 5).clamp(0, 100);
+                                      }),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: const _ToggleCard(
+                                      title:
+                                          'Irrigation entry and front home two valve',
+                                      isOn: true,
+                                      mode: 'A',
+                                      modeFilled: false,
+                                      imagePath: 'assets/Mask group (7).png',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -233,8 +261,47 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ],
             ),
-          ),
-        ],
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        15.w,
+                        topInset + 10.h,
+                        15.w,
+                        8.h,
+                      ),
+                      child: Builder(
+                        builder: (ctx) => _Header(
+                          title: widget.screenTitle,
+                          onMenuTap: () {
+                            ctx.push(MenuScreen.routeName);
+                          },
+                          onEditTap: () =>
+                              Zone_Category_Screen.showEditAddSectionSheet(ctx),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -243,6 +310,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
       initialIndex: 2,
+      translucentBottomBar: true,
+      bottomBarBackgroundOpacity: 0,
+      backgroundColor: Colors.white,
       // Voice/Home is index 2
       // drawer: Drawer(
       //   child: SafeArea(
@@ -333,7 +403,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           child: AnalyticsScreen(showBottomNav: false),
         ),
         // Index 2: Home/Voice
-        RepaintBoundary(child: _buildHomeBody()),
+        RepaintBoundary(child: _buildHomeBody(context)),
         // Index 3: Notifications
         RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
         // Index 4: Settings
@@ -349,27 +419,24 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         const _SectionTitle('Shading'),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 0,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'M',
           modeFilled: true,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 1,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'A',
           modeFilled: false,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
+          rowIndex: 2,
           deviceName: 'Blind Living Room south window upside right',
           mode: 'M',
           modeFilled: true,
-          downPercent: 100,
-          upPercent: 50,
         ),
         SizedBox(height: 18.h),
         // _buildTemperatureSetPointCard(),
@@ -378,12 +445,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   }
 
   Widget _buildShadingControl({
+    required int rowIndex,
     required String deviceName,
     required String mode,
     required bool modeFilled,
-    required int downPercent,
-    required int upPercent,
   }) {
+    final downPercent = _shadeDown[rowIndex];
+    final upPercent = _shadeUp[rowIndex];
     return Container(
       height: 90.h, // ✅ slimmer like image
       decoration: BoxDecoration(
@@ -483,6 +551,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 children: [
                   _CircleBtn(
                     size: 35,
+                    onTap: () => setState(() {
+                      _shadeDown[rowIndex] =
+                          (_shadeDown[rowIndex] - 5).clamp(0, 100);
+                    }),
                     child: Image.asset(
                       'assets/Mask group (17).png',
                       width: 13.w,
@@ -493,6 +565,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                   SizedBox(width: 17.w),
                   _CircleBtn(
                     size: 35,
+                    onTap: () => setState(() {
+                      _shadeUp[rowIndex] =
+                          (_shadeUp[rowIndex] + 5).clamp(0, 100);
+                    }),
                     child: Transform.rotate(
                       angle: math.pi,
                       child: Image.asset(
@@ -524,7 +600,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           children: [
             Expanded(child: _buildCameraCard()), // ✅ equal
             SizedBox(width: 12.w),
-            Expanded(child: _buildThermostatCard(mode: 'M', filled: true)),
+            Expanded(
+              child: _buildThermostatCard(
+                mode: 'M',
+                filled: true,
+                value: _favThermostatM,
+                onMinus: () => setState(() {
+                  _favThermostatM =
+                      (_favThermostatM - 0.5).clamp(10.0, 35.0);
+                }),
+                onPlus: () => setState(() {
+                  _favThermostatM =
+                      (_favThermostatM + 0.5).clamp(10.0, 35.0);
+                }),
+              ),
+            ),
           ],
         ),
 
@@ -535,7 +625,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           children: [
             Expanded(child: _buildCameraCard()),
             SizedBox(width: 12.w),
-            Expanded(child: _buildThermostatCard(mode: 'A', filled: false)),
+            Expanded(
+              child: _buildThermostatCard(
+                mode: 'A',
+                filled: false,
+                value: _favThermostatA,
+                onMinus: () => setState(() {
+                  _favThermostatA =
+                      (_favThermostatA - 0.5).clamp(10.0, 35.0);
+                }),
+                onPlus: () => setState(() {
+                  _favThermostatA =
+                      (_favThermostatA + 0.5).clamp(10.0, 35.0);
+                }),
+              ),
+            ),
           ],
         ),
       ],
@@ -589,7 +693,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     );
   }
 
-  Widget _buildThermostatCard({required String mode, required bool filled}) {
+  Widget _buildThermostatCard({
+    required String mode,
+    required bool filled,
+    required double value,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+  }) {
     return Stack(
       children: [
         Container(
@@ -626,11 +736,19 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
               Row(
                 children: [
-                  _CircleBtn(child: Icon(Icons.remove, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
+                  _CircleBtn(
+                    onTap: onMinus,
+                    size: 35,
+                    child: Icon(
+                      Icons.remove,
+                      size: 20.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                   Expanded(
                     child: Center(
                       child: Text(
-                        '24.6°c',
+                        '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -639,7 +757,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                       ),
                     ),
                   ),
-                  _CircleBtn(child: Icon(Icons.add, size: 20.sp, color: Color(0xFF6B7280),), size: 35),
+                  _CircleBtn(
+                    onTap: onPlus,
+                    size: 35,
+                    child: Icon(
+                      Icons.add,
+                      size: 20.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1220,15 +1346,16 @@ class _ModeBadge extends StatelessWidget {
 }
 
 class _CircleBtn extends StatelessWidget {
-  const _CircleBtn({required this.child, this.size});
+  const _CircleBtn({required this.child, this.size, this.onTap});
 
   final Widget child;
   final double? size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final s = size ?? 32;
-    return Container(
+    final circle = Container(
       width: s.w,
       height: s.h,
       decoration: const BoxDecoration(
@@ -1237,6 +1364,15 @@ class _CircleBtn extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: child,
+    );
+    if (onTap == null) return circle;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: circle,
+      ),
     );
   }
 }
@@ -1251,7 +1387,8 @@ class _LightDimmerCard extends StatelessWidget {
     required this.mode,
     required this.modeFilled,
     this.imagePath,
-    this.onTap, 
+    this.onPercentChanged,
+    this.onNavigate,
   });
 
   final String title;
@@ -1259,48 +1396,59 @@ class _LightDimmerCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
-  final VoidCallback? onTap; 
+  final ValueChanged<double>? onPercentChanged;
+  final VoidCallback? onNavigate;
 
   @override
   Widget build(BuildContext context) {
+    final top = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        imagePath != null
+            ? Image.asset(
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.lightbulb_outline,
+                size: 52.sp,
+                color: const Color(0xFF15DFFE),
+              ),
+        SizedBox(height: 10.h),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF111827),
+            height: 1.18,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ✅ icon size like image-1
-              imagePath != null
-                  ? Image.asset(
-                imagePath!,
-                width: 52.w,
-                height: 52.w,
-                fit: BoxFit.contain,
-              )
-                  : Icon(
-                Icons.lightbulb_outline,
-                size: 52.sp,
-                color: const Color(0xFF15DFFE),
-              ),
-
-              SizedBox(height: 10.h),
-
-              // ✅ title like image-1 (NOT huge)
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF111827),
-                  height: 1.18,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
+              if (onNavigate != null)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onNavigate,
+                    borderRadius: BorderRadius.circular(18.r),
+                    child: top,
+                  ),
+                )
+              else
+                top,
               const Spacer(),
-
-              // ✅ bottom row: 72% + pill slider (sun inside)
               Row(
                 children: [
                   Text(
@@ -1312,13 +1460,17 @@ class _LightDimmerCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  Expanded(child: _DimmerPill(percent: percent)),
+                  Expanded(
+                    child: _DimmerPill(
+                      percent: percent,
+                      onChanged: onPercentChanged,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
-
         Positioned(
           right: 12.w,
           top: 12.w,
@@ -1330,23 +1482,24 @@ class _LightDimmerCard extends StatelessWidget {
 }
 
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent});
+  const _DimmerPill({required this.percent, this.onChanged});
   final double percent;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
+    final w = 133.w;
 
-    return Container(
-      height: 35.h, // ✅ image-1 height
-      width: 133.w,
+    final pill = Container(
+      height: 35.h,
+      width: w,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Stack(
         children: [
-          // ✅ right grey segment (remaining)
           Align(
             alignment: Alignment.centerRight,
             child: FractionallySizedBox(
@@ -1355,15 +1508,13 @@ class _DimmerPill extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFD1D5DB),
                   borderRadius: BorderRadius.horizontal(
-                    right: Radius.circular(999),
+                    right: const Radius.circular(999),
                     left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
                   ),
                 ),
               ),
             ),
           ),
-
-          // ✅ sun icon (left)
           Align(
             alignment: Alignment.centerLeft,
             child: Padding(
@@ -1371,12 +1522,25 @@ class _DimmerPill extends StatelessWidget {
               child: Icon(
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
-                color: Color(0xFF6B7280),
+                color: const Color(0xFF6B7280),
               ),
             ),
           ),
         ],
       ),
+    );
+
+    if (onChanged == null) return pill;
+
+    void applyDx(double dx) {
+      onChanged!((dx / w).clamp(0.0, 1.0));
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
+      child: pill,
     );
   }
 }
@@ -1387,6 +1551,8 @@ class _ThermostatCard extends StatelessWidget {
     required this.value,
     required this.mode,
     required this.modeFilled,
+    required this.onMinus,
+    required this.onPlus,
     this.imagePath,
   });
 
@@ -1395,6 +1561,8 @@ class _ThermostatCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final VoidCallback onMinus;
+  final VoidCallback onPlus;
 
   @override
   Widget build(BuildContext context) {
@@ -1406,16 +1574,16 @@ class _ThermostatCard extends StatelessWidget {
             children: [
               imagePath != null
                   ? Image.asset(
-                imagePath!,
-                width: 52.w,
-                height: 52.w,
-                fit: BoxFit.contain,
-              )
+                      imagePath!,
+                      width: 52.w,
+                      height: 52.w,
+                      fit: BoxFit.contain,
+                    )
                   : Icon(
-                Icons.thermostat_outlined,
-                size: 44.sp,
-                color: const Color(0xFF0088FE),
-              ),
+                      Icons.thermostat_outlined,
+                      size: 44.sp,
+                      color: const Color(0xFF0088FE),
+                    ),
               SizedBox(height: 10.h),
               Expanded(
                 child: Row(
@@ -1459,7 +1627,15 @@ class _ThermostatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _CircleBtn(size: 35, child: Icon(Icons.remove, size: 23.sp, color: Color(0xFF6B7280),)),
+                  _CircleBtn(
+                    size: 35,
+                    onTap: onMinus,
+                    child: Icon(
+                      Icons.remove,
+                      size: 23.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
@@ -1468,7 +1644,15 @@ class _ThermostatCard extends StatelessWidget {
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  _CircleBtn(size: 35, child: Icon(Icons.add, size: 23.sp, color: Color(0xFF6B7280),), ),
+                  _CircleBtn(
+                    size: 35,
+                    onTap: onPlus,
+                    child: Icon(
+                      Icons.add,
+                      size: 23.sp,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1491,6 +1675,8 @@ class _BlindCard extends StatelessWidget {
     required this.upPercent,
     required this.mode,
     required this.modeFilled,
+    required this.onDown,
+    required this.onUp,
     this.imagePath,
   });
 
@@ -1500,6 +1686,8 @@ class _BlindCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final VoidCallback onDown;
+  final VoidCallback onUp;
 
   @override
   Widget build(BuildContext context) {
@@ -1531,7 +1719,6 @@ class _BlindCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8.h),
-              // Bottom controls row
               Flexible(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -1539,6 +1726,7 @@ class _BlindCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _CircleBtn(
+                        onTap: onDown,
                         child: Image.asset(
                           'assets/Mask group (17).png',
                           width: 13.sp,
@@ -1582,6 +1770,7 @@ class _BlindCard extends StatelessWidget {
                       ),
                       SizedBox(width: 7.w),
                       _CircleBtn(
+                        onTap: onUp,
                         child: Image.asset(
                           'assets/Mask group (16).png',
                           width: 13.sp,

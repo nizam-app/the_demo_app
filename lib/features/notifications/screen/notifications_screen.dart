@@ -105,6 +105,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       child: Scaffold(
         backgroundColor: _screenBg,
+        extendBody: widget.showBottomNav,
         body: SafeArea(
           top: false,
           bottom: !widget.showBottomNav,
@@ -308,7 +309,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ? BottomNavBarWidget(
                 selectedIndex: _selectedNavIndex,
                 onItemTapped: _onNavItemTapped,
-                backgroundOpacity: 0.10,
+                backgroundOpacity: 0,
                 useBackdropBlur: true,
               )
             : null,

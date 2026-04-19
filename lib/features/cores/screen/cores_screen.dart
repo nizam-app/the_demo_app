@@ -218,7 +218,7 @@ class _CoresScreenState extends State<CoresScreen> {
     return Row(
       children: [
         GlobalCircleIconBtn(
-          color: const Color(0xFFF3F4F6),
+          color: const Color(0xFFFFFFFF),
           child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
           onTap: () => Navigator.maybePop(context),
         ),

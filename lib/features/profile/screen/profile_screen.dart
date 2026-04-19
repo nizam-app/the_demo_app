@@ -342,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               GlobalCircleIconBtn(
-                                color: const Color(0xFFF3F4F6),
+                                color: Color(0xFFFFFFFF),
                                 child: Image.asset(
                                   'assets/aro.png',
                                   width: 16.w,
@@ -360,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                               GlobalCircleIconBtn(
-                                color: const Color(0xFFF3F4F6),
+                              color: Color(0xFFFFFFFF),
                                 child: Image.asset(
                                   'assets/image 89 (1).png',
                                   width: 22.w,
