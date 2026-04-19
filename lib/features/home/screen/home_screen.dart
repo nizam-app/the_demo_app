@@ -67,8 +67,19 @@ class _HomeScreenState extends State<HomeScreen> {
   int _blindNorthUp = 72;
   final List<int> _shadeDown = [100, 100, 100];
   final List<int> _shadeUp = [50, 50, 50];
+  /// Shading list rows: manual (M) vs auto (A), matches prior static modes.
+  final List<bool> _shadeManual = [true, false, true];
   double _favThermostatM = 24.6;
   double _favThermostatA = 24.6;
+
+  /// A/M mode badges (tap to toggle auto vs manual) — dashboard + lighting.
+  bool _bedroomManual = false;
+  bool _bathroomManual = true;
+  bool _blindManual = true;
+  bool _lightingLedBadge1Manual = false;
+  bool _lightingLedBadge2Manual = true;
+  bool _favThermoMManual = true;
+  bool _favThermoAManual = false;
 
   Widget _buildHomeBody(BuildContext context) {
     final topInset = MediaQuery.viewPaddingOf(context).top;
@@ -165,9 +176,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title:
                                           'Bedroom spot light\nsmall patio blue light',
                                       percent: _bedroomDimmer,
-                                      mode: 'A',
-                                      modeFilled: false,
+                                      mode: _bedroomManual ? 'M' : 'A',
+                                      modeFilled: _bedroomManual,
                                       imagePath: 'assets/Mask group (5).png',
+                                      onModeTap: () => setState(
+                                        () => _bedroomManual = !_bedroomManual,
+                                      ),
                                       onPercentChanged: (v) => setState(
                                         () => _bedroomDimmer = v.clamp(0.0, 1.0),
                                       ),
@@ -185,9 +199,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title:
                                           'Bathroom heating and boiler thermostat',
                                       value: _bathroomThermostat,
-                                      mode: 'M',
-                                      modeFilled: true,
+                                      mode: _bathroomManual ? 'M' : 'A',
+                                      modeFilled: _bathroomManual,
                                       imagePath: 'assets/Mask group (6).png',
+                                      onModeTap: () => setState(
+                                        () => _bathroomManual = !_bathroomManual,
+                                      ),
                                       onMinus: () => setState(() {
                                         _bathroomThermostat =
                                             (_bathroomThermostat - 0.5)
@@ -214,9 +231,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title: 'Blind Living Room\nnorth window',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
-                                      mode: 'M',
-                                      modeFilled: true,
+                                      mode: _blindManual ? 'M' : 'A',
+                                      modeFilled: _blindManual,
                                       imagePath: 'assets/Rectangle 823.png',
+                                      onModeTap: () => setState(
+                                        () => _blindManual = !_blindManual,
+                                      ),
                                       onDown: () => setState(() {
                                         _blindNorthDown =
                                             (_blindNorthDown + 5).clamp(0, 100);
@@ -236,8 +256,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title:
                                           'Irrigation entry and front home two valve',
                                       isOn: true,
-                                      mode: 'A',
-                                      modeFilled: false,
                                       imagePath: 'assets/Mask group (7).png',
                                     ),
                                   ),
@@ -435,22 +453,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildShadingControl(
           rowIndex: 0,
           deviceName: 'Blind Living Room south window upside right',
-          mode: 'M',
-          modeFilled: true,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
           rowIndex: 1,
           deviceName: 'Blind Living Room south window upside right',
-          mode: 'A',
-          modeFilled: false,
         ),
         SizedBox(height: 12.h),
         _buildShadingControl(
           rowIndex: 2,
           deviceName: 'Blind Living Room south window upside right',
-          mode: 'M',
-          modeFilled: true,
         ),
         SizedBox(height: 18.h),
         // _buildTemperatureSetPointCard(),
@@ -461,9 +473,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildShadingControl({
     required int rowIndex,
     required String deviceName,
-    required String mode,
-    required bool modeFilled,
   }) {
+    final manual = _shadeManual[rowIndex];
     final downPercent = _shadeDown[rowIndex];
     final upPercent = _shadeUp[rowIndex];
     return Container(
@@ -507,7 +518,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 // ✅ Indicators row (M + down% + up%)
                 Row(
                   children: [
-                    _ModeBadge(mode: mode, filled: modeFilled),
+                    _ModeBadge(
+                      mode: manual ? 'M' : 'A',
+                      filled: manual,
+                      onTap: () => setState(
+                        () => _shadeManual[rowIndex] = !manual,
+                      ),
+                    ),
                     SizedBox(width: 10.w),
 
                     Image.asset(
@@ -616,9 +633,12 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildThermostatCard(
-                mode: 'M',
-                filled: true,
+                mode: _favThermoMManual ? 'M' : 'A',
+                filled: _favThermoMManual,
                 value: _favThermostatM,
+                onModeTap: () => setState(
+                  () => _favThermoMManual = !_favThermoMManual,
+                ),
                 onMinus: () => setState(() {
                   _favThermostatM =
                       (_favThermostatM - 0.5).clamp(10.0, 35.0);
@@ -641,9 +661,12 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildThermostatCard(
-                mode: 'A',
-                filled: false,
+                mode: _favThermoAManual ? 'M' : 'A',
+                filled: _favThermoAManual,
                 value: _favThermostatA,
+                onModeTap: () => setState(
+                  () => _favThermoAManual = !_favThermoAManual,
+                ),
                 onMinus: () => setState(() {
                   _favThermostatA =
                       (_favThermostatA - 0.5).clamp(10.0, 35.0);
@@ -711,6 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String mode,
     required bool filled,
     required double value,
+    VoidCallback? onModeTap,
     required VoidCallback onMinus,
     required VoidCallback onPlus,
   }) {
@@ -789,7 +813,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: mode, filled: filled),
+          child: _ModeBadge(
+            mode: mode,
+            filled: filled,
+            onTap: onModeTap,
+          ),
         ),
       ],
     );
@@ -845,7 +873,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     right: 7.w, // ✅ outside, but doesn't shrink the card
                     top: 7.h,
-                    child: _ModeBadge(mode: 'A', filled: false),
+                    child: _ModeBadge(
+                      mode: _lightingLedBadge1Manual ? 'M' : 'A',
+                      filled: _lightingLedBadge1Manual,
+                      onTap: () => setState(
+                        () => _lightingLedBadge1Manual =
+                            !_lightingLedBadge1Manual,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -900,7 +935,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     right: 7.w,
                     top: 7.h,
-                    child: _ModeBadge(mode: 'M', filled: true),
+                    child: _ModeBadge(
+                      mode: _lightingLedBadge2Manual ? 'M' : 'A',
+                      filled: _lightingLedBadge2Manual,
+                      onTap: () => setState(
+                        () => _lightingLedBadge2Manual =
+                            !_lightingLedBadge2Manual,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1417,19 +1459,30 @@ class _CardShell extends StatelessWidget {
 }       
 
 class _ModeBadge extends StatelessWidget {
-  const _ModeBadge({required this.mode, required this.filled});
+  const _ModeBadge({
+    required this.mode,
+    required this.filled,
+    this.onTap,
+  });
 
   final String mode;
   final bool filled;
+  final VoidCallback? onTap;
+
+  static const Color _softGrey = Color(0xFFF3F4F6);
+  static const Color _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final badge = Container(
       width: 26.w,
       height: 26.w,
       decoration: BoxDecoration(
-        color: filled ? const Color(0xFF6B7280) : const Color(0xFFE1E1E1),
+        color: filled ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
+        border: filled
+            ? null
+            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -1437,19 +1490,39 @@ class _ModeBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 16.sp,
           fontWeight: FontWeight.w600,
-          color: filled ? Colors.white : const Color(0xFF6B7280),
+          color: filled ? Colors.white : _themeBlue,
         ),
+      ),
+    );
+    if (onTap == null) return badge;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: _softGrey,
+        highlightColor: const Color(0xFFE5E7EB),
+        child: badge,
       ),
     );
   }
 }
 
 class _CircleBtn extends StatelessWidget {
-  const _CircleBtn({required this.child, this.size, this.onTap});
+  const _CircleBtn({
+    required this.child,
+    this.size,
+    this.onTap,
+    this.accent = false,
+  });
 
   final Widget child;
   final double? size;
   final VoidCallback? onTap;
+  final bool accent;
+
+  static const Color _softGrey = Color(0xFFF3F4F6);
+  static const Color _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
@@ -1457,8 +1530,8 @@ class _CircleBtn extends StatelessWidget {
     final circle = Container(
       width: s.w,
       height: s.h,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: accent ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -1470,6 +1543,10 @@ class _CircleBtn extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
+        splashColor:
+            accent ? Colors.white24 : const Color(0xFFE5E7EB),
+        highlightColor:
+            accent ? Colors.white30 : const Color(0xFFD1D5DB),
         child: circle,
       ),
     );
@@ -1488,6 +1565,7 @@ class _LightDimmerCard extends StatelessWidget {
     this.imagePath,
     this.onPercentChanged,
     this.onNavigate,
+    this.onModeTap,
   });
 
   final String title;
@@ -1497,6 +1575,7 @@ class _LightDimmerCard extends StatelessWidget {
   final String? imagePath;
   final ValueChanged<double>? onPercentChanged;
   final VoidCallback? onNavigate;
+  final VoidCallback? onModeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1573,7 +1652,11 @@ class _LightDimmerCard extends StatelessWidget {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: mode, filled: modeFilled),
+          child: _ModeBadge(
+            mode: mode,
+            filled: modeFilled,
+            onTap: onModeTap,
+          ),
         ),
       ],
     );
@@ -1653,6 +1736,7 @@ class _ThermostatCard extends StatelessWidget {
     required this.onMinus,
     required this.onPlus,
     this.imagePath,
+    this.onModeTap,
   });
 
   final String title;
@@ -1662,6 +1746,7 @@ class _ThermostatCard extends StatelessWidget {
   final String? imagePath;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
+  final VoidCallback? onModeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1760,7 +1845,11 @@ class _ThermostatCard extends StatelessWidget {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: mode, filled: modeFilled),
+          child: _ModeBadge(
+            mode: mode,
+            filled: modeFilled,
+            onTap: onModeTap,
+          ),
         ),
       ],
     );
@@ -1777,6 +1866,7 @@ class _BlindCard extends StatelessWidget {
     required this.onDown,
     required this.onUp,
     this.imagePath,
+    this.onModeTap,
   });
 
   final String title;
@@ -1787,6 +1877,7 @@ class _BlindCard extends StatelessWidget {
   final String? imagePath;
   final VoidCallback onDown;
   final VoidCallback onUp;
+  final VoidCallback? onModeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1818,70 +1909,79 @@ class _BlindCard extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8.h),
-              // Bottom controls row
               Flexible(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _CircleBtn(
-                        onTap: onDown,
-                        child: Image.asset(
-                          'assets/Mask group (17).png',
-                          width: 13.sp,
-                          height: 13.sp,
-                          fit: BoxFit.contain,
-                            color: Color(0xFF6B7280),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _CircleBtn(
+                                onTap: onDown,
+                                child: Image.asset(
+                                  'assets/Mask group (17).png',
+                                  width: 13.sp,
+                                  height: 13.sp,
+                                  fit: BoxFit.contain,
+                                  color: Color(0xFF6B7280),
+                                ),
+                                size: 35,
+                              ),
+                              SizedBox(width: 7.w),
+                              Image.asset(
+                                'assets/Group 32.jpg',
+                                width: 10.w,
+                                height: 17.h,
+                                fit: BoxFit.contain,
+                              ),
+                              SizedBox(width: 3.w),
+                              Text(
+                                '$downPercent%',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Image.asset(
+                                'assets/Vector 4.jpg',
+                                width: 8.w,
+                                height: 17.h,
+                                fit: BoxFit.contain,
+                              ),
+                              SizedBox(width: 3.w),
+                              Text(
+                                '$upPercent%',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                              SizedBox(width: 7.w),
+                              _CircleBtn(
+                                onTap: onUp,
+                                child: Image.asset(
+                                  'assets/Mask group (16).png',
+                                  width: 13.sp,
+                                  height: 13.sp,
+                                  fit: BoxFit.contain,
+                                  color: Color(0xFF6B7280),
+                                ),
+                                size: 35,
+                              ),
+                            ],
+                          ),
                         ),
-                        size: 35,
                       ),
-                      SizedBox(width: 7.w),
-                      Image.asset(
-                        'assets/Group 32.jpg',
-                        width: 10.w,
-                        height: 17.h,
-                        fit: BoxFit.contain,
-                      ),
-                      SizedBox(width: 3.w),
-                      Text(
-                        '$downPercent%',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Image.asset(
-                        'assets/Vector 4.jpg',
-                        width: 8.w,
-                        height: 17.h,
-                        fit: BoxFit.contain,
-                      ),
-                      SizedBox(width: 3.w),
-                      Text(
-                        '$upPercent%',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                      SizedBox(width: 7.w),
-                      _CircleBtn(
-                        onTap: onUp,
-                        child: Image.asset(
-                          'assets/Mask group (16).png',
-                          width: 13.sp,
-                          height: 13.sp,
-                          fit: BoxFit.contain,
-                          color: Color(0xFF6B7280),
-                        ),
-                        size: 35,
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -1890,7 +1990,11 @@ class _BlindCard extends StatelessWidget {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: mode, filled: modeFilled),
+          child: _ModeBadge(
+            mode: mode,
+            filled: modeFilled,
+            onTap: onModeTap,
+          ),
         ),
       ],
     );
@@ -1901,15 +2005,11 @@ class _ToggleCard extends StatefulWidget {
   const _ToggleCard({
     required this.title,
     required this.isOn,
-    required this.mode,
-    required this.modeFilled,
     this.imagePath,
   });
 
   final String title;
   final bool isOn;
-  final String mode;
-  final bool modeFilled;
   final String? imagePath;
 
   @override
@@ -1918,11 +2018,13 @@ class _ToggleCard extends StatefulWidget {
 
 class _ToggleCardState extends State<_ToggleCard> {
   late bool _on;
+  late bool _manualMode;
 
   @override
   void initState() {
     super.initState();
     _on = widget.isOn;
+    _manualMode = false;
   }
 
   @override
@@ -1995,7 +2097,11 @@ class _ToggleCardState extends State<_ToggleCard> {
         Positioned(
           right: 12.w,
           top: 12.w,
-          child: _ModeBadge(mode: widget.mode, filled: widget.modeFilled),
+          child: _ModeBadge(
+            mode: _manualMode ? 'M' : 'A',
+            filled: _manualMode,
+            onTap: () => setState(() => _manualMode = !_manualMode),
+          ),
         ),
       ],
     );

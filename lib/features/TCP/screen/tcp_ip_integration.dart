@@ -356,7 +356,7 @@ class _TopBar extends StatelessWidget {
             width: 32.w,
             height: 32.w,
             decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
+              color: Color(0xFFFFFFFF),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -390,7 +390,7 @@ class _TopBar extends StatelessWidget {
             width: 32.w,
             height: 32.w,
             decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
+              color: Color(0xFFFFFFFF),
               shape: BoxShape.circle,
             ),
             child: Center(

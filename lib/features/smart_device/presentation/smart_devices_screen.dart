@@ -29,6 +29,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   int _irrigationMinutes = 0;
   double _kitchenTemp = 24.6;
   int _kitchenHumidityPct = 35;
+  bool _bathroomManual = false;
+  bool _fanManual = true;
+  bool _kitchenManual = false;
 
   /// Which device row is highlighted (persists until another row is tapped).
   String _selectedDeviceId = 'heating';
@@ -549,7 +552,12 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           title: 'Bathroom',
           subtitle: Row(
             children: [
-              const _SmallCircleText('A'),
+              _SmallCircleText(
+                manual: _bathroomManual,
+                onTap: () => setState(
+                  () => _bathroomManual = !_bathroomManual,
+                ),
+              ),
               SizedBox(width: 6.w),
               Icon(
                 Icons.thermostat_rounded,
@@ -627,14 +635,23 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   width: 42.w,
                   height: 42.w,
                   decoration: BoxDecoration(
-                    color: _irrigationBoostOn ? _blue : _green,
+                    color: _irrigationBoostOn
+                        ? _blue
+                        : const Color(0xFFF3F4F6),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: Image.asset(
-                      'assets/images/charge.png',
-                      height: 22.h,
-                    ),
+                    child: _irrigationBoostOn
+                        ? Image.asset(
+                            'assets/images/charge.png',
+                            height: 22.h,
+                          )
+                        : Image.asset(
+                            'assets/images/charge.png',
+                            height: 22.h,
+                            color: _muted,
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
                   ),
                 ),
               ),
@@ -656,7 +673,11 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           title: 'Fan(3 levels)',
           subtitle: Row(
             children: [
-              const _SmallCircleText('M'),
+              _SmallCircleText(
+                manual: _fanManual,
+                onTap: () =>
+                    setState(() => _fanManual = !_fanManual),
+              ),
               SizedBox(width: 8.w),
               Text(
                 _fanLevel == 0 ? 'Off' : 'Level $_fanLevel',
@@ -794,7 +815,12 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           title: 'Kitchen',
           subtitle: Row(
             children: [
-              const _SmallCircleText('A'),
+              _SmallCircleText(
+                manual: _kitchenManual,
+                onTap: () => setState(
+                  () => _kitchenManual = !_kitchenManual,
+                ),
+              ),
               SizedBox(width: 8.w),
               Icon(
                 Icons.thermostat_rounded,
@@ -913,31 +939,52 @@ class _TagChip extends StatelessWidget {
 }
 
 class _SmallCircleText extends StatelessWidget {
-  const _SmallCircleText(this.text);
-  final String text;
+  const _SmallCircleText({
+    required this.manual,
+    this.onTap,
+  });
+
+  /// `true` = manual (M), `false` = auto (A).
+  final bool manual;
+  final VoidCallback? onTap;
+
+  static const _softGrey = Color(0xFFF3F4F6);
+  static const _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = text == 'A' ? const Color(0xFFE1E1E1) : const Color(0xFF6B7280);
-    final textColor = text == 'A' ? const Color(0xFF6B7280) : Colors.white;
-    
-    return Container(
+    final letter = manual ? 'M' : 'A';
+    final badge = Container(
       width: 26.w,
       height: 26.w,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: bgColor,
+        color: manual ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
+        border: manual
+            ? null
+            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       child: Text(
-        text,
+        letter,
         style: TextStyle(
           fontSize: 16.sp,
-          fontWeight: FontWeight.w500,
-          color: textColor,
+          fontWeight: FontWeight.w600,
+          color: manual ? Colors.white : _themeBlue,
           fontFamily: 'Inter',
           height: 1.0,
         ),
+      ),
+    );
+    if (onTap == null) return badge;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: _softGrey,
+        highlightColor: const Color(0xFFE5E7EB),
+        child: badge,
       ),
     );
   }
@@ -956,24 +1003,31 @@ class _CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 35.w,
-        height: 35.w,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF3F4F6),
-          shape: BoxShape.circle,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: 35.w,
+          height: 35.w,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF3F4F6),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: 15.w,
+                    height: 15.w,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
+          ),
         ),
-        alignment: Alignment.center,
-        child: imagePath != null
-            ? Image.asset(
-                imagePath!,
-                width: 15.w,
-                height: 15.w,
-                fit: BoxFit.contain,
-              )
-            : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
       ),
     );
   }

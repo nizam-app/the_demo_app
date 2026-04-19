@@ -11,6 +11,7 @@ class BottomNavBarWidget extends StatelessWidget {
     required this.onItemTapped,
     this.backgroundOpacity = 0.10,
     this.useBackdropBlur = true,
+    this.trackColor,
   });
 
   final int selectedIndex;
@@ -21,6 +22,9 @@ class BottomNavBarWidget extends StatelessWidget {
 
   /// When true, blurs content behind the bar and uses a soft top edge.
   final bool useBackdropBlur;
+
+  /// When set, used as the bar fill instead of [Colors.white] with [backgroundOpacity].
+  final Color? trackColor;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,8 @@ class BottomNavBarWidget extends StatelessWidget {
     final track = Container(
       height: 72.h,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
+        color: trackColor ??
+            Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
         border: const Border(
           top: BorderSide(
             color: Color(0xFFE1E1E1),

@@ -310,7 +310,7 @@ class _TopBar extends StatelessWidget {
             width: 32.w,
             height: 32.h,
             decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
+              color: Colors.white,
               shape: BoxShape.circle,
             ),
             child: Center(

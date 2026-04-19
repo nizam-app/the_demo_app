@@ -127,7 +127,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 children: [
                   for (final e in _analyticsCategoryMenuEntries)
                     Material(
-                      color: Colors.transparent,
+                      //color: Colors.transparent,
+                      color:Colors.white, 
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14.r),
                         onTap: () => Navigator.of(ctx).pop(e.label),
@@ -239,9 +240,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ),
       child: Scaffold(
         backgroundColor: _AnalyticsColors.pageBg,
+        // Match HomeScreen dashboard: do not inset the bottom safe area here so
+        // scroll content can sit under the shell (or standalone) translucent bar
+        // and the BackdropFilter has real pixels to blur.
         body: SafeArea(
           top: false,
-          bottom: !widget.showBottomNav,
+          bottom: false,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -360,6 +364,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
               ),
+              if (widget.showBottomNav)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: BottomNavBarWidget(
+                    selectedIndex: 1,
+                    onItemTapped: _onNavItemTapped,
+                    backgroundOpacity: 0,
+                    useBackdropBlur: true,
+                  ),
+                ),
               Positioned(
                 top: 0,
                 left: 0,
@@ -392,7 +408,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: GlobalCircleIconBtn(
-                                  color: const Color(0xFFF3F4F6),
+                                  color: _AnalyticsColors.cardBg,
                                   child: Image.asset(
                                     'assets/aro.png',
                                     width: 16.w,
@@ -438,14 +454,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: widget.showBottomNav
-            ? BottomNavBarWidget(
-                selectedIndex: 1,
-                onItemTapped: _onNavItemTapped,
-                backgroundOpacity: 0.10,
-                useBackdropBlur: true,
-              )
-            : null,
       ),
     );
   }

@@ -30,8 +30,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
   // Local demo state for list controls (no backend).
   bool _rgbwOn = true;
   int _rgbwLevel = 50;
+  bool _rgbwManual = false;
   bool _alarmDisarmed = true;
   double _bathroomTemp = 24.6;
+  bool _bathroomManual = true;
   int _blindPctDown = 0;
   int _blindPctUp = 50;
   bool _irrigationPlaying = false;
@@ -97,9 +99,11 @@ class _DevicesScreenState extends State<DevicesScreen> {
       ),
       child: Scaffold(
         backgroundColor: bg,
+        // Match HomeScreen: bottom false so scroll content can sit under the shell
+        // (or standalone) translucent bar; BackdropFilter then blurs real pixels.
         body: SafeArea(
           top: false,
-          bottom: !widget.showBottomNav,
+          bottom: false,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -269,7 +273,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             children: [
                               Row(
                                 children: [
-                                  _ModeDot(text: 'A', filledA: _rgbwOn),
+                                  _ModeDot(
+                                    manual: _rgbwManual,
+                                    onTap: () => setState(
+                                      () => _rgbwManual = !_rgbwManual,
+                                    ),
+                                  ),
                                   SizedBox(width: 6.w),
                                   _SmallText(_rgbwOn ? 'On' : 'Off'),
                                 ],
@@ -364,6 +373,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             padding: EdgeInsets.only(right: 20.w),
                             child: _CircleActionBlue(
                               imagePath: 'assets/Mask group (15).png',
+                              active: !_alarmDisarmed,
                               onTap: () => setState(
                                 () => _alarmDisarmed = !_alarmDisarmed,
                               ),
@@ -387,7 +397,12 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               setState(() => _selectedDeviceTitle = 'Bathroom'),
                           subtitle: Row(
                             children: [
-                              const _ModeDot(text: 'M', filledA: true),
+                              _ModeDot(
+                                manual: _bathroomManual,
+                                onTap: () => setState(
+                                  () => _bathroomManual = !_bathroomManual,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               Image.asset(
                                 'assets/low-temperature 1.png',
@@ -504,6 +519,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           trailing: _CircleActionBlue(
                             imagePath: 'assets/play.png',
                             isPlay: true,
+                            active: _irrigationPlaying,
                             onTap: () => setState(
                               () => _irrigationPlaying = !_irrigationPlaying,
                             ),
@@ -726,7 +742,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                 child: BottomNavBarWidget(
                   selectedIndex: _selectedNavIndex,
                   onItemTapped: _onNavItemTapped,
-                  backgroundOpacity: 0.10,
+                  backgroundOpacity: 0,
                   useBackdropBlur: true,
                 ),
               ),
@@ -1063,21 +1079,27 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size.w,
-        height: size.w,
-        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-        child: Center(
-          child: imagePath != null
-              ? Image.asset(
-                  imagePath!,
-                  width: iconSize.w,
-                  height: iconSize.h,
-                  fit: BoxFit.contain,
-                )
-              : Icon(icon!, size: iconSize.sp, color: iconColor),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: size.w,
+          height: size.w,
+          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+          child: Center(
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: iconSize.w,
+                    height: iconSize.h,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: iconSize.sp, color: iconColor),
+          ),
         ),
       ),
     );
@@ -1099,6 +1121,8 @@ class _CircleMiniBtn extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
           width: 36.w,
           height: 36.h,
@@ -1118,11 +1142,12 @@ class _CircleMiniBtn extends StatelessWidget {
 }
 
 class _CircleActionBlue extends StatelessWidget {
-  _CircleActionBlue({
+  const _CircleActionBlue({
     this.icon,
     this.imagePath,
     this.isPlay = false,
     this.onTap,
+    this.active = true,
   }) : assert(
          icon != null || imagePath != null,
          'Either icon or imagePath must be provided',
@@ -1132,30 +1157,55 @@ class _CircleActionBlue extends StatelessWidget {
   final String? imagePath;
   final bool isPlay;
   final VoidCallback? onTap;
+  final bool active;
+
+  static const Color _softGrey = Color(0xFFF3F4F6);
+  static const Color _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
+    final bg = active ? _themeBlue : _softGrey;
+    final fg = active ? Colors.white : const Color(0xFF6B7280);
     return Material(
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
           width: 44.w,
           height: 44.w,
-          decoration: const BoxDecoration(
-            color: Color(0xFF0088FE),
+          decoration: BoxDecoration(
+            color: bg,
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: imagePath != null
-                ? Image.asset(
-                    imagePath!,
-                    width: isPlay ? 27.sp : 21.sp,
-                    height: isPlay ? 24.sp : 20.sp,
-                    fit: BoxFit.contain,
-                  )
-                : Icon(icon!, size: 20.sp, color: Colors.white),
+            child: ClipOval(
+              child: SizedBox(
+                width: 30.w,
+                height: 30.w,
+                child: Center(
+                  child: imagePath != null
+                      ? (active
+                          ? Image.asset(
+                              imagePath!,
+                              width: isPlay ? 27.sp : 21.sp,
+                              height: isPlay ? 24.sp : 20.sp,
+                              fit: BoxFit.scaleDown,
+                            )
+                          : Image.asset(
+                              imagePath!,
+                              width: isPlay ? 27.sp : 21.sp,
+                              height: isPlay ? 24.sp : 20.sp,
+                              fit: BoxFit.scaleDown,
+                              color: fg,
+                              colorBlendMode: BlendMode.srcIn,
+                            ))
+                      : Icon(icon!, size: 20.sp, color: fg),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1291,33 +1341,49 @@ class _TinyGreyText extends StatelessWidget {
 /* ---------------- Badges / Tags ---------------- */
 
 class _ModeDot extends StatelessWidget {
-  const _ModeDot({required this.text, required this.filledA});
-  final String text;
-  final bool filledA;
+  const _ModeDot({required this.manual, this.onTap});
+
+  /// `true` = manual (M), `false` = auto (A).
+  final bool manual;
+  final VoidCallback? onTap;
+
+  static const Color _softGrey = Color(0xFFF3F4F6);
+  static const Color _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
-    // ✅ A ছোট, M বড় (same call, no structure change)
-    final isBig = filledA; // M row filled=true => bigger
-    final s = (isBig ? 26 : 26);
-
-    return Container(
-      width: s.w,
-      height: s.h,
+    final letter = manual ? 'M' : 'A';
+    final badge = Container(
+      width: 26.w,
+      height: 26.w,
       decoration: BoxDecoration(
-        color: filledA ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
+        color: manual ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
+        border: manual
+            ? null
+            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       alignment: Alignment.center,
       child: Text(
-        text,
+        letter,
         style: TextStyle(
-          fontSize: (isBig ? 14 : 14).sp,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w700,
-          color: filledA ? Colors.white : const Color(0xFF6b7280),
+          color: manual ? Colors.white : _themeBlue,
           height: 1.0,
           fontFamily: 'Inter',
         ),
+      ),
+    );
+    if (onTap == null) return badge;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: _softGrey,
+        highlightColor: const Color(0xFFE5E7EB),
+        child: badge,
       ),
     );
   }
