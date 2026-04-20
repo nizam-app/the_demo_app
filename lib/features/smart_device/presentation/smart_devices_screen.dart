@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
@@ -412,7 +411,11 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
-  /// Same circle size, gap, and trailing inset for all +/- and arrow pairs.
+  
+
+  // Same circle size, gap, and trailing inset for all +/- and arrow pairs.
+
+  
   Widget _deviceControlPair({
     required IconData left,
     required IconData right,
@@ -430,6 +433,8 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     );
   }
 
+  
+
   Widget _deviceControlPairAssets({
     required String leftAsset,
     required String rightAsset,
@@ -439,9 +444,15 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _CircleButton(imagePath: leftAsset, onTap: onLeft ?? () {}),
-        SizedBox(width: 20.w),
-        _CircleButton(imagePath: rightAsset, onTap: onRight ?? () {}),
+        _CircleAssetButton(
+          assetPath: leftAsset,
+          onTap: onLeft ?? () {},
+        ),
+        SizedBox(width: 14.w),
+        _CircleAssetButton(
+          assetPath: rightAsset,
+          onTap: onRight ?? () {},
+        ),
         SizedBox(width: 10.w),
       ],
     );
@@ -457,7 +468,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           leading: _leftIconAsset(
             imagePath: _icAlarm,
             ringColor: _pink,
-            fallbackIcon: Icons.lock_outline_rounded,
+            fallbackIcon: Icons.pause,
           ),
           title: 'Alram',
           subtitle: Column(
@@ -524,14 +535,18 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   child: Ink(
                     width: 44.w,
                     height: 44.w,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
+                      // Paused = active / “on” (blue + play). Disarmed = “off” — do not
+                      // use pause here; it reads as media controls and matches the bad UI.
                       color: Color(0xFFF3F4F6),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      _alarmPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                      _alarmPaused
+                          ? Icons.play_arrow_rounded
+                          : Icons.pause,
                       size: 20.sp,
-                      color: _muted,
+                      color: _alarmPaused ?   Color(0xFF0088FE) : const Color(0xFF6B7280),
                     ),
                   ),
                 ),
@@ -589,18 +604,26 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 padding: EdgeInsets.only(left: 16.w),
                 decoration: BoxDecoration(
                   color: _bathroomComfortOn
-                      ? const Color(0xFFE0F2FE)
+                      ? const Color(0xFFE1E1E1)
                       : const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(999.r),
+                  borderRadius: BorderRadius.circular(26.r),
                 ),
                 alignment: Alignment.centerLeft,
-                child: Image.asset(
+                child: _bathroomComfortOn
+                    ? Image.asset(
+                        'assets/Mask group (15).png',
+                        width: 20.w,
+                        height: 20.h,
+                        fit: BoxFit.contain,
+                        color: _blue,   //_muted
+                      )
+                    : Image.asset(
                   'assets/images/Group 48 (1).png',
                   width: 20.w,
                   height: 20.h,
                   fit: BoxFit.contain,
-                  color: _bathroomComfortOn ? _blue : _muted,
-                ),
+                  color: _muted
+                )
               ),
             ),
           ),
@@ -636,7 +659,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   height: 42.w,
                   decoration: BoxDecoration(
                     color: _irrigationBoostOn
-                        ? _blue
+                        ? Color(0xFF26D344)
                         : const Color(0xFFF3F4F6),
                     shape: BoxShape.circle,
                   ),
@@ -948,8 +971,8 @@ class _SmallCircleText extends StatelessWidget {
   final bool manual;
   final VoidCallback? onTap;
 
-  static const _softGrey = Color(0xFFF3F4F6);
-  static const _themeBlue = Color(0xFF0088FE);
+  static const _softGrey = Color(0xFFE1E1E1);
+  static const _themeBlue = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
@@ -961,9 +984,9 @@ class _SmallCircleText extends StatelessWidget {
       decoration: BoxDecoration(
         color: manual ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
-        border: manual
-            ? null
-            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
+        // border: manual
+        //     ? null
+        //     : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       child: Text(
         letter,
@@ -990,16 +1013,74 @@ class _SmallCircleText extends StatelessWidget {
   }
 }
 
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({this.icon, this.imagePath, this.onTap})
-    : assert(
-        icon != null || imagePath != null,
-        'Provide icon or imagePath',
-      );
+// class _CircleButton extends StatelessWidget {
+//   const _CircleButton({
+//     this.icon,
+//     this.imagePath,
+//     this.onTap,
+//   }) : assert(icon != null || imagePath != null);
+//
+//   final IconData? icon;
+//   final String? imagePath;
+//   final VoidCallback? onTap;
+//
+//   static const Color _increaseColor = Color(0xFFFFFFFF); // white
+//   static const Color _decreaseColor = Color(0xFFF3F4F6); // grey
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     // 👉 increase group (plus + up arrow)
+//     final isIncrease =
+//         icon == Icons.add || icon == Icons.keyboard_arrow_up;
+//
+//     final bgColor = isIncrease ? _increaseColor : _decreaseColor;
+//
+//     return Material(
+//       color: Colors.transparent,
+//       child: InkWell(
+//         customBorder: const CircleBorder(),
+//         onTap: onTap,
+//         highlightColor: const Color(0xFFD1D5DB),
+//         child: Ink(
+//           width: 35.w,
+//           height: 35.w,
+//           decoration: BoxDecoration(
+//             color: bgColor,
+//             shape: BoxShape.circle,
+//           ),
+//           child: Center(
+//             child: imagePath != null
+//                 ? Image.asset(
+//               imagePath!,
+//               width: 15.w,
+//               height: 15.w,
+//               fit: BoxFit.contain,
+//             )
+//                 : Icon(
+//               icon!,
+//               size: 25.sp,
+//               color: const Color(0xFF6B7280),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-  final IconData? icon;
-  final String? imagePath;
+
+
+class _CircleButton extends StatelessWidget {
+  const _CircleButton ({
+    required this.icon,
+    this.onTap,
+  });
+
+  final IconData icon;
   final VoidCallback? onTap;
+
+  /// Single fill for +/- pairs so left and right circles match (no darker “+” side).
+  static const Color _circleBg = Color(0xFFF3F4F6);
 
   @override
   Widget build(BuildContext context) {
@@ -1011,24 +1092,100 @@ class _CircleButton extends StatelessWidget {
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
-          width: 35.w,
-          height: 35.w,
+          width: 36,
+          height: 36,
           decoration: const BoxDecoration(
-            color: Color(0xFFF3F4F6),
+            color: _circleBg,
             shape: BoxShape.circle,
           ),
-          child: Center(
-            child: imagePath != null
-                ? Image.asset(
-                    imagePath!,
-                    width: 15.w,
-                    height: 15.w,
-                    fit: BoxFit.contain,
-                  )
-                : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
+          child: Icon(
+            icon,
+            size: 22.sp,
+            color: const Color(0xFF6B7280),
           ),
         ),
       ),
     );
   }
 }
+
+class _CircleAssetButton extends StatelessWidget {
+  const _CircleAssetButton({
+    required this.assetPath,
+    required this.onTap,
+  });
+
+  final String assetPath;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: 36.w,
+          height: 36.w,
+          decoration: const BoxDecoration(
+            color: _CircleButton._circleBg,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Image.asset(
+              assetPath,
+              width: 22.w,
+              height: 22.w,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+// class _CircleButton extends StatelessWidget {
+//   const _CircleButton({this.icon, this.imagePath, this.onTap})
+//     : assert(
+//         icon != null || imagePath != null,
+//         'Provide icon or imagePath',
+//       );
+//
+//   final IconData? icon;
+//   final String? imagePath;
+//   final VoidCallback? onTap;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Material(
+//       color: Colors.transparent,
+//       child: InkWell(
+//         customBorder: const CircleBorder(),
+//         onTap: onTap,
+//         //splashColor: const Color(0xFF000000),
+//         highlightColor: const Color(0xFFD1D5DB),
+//         child: Ink(
+//           width: 35.w,
+//           height: 35.w,
+//           decoration: const BoxDecoration(
+//             color: Color(0xFFFFFFFF),
+//             shape: BoxShape.circle,
+//           ),
+//           child: Center(
+//             child: imagePath != null
+//                 ? Image.asset(
+//                     imagePath!,
+//                     width: 15.w,
+//                     height: 15.w,
+//                     fit: BoxFit.contain,
+//                   )
+//                 : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

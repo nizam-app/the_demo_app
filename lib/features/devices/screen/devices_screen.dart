@@ -372,8 +372,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           trailing: Padding(
                             padding: EdgeInsets.only(right: 20.w),
                             child: _CircleActionBlue(
-                              imagePath: 'assets/Mask group (15).png',
-                              active: !_alarmDisarmed,
+                              imagePath: _alarmDisarmed ?'assets/Mask group (15).png':'assets/images/Group 48 (1).png',
+                              // Must track armed state, not inverted: when disarmed, `active`
+                              // must be false so the asset is tint-only (avoids wrong full-color glyph).
+                              active: _alarmDisarmed,
                               onTap: () => setState(
                                 () => _alarmDisarmed = !_alarmDisarmed,
                               ),
@@ -477,18 +479,17 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 _CircleMiniBtn(
-                                  icon: Icons.keyboard_arrow_up,
+                                  icon: Icons.keyboard_arrow_down,
                                   onTap: () => setState(() {
-                                    _blindPctUp =
-                                        (_blindPctUp + 5).clamp(0, 100);
+                                    
+                                    _blindPctDown = (_blindPctDown - 5).clamp(0, 100);
                                   }),
                                 ),
                                 SizedBox(width: 14.w),
                                 _CircleMiniBtn(
-                                  icon: Icons.keyboard_arrow_down,
+                                  icon: Icons.keyboard_arrow_up,
                                   onTap: () => setState(() {
-                                    _blindPctDown =
-                                        (_blindPctDown + 5).clamp(0, 100);
+                                    _blindPctDown = (_blindPctDown + 5).clamp(0, 100);
                                   }),
                                 ),
                                 SizedBox(width: 10.w),
@@ -514,7 +515,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             () => _selectedDeviceTitle = 'Block Irrigation Schedule',
                           ),
                           subtitle: _SmallText(
-                            _irrigationPlaying ? 'Running' : 'Blocked',
+                            _irrigationPlaying ? 'Blocked' : 'Running',
                           ),
                           trailing: _CircleActionBlue(
                             imagePath: 'assets/play.png',
@@ -1106,15 +1107,59 @@ class _CircleIconButton extends StatelessWidget {
   }
 }
 
+// class _CircleMiniBtn extends StatelessWidget {
+//   const _CircleMiniBtn({required this.icon, this.onTap});
+//   final IconData icon;
+//   final VoidCallback? onTap;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final isArrow =
+//         icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+//
+//     return Material(
+//       color: Colors.transparent,
+//       child: InkWell(
+//         customBorder: const CircleBorder(),
+//         onTap: onTap,
+//         splashColor: const Color(0xFFE5E7EB),
+//         highlightColor: const Color(0xFFD1D5DB),
+//         child: Ink(
+//           width: 36.w,
+//           height: 36.h,
+//           decoration: const BoxDecoration(
+//             color: Color(0xFFE1E1E1),
+//             shape: BoxShape.circle,
+//           ),
+//           child: Icon(
+//             icon,
+//             size: (isArrow ? 36 : 22).sp,
+//             color: const Color(0xFF6B7280),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class _CircleMiniBtn extends StatelessWidget {
-  const _CircleMiniBtn({required this.icon, this.onTap});
+  const _CircleMiniBtn({
+    required this.icon,
+    this.onTap,
+  });
+
   final IconData icon;
   final VoidCallback? onTap;
 
+  static const Color _plusColor = Color(0xFFE1E1E1);
+  static const Color _minusColor = Color(0xFFF3F4F6);
+
   @override
   Widget build(BuildContext context) {
-    final isArrow =
-        icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+    final isIncrease =
+        icon == Icons.add || icon == Icons.keyboard_arrow_up;
+
+    final bgColor = isIncrease ? _plusColor : _minusColor;
 
     return Material(
       color: Colors.transparent,
@@ -1124,15 +1169,15 @@ class _CircleMiniBtn extends StatelessWidget {
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
-          width: 36.w,
-          height: 36.h,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF3F4F6),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: bgColor,
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
-            size: (isArrow ? 36 : 22).sp,
+            size: 22.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -1145,9 +1190,9 @@ class _CircleActionBlue extends StatelessWidget {
   const _CircleActionBlue({
     this.icon,
     this.imagePath,
-    this.isPlay = false,
+    this.isPlay = true,
     this.onTap,
-    this.active = true,
+    this.active = false,
   }) : assert(
          icon != null || imagePath != null,
          'Either icon or imagePath must be provided',
@@ -1347,8 +1392,8 @@ class _ModeDot extends StatelessWidget {
   final bool manual;
   final VoidCallback? onTap;
 
-  static const Color _softGrey = Color(0xFFF3F4F6);
-  static const Color _themeBlue = Color(0xFF0088FE);
+  static const Color _softGrey = Color(0xFFE1E1E1);
+  static const Color _themeBlue = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
@@ -1359,9 +1404,9 @@ class _ModeDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: manual ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
-        border: manual
-            ? null
-            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
+        // border: manual
+        //     ? null
+        //     : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -1481,7 +1526,7 @@ class _TimeTag extends StatelessWidget {
             width: 16.sp,
             height: 16.sp,
             fit: BoxFit.contain,
-            color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
+            color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFFF3F4F6),
             colorBlendMode: BlendMode.srcIn,
           ),
           SizedBox(width: 11.w),
@@ -1764,7 +1809,7 @@ class _BulbIcon extends StatelessWidget {
 
 /* ---------------- Blind stats row ---------------- */
 
-class _BlindStatsRow extends StatelessWidget {
+class _BlindStatsRow extends StatefulWidget {
   const _BlindStatsRow({
     required this.closedPct,
     required this.openPct,
@@ -1774,27 +1819,19 @@ class _BlindStatsRow extends StatelessWidget {
   final int openPct;
 
   @override
+  State<_BlindStatsRow> createState() => _BlindStatsRowState();
+}
+
+class _BlindStatsRowState extends State<_BlindStatsRow> {
+  bool _rgbwManual = false;
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // A badge (light grey circle)
-        Container(
-          width: 26.w,
-          height: 26.w,
-          decoration: const BoxDecoration(
-            color: Color(0xFFE5E7EB),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'A',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF6B7280),
-              height: 1.0,
-              fontFamily: 'Inter',
-            ),
+        _ModeDot(
+          manual: _rgbwManual,
+          onTap: () => setState(
+                () => _rgbwManual = !_rgbwManual,
           ),
         ),
         SizedBox(width: 10.w),
@@ -1807,7 +1844,7 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '${closedPct.clamp(0, 100)}%',
+          '${widget.closedPct.clamp(0, 100)}%',
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
@@ -1826,7 +1863,7 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '${openPct.clamp(0, 100)}%',
+          '${widget.openPct.clamp(0, 100)}%',
           style: TextStyle(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
