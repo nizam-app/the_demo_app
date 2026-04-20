@@ -595,6 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 17.w),
                   _CircleBtn(
+                    accent: true,
                     size: 35,
                     onTap: () => setState(() {
                       _shadeUp[rowIndex] =
@@ -798,6 +799,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _CircleBtn(
                     onTap: onPlus,
                     size: 35,
+                    accent: true,
                     child: Icon(
                       Icons.add,
                       size: 20.sp,
@@ -1469,8 +1471,8 @@ class _ModeBadge extends StatelessWidget {
   final bool filled;
   final VoidCallback? onTap;
 
-  static const Color _softGrey = Color(0xFFF3F4F6);
-  static const Color _themeBlue = Color(0xFF0088FE);
+  static const Color _softGrey = Color(0xFFE1E1E1);
+  static const Color _themeBlue = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
@@ -1480,9 +1482,9 @@ class _ModeBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: filled ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
-        border: filled
-            ? null
-            : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
+        // border: filled
+        //     ? null
+        //     : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       alignment: Alignment.center,
       child: Text(
@@ -1521,8 +1523,8 @@ class _CircleBtn extends StatelessWidget {
   final VoidCallback? onTap;
   final bool accent;
 
-  static const Color _softGrey = Color(0xFFF3F4F6);
-  static const Color _themeBlue = Color(0xFF0088FE);
+  static const Color _softGrey = Color(0xFFFFFFFF);   //0xFFF3F4F6   0xFF0088FE
+  static const Color _themeBlue = Color(0xFFE1E1E1);
 
   @override
   Widget build(BuildContext context) {
@@ -1544,7 +1546,7 @@ class _CircleBtn extends StatelessWidget {
         customBorder: const CircleBorder(),
         onTap: onTap,
         splashColor:
-            accent ? Colors.white24 : const Color(0xFFE5E7EB),
+            accent ? Colors.white24 : const Color(0xFFE5E7EB),    // 0xFFE5E7EB
         highlightColor:
             accent ? Colors.white30 : const Color(0xFFD1D5DB),
         child: circle,
@@ -1688,7 +1690,7 @@ class _DimmerPill extends StatelessWidget {
               widthFactor: (1 - p),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD1D5DB),
+                  color: const Color(0xFFE1E1E1),
                   borderRadius: BorderRadius.horizontal(
                     right: const Radius.circular(999),
                     left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
@@ -1747,6 +1749,7 @@ class _ThermostatCard extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback? onModeTap;
+
 
   @override
   Widget build(BuildContext context) {
@@ -1811,8 +1814,19 @@ class _ThermostatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // _CircleBtn(
+                  //   size: 35,
+                  //   onTap: onMinus,
+                  //   child: Icon(
+                  //     Icons.remove,
+                  //     size: 23.sp,
+                  //     color: const Color(0xFF6B7280),
+                  //   ),
+                  // ),
+
                   _CircleBtn(
                     size: 35,
+                    accent: false, 
                     onTap: onMinus,
                     child: Icon(
                       Icons.remove,
@@ -1830,7 +1844,8 @@ class _ThermostatCard extends StatelessWidget {
                   ),
                   _CircleBtn(
                     size: 35,
-                    onTap: onPlus,
+                    accent: true,
+                    onTap: onMinus,
                     child: Icon(
                       Icons.add,
                       size: 23.sp,
@@ -1855,7 +1870,7 @@ class _ThermostatCard extends StatelessWidget {
     );
   }
 }
-
+bool isPlusSelected = true;
 class _BlindCard extends StatelessWidget {
   const _BlindCard({
     required this.title,
@@ -1923,6 +1938,7 @@ class _BlindCard extends StatelessWidget {
                             children: [
                               _CircleBtn(
                                 onTap: onDown,
+                                  accent: false,
                                 child: Image.asset(
                                   'assets/Mask group (17).png',
                                   width: 13.sp,
@@ -1967,6 +1983,7 @@ class _BlindCard extends StatelessWidget {
                               SizedBox(width: 7.w),
                               _CircleBtn(
                                 onTap: onUp,
+                                accent: true,
                                 child: Image.asset(
                                   'assets/Mask group (16).png',
                                   width: 13.sp,
