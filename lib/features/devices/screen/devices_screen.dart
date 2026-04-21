@@ -829,7 +829,7 @@ class _DeviceRow extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 46.w,
-                        height: 46.w,
+                        height: 46.h,
                         child: Center(child: leading),
                       ),
                       SizedBox(width: 12.w),
@@ -1089,7 +1089,7 @@ class _CircleIconButton extends StatelessWidget {
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
           width: size.w,
-          height: size.w,
+          height: size.h,
           decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
           child: Center(
             child: imagePath != null
@@ -1156,10 +1156,10 @@ class _CircleMiniBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isIncrease =
-        icon == Icons.add || icon == Icons.keyboard_arrow_up;
+    final isEmphasized =
+        icon == Icons.add || icon == Icons.keyboard_arrow_down;
 
-    final bgColor = isIncrease ? _plusColor : _minusColor;
+    final bgColor = isEmphasized ? _plusColor : _minusColor;
 
     return Material(
       color: Colors.transparent,
@@ -1229,7 +1229,7 @@ class _CircleActionBlue extends StatelessWidget {
             child: ClipOval(
               child: SizedBox(
                 width: 30.w,
-                height: 30.w,
+                height: 30.h,
                 child: Center(
                   child: imagePath != null
                       ? (active

@@ -20,9 +20,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   final FocusNode _searchFocusNode = FocusNode();
 
   // Local UI state for list controls (demo / no backend).
-  bool _alarmPaused = false;
-  bool _bathroomComfortOn = false;
-  bool _irrigationBoostOn = false;
+  bool _alarmPaused = true;
+  bool _bathroomComfortOn = true;
+  double _bathroomDimmerPercent = 0.5;
+  bool _irrigationBoostOn = true;
   int _fanLevel = 0; // 0 = Off, 1–3 = levels
   double _heatSetpoint = 21.0;
   int _irrigationMinutes = 0;
@@ -162,40 +163,50 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(
-                    onTap: ()=>showEditSmartDeviceSheet(context),
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.more_horiz_rounded,
-                        size: 22.sp,
-                        color: _primary,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => showEditSmartDeviceSheet(context),
+                      customBorder: const CircleBorder(),
+                      splashColor: const Color(0xFFE5E7EB),
+                      highlightColor: const Color(0xFFE5E7EB),
+                      child: Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.more_horiz_rounded,
+                          size: 22.sp,
+                          color: _primary,
+                        ),
                       ),
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  //new repo 
-                  GestureDetector(
-                    onTap: ()=>showAddSmartDeviceBottomSheet(context),
-                  child: Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF111827),
-                      shape: BoxShape.circle,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => showAddSmartDeviceBottomSheet(context),
+                      customBorder: const CircleBorder(),
+                      splashColor: Colors.white24,
+                      highlightColor: Colors.white10,
+                      child: Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF111827),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 23,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      Icons.add_rounded,
-                      size: 23,
-                      color: Colors.white,
-                    ),
-                  ),
-
                   ),
                   // _CircleIconButton(
                   //   icon: Icons.add_rounded,
@@ -410,11 +421,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       ),
     );
   }
-
-  
-
   // Same circle size, gap, and trailing inset for all +/- and arrow pairs.
-
   
   Widget _deviceControlPair({
     required IconData left,
@@ -426,7 +433,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleButton(icon: left, onTap: onLeft ?? () {}),
-        SizedBox(width: 20.w),
+        SizedBox(width: 12.w),
         _CircleButton(icon: right, onTap: onRight ?? () {}),
         SizedBox(width: 10.w),
       ],
@@ -446,11 +453,13 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       children: [
         _CircleAssetButton(
           assetPath: leftAsset,
+          emphasized: false,
           onTap: onLeft ?? () {},
         ),
-        SizedBox(width: 14.w),
+        SizedBox(width: 12.w),
         _CircleAssetButton(
           assetPath: rightAsset,
+          emphasized: true,
           onTap: onRight ?? () {},
         ),
         SizedBox(width: 10.w),
@@ -591,42 +600,52 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               ),
             ],
           ),
-          trailing: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(999.r),
-              onTap: () =>
-                  setState(() => _bathroomComfortOn = !_bathroomComfortOn),
-              child: Container(
-                margin: EdgeInsets.only(right: 8.w),
-                width: 152.w,
-                height: 39.h,
-                padding: EdgeInsets.only(left: 16.w),
-                decoration: BoxDecoration(
-                  color: _bathroomComfortOn
-                      ? const Color(0xFFE1E1E1)
-                      : const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(26.r),
-                ),
-                alignment: Alignment.centerLeft,
-                child: _bathroomComfortOn
-                    ? Image.asset(
-                        'assets/Mask group (15).png',
-                        width: 20.w,
-                        height: 20.h,
-                        fit: BoxFit.contain,
-                        color: _blue,   //_muted
-                      )
-                    : Image.asset(
-                  'assets/images/Group 48 (1).png',
-                  width: 20.w,
-                  height: 20.h,
-                  fit: BoxFit.contain,
-                  color: _muted
-                )
-              ),
-            ),
+          trailing: _DimmerPill(
+            percent: _bathroomDimmerPercent,
+            comfortOn: _bathroomComfortOn,
+            onChanged: (v) =>
+                setState(() => _bathroomDimmerPercent = v.clamp(0.0, 1.0)),
+            onSunTap: () =>
+                setState(() => _bathroomComfortOn = !_bathroomComfortOn),
           ),
+
+
+          // Material(
+          //   color: Colors.transparent,
+          //   child: InkWell(
+          //     borderRadius: BorderRadius.circular(26.r),
+          //     onTap: () =>
+          //         setState(() => _bathroomComfortOn = !_bathroomComfortOn),
+          //     child: Container(
+          //       margin: EdgeInsets.only(right: 8.w),
+          //       width: 152.w,
+          //       height: 39.h,
+          //       padding: EdgeInsets.only(left: 16.w),
+          //       decoration: BoxDecoration(
+          //         color: _bathroomComfortOn
+          //             ? const Color(0xFFE1E1E1)
+          //             : const Color(0xFFF3F4F6),
+          //         borderRadius: BorderRadius.circular(26.r),
+          //       ),
+          //       alignment: Alignment.centerLeft,
+          //       child: _bathroomComfortOn
+          //           ? Image.asset(
+          //               'assets/Mask group (15).png',
+          //               width: 20.w,
+          //               height: 20.h,
+          //               fit: BoxFit.contain,
+          //               color: _blue,   //_muted
+          //             )
+          //           : Image.asset(
+          //         'assets/images/Group 48 (1).png',
+          //         width: 20.w,
+          //         height: 20.h,
+          //         fit: BoxFit.contain,
+          //         color: _muted
+          //       )
+          //     ),
+          //   ),
+          // ),
         ),
        
         _buildDivider(),
@@ -643,7 +662,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           ),
           title: 'Block Irrigation Schedule',
           subtitle: _InlineText(
-            _irrigationBoostOn ? 'Boost on' : 'Active',
+            _irrigationBoostOn ? 'Active' : 'Boost on',
             bold: true,
           ),
           trailing: Padding(
@@ -795,10 +814,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             left: Icons.remove_rounded,
             right: Icons.add_rounded,
             onLeft: () => setState(() {
-              _heatSetpoint = (_heatSetpoint - 0.5).clamp(5.0, 35.0);
+              _heatSetpoint = (_heatSetpoint - 0.5).clamp(0.0, 35.0);
             }),
             onRight: () => setState(() {
-              _heatSetpoint = (_heatSetpoint + 0.5).clamp(5.0, 35.0);
+              _heatSetpoint = (_heatSetpoint + 0.5).clamp(0.0, 35.0);
             }),
           ),
         ),
@@ -818,10 +837,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             leftAsset: _icIrrigationLeft,
             rightAsset: _icIrrigationRight,
             onLeft: () => setState(() {
-              _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 180);
+              _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 100);
             }),
             onRight: () => setState(() {
-              _irrigationMinutes = (_irrigationMinutes + 5).clamp(0, 180);
+              _irrigationMinutes = (_irrigationMinutes + 5).clamp(0, 100);
             }),
           ),
         ),
@@ -880,12 +899,12 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             onLeft: () => setState(() {
               _kitchenTemp = (_kitchenTemp - 0.5).clamp(10.0, 35.0);
               _kitchenHumidityPct =
-                  (_kitchenHumidityPct - 2).clamp(0, 100);
+                  (_kitchenHumidityPct - 5).clamp(0, 100);
             }),
             onRight: () => setState(() {
               _kitchenTemp = (_kitchenTemp + 0.5).clamp(10.0, 35.0);
               _kitchenHumidityPct =
-                  (_kitchenHumidityPct + 2).clamp(0, 100);
+                  (_kitchenHumidityPct + 5).clamp(0, 100);
             }),
           ),
         ),
@@ -979,7 +998,7 @@ class _SmallCircleText extends StatelessWidget {
     final letter = manual ? 'M' : 'A';
     final badge = Container(
       width: 26.w,
-      height: 26.w,
+      height: 26.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: manual ? _themeBlue : _softGrey,
@@ -1069,6 +1088,112 @@ class _SmallCircleText extends StatelessWidget {
 // }
 
 
+class _DimmerPill extends StatelessWidget {
+  const _DimmerPill({
+    required this.percent,
+    required this.comfortOn,
+    this.onChanged,
+    this.onSunTap,
+  });
+
+  final double percent;
+  final bool comfortOn;
+  final ValueChanged<double>? onChanged;
+  final VoidCallback? onSunTap;
+
+  static const Color _onIconTint = Color(0xFF0088FE);
+  static const Color _offIconTint = Color(0xFF6B7280);
+
+  @override
+  Widget build(BuildContext context) {
+    final p = percent.clamp(0.0, 1.0);
+    final w = 133.w;
+
+    final pill = Container(
+      height: 35.h,
+      width: w,
+      decoration: BoxDecoration(
+        color: Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: FractionallySizedBox(
+              widthFactor: (1 - p),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE1E1E1),
+                  borderRadius: BorderRadius.horizontal(
+                    right: const Radius.circular(999),
+                    left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: EdgeInsets.only(left: 8.w),
+              child: _buildComfortLead(),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (onChanged == null) return pill;
+
+    void applyDx(double dx) {
+      onChanged!((dx / w).clamp(0.0, 1.0));
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
+      child: pill,
+    );
+  }
+
+  Widget _buildComfortLead() {
+    final glyph = comfortOn
+        ? Image.asset(
+            'assets/Mask group (15).png',
+            height: 20.h,
+            width: 20.w,
+            fit: BoxFit.contain,
+            color: _onIconTint,
+          )
+        : Image.asset(
+            'assets/images/Group 48 (1).png',
+            height: 20.h,
+            width: 20.w,
+            fit: BoxFit.contain,
+            color: _offIconTint,
+          );
+
+    final padded = Padding(
+      padding: EdgeInsets.all(6.w),
+      child: glyph,
+    );
+
+    if (onSunTap == null) return padded;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onSunTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFE5E7EB),
+        child: padded,
+      ),
+    );
+  }
+}
 
 class _CircleButton extends StatelessWidget {
   const _CircleButton ({
@@ -1079,11 +1204,20 @@ class _CircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
 
-  /// Single fill for +/- pairs so left and right circles match (no darker “+” side).
-  static const Color _circleBg = Color(0xFFF3F4F6);
+  /// Matches `devices_screen` `_CircleMiniBtn`: + and down use the stronger fill.
+  static const Color _circleEmphasizedBg = Color(0xFFE1E1E1);
+  static const Color _circleSubtleBg = Color(0xFFF3F4F6);
+
+  bool get _emphasized {
+    return icon == Icons.add ||
+        icon == Icons.add_rounded ||
+        icon == Icons.keyboard_arrow_down ||
+        icon == Icons.keyboard_arrow_down_rounded;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bg = _emphasized ? _circleEmphasizedBg : _circleSubtleBg;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1092,10 +1226,10 @@ class _CircleButton extends StatelessWidget {
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-            color: _circleBg,
+          width: 36.w,
+          height: 36.h,
+          decoration: BoxDecoration(
+            color: bg,
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -1113,13 +1247,18 @@ class _CircleAssetButton extends StatelessWidget {
   const _CircleAssetButton({
     required this.assetPath,
     required this.onTap,
+    required this.emphasized,
   });
 
   final String assetPath;
   final VoidCallback onTap;
+  final bool emphasized;
 
   @override
   Widget build(BuildContext context) {
+    final bg = emphasized
+        ? _CircleButton._circleEmphasizedBg
+        : _CircleButton._circleSubtleBg;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1129,16 +1268,16 @@ class _CircleAssetButton extends StatelessWidget {
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
           width: 36.w,
-          height: 36.w,
-          decoration: const BoxDecoration(
-            color: _CircleButton._circleBg,
+          height: 36.h,
+          decoration: BoxDecoration(
+            color: bg,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Image.asset(
               assetPath,
               width: 22.w,
-              height: 22.w,
+              height: 22.h,
               fit: BoxFit.contain,
             ),
           ),
