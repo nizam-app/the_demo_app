@@ -167,6 +167,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     ),
                     if (_showSection('Errors')) ...[
+                      SizedBox(height: 10.h,), 
                       _SectionHeader(
                         title: 'Errors',
                         onClear: () => _clearSection(_NotifSection.errors),

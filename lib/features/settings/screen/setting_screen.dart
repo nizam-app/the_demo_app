@@ -50,17 +50,14 @@ class _SettingScreenState extends State<SettingScreen> {
         backgroundColor: _screenBg,
         body: SafeArea(
           top: false,
-          bottom: true,
+          bottom: false,
           child: Stack(
             fit: StackFit.expand,
             children: [
               Positioned.fill(
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(color: _screenBg),
-                ),
-              ),
-              Positioned.fill(
-                child: SingleChildScrollView(
+                child: Material(
+                  color: _screenBg,
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     14.w,
                     scrollTopPadding,
@@ -166,6 +163,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),
                     ],
                   ),
+                ),
                 ),
               ),
               Positioned(

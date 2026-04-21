@@ -20,9 +20,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool rolesEnabled = true;
   bool remoteAccessEnabled = true;
 
+  static const _pageBg = Color(0xFFF3F4F6);
+  static const _cardRadius = 26.0;
+  static const _pageHorizontalPad = 16.0;
+
   @override
   Widget build(BuildContext context) {
-    const screenBg = Color(0xFFF3F4F6);
+    const screenBg = _pageBg;
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final headerChrome = 56.h;
@@ -39,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: screenBg,
         body: SafeArea(
           top: false,
-          bottom: true,
+          bottom: false,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -52,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(
                     top: scrollTopPadding,
-                    bottom: 40.h + bottomInset,
+                    bottom: 8.h,
                   ),
                   child: SizedBox(
                     width: double.infinity,
@@ -61,14 +65,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         SizedBox(height: 10.h),
 
                         // Profile Card
-                        Container(
-                          margin: EdgeInsets.symmetric(horizontal: 14.w),
-                          padding: EdgeInsets.all(20.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(26.r),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: _pageHorizontalPad.w,
                           ),
-                          child: Row(
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(20.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.circular(_cardRadius.r),
+                            ),
+                            child: Row(
                             children: [
                               EditableAvatar(
                                 imageAsset:
@@ -87,8 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       'Oren Elimelech',
                                       style: TextStyle(
                                         fontSize: 21.sp,
-                                        fontWeight: FontWeight.w400,
+                                        fontWeight: FontWeight.w600,
                                         color: const Color(0xFF111827),
+                                        fontFamily: 'Inter',
                                       ),
                                     ),
                                     SizedBox(height: 4.h),
@@ -138,13 +148,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
+                          ),
                         ),
                         SizedBox(height: 24.h),
 
                         // Information Section
                         _Section(
                           title: 'Information',
+                          horizontalPad: _pageHorizontalPad.w,
                           child: _CardList(
+                            borderRadius: _cardRadius.r,
                             children: const [
                               _KeyValueRow(
                                 label: 'Name',
@@ -166,6 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _KeyValueRow(
                                 label: 'Categories',
                                 value: 'Electrician',
+                                showChevron: true,
                               ),
                             ],
                           ),
@@ -174,7 +188,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // Account Section
                         _Section(
                           title: 'Account',
+                          horizontalPad: _pageHorizontalPad.w,
                           child: _CardList(
+                            borderRadius: _cardRadius.r,
                             children: [
                               const _KeyValueRow(
                                 label: 'Email',
@@ -209,6 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // Connect Section
                         _Section(
                           title: 'Connect',
+                          horizontalPad: _pageHorizontalPad.w,
                           child: Container(
                             width: double.infinity,
                             padding: EdgeInsets.symmetric(
@@ -217,7 +234,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(26.r),
+                              borderRadius:
+                                  BorderRadius.circular(_cardRadius.r),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,62 +264,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
 
-                        // Update Account Button
+                        // Save (outline pill — design spec)
                         Padding(
-                          padding: EdgeInsets.fromLTRB(30.w, 0, 30.w, 40.h),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 55.h,
+                          padding: EdgeInsets.fromLTRB(
+                            _pageHorizontalPad.w,
+                            8.h,
+                            _pageHorizontalPad.w,
+                            24.h + bottomInset,
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
                             child: InkWell(
                               onTap: () {},
-                              borderRadius: BorderRadius.circular(26.r),
-                              child: Container(
+                              borderRadius: BorderRadius.circular(_cardRadius.r),
+                              child: Ink(
+                                height: 55.h,
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF5D65FF),
-                                      Color(0xFF0088FE),
-                                    ],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.circular(_cardRadius.r),
+                                  border: Border.all(
+                                    color: const Color(0xFF0088FE),
+                                    width: 1.5,
                                   ),
-                                  borderRadius: BorderRadius.circular(26.r),
                                 ),
-                                child: Container(
-                                  margin: EdgeInsets.all(1.w),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(26.r),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Image.asset(
-                                        'assets/download.png',
-                                        width: 18.w,
-                                        height: 18.w,
-                                        fit: BoxFit.contain,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.arrow_circle_up_outlined,
+                                      size: 22.sp,
+                                      color: const Color(0xFF0088FE),
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      'Save',
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF0088FE),
+                                        fontFamily: 'Inter',
                                       ),
-                                      SizedBox(width: 8.w),
-                                      ShaderMask(
-                                        shaderCallback: (bounds) =>
-                                            const LinearGradient(
-                                              colors: [
-                                                Color(0xFF0088FE),
-                                                Color(0xFF0088FE),
-                                              ],
-                                            ).createShader(bounds),
-                                        child: Text(
-                                          'Update Account',
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -488,40 +493,51 @@ class EditableAvatar extends StatelessWidget {
 /* -------------------- Small Widgets -------------------- */
 
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
+  const _Section({
+    required this.title,
+    required this.child,
+    required this.horizontalPad,
+  });
+
   final String title;
   final Widget child;
+  final double horizontalPad;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 6.w, bottom: 16.h),
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
-                fontFamily: 'Inter',
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(horizontalPad, 0, horizontalPad, 16.h),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF111827),
+              fontFamily: 'Inter',
             ),
           ),
-          child,
-          SizedBox(height: 24.h),
-        ],
-      ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPad),
+          child: child,
+        ),
+        SizedBox(height: 24.h),
+      ],
     );
   }
 }
 
 class _CardList extends StatelessWidget {
-  const _CardList({required this.children});
+  const _CardList({
+    required this.children,
+    required this.borderRadius,
+  });
+
   final List<Widget> children;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -530,17 +546,24 @@ class _CardList extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 5.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26.r),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
 }
 
 class _KeyValueRow extends StatelessWidget {
-  const _KeyValueRow({required this.label, required this.value});
+  const _KeyValueRow({
+    required this.label,
+    required this.value,
+    this.showChevron = false,
+  });
+
   final String label;
   final String value;
+  final bool showChevron;
 
   @override
   Widget build(BuildContext context) {
@@ -561,15 +584,31 @@ class _KeyValueRow extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF6B7280),
-                fontFamily: 'Inter',
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF6B7280),
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+                if (showChevron) ...[
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 22.sp,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ],
+              ],
             ),
           ),
         ],

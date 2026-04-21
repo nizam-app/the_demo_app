@@ -287,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // ✅ Chart card
                         _ChartCard(),
 
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 70.h),
                       ],
                     ),
                   ),
@@ -345,88 +345,6 @@ class _HomeScreenState extends State<HomeScreen> {
       translucentBottomBar: true,
       bottomBarBackgroundOpacity: 0,
       backgroundColor: Colors.white,
-      // Voice/Home is index 2
-      // drawer: Drawer(
-      //   child: SafeArea(
-      //     child: Column(
-      //       crossAxisAlignment: CrossAxisAlignment.stretch,
-      //       children: [
-      //         Padding(
-      //           padding: EdgeInsets.all(20.w),
-      //           child: Text(
-      //             'Menu',
-      //             style: TextStyle(
-      //               fontSize: 22.sp,
-      //               fontWeight: FontWeight.w600,
-      //               color: const Color(0xFF111827),
-      //             ),
-      //           ),
-      //         ),
-      //         const Divider(height: 1),
-      //         ListTile(
-      //           leading: const Icon(Icons.menu, color: Color(0xFF111827)),
-      //           title: Text(
-      //             'Menu',
-      //             style: TextStyle(
-      //               fontSize: 16.sp,
-      //               fontWeight: FontWeight.w500,
-      //               color: const Color(0xFF111827),
-      //             ),
-      //           ),
-      //           onTap: () {
-      //             Navigator.pop(context);
-      //             context.push(MenuScreen.routeName);
-      //           },
-      //         ),
-      //
-      //         ///PROFILE MENU OPTION
-      //
-      //         // ListTile(
-      //         //   leading: const Icon(
-      //         //     Icons.person_outline,
-      //         //     color: Color(0xFF111827),
-      //         //   ),
-      //         //   title: Text(
-      //         //     'Profile',
-      //         //     style: TextStyle(
-      //         //       fontSize: 16.sp,
-      //         //       fontWeight: FontWeight.w500,
-      //         //       color: const Color(0xFF111827),
-      //         //     ),
-      //         //   ),
-      //         //   onTap: () {
-      //         //     Navigator.pop(context);
-      //         //     context.push(ProfileScreen.routeName);
-      //         //   },
-      //         // ),
-      //
-      //
-      //
-      //
-      //
-      //
-      //         // ListTile(
-      //         //   leading: const Icon(
-      //         //     Icons.align_horizontal_center,
-      //         //     color: Color(0xFF111827),
-      //         //   ),
-      //         //   title: Text(
-      //         //     'Zones',
-      //         //     style: TextStyle(
-      //         //       fontSize: 16.sp,
-      //         //       fontWeight: FontWeight.w500,
-      //         //       color: const Color(0xFF111827),
-      //         //     ),
-      //         //   ),
-      //         //   onTap: () {
-      //         //     Navigator.pop(context);
-      //         //
-      //         //   },
-      //         // ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
       children: [
         // Index 0: Devices
         RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
@@ -506,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   deviceName,
                   style: TextStyle(
                     fontSize: 16.sp, // ✅ bigger like image
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     height: 1.08,
                   ),
@@ -998,6 +916,7 @@ class _HomeScreenState extends State<HomeScreen> {
               deviceName,
               style: TextStyle(
                 fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
                 color: const Color(0xFF111827),
                 height: 1.15,
               ),
@@ -1010,8 +929,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             status,
             style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
               color: const Color(0xFF111827),
               fontFamily: "Inter",
             ),
@@ -1183,96 +1102,6 @@ class _Header extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------
-// class _Header extends StatelessWidget {
-//   const _Header({required this.onMenuTap, required this.onEditTap});
-//
-//   final VoidCallback onMenuTap;
-//   final VoidCallback onEditTap;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         InkWell(
-//           onTap: onMenuTap,
-//           borderRadius: BorderRadius.circular(12.r),
-//           child: SizedBox(
-//             width: 44.w,
-//             height: 44.w,
-//             child: Center(
-//               child: Image.asset(
-//                 'assets/Group 35 (1).png',
-//                 width: 26.w,
-//                 height: 17.w,
-//                 fit: BoxFit.contain,
-//               ),
-//             ),
-//           ),
-//         ),
-//         Expanded(
-//           child: Center(
-//             child: Text(
-//               'Dashboard',
-//               style: TextStyle(
-//                 fontSize: 22.sp,
-//                 fontWeight: FontWeight.w600,
-//                 color: const Color(0xFF111827),
-//                 fontFamily: 'Inter',
-//               ),
-//             ),
-//           ),
-//         ),
-//         Row(
-//           children: [
-//             InkWell(
-//               onTap: onEditTap,
-//               borderRadius: BorderRadius.circular(999),
-//               child: Container(
-//                 width: 32.w,
-//                 height: 32.w,
-//                 decoration: const BoxDecoration(
-//                   color: Color(0xFFF3F4F6),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: Center(
-//                   child: Image.asset(
-//                     'assets/image 89.png',
-//                     width: 22.w,
-//                     height: 22.w,
-//                     fit: BoxFit.contain,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//             SizedBox(width: 13.w,), 
-//             InkWell(
-//               onTap: () => HomeScreen.showAddSectionSheet(context),
-//               borderRadius: BorderRadius.circular(999),
-//               child: Container(
-//                 width: 32.w,
-//                 height: 32.w,
-//                 decoration: const BoxDecoration(
-//                   color: Color(0xFFF3F4F6),
-//                   shape: BoxShape.circle,
-//                 ),
-//                 child: Center(
-//                   child: Icon(Icons.add_rounded, color: Color(0xFF111827), size: 23.sp,)
-//                 ),
-//               ),
-//             ),
-//            
-//           ],
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// ---------------------------
-// Category pill
-// ---------------------------
 class _CategoryPill extends StatelessWidget {
   const _CategoryPill({
     required this.label,
@@ -1491,7 +1320,7 @@ class _ModeBadge extends StatelessWidget {
         mode,
         style: TextStyle(
           fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: filled ? Colors.white : _themeBlue,
         ),
       ),
@@ -1600,7 +1429,7 @@ class _LightDimmerCard extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 15.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF111827),
             height: 1.18,
@@ -2092,7 +1921,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF111827),
                     ),
@@ -2125,209 +1954,6 @@ class _ToggleCardState extends State<_ToggleCard> {
   }
 }
 
-// ---------------------------
-// Lighting mini cards
-// ---------------------------
-// class _MiniLightingCard extends StatelessWidget {
-//   const _MiniLightingCard({
-//     required this.title,
-//     required this.status,
-//     required this.icon,
-//     required this.showProgress,
-//     required this.mode,
-//   });
-//
-//   final String title;
-//   final String status;
-//   final IconData icon;
-//   final bool showProgress;
-//   final String? mode;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: 132.w,
-//       child: Stack(
-//         children: [
-//           _CardShell(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Icon(icon, size: 38.sp, color: const Color(0xFF111827)),
-//                 SizedBox(height: 4.h),
-//                 Expanded(
-//                   child: Text(
-//                     title,
-//                     style: TextStyle(
-//                       fontSize: 13.sp,
-//                       color: const Color(0xFF111827),
-//                       height: 1.15,
-//                     ),
-//                     maxLines: 2,
-//                     overflow: TextOverflow.ellipsis,
-//                   ),
-//                 ),
-//                 SizedBox(height: 4.h),
-//                 Text(
-//                   status,
-//                   style: TextStyle(
-//                     fontSize: 12.sp,
-//                     fontWeight: FontWeight.w700,
-//                     color: const Color(0xFF111827),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//
-//           if (showProgress)
-//             Positioned(
-//               right: 10.w,
-//               top: 10.w,
-//               child: SizedBox(
-//                 width: 46.w,
-//                 height: 46.w,
-//                 child: CustomPaint(
-//                   painter: _CircularProgressPainter(
-//                     progress: 1,
-//                     strokeWidth: 3,
-//                   ),
-//                   child: Center(
-//                     child: Text(
-//                       '100%',
-//                       style: TextStyle(
-//                         fontSize: 11.sp,
-//                         color: const Color(0xFF111827),
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//
-//           if (mode != null)
-//             Positioned(
-//               right: 10.w,
-//               top: 10.w,
-//               child: _ModeBadge(mode: mode!, filled: false),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// ---------------------------
-// Favorites
-// ---------------------------
-// class _FavoritesRow extends StatelessWidget {
-//   const _FavoritesRow({required this.mode, required this.modeFilled});
-//
-//   final String mode;
-//   final bool modeFilled;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         Expanded(
-//           child: Stack(
-//             children: [
-//               ClipRRect(
-//                 borderRadius: BorderRadius.circular(24.r),
-//                 child: Container(
-//                   height: 132.h,
-//                   color: Colors.grey.shade300,
-//                   child: const Center(child: Icon(Icons.videocam_outlined)),
-//                 ),
-//               ),
-//               Positioned(
-//                 left: 12.w,
-//                 bottom: 12.w,
-//                 child: Text(
-//                   'Front Door\nCamera',
-//                   style: TextStyle(
-//                     fontSize: 14.sp,
-//                     fontWeight: FontWeight.w600,
-//                     color: Colors.white,
-//                     shadows: [
-//                       Shadow(
-//                         color: Colors.black.withOpacity(0.35),
-//                         blurRadius: 10,
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//               Positioned(
-//                 right: 10.w,
-//                 top: 10.w,
-//                 child: _ModeBadge(mode: mode, filled: modeFilled),
-//               ),
-//             ],
-//           ),
-//         ),
-//         SizedBox(width: 12.w),
-//         Expanded(
-//           child: Stack(
-//             children: [
-//               Container(
-//                 height: 132.h,
-//                 decoration: BoxDecoration(
-//                   color: const Color(0xFFF3F4F6),
-//                   borderRadius: BorderRadius.circular(24.r),
-//                 ),
-//                 padding: EdgeInsets.all(14.w),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       'Bedroom Thermostat\nparents room',
-//                       style: TextStyle(
-//                         fontSize: 16.sp,
-//                         color: const Color(0xFF111827),
-//                         height: 1.15,
-//                       ),
-//                       maxLines: 2,
-//                       overflow: TextOverflow.ellipsis,
-//                     ),
-//                     const Spacer(),
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         _CircleBtn(
-//                           child: Icon(Icons.remove, size: 20.sp,color: Color(0xFF6B7280), ),
-//                           size: 35,
-//                         ),
-//                         Text(
-//                           '24.6°c',
-//                           style: TextStyle(
-//                             fontSize: 14.sp,
-//                             fontWeight: FontWeight.w700,
-//                           ),
-//                         ),
-//                         _CircleBtn(child: Icon(Icons.add, size: 20.sp,color: Color(0xFF6B7280),)),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               Positioned(
-//                 right: 10.w,
-//                 top: 10.w,
-//                 child: _ModeBadge(mode: mode, filled: modeFilled),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
-
-// ---------------------------
-// Chart card
-// ---------------------------
 class _ChartCard extends StatefulWidget {
   const _ChartCard();
 

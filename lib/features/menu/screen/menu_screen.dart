@@ -33,9 +33,9 @@ class MenuScreen extends StatelessWidget {
 
   static const String routeName = '/menu';
 
-  // colors (match screenshot)
+  // Opaque page fill so routes stacked under Menu never show through; cards stay light.
   static const _bg = Color(0xFFFFFFFF);
-  static const _card = Colors.white;
+  static const _card = Colors.transparent;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
@@ -64,6 +64,11 @@ class MenuScreen extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(color: _bg),
+                ),
+              ),
               SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   0,
@@ -81,14 +86,10 @@ class MenuScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(26.r),
-                          border: Border.all(color: Colors.white, width: 2.h),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.20),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
+                          border: Border.all(
+                            color: _divider.withValues(alpha: 0.35),
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -739,14 +740,10 @@ class _CardBlock extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26.r),
-        border: Border.all(width: 1.h, color: Colors.white),
-        boxShadow: [
-          BoxShadow(
-           color: Colors.grey.withOpacity(0.20),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: const Color(0xFFE5E7EB).withValues(alpha: 0.45),
+          width: 1,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22.r),

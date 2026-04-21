@@ -1320,7 +1320,7 @@ class _SmallText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
         color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
@@ -1846,7 +1846,7 @@ class _BlindStatsRowState extends State<_BlindStatsRow> {
         Text(
           '${widget.closedPct.clamp(0, 100)}%',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
             fontFamily: 'Inter',
@@ -1865,7 +1865,7 @@ class _BlindStatsRowState extends State<_BlindStatsRow> {
         Text(
           '${widget.openPct.clamp(0, 100)}%',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
             fontFamily: 'Inter',
@@ -2072,7 +2072,7 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),

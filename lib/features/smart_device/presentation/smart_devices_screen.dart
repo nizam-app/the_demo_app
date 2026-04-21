@@ -132,9 +132,6 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     ]),
               ),
             ),
-            
-                    
-            
           ],
         ),
       ),
@@ -208,15 +205,6 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                       ),
                     ),
                   ),
-                  // _CircleIconButton(
-                  //   icon: Icons.add_rounded,
-                  //   onTap: ()=>_showAssignCategoryPopup(context),
-                  //   size: 32,
-                  //   bg:const Color(0xFF111827),
-                  //   //bg: const Color(0xFF0088FE),
-                  //   iconColor: Colors.white,
-                  //   iconSize: 23,
-                  // ),
                 ],
               ),
             ],
@@ -592,7 +580,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Text(
                 _bathroomComfortOn ? 'On' : 'Off',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 16.sp,
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Inter',
@@ -608,44 +596,6 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             onSunTap: () =>
                 setState(() => _bathroomComfortOn = !_bathroomComfortOn),
           ),
-
-
-          // Material(
-          //   color: Colors.transparent,
-          //   child: InkWell(
-          //     borderRadius: BorderRadius.circular(26.r),
-          //     onTap: () =>
-          //         setState(() => _bathroomComfortOn = !_bathroomComfortOn),
-          //     child: Container(
-          //       margin: EdgeInsets.only(right: 8.w),
-          //       width: 152.w,
-          //       height: 39.h,
-          //       padding: EdgeInsets.only(left: 16.w),
-          //       decoration: BoxDecoration(
-          //         color: _bathroomComfortOn
-          //             ? const Color(0xFFE1E1E1)
-          //             : const Color(0xFFF3F4F6),
-          //         borderRadius: BorderRadius.circular(26.r),
-          //       ),
-          //       alignment: Alignment.centerLeft,
-          //       child: _bathroomComfortOn
-          //           ? Image.asset(
-          //               'assets/Mask group (15).png',
-          //               width: 20.w,
-          //               height: 20.h,
-          //               fit: BoxFit.contain,
-          //               color: _blue,   //_muted
-          //             )
-          //           : Image.asset(
-          //         'assets/images/Group 48 (1).png',
-          //         width: 20.w,
-          //         height: 20.h,
-          //         fit: BoxFit.contain,
-          //         color: _muted
-          //       )
-          //     ),
-          //   ),
-          // ),
         ),
        
         _buildDivider(),
@@ -724,7 +674,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Text(
                 _fanLevel == 0 ? 'Off' : 'Level $_fanLevel',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                   fontFamily: 'Inter',
@@ -873,7 +823,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Text(
                 '${_kitchenTemp.toStringAsFixed(1)}°C',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 16.sp,
                   color: _primary,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Inter',
@@ -885,7 +835,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               Text(
                 '$_kitchenHumidityPct%',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: _primary,
                   fontFamily: 'Inter',
@@ -930,7 +880,7 @@ class _InlineText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         fontWeight: bold ? FontWeight.w700 : FontWeight.w700,
         color: Colors.black,
         fontFamily: 'Inter',
@@ -1031,61 +981,6 @@ class _SmallCircleText extends StatelessWidget {
     );
   }
 }
-
-// class _CircleButton extends StatelessWidget {
-//   const _CircleButton({
-//     this.icon,
-//     this.imagePath,
-//     this.onTap,
-//   }) : assert(icon != null || imagePath != null);
-//
-//   final IconData? icon;
-//   final String? imagePath;
-//   final VoidCallback? onTap;
-//
-//   static const Color _increaseColor = Color(0xFFFFFFFF); // white
-//   static const Color _decreaseColor = Color(0xFFF3F4F6); // grey
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // 👉 increase group (plus + up arrow)
-//     final isIncrease =
-//         icon == Icons.add || icon == Icons.keyboard_arrow_up;
-//
-//     final bgColor = isIncrease ? _increaseColor : _decreaseColor;
-//
-//     return Material(
-//       color: Colors.transparent,
-//       child: InkWell(
-//         customBorder: const CircleBorder(),
-//         onTap: onTap,
-//         highlightColor: const Color(0xFFD1D5DB),
-//         child: Ink(
-//           width: 35.w,
-//           height: 35.w,
-//           decoration: BoxDecoration(
-//             color: bgColor,
-//             shape: BoxShape.circle,
-//           ),
-//           child: Center(
-//             child: imagePath != null
-//                 ? Image.asset(
-//               imagePath!,
-//               width: 15.w,
-//               height: 15.w,
-//               fit: BoxFit.contain,
-//             )
-//                 : Icon(
-//               icon!,
-//               size: 25.sp,
-//               color: const Color(0xFF6B7280),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 
 class _DimmerPill extends StatelessWidget {
@@ -1286,45 +1181,3 @@ class _CircleAssetButton extends StatelessWidget {
     );
   }
 }
-// class _CircleButton extends StatelessWidget {
-//   const _CircleButton({this.icon, this.imagePath, this.onTap})
-//     : assert(
-//         icon != null || imagePath != null,
-//         'Provide icon or imagePath',
-//       );
-//
-//   final IconData? icon;
-//   final String? imagePath;
-//   final VoidCallback? onTap;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Material(
-//       color: Colors.transparent,
-//       child: InkWell(
-//         customBorder: const CircleBorder(),
-//         onTap: onTap,
-//         //splashColor: const Color(0xFF000000),
-//         highlightColor: const Color(0xFFD1D5DB),
-//         child: Ink(
-//           width: 35.w,
-//           height: 35.w,
-//           decoration: const BoxDecoration(
-//             color: Color(0xFFFFFFFF),
-//             shape: BoxShape.circle,
-//           ),
-//           child: Center(
-//             child: imagePath != null
-//                 ? Image.asset(
-//                     imagePath!,
-//                     width: 15.w,
-//                     height: 15.w,
-//                     fit: BoxFit.contain,
-//                   )
-//                 : Icon(icon!, size: 25.sp, color: const Color(0xFF6B7280)),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
