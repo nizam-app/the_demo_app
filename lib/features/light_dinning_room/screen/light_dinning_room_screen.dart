@@ -195,7 +195,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 height: 39.h,
                 width: 78.w,
                 decoration: BoxDecoration(
-                  color: _isOn ? Colors.white : const Color(0xFF0088FE),
+                  color: _isOn ? Color(0xFF6B7280) : const Color(0xFF0088FE),
                   borderRadius: BorderRadius.circular(26.r),
                 ),
                 child: Center(
@@ -207,9 +207,10 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                         height: 13.h,
                         width: 13.w,
                         fit: BoxFit.cover,
-                        color: _isOn
-                            ? Color(0xFF111827)
-                            : const Color(0xFFFFFFFF),
+                        color:    Colors.white,
+                        // _isOn
+                        //     ? Color(0xFF111827)
+                        //     : const Color(0xFF6B7280),
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -218,9 +219,10 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: _isOn
-                              ? Color(0xFF111827)
-                              : const Color(0xFFFFFFFF),
+                          color:  Color(0xFFFFFFFF),
+                          // _isOn
+                          //     ? Color(0xFF111827)
+                          //     : const Color(0xFFFFFFFF),
                         ),
                       ),
                     ],
@@ -237,7 +239,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 height: 39.h,
                 width: 78.w,
                 decoration: BoxDecoration(
-                  color: _isOn ? const Color(0xFF0088FE) : Colors.white,
+                  color: _isOn ? const Color(0xFF0088FE) : Color(0xFF6B7280),
                   borderRadius: BorderRadius.circular(26.r),
                 ),
                 child: Center(
@@ -247,7 +249,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                       Icon(
                         Icons.power_settings_new_rounded,
                         size: 18.sp,
-                        color: _isOn ? Colors.white : const Color(0xFF111827),
+                        color:  Color(0xFFFFFFFF),
+                        //_isOn ? Colors.white : const Color(0xFF111827),
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -256,7 +259,8 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: _isOn ? Colors.white : const Color(0xFF111827),
+                          color:Colors.white,
+                          //_isOn ? Colors.white : const Color(0xFF111827),
                         ),
                       ),
                     ],
@@ -419,12 +423,12 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 60.h,
+              height: 55.h,
               padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
               child: Text(
                 'Manage your device',
                 style: TextStyle(
-                  fontFamily: 'Inter',
+                  fontFamily: 'Inter',                                            
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF111827),
@@ -684,15 +688,18 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-            child: Text(
-              'Organize automation',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF111827),
+          Container(
+            height: 55.h,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+              child: Text(
+                'Organize automation',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF111827),
+                ),
               ),
             ),
           ),
@@ -744,15 +751,18 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-            child: Text(
-              'Live chart',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF111827),
+          SizedBox(
+            height: 55.h,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+              child: Text(
+                'Live chart',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF111827),
+                ),
               ),
             ),
           ),
@@ -890,15 +900,18 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-            child: Text(
-              'History log',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF111827),
+          SizedBox(
+            height: 55.h,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+              child: Text(
+                'History log',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF111827),
+                ),
               ),
             ),
           ),
@@ -1123,15 +1136,18 @@ Widget deviceOverviewCard() {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: EdgeInsets.only(left:  20.w, top:  10.h, bottom:  10.h),
-          child: Text(
-            'Device overview',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w500,
-              color: overviewTitle,
+        SizedBox(
+          height: 55.h,
+          child: Padding(
+            padding: EdgeInsets.only(left:  20.w, top:  10.h, bottom:  10.h),
+            child: Text(
+              'Device overview',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w500,
+                color: overviewTitle,
+              ),
             ),
           ),
         ),

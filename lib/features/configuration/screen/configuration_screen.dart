@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +19,7 @@ class ConfigurationScreen extends StatelessWidget {
   static const Color _dividerColor = Color(0xFFE1E1E1);
   static const Color _replaceBlue = Color(0xFF0088FE);
   static const Color _deletePink = Color(0xFFFE019A);
+  static const Color _headerIconCircle = Color(0xFFF3F4F6);
 
   static const List<({String label, String value})> _detailsRows = [
     (label: 'Serial Number', value: 'BLIND-4B37-3419-363A'),
@@ -61,17 +64,30 @@ class ConfigurationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerRowHeight = 36.w;
+    final scrollTopPadding = topInset + 8.h + headerRowHeight + 8.h;
+
     return Scaffold(
       backgroundColor: _screenBg,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        top: false,
+        bottom: false,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            _buildAppBar(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 28.h),
-                child: Column(
+            Positioned.fill(
+              child: Material(
+                color: _screenBg,
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    14.w,
+                    scrollTopPadding,
+                    14.w,
+                    28.h + bottomInset,
+                  ),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _sectionTitle('Details'),
@@ -128,8 +144,15 @@ class ConfigurationScreen extends StatelessWidget {
                       width: 16.w,
                     ),
                   ],
+                  ),
                 ),
               ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildAppBar(context, topInset, headerRowHeight),
             ),
           ],
         ),
@@ -137,47 +160,102 @@ class ConfigurationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(17.w, 6.h, 17.w, 10.h),
-      child: SizedBox(
-        height: 40.h,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GlobalCircleIconBtn(
-                color: Colors.white,
-                child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
-                onTap: () {
-                  if (Navigator.of(context).canPop()) {
-                    Navigator.of(context).pop();
-                  } else {
-                    context.go('/setting-device');
-                  }
-                },
+  Widget _buildAppBar(
+    BuildContext context,
+    double topInset,
+    double headerRowHeight,
+  ) {
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.20),
+            border: Border(
+              bottom: BorderSide(
+                color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                width: 1,
               ),
             ),
-            Text(
-              // 'Configuration',
-              'Blinds control unit',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w600,
-                color: _titleColor,
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 14.w,
+              right: 14.w,
+              top: topInset + 8.h,
+              bottom: 12.h,
+            ),
+            child: SizedBox(
+              height: headerRowHeight,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GlobalCircleIconBtn(
+                      color: _headerIconCircle,
+                      child: Image.asset(
+                        'assets/aro.png',
+                        width: 16.w,
+                        height: 16.h,
+                      ),
+                      onTap: () {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        } else {
+                          context.go('/setting-device');
+                        }
+                      },
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      'Blinds control unit',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _titleColor,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 36.h,
+                          width: 36.w,
+                          child: _CircleIconButton(
+                            icon: Icons.more_horiz_rounded,
+                            onTap: () {},
+                            size: 22,
+                            bg: const Color(0xFFF3F4F6),
+                            iconColor: const Color(0xFF111827),
+                            iconSize: 22,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        SizedBox(
+                          height: 36.h,
+                          width: 36.w,
+                          child: _CircleIconButton(
+                            icon: Icons.add_rounded,
+                            onTap: () {},
+                            size: 23,
+                            bg: const Color(0xFF111827),
+                            iconColor: Colors.white,
+                            iconSize: 23,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GlobalCircleIconBtn(
-                onTap: () {},
-                // icon: Icons.more_horiz_rounded,
-                child: Icon(Icons.more_horiz_rounded, color: Colors.black),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -411,6 +489,57 @@ class ConfigurationScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleIconButton extends StatelessWidget {
+  const _CircleIconButton({
+    this.icon,
+    this.imagePath,
+    required this.onTap,
+    this.size = 44,
+    this.bg = const Color(0xFFF3F4F6),
+    this.iconColor = const Color(0xFF111827),
+    this.iconSize = 22,
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
+
+  final IconData? icon;
+  final String? imagePath;
+  final VoidCallback onTap;
+  final double size;
+  final Color bg;
+  final Color iconColor;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: size.w,
+          height: size.h,
+          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+          child: Center(
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: iconSize.w,
+                    height: iconSize.h,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: iconSize.sp, color: iconColor),
           ),
         ),
       ),
