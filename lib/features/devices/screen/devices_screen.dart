@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
+import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../widget/assign_category_zone.dart';
 
@@ -36,6 +37,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
   bool _bathroomManual = true;
   int _blindPctDown = 0;
   int _blindPctUp = 50;
+  /// 0 = neither +/- (or blind arrow) marked; 1 = first control; 2 = second.
+  int _rgbwStepMark = 0;
+  int _bathroomThermoMark = 0;
+  int _blindStepMark = 0;
   bool _irrigationPlaying = false;
   int _brightnessPct = 54;
   bool _cardReaderOn = false;
@@ -335,14 +340,18 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             children: [
                               _CircleMiniBtn(
                                 icon: Icons.remove,
+                                marked: _rgbwStepMark == 1,
                                 onTap: () => setState(() {
+                                  _rgbwStepMark = 1;
                                   _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100);
                                 }),
                               ),
                               SizedBox(width: 14.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
+                                marked: _rgbwStepMark == 2,
                                 onTap: () => setState(() {
+                                  _rgbwStepMark = 2;
                                   _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100);
                                 }),
                               ),
@@ -416,8 +425,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               Text(
                                 '${_bathroomTemp.toStringAsFixed(1)}°C',
                                 style: const TextStyle(
-                                  fontSize: 14, // screenshot vibe
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16, // screenshot vibe
+                                  fontWeight: FontWeight.w700,
                                   color: Color(0xFF111827),
                                   fontFamily: 'Inter',
                                 ),
@@ -429,7 +438,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
                             children: [
                               _CircleMiniBtn(
                                 icon: Icons.remove,
+                                marked: _bathroomThermoMark == 1,
                                 onTap: () => setState(() {
+                                  _bathroomThermoMark = 1;
                                   _bathroomTemp = (_bathroomTemp - 0.5)
                                       .clamp(10.0, 35.0);
                                 }),
@@ -437,7 +448,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               SizedBox(width: 14.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
+                                marked: _bathroomThermoMark == 2,
                                 onTap: () => setState(() {
+                                  _bathroomThermoMark = 2;
                                   _bathroomTemp = (_bathroomTemp + 0.5)
                                       .clamp(10.0, 35.0);
                                 }),
@@ -480,16 +493,33 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               children: [
                                 _CircleMiniBtn(
                                   icon: Icons.keyboard_arrow_down,
+                                  marked: _blindStepMark == 1,
                                   onTap: () => setState(() {
-                                    
-                                    _blindPctDown = (_blindPctDown - 5).clamp(0, 100);
+                                    _blindStepMark = 1;
+                                    _blindPctDown = (_blindPctDown - 5).clamp(
+                                      0,
+                                      100,
+                                    );
                                   }),
                                 ),
                                 SizedBox(width: 14.w),
                                 _CircleMiniBtn(
-                                  icon: Icons.keyboard_arrow_up,
+
+                                  icon:Icons.keyboard_arrow_up,
+                                  //image: 'assets/Mask group (17).png',
+                                  // Image.asset(
+                                  //   'assets/Mask group (17).png',
+                                  //   width: 13.w,
+                                  //   height: 13.h,
+                                  //   color: Color(0xFF6B7280),
+                                  // ),
+                                  marked: _blindStepMark == 2,
                                   onTap: () => setState(() {
-                                    _blindPctDown = (_blindPctDown + 5).clamp(0, 100);
+                                    _blindStepMark = 2;
+                                    _blindPctUp = (_blindPctUp + 5).clamp(
+                                      0,
+                                      100,
+                                    );
                                   }),
                                 ),
                                 SizedBox(width: 10.w),
@@ -1142,46 +1172,75 @@ class _CircleIconButton extends StatelessWidget {
 //   }
 // }
 
-class _CircleMiniBtn extends StatelessWidget {
+class _CircleMiniBtn extends StatefulWidget {
   const _CircleMiniBtn({
-    required this.icon,
+    this.icon,
     this.onTap,
+    this.marked = false,
+    this.image,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final VoidCallback? onTap;
+  final bool marked;
+  final String? image;
 
-  static const Color _plusColor = Color(0xFFE1E1E1);
-  static const Color _minusColor = Color(0xFFF3F4F6);
+  static const Color _markedOrPressFill = Color(0xFFE5E7EB);
+  static const Color _idleFill = Color(0xFFF3F4F6);
+
+  @override
+  State<_CircleMiniBtn> createState() => _CircleMiniBtnState();
+}
+
+class _CircleMiniBtnState extends State<_CircleMiniBtn> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isEmphasized =
-        icon == Icons.add || icon == Icons.keyboard_arrow_down;
+    final fill = (widget.marked || _pressed)
+        ? _CircleMiniBtn._markedOrPressFill
+        : _CircleMiniBtn._idleFill;
 
-    final bgColor = isEmphasized ? _plusColor : _minusColor;
+    final circle = Container(
+      width: 36.w,
+      height: 36.h,
+      decoration: BoxDecoration(
+        color: fill, shape: BoxShape.circle),
+      alignment: Alignment.center,
+      child: Icon(
+        widget.icon, size: 22.sp, color: const Color(0xFF6B7280)), 
+    );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        splashColor: const Color(0xFFE5E7EB),
-        highlightColor: const Color(0xFFD1D5DB),
-        child: Ink(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: bgColor,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            size: 22.sp,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
-      ),
+    // final circles = Container(
+    //   width: 36.w,
+    //   height: 36.h,
+    //   decoration: BoxDecoration(color: fill, shape: BoxShape.circle,
+    //   ),
+    //   alignment: Alignment.center,
+    //   child: Image.asset(
+    //     widget.image!,
+    //     height: 13.h,
+    //     width: 13.w,
+    //     color: const Color(0xFF6B7280),
+    //   ),
+    // );
+
+    if (widget.onTap == null) return circle;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: () {
+        widget.onTap!();
+        _setPressed(false);
+      },
+      child: circle,
     );
   }
 }
@@ -1355,7 +1414,7 @@ class _BoldSmall extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF111827),
         fontFamily: 'Inter',
@@ -1373,7 +1432,7 @@ class _TinyGreyText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        // ✅ Screenshot: id/text খুব ছোট (18 ❌)
+        
         fontSize: 12.sp,
         fontWeight: FontWeight.w400,
         color: const Color(0xFF6B7280),
@@ -1412,7 +1471,7 @@ class _ModeDot extends StatelessWidget {
       child: Text(
         letter,
         style: TextStyle(
-          fontSize: 14.sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w700,
           color: manual ? Colors.white : _themeBlue,
           height: 1.0,
@@ -1533,7 +1592,7 @@ class _TimeTag extends StatelessWidget {
           Text(
             text,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 16.sp,
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
               height: 1.0,
@@ -1562,7 +1621,7 @@ class _StarTimeTag extends StatelessWidget {
           Text(
             time,
             style: TextStyle(
-              fontSize: 13.sp, // ✅ screenshot small
+              fontSize: 16.sp, // ✅ screenshot small
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
               height: 1.0,
@@ -1975,10 +2034,10 @@ class _BrightnessPill extends StatelessWidget {
       width: w,
       height: h,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(26.r),
         child: Stack(
           children: [
-            Container(color: const Color(0xFFE5E7EB)),
+            Container(color: const Color(0xFFE1E1E1)),
             Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
@@ -2004,10 +2063,11 @@ class _BrightnessPill extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: EdgeInsets.only(left: 14.w),
-                child: Icon(
-                  Icons.wb_sunny_outlined,
-                  size: 20.sp,
-                  color: const Color(0xFF6B7280),
+                child: Image.asset(
+                  'assets/Mask group (14).png',
+                  width: 22.w,
+                  height: 22.h,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -2105,7 +2165,7 @@ class _ControlUnitRow extends StatelessWidget {
                 Text(
                   sub2,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF9CA3AF),
                     fontFamily: 'Inter',

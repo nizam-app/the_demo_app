@@ -1,11 +1,10 @@
-import 'dart:ui';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
-import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/settings/screen/settings_screen.dart';
@@ -112,6 +111,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
     return CustomBottomNavBar(
       initialIndex: 2,
+      translucentBottomBar: true,
+      bottomBarBackgroundOpacity: 0,
+      backgroundColor: Colors.white,
       children: [
         const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
@@ -123,38 +125,87 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildCategoriesBody(BuildContext context, List<ZoneItem> zones) {
+    const screenBg = Color(0xFFFFFFFF);
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final scrollTopPad = topInset + 8.h + 44.h + 14.h;
+    final scrollBottomPad = 18.h + 72.h + bottomInset;
+
     return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18.w),
-        child: Column(
-          children: [
-            SizedBox(height: 8.h),
-            _TopBar(
-              onBack: () => Navigator.pop(context),
-              onMenu: () => showCategoryMenuSheet(context),
-              onAdd: () => showCategoryAddMenuSheet(context),
+      top: false,
+      bottom: false,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(color: screenBg),
             ),
-            SizedBox(height: 14.h),
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.only(bottom: 16.h),
-                physics: const BouncingScrollPhysics(),
-                itemCount: zones.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 14.w,
-                  mainAxisSpacing: 14.h,
-                  childAspectRatio: 1.13,
+          ),
+          Positioned.fill(
+            child: GridView.builder(
+              padding: EdgeInsets.fromLTRB(
+                18.w,
+                scrollTopPad,
+                18.w,
+                scrollBottomPad,
+              ),
+              physics: const BouncingScrollPhysics(),
+              itemCount: zones.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 14.w,
+                mainAxisSpacing: 14.h,
+                childAspectRatio: 1.13,
+              ),
+              itemBuilder: (_, i) {
+                return ZoneCard(
+                  item: zones[i],
+                  onTap: () => context.push(
+                    Zone_Category_Screen.routeWithTitle(zones[i].title),
+                  ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.20),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      18.w,
+                      topInset + 8.h,
+                      18.w,
+                      8.h,
+                    ),
+                    child: SizedBox(
+                      height: 44.h,
+                      child: _TopBar(
+                        onBack: () => Navigator.pop(context),
+                        onMenu: () => showCategoryMenuSheet(context),
+                        onAdd: () => showCategoryAddMenuSheet(context),
+                      ),
+                    ),
+                  ),
                 ),
-                itemBuilder: (_, i) {
-                  return ZoneCard(item: zones[i], onTap: () {
-                    context.push(Zone_Category_Screen.routeName);
-                  });
-                },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

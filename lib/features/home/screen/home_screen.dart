@@ -81,6 +81,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _favThermoMManual = true;
   bool _favThermoAManual = false;
 
+  /// 0 = neither circle "marked"; 1 = minus/down; 2 = plus/up (gray when marked).
+  int _bathroomThermoMark = 0;
+  int _blindNorthMark = 0;
+  final List<int> _shadeStepMark = [0, 0, 0];
+  int _favThermoMMark = 0;
+  int _favThermoAMark = 0;
+
   Widget _buildHomeBody(BuildContext context) {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
@@ -202,15 +209,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mode: _bathroomManual ? 'M' : 'A',
                                       modeFilled: _bathroomManual,
                                       imagePath: 'assets/Mask group (6).png',
+                                      minusMarked: _bathroomThermoMark == 1,
+                                      plusMarked: _bathroomThermoMark == 2,
                                       onModeTap: () => setState(
                                         () => _bathroomManual = !_bathroomManual,
                                       ),
                                       onMinus: () => setState(() {
+                                        _bathroomThermoMark = 1;
                                         _bathroomThermostat =
                                             (_bathroomThermostat - 0.5)
                                                 .clamp(10.0, 35.0);
                                       }),
                                       onPlus: () => setState(() {
+                                        _bathroomThermoMark = 2;
                                         _bathroomThermostat =
                                             (_bathroomThermostat + 0.5)
                                                 .clamp(10.0, 35.0);
@@ -234,14 +245,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
                                       imagePath: 'assets/Rectangle 823.png',
+                                      downMarked: _blindNorthMark == 1,
+                                      upMarked: _blindNorthMark == 2,
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
                                       ),
                                       onDown: () => setState(() {
+                                        _blindNorthMark = 1;
                                         _blindNorthDown =
                                             (_blindNorthDown + 5).clamp(0, 100);
                                       }),
                                       onUp: () => setState(() {
+                                        _blindNorthMark = 2;
                                         _blindNorthUp =
                                             (_blindNorthUp + 5).clamp(0, 100);
                                       }),
@@ -455,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF111827),
                       ),
@@ -473,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF111827),
                       ),
@@ -500,7 +515,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   _CircleBtn(
                     size: 35,
+                    marked: _shadeStepMark[rowIndex] == 1,
                     onTap: () => setState(() {
+                      _shadeStepMark[rowIndex] = 1;
                       _shadeDown[rowIndex] =
                           (_shadeDown[rowIndex] - 5).clamp(0, 100);
                     }),
@@ -513,9 +530,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 17.w),
                   _CircleBtn(
-                    accent: true,
                     size: 35,
+                    marked: _shadeStepMark[rowIndex] == 2,
                     onTap: () => setState(() {
+                      _shadeStepMark[rowIndex] = 2;
                       _shadeUp[rowIndex] =
                           (_shadeUp[rowIndex] + 5).clamp(0, 100);
                     }),
@@ -555,14 +573,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 mode: _favThermoMManual ? 'M' : 'A',
                 filled: _favThermoMManual,
                 value: _favThermostatM,
+                minusMarked: _favThermoMMark == 1,
+                plusMarked: _favThermoMMark == 2,
                 onModeTap: () => setState(
                   () => _favThermoMManual = !_favThermoMManual,
                 ),
                 onMinus: () => setState(() {
+                  _favThermoMMark = 1;
                   _favThermostatM =
                       (_favThermostatM - 0.5).clamp(10.0, 35.0);
                 }),
                 onPlus: () => setState(() {
+                  _favThermoMMark = 2;
                   _favThermostatM =
                       (_favThermostatM + 0.5).clamp(10.0, 35.0);
                 }),
@@ -583,14 +605,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 mode: _favThermoAManual ? 'M' : 'A',
                 filled: _favThermoAManual,
                 value: _favThermostatA,
+                minusMarked: _favThermoAMark == 1,
+                plusMarked: _favThermoAMark == 2,
                 onModeTap: () => setState(
                   () => _favThermoAManual = !_favThermoAManual,
                 ),
                 onMinus: () => setState(() {
+                  _favThermoAMark = 1;
                   _favThermostatA =
                       (_favThermostatA - 0.5).clamp(10.0, 35.0);
                 }),
                 onPlus: () => setState(() {
+                  _favThermoAMark = 2;
                   _favThermostatA =
                       (_favThermostatA + 0.5).clamp(10.0, 35.0);
                 }),
@@ -653,6 +679,8 @@ class _HomeScreenState extends State<HomeScreen> {
     required String mode,
     required bool filled,
     required double value,
+    bool minusMarked = false,
+    bool plusMarked = false,
     VoidCallback? onModeTap,
     required VoidCallback onMinus,
     required VoidCallback onPlus,
@@ -694,6 +722,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 children: [
                   _CircleBtn(
+                    marked: minusMarked,
                     onTap: onMinus,
                     size: 35,
                     child: Icon(
@@ -707,7 +736,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF111827),
                         ),
@@ -715,9 +744,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   _CircleBtn(
+                    marked: plusMarked,
                     onTap: onPlus,
                     size: 35,
-                    accent: true,
                     child: Icon(
                       Icons.add,
                       size: 20.sp,
@@ -977,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           '100%',
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w500,
             color: const Color(0xFF111827),
           ),
@@ -1011,20 +1040,14 @@ class _Header extends StatelessWidget {
           width: rightWidth,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: InkWell(
-              onTap:  onMenuTap,
-              borderRadius: BorderRadius.circular(12.r),
-              child: SizedBox(
-                width: 44.w,
-                height: 44.w,
-                child: Center(
-                  child: Image.asset(
-                    'assets/Group 35 (1).png',
-                    width: 26.w,
-                    height: 17.w,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+            child: _PressableCircleSurface(
+              side: 44.w,
+              onTap: onMenuTap,
+              child: Image.asset(
+                'assets/Group 35 (1).png',
+                width: 26.w,
+                height: 17.w,
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -1054,44 +1077,24 @@ class _Header extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                InkWell(
+                _PressableCircleSurface(
+                  side: 32.w,
                   onTap: onEditTap,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/image 89.png',
-                        width: 22.w,
-                        height: 22.w,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  child: Image.asset(
+                    'assets/image 89.png',
+                    width: 22.w,
+                    height: 22.w,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 SizedBox(width: 13.w),
-                InkWell(
+                _PressableCircleSurface(
+                  side: 32.w,
                   onTap: () => HomeScreen.showAddSectionSheet(context),
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: const Color(0xFF111827),
-                        size: 23.sp,
-                      ),
-                    ),
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: const Color(0xFF111827),
+                    size: 23.sp,
                   ),
                 ),
               ],
@@ -1339,47 +1342,87 @@ class _ModeBadge extends StatelessWidget {
   }
 }
 
+/// White at rest; gray fill only while the pointer is down (Material 3 ink
+/// does not reliably match that).
+class _PressableCircleSurface extends StatefulWidget {
+  const _PressableCircleSurface({
+    required this.side,
+    required this.child,
+    this.onTap,
+    this.marked = false,
+  });
+
+  final double side;
+  final Widget child;
+  final VoidCallback? onTap;
+  /// When true, fill stays gray (last-used / "marked" control).
+  final bool marked;
+
+  static const Color _pressedFill = Color(0xFFE5E7EB);
+
+  @override
+  State<_PressableCircleSurface> createState() =>
+      _PressableCircleSurfaceState();
+}
+
+class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fill = (widget.marked || _pressed)
+        ? _PressableCircleSurface._pressedFill
+        : Colors.white;
+    final circle = Container(
+      width: widget.side,
+      height: widget.side,
+      decoration: BoxDecoration(
+        color: fill,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: widget.child,
+    );
+    if (widget.onTap == null) return circle;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: () {
+        widget.onTap!();
+        _setPressed(false);
+      },
+      child: circle,
+    );
+  }
+}
+
 class _CircleBtn extends StatelessWidget {
   const _CircleBtn({
     required this.child,
     this.size,
     this.onTap,
-    this.accent = false,
+    this.marked = false,
   });
 
   final Widget child;
   final double? size;
   final VoidCallback? onTap;
-  final bool accent;
-
-  static const Color _softGrey = Color(0xFFFFFFFF);   //0xFFF3F4F6   0xFF0088FE
-  static const Color _themeBlue = Color(0xFFE1E1E1);
+  final bool marked;
 
   @override
   Widget build(BuildContext context) {
-    final s = size ?? 32;
-    final circle = Container(
-      width: s.w,
-      height: s.h,
-      decoration: BoxDecoration(
-        color: accent ? _themeBlue : _softGrey,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
+    final s = (size ?? 32).w;
+    return _PressableCircleSurface(
+      side: s,
+      onTap: onTap,
+      marked: marked,
       child: child,
-    );
-    if (onTap == null) return circle;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        splashColor:
-            accent ? Colors.white24 : const Color(0xFFE5E7EB),    // 0xFFE5E7EB
-        highlightColor:
-            accent ? Colors.white30 : const Color(0xFFD1D5DB),
-        child: circle,
-      ),
     );
   }
 }
@@ -1463,7 +1506,7 @@ class _LightDimmerCard extends StatelessWidget {
                   Text(
                     '${(percent * 100).round()}%',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF111827),
                     ),
@@ -1566,6 +1609,8 @@ class _ThermostatCard extends StatelessWidget {
     required this.modeFilled,
     required this.onMinus,
     required this.onPlus,
+    this.minusMarked = false,
+    this.plusMarked = false,
     this.imagePath,
     this.onModeTap,
   });
@@ -1578,6 +1623,8 @@ class _ThermostatCard extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback? onModeTap;
+  final bool minusMarked;
+  final bool plusMarked;
 
 
   @override
@@ -1655,7 +1702,7 @@ class _ThermostatCard extends StatelessWidget {
 
                   _CircleBtn(
                     size: 35,
-                    accent: false, 
+                    marked: minusMarked,
                     onTap: onMinus,
                     child: Icon(
                       Icons.remove,
@@ -1666,15 +1713,15 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF111827),
                     ),
                   ),
                   _CircleBtn(
                     size: 35,
-                    accent: true,
-                    onTap: onMinus,
+                    marked: plusMarked,
+                    onTap: onPlus,
                     child: Icon(
                       Icons.add,
                       size: 23.sp,
@@ -1699,7 +1746,7 @@ class _ThermostatCard extends StatelessWidget {
     );
   }
 }
-bool isPlusSelected = true;
+
 class _BlindCard extends StatelessWidget {
   const _BlindCard({
     required this.title,
@@ -1709,6 +1756,8 @@ class _BlindCard extends StatelessWidget {
     required this.modeFilled,
     required this.onDown,
     required this.onUp,
+    this.downMarked = false,
+    this.upMarked = false,
     this.imagePath,
     this.onModeTap,
   });
@@ -1722,6 +1771,8 @@ class _BlindCard extends StatelessWidget {
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onModeTap;
+  final bool downMarked;
+  final bool upMarked;
 
   @override
   Widget build(BuildContext context) {
@@ -1766,8 +1817,8 @@ class _BlindCard extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               _CircleBtn(
+                                marked: downMarked,
                                 onTap: onDown,
-                                  accent: false,
                                 child: Image.asset(
                                   'assets/Mask group (17).png',
                                   width: 13.sp,
@@ -1788,7 +1839,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize: 13.sp,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF111827),
                                 ),
@@ -1804,21 +1855,24 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 13.sp,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
                               SizedBox(width: 7.w),
                               _CircleBtn(
+                                marked: upMarked,
                                 onTap: onUp,
-                                accent: true,
-                                child: Image.asset(
-                                  'assets/Mask group (16).png',
-                                  width: 13.sp,
-                                  height: 13.sp,
-                                  fit: BoxFit.contain,
-                                  color: Color(0xFF6B7280),
+                                child: Transform.rotate(
+                                  angle: math.pi,
+                                  child: Image.asset(
+                                    'assets/Mask group (17).png',
+                                    width: 13.sp,
+                                    height: 13.sp,
+                                    fit: BoxFit.contain,
+                                    color: Color(0xFF6B7280),
+                                  ),
                                 ),
                                 size: 35,
                               ),

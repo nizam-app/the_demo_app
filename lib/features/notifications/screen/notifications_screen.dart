@@ -92,9 +92,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
-    final scrollBottomPad = widget.showBottomNav
+    // [HomeScreen] and similar shells already provide [CustomBottomNavBar]; avoid
+    // a second bottom bar when this screen is embedded with showBottomNav: true.
+    final inMainShell = CustomBottomNavBar.of(context) != null;
+    final showOwnBottomNav = widget.showBottomNav && !inMainShell;
+    final scrollBottomPad = showOwnBottomNav
         ? 18.h + 72.h + bottomInset
-        : 24.h + bottomInset;
+        : inMainShell
+            ? 18.h + 72.h + bottomInset
+            : 24.h + bottomInset;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -105,10 +111,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       child: Scaffold(
         backgroundColor: _screenBg,
-        extendBody: widget.showBottomNav,
         body: SafeArea(
           top: false,
-          bottom: !widget.showBottomNav,
+          // Let list pixels sit under the nav so [BackdropFilter] matches dashboard/shell.
+          bottom: !(showOwnBottomNav || inMainShell),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -268,14 +274,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     height: 16.h,
                                   ),
                                   onTap: () {
-                                    if (!widget.showBottomNav) {
-                                      final shell = CustomBottomNavBar.of(
-                                        context,
-                                      );
-                                      if (shell != null) {
-                                        shell.setSelectedIndex(2);
-                                        return;
-                                      }
+                                    final shell = CustomBottomNavBar.of(
+                                      context,
+                                    );
+                                    if (shell != null) {
+                                      shell.setSelectedIndex(2);
+                                      return;
                                     }
                                     if (context.canPop()) {
                                       context.pop();
@@ -303,17 +307,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ),
               ),
+              if (showOwnBottomNav)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: BottomNavBarWidget(
+                    selectedIndex: _selectedNavIndex,
+                    onItemTapped: _onNavItemTapped,
+                    backgroundOpacity: 0,
+                    useBackdropBlur: true,
+                  ),
+                ),
             ],
           ),
         ),
-        bottomNavigationBar: widget.showBottomNav
-            ? BottomNavBarWidget(
-                selectedIndex: _selectedNavIndex,
-                onItemTapped: _onNavItemTapped,
-                backgroundOpacity: 0,
-                useBackdropBlur: true,
-              )
-            : null,
       ),
     );
   }

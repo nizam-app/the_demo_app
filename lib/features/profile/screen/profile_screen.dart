@@ -266,11 +266,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         // Save (outline pill — design spec)
                         Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            _pageHorizontalPad.w,
-                            8.h,
-                            _pageHorizontalPad.w,
-                            24.h + bottomInset,
+                          padding: EdgeInsets.only(
+                            left: 31.w,
+                            right: 32.w ,
+                            bottom: 30.h
                           ),
                           child: Material(
                             color: Colors.transparent,
@@ -278,24 +277,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onTap: () {},
                               borderRadius: BorderRadius.circular(_cardRadius.r),
                               child: Ink(
-                                height: 55.h,
+                                height: 53.h,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius:
                                       BorderRadius.circular(_cardRadius.r),
                                   border: Border.all(
                                     color: const Color(0xFF0088FE),
-                                    width: 1.5,
+                                    width: 1.w,
                                   ),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                      Icons.arrow_circle_up_outlined,
-                                      size: 22.sp,
-                                      color: const Color(0xFF0088FE),
-                                    ),
+                                    Image.asset("assets/download.png", height: 18.h, width: 18.w,fit: BoxFit.contain,),
                                     SizedBox(width: 8.w),
                                     Text(
                                       'Save',
