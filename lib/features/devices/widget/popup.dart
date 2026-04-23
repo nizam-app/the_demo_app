@@ -1,4 +1,6 @@
 
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -86,219 +88,228 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _kSheetBg.withOpacity(0.74),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
       ),
-      child: SafeArea(
-        top: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // ===== Main content =====
-            Column(
-              mainAxisSize: MainAxisSize.min,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: _kSheetBg.withOpacity(0.74),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24.r),
+              topRight: Radius.circular(24.r),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                _buildHeader(context),
+                // ===== Main content =====
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHeader(context),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  child: Column(
-                    children: [
-                      // Rename Card
-                      _Card(
-                        child: _EditSheetRow(
-                          imagePath: 'assets/images/Erename.png',
-                          iconWidth: 22.w,
-                          iconHeight: 22.h,
-                          label: 'Rename',
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ConstrainedBox(
-                                constraints: BoxConstraints(maxWidth: 155.w),
-                                child: Text(
-                                  _renameController.text,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w400,
-                                    color: _kTextSecondary,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 6.w),
-                              Image.asset(
-                                'assets/Group 63.png',
-                                width: 14.w,
-                                height: 13.h,
-                                fit: BoxFit.contain,
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            // TODO: open rename dialog if needed
-                          },
-                        ),
-                      ),
-
-                      SizedBox(height: 12.h),
-
-                      // Actions Card
-                      _Card(
-                        child: Column(
-                          children: [
-                            _EditSheetRow(
-                              imagePath: 'assets/images/pin1.png',
-                              iconWidth: 20.w,
-                              iconHeight: 20.h,
-                              label: 'Pin device',
-                              onTap: () {},
-                            ),
-                            SizedBox(height: 12.h),
-                            _EditSheetRow(
-                              imagePath: 'assets/images/star1.png',
-                              iconWidth: 32.w,
-                              iconHeight: 32.h,
-                              label: 'Add to favorites',
-                              onTap: () {},
-                            ),
-                            SizedBox(height: 12.h),
-
-                            // Add to dashboard (anchor target)
-                            _EditSheetRow(
-                              imagePath: 'assets/images/add_dashboard.png',
-                              iconWidth: 21.w,
-                              iconHeight: 21.h,
-                              label: 'Add to dashboard',
-                              trailing: CompositedTransformTarget(
-                                link: _dropdownLink,
-                                child: _DashboardDropdownTrigger(
-                                  value: _dashboards[_selectedDashboardIndex],
-                                  isOpen: _dashboardDropdownOpen,
-                                  onTap: _toggleDashboardMenu,
-                                ),
-                              ),
-                            ),
-
-                            SizedBox(height: 12.h),
-
-                            // Category & zone (chips)
-                            _EditSheetRow(
-                              imagePath: 'assets/images/category&zone.png',
-                              iconWidth: 20.w,
-                              iconHeight: 20.h,
-                              label: 'Category & zone',
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Column(
+                        children: [
+                          // Rename Card
+                          _Card(
+                            child: _EditSheetRow(
+                              imagePath: 'assets/images/Erename.png',
+                              iconWidth: 22.w,
+                              iconHeight: 22.h,
+                              label: 'Rename',
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _ChipPill(
-                                    text: 'Light',
-                                    bg: Colors.white,
-                                    border: _kBlue,
-                                    textColor: _kBlue,
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: 155.w),
+                                    child: Text(
+                                      _renameController.text,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: _kTextSecondary,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
                                   ),
-                                  SizedBox(width: 8.w),
-                                  _ChipPill(
-                                    text: 'Living room',
-                                    bg: _kDestructiveRed,
-                                    border: _kDestructiveRed,
-                                    textColor: Colors.white,
+                                  SizedBox(width: 6.w),
+                                  Image.asset(
+                                    'assets/Group 63.png',
+                                    width: 14.w,
+                                    height: 13.h,
+                                    fit: BoxFit.contain,
                                   ),
                                 ],
                               ),
-                              onTap: () => _showAssignCategoryPopup(context),
+                              onTap: () {
+                                // TODO: open rename dialog if needed
+                              },
                             ),
+                          ),
 
-                            SizedBox(height: 10.h),
+                          SizedBox(height: 12.h),
 
-                            // Last activities (big switch)
-                            _EditSheetRow(
-                              imagePath: 'assets/images/last_active.png',
-                              iconWidth: 26.w,
-                              iconHeight: 26.h,
-                              label: 'Last activities',
-                              trailing: SizedBox(
-                                height: 35.h,
-                                width: 60.w,
-                                child: CupertinoSwitch(
-                                  value: _lastActivitiesOn,
-                                  onChanged: (v) =>
-                                      setState(() => _lastActivitiesOn = v),
-                                  activeColor: _kBlue,
+                          // Actions Card
+                          _Card(
+                            child: Column(
+                              children: [
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/pin1.png',
+                                  iconWidth: 20.w,
+                                  iconHeight: 20.h,
+                                  label: 'Pin device',
+                                  onTap: () {},
                                 ),
-                              ),
+                                SizedBox(height: 12.h),
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/star1.png',
+                                  iconWidth: 32.w,
+                                  iconHeight: 32.h,
+                                  label: 'Add to favorites',
+                                  onTap: () {},
+                                ),
+                                SizedBox(height: 12.h),
+
+                                // Add to dashboard (anchor target)
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/add_dashboard.png',
+                                  iconWidth: 21.w,
+                                  iconHeight: 21.h,
+                                  label: 'Add to dashboard',
+                                  trailing: CompositedTransformTarget(
+                                    link: _dropdownLink,
+                                    child: _DashboardDropdownTrigger(
+                                      value: _dashboards[_selectedDashboardIndex],
+                                      isOpen: _dashboardDropdownOpen,
+                                      onTap: _toggleDashboardMenu,
+                                    ),
+                                  ),
+                                ),
+
+                                SizedBox(height: 12.h),
+
+                                // Category & zone (chips)
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/category&zone.png',
+                                  iconWidth: 20.w,
+                                  iconHeight: 20.h,
+                                  label: 'Category & zone',
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _ChipPill(
+                                        text: 'Light',
+                                        bg: Colors.white,
+                                        border: _kBlue,
+                                        textColor: _kBlue,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      _ChipPill(
+                                        text: 'Living room',
+                                        bg: _kDestructiveRed,
+                                        border: _kDestructiveRed,
+                                        textColor: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () => _showAssignCategoryPopup(context),
+                                ),
+
+                                SizedBox(height: 10.h),
+
+                                // Last activities (big switch)
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/last_active.png',
+                                  iconWidth: 26.w,
+                                  iconHeight: 26.h,
+                                  label: 'Last activities',
+                                  trailing: SizedBox(
+                                    height: 35.h,
+                                    width: 60.w,
+                                    child: CupertinoSwitch(
+                                      value: _lastActivitiesOn,
+                                      onChanged: (v) =>
+                                          setState(() => _lastActivitiesOn = v),
+                                      activeColor: _kBlue,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+
+                          SizedBox(height: 12.h),
+
+                          // Settings / Remove Card
+                          _Card(
+                            child: Column(
+                              children: [
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/setting.png',
+                                  iconWidth: 18.w,
+                                  iconHeight: 18.h,
+                                  label: 'Settings',
+                                  onTap: () {},
+                                ),
+                                SizedBox(height: 12.h),
+                                _EditSheetRow(
+                                  imagePath: 'assets/images/delete1.png',
+                                  iconWidth: 16.w,
+                                  iconHeight: 19.h,
+                                  label: 'Delete',
+                                  isDestructive: true,
+                                  onTap: () {},
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 16.h),
+                        ],
                       ),
-
-                      SizedBox(height: 12.h),
-
-                      // Settings / Remove Card
-                      _Card(
-                        child: Column(
-                          children: [
-                            _EditSheetRow(
-                              imagePath: 'assets/images/setting.png',
-                              iconWidth: 18.w,
-                              iconHeight: 18.h,
-                              label: 'Settings',
-                              onTap: () {},
-                            ),
-                            SizedBox(height: 12.h),
-                            _EditSheetRow(
-                              imagePath: 'assets/images/delete1.png',
-                              iconWidth: 16.w,
-                              iconHeight: 19.h,
-                              label: 'Delete',
-                              isDestructive: true,
-                              onTap: () {},
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 16.h),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+
+                // ===== Outside tap closes dropdown =====
+                if (_dashboardDropdownOpen)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: _closeDashboardMenu,
+                      behavior: HitTestBehavior.translucent,
+                      child: const SizedBox.shrink(),
+                    ),
+                  ),
+
+                // ===== Dropdown overlay (anchored just under the trigger, like design) =====
+                if (_dashboardDropdownOpen)
+                  CompositedTransformFollower(
+                    link: _dropdownLink,
+                    showWhenUnlinked: false,
+                    offset: Offset(0, 34.h), // small gap under text+arrow row
+                    child: _DashboardDropdownMenu(
+                      width: 220.w,
+                      items: _dashboards,
+                      selectedIndex: _selectedDashboardIndex,
+                      onSelect: (index) => setState(() {
+                        _selectedDashboardIndex = index;
+                        _dashboardDropdownOpen = false;
+                      }),
+                    ),
+                  ),
               ],
             ),
-
-            // ===== Outside tap closes dropdown =====
-            if (_dashboardDropdownOpen)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _closeDashboardMenu,
-                  behavior: HitTestBehavior.translucent,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-
-            // ===== Dropdown overlay (anchored just under the trigger, like design) =====
-            if (_dashboardDropdownOpen)
-              CompositedTransformFollower(
-                link: _dropdownLink,
-                showWhenUnlinked: false,
-                offset: Offset(0, 34.h), // small gap under text+arrow row
-                child: _DashboardDropdownMenu(
-                  width: 220.w,
-                  items: _dashboards,
-                  selectedIndex: _selectedDashboardIndex,
-                  onSelect: (index) => setState(() {
-                    _selectedDashboardIndex = index;
-                    _dashboardDropdownOpen = false;
-                  }),
-                ),
-              ),
-          ],
+          ),
         ),
       ),
     );
@@ -331,7 +342,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 width: 30.w,
                 height: 30.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF),
+                  color: _kSheetBg.withOpacity(0.86),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -362,14 +373,12 @@ class _Card extends StatelessWidget {
   const _Card({required this.child});
   final Widget child;
 
-  static const Color _kCardBg = Colors.white;
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(14.sp),
       decoration: BoxDecoration(
-        color: _kCardBg,
+        color: const Color(0xFFF3F4F6).withOpacity(0.86),
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: child,

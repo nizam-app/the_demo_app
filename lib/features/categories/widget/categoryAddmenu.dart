@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -6,7 +8,7 @@ class CategoryAddMenu extends StatelessWidget {
 
   static const _bg = Color(0xFFF3F4F6);
   static final _bgTransparent = _bg.withOpacity(0.74);
-  static const _card = Colors.white;
+  static final _card = _bg.withOpacity(0.86);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
   static const _dividerColor = Color(0xFFE5E7EB);
@@ -14,16 +16,26 @@ class CategoryAddMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: Container(
-        decoration: BoxDecoration(
-          color: _bgTransparent,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
-        ),
-        padding: EdgeInsets.only(left: 16.w, right: 16.w),
-        child: Column(
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              color: _bgTransparent,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24.r),
+                topRight: Radius.circular(24.r),
+              ),
+            ),
+            padding: EdgeInsets.only(left: 16.w, right: 16.w),
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             /// HEADER – title centered in screen, close on right
@@ -48,8 +60,8 @@ class CategoryAddMenu extends StatelessWidget {
                     child: Container(
                       width: 30.w,
                       height: 30.h,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFFFFF),
+                      decoration: BoxDecoration(
+                        color: _bg.withOpacity(0.86),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -230,6 +242,8 @@ class CategoryAddMenu extends StatelessWidget {
             ),
             SizedBox(height: 47.h),
           ],
+            ),
+          ),
         ),
       ),
     );

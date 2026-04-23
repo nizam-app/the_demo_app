@@ -1,9 +1,11 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const _bg = Color(0xFFF3F4F6);
-const _cardBg = Colors.white;
+const _cardBg = Color(0xFFF3F4F6);
 const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
@@ -23,20 +25,30 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16.w,
-        right: 16.w,
-        top: 10.h,
-        bottom: 0.h,
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
       ),
-      decoration: BoxDecoration(
-        color: _bg.withOpacity(0.74),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: EdgeInsets.only(
+            left: 16.w,
+            right: 16.w,
+            top: 10.h,
+            bottom: 0.h,
+          ),
+          decoration: BoxDecoration(
+            color: _bg.withOpacity(0.74),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24.r),
+              topRight: Radius.circular(24.r),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
@@ -66,8 +78,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                   Container(
                     width: 30.w,
                     height: 30.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFFFFF),
+                    decoration: BoxDecoration(
+                      color: _bg.withOpacity(0.86),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -224,6 +236,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             )
 
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -239,7 +253,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: _cardBg.withOpacity(0.86),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: child,

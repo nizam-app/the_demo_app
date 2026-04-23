@@ -529,22 +529,38 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 child: InkWell(
                   customBorder: const CircleBorder(),
                   onTap: () => setState(() => _alarmPaused = !_alarmPaused),
-                  child: Ink(
+                  child: Container(
                     width: 44.w,
-                    height: 44.w,
+                    height: 44.h,
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26.r),
                       // Paused = active / “on” (blue + play). Disarmed = “off” — do not
                       // use pause here; it reads as media controls and matches the bad UI.
                       color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
+                      // shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      _alarmPaused
-                          ? Icons.play_arrow_rounded
-                          : Icons.pause,
-                      size: 20.sp,
-                      color: _alarmPaused ?   Color(0xFF0088FE) : const Color(0xFF6B7280),
-                    ),
+                    child: Center(
+                      child: _alarmPaused
+                          ? Image.asset(
+                              "assets/images/001-2 1.png",
+                              height: 15.h,
+                              width: 14.w,
+                              fit: BoxFit.contain,
+                            )
+                          : Image.asset(
+                              "assets/images/Group 68.png",
+                              height: 14.h,
+                              width: 14.w,
+                              fit: BoxFit.contain,
+                            ),
+                    )
+                    // Icon(
+                    //   _alarmPaused
+                    //       ? Icons.play_arrow_rounded
+                    //       : Icons.pause,
+                    //   size: 20.sp,
+                    //   color: _alarmPaused ?   Color(0xFF0088FE) : const Color(0xFF6B7280),
+                    // ),
                   ),
                 ),
               ),
@@ -592,7 +608,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             percent: _bathroomDimmerPercent,
             comfortOn: _bathroomComfortOn,
             onChanged: (v) =>
-                setState(() => _bathroomDimmerPercent = v.clamp(0.0, 1.0)),
+                setState(() => _bathroomDimmerPercent = v.clamp(0.5, 0.5)),
             onSunTap: () =>
                 setState(() => _bathroomComfortOn = !_bathroomComfortOn),
           ),
@@ -1121,17 +1137,13 @@ class _CircleButton extends StatelessWidget {
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
-          width: 36.w,
-          height: 36.h,
+          width: 35.w,
+          height: 35.h,
           decoration: BoxDecoration(
             color: bg,
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            icon,
-            size: 22.sp,
-            color: const Color(0xFF6B7280),
-          ),
+          child: Icon(icon, size: 23.sp, color: const Color(0xFF6B7280)),
         ),
       ),
     );
@@ -1162,8 +1174,8 @@ class _CircleAssetButton extends StatelessWidget {
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
-          width: 36.w,
-          height: 36.h,
+          width: 35.w,
+          height: 35.h,
           decoration: BoxDecoration(
             color: bg,
             shape: BoxShape.circle,
@@ -1171,8 +1183,8 @@ class _CircleAssetButton extends StatelessWidget {
           child: Center(
             child: Image.asset(
               assetPath,
-              width: 22.w,
-              height: 22.h,
+              width: 13.w,
+              height: 13.h,
               fit: BoxFit.contain,
             ),
           ),

@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         () => _bedroomManual = !_bedroomManual,
                                       ),
                                       onPercentChanged: (v) => setState(
-                                        () => _bedroomDimmer = v.clamp(0.0, 1.0),
+                                        () => _bedroomDimmer = v.clamp(0.72, 0.72),
                                       ),
                                       onNavigate: () => context.push(
                                         LightDinningRoomScreen.routeName,

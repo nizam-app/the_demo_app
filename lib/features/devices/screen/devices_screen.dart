@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
@@ -587,7 +588,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               value: _brightnessPct / 100.0,
                               onChanged: (v) => setState(
                                 () => _brightnessPct =
-                                    (v * 100).round().clamp(0, 100),
+                                    (v * 100).round().clamp(54, 54),
                               ),
                             ),
                           ),
@@ -1204,15 +1205,31 @@ class _CircleMiniBtnState extends State<_CircleMiniBtn> {
     final fill = (widget.marked || _pressed)
         ? _CircleMiniBtn._markedOrPressFill
         : _CircleMiniBtn._idleFill;
+    final isBlindArrow = widget.icon == Icons.keyboard_arrow_down ||
+        widget.icon == Icons.keyboard_arrow_up;
 
     final circle = Container(
-      width: 36.w,
-      height: 36.h,
+      width: 35.w,
+      height: 35.h,
       decoration: BoxDecoration(
         color: fill, shape: BoxShape.circle),
       alignment: Alignment.center,
-      child: Icon(
-        widget.icon, size: 22.sp, color: const Color(0xFF6B7280)), 
+      child: isBlindArrow
+          ? Transform.rotate(
+              angle: widget.icon == Icons.keyboard_arrow_up ? math.pi : 0,
+              child: Image.asset(
+                'assets/Mask group (17).png',
+                width: 13.sp,
+                height: 13.sp,
+                fit: BoxFit.contain,
+                color: const Color(0xFF6B7280),
+              ),
+            )
+          : Icon(
+              widget.icon,
+              size: 23.sp,
+              color: const Color(0xFF6B7280),
+            ),
     );
 
     // final circles = Container(
@@ -2165,7 +2182,7 @@ class _ControlUnitRow extends StatelessWidget {
                 Text(
                   sub2,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF9CA3AF),
                     fontFamily: 'Inter',
