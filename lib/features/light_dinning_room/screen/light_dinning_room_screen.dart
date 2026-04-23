@@ -1139,7 +1139,7 @@ Widget deviceOverviewCard() {
         SizedBox(
           height: 55.h,
           child: Padding(
-            padding: EdgeInsets.only(left:  20.w, top:  10.h, bottom:  10.h),
+            padding: EdgeInsets.only(left:  14.w, top:  14.h, bottom:  14.h, right: 14.w),
             child: Text(
               'Device overview',
               style: TextStyle(
@@ -1157,7 +1157,7 @@ Widget deviceOverviewCard() {
           thickness: 1,
         ),
         Padding(
-          padding: EdgeInsets.only(top: 10.h, bottom:  16.h),
+          padding: EdgeInsets.only(top: 14.h, bottom:  14.h),
           child: Column(
             children: [
               Row(

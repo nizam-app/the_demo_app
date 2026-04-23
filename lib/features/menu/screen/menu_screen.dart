@@ -33,9 +33,9 @@ class MenuScreen extends StatelessWidget {
 
   static const String routeName = '/menu';
 
-  // Opaque page fill so routes stacked under Menu never show through; cards stay light.
-  static const _bg = Color(0xFFFFFFFF);
-  static const _card = Colors.transparent;
+  static const _bg = Colors.transparent;
+  static const _pageTint = Color(0xFFF3F4F6);
+  static const _card = Color(0xFFF3F4F6);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
@@ -50,7 +50,7 @@ class MenuScreen extends StatelessWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: Color(0xFFF3F4F6).withOpacity(0.86),
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -66,7 +66,9 @@ class MenuScreen extends StatelessWidget {
             children: [
               Positioned.fill(
                 child: DecoratedBox(
-                  decoration: const BoxDecoration(color: _bg),
+                  decoration: BoxDecoration(
+                    color: _pageTint.withOpacity(0.74),
+                  ),
                 ),
               ),
               SingleChildScrollView(
@@ -84,7 +86,7 @@ class MenuScreen extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(10.w),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: _card.withOpacity(0.86),
                           borderRadius: BorderRadius.circular(26.r),
                           border: Border.all(
                             color: _divider.withValues(alpha: 0.35),
@@ -135,8 +137,8 @@ class MenuScreen extends StatelessWidget {
                                       width: 110.w,
                                       height: 28.h,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF3F4F6),
-                                        borderRadius: BorderRadius.circular(30),
+                                        color: const Color(0xFFE1E1E1).withOpacity(0.50),
+                                        borderRadius: BorderRadius.circular(26.r),
                                       ),
                                       child: Center(
                                         child: Text(
@@ -536,7 +538,7 @@ class MegaIconCircle extends StatelessWidget {
         height: 50.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFFF3F5F9), // হালকা grey circle
+          color: const Color(0xFFE1E1E1).withOpacity(0.50), // হালকা grey circle
         ),
         child: Center(
           child: Image.asset(
@@ -738,7 +740,7 @@ class _CardBlock extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFF3F4F6).withOpacity(0.86),
         borderRadius: BorderRadius.circular(26.r),
         border: Border.all(
           color: const Color(0xFFE5E7EB).withValues(alpha: 0.45),
