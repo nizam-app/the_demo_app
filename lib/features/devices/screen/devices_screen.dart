@@ -347,7 +347,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                   _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100);
                                 }),
                               ),
-                              SizedBox(width: 14.w),
+                              SizedBox(width: 20.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
                                 marked: _rgbwStepMark == 2,
@@ -356,7 +356,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                   _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100);
                                 }),
                               ),
-                              SizedBox(width: 8.w),
+                              SizedBox(width: 16.w),
                               _ToggleColorswitch(
                                 value: _rgbwOn,
                                 onChanged: (v) => setState(() => _rgbwOn = v),
@@ -446,7 +446,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                       .clamp(10.0, 35.0);
                                 }),
                               ),
-                              SizedBox(width: 14.w),
+                              SizedBox(width: 20.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
                                 marked: _bathroomThermoMark == 2,
@@ -494,16 +494,16 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               children: [
                                 _CircleMiniBtn(
                                   icon: Icons.keyboard_arrow_down,
-                                  marked: _blindStepMark == 1,
+                                  marked: _blindStepMark == 2,
                                   onTap: () => setState(() {
-                                    _blindStepMark = 1;
-                                    _blindPctDown = (_blindPctDown - 5).clamp(
+                                    _blindStepMark = 2;
+                                    _blindPctDown = (_blindPctDown +5).clamp(
                                       0,
                                       100,
                                     );
                                   }),
                                 ),
-                                SizedBox(width: 14.w),
+                                SizedBox(width: 20.w),
                                 _CircleMiniBtn(
 
                                   icon:Icons.keyboard_arrow_up,
@@ -588,7 +588,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               value: _brightnessPct / 100.0,
                               onChanged: (v) => setState(
                                 () => _brightnessPct =
-                                    (v * 100).round().clamp(54, 54),
+                                    (v * 100).round().clamp(0, 100),
                               ),
                             ),
                           ),
@@ -694,7 +694,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               child: GlobalCircleIconBtn(
                                 color: Color(0xFFF3F4F6),
                                 child: Image.asset(
-                                  'assets/aro.png',
+                                  'assets/aro.png',            
                                   width: 16.w,
                                   height: 16.h,
                                 ),
@@ -894,8 +894,14 @@ class _DeviceRow extends StatelessWidget {
               trailing,
             ],
           ),
+          // topRight is decorative; without IgnorePointer the Stack layer blocks
+          // hit tests to `trailing` (e.g. Blind Living Room chevrons).
           if (topRight != null)
-            Positioned(right: 0, top: 0, child: topRight!),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: IgnorePointer(ignoring: true, child: topRight!),
+            ),
         ],
       ),
     );
