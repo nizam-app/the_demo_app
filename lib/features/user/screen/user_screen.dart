@@ -263,9 +263,10 @@ class _SearchBarState extends State<_SearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _searchFocusNode,
+      listenable: Listenable.merge([_searchFocusNode, _searchController]),
       builder: (context, _) {
-        //final hasFocus = _searchFocusNode.hasFocus;
+        final hasFocus = _searchFocusNode.hasFocus;
+        final isTyping = hasFocus && _searchController.text.trim().isNotEmpty;
         return Container(
             height: 46.h,
             //alignment: Alignment.centerLeft,
@@ -273,6 +274,9 @@ class _SearchBarState extends State<_SearchBar> {
             decoration: BoxDecoration(
               color: const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular( 26.r),
+              border: isTyping
+                  ? Border.all(color: const Color(0xFF0088FE), width: 1.2)
+                  : null,
             ),
             child: TextField(
               controller: _searchController,

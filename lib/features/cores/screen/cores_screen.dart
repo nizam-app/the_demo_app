@@ -35,7 +35,7 @@ class _CoresScreenState extends State<CoresScreen> {
     }
   }
 
-  static const _bg = Color(0xFFF3F4F6);
+  static const _bg = Color(0xFFE1E1E1);
   static const _cardBg = Color(0xFFFFFFFF);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -70,7 +70,7 @@ class _CoresScreenState extends State<CoresScreen> {
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: _bg,
+        backgroundColor: _bg.withOpacity(0.10),
         body: SafeArea(
           top: false,
           bottom: false,
@@ -242,16 +242,17 @@ class _CoresScreenState extends State<CoresScreen> {
 
   Widget _buildSearchBar() {
     return ListenableBuilder(
-      listenable: _searchFocusNode,
+      listenable: Listenable.merge([_searchFocusNode, _searchController]),
       builder: (context, _) {
         final hasFocus = _searchFocusNode.hasFocus;
+        final isTyping = hasFocus && _searchController.text.trim().isNotEmpty;
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           child: Container(
-            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+            padding: EdgeInsets.all(isTyping ? 1.5.w : 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26.r),
-              gradient: hasFocus
+              gradient: isTyping
                   ? const LinearGradient(
                       colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
                       begin: Alignment.centerLeft,
@@ -267,7 +268,7 @@ class _CoresScreenState extends State<CoresScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 26.r),
+                  borderRadius: BorderRadius.circular(isTyping ? 22.r : 26.r),
                 ),
                 child: TextField(
                   controller: _searchController,

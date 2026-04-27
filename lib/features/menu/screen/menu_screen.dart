@@ -50,7 +50,7 @@ class MenuScreen extends StatelessWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF3F4F6).withOpacity(0.86),
+      backgroundColor: Colors.white,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -67,7 +67,7 @@ class MenuScreen extends StatelessWidget {
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: _pageTint.withOpacity(0.74),
+                    color: Colors.white,
                   ),
                 ),
               ),
