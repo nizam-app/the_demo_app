@@ -46,6 +46,25 @@ class _DevicesScreenState extends State<DevicesScreen> {
   int _brightnessPct = 54;
   bool _cardReaderOn = false;
 
+  void _flashMark({
+    required int value,
+    required int Function() getCurrent,
+    required void Function(int v) set,
+    VoidCallback? action,
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    setState(() {
+      set(value);
+      action?.call();
+    });
+    Future.delayed(duration, () {
+      if (!mounted) return;
+      if (getCurrent() == value) {
+        setState(() => set(0));
+      }
+    });
+  }
+
   void _onNavItemTapped(int index) {
     final routes = [
       '/devices',
@@ -342,19 +361,25 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               _CircleMiniBtn(
                                 icon: Icons.remove,
                                 marked: _rgbwStepMark == 1,
-                                onTap: () => setState(() {
-                                  _rgbwStepMark = 1;
-                                  _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100);
-                                }),
+                                onTap: () => _flashMark(
+                                  value: 1,
+                                  getCurrent: () => _rgbwStepMark,
+                                  set: (v) => _rgbwStepMark = v,
+                                  action: () =>
+                                      _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100),
+                                ),
                               ),
                               SizedBox(width: 20.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
                                 marked: _rgbwStepMark == 2,
-                                onTap: () => setState(() {
-                                  _rgbwStepMark = 2;
-                                  _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100);
-                                }),
+                                onTap: () => _flashMark(
+                                  value: 2,
+                                  getCurrent: () => _rgbwStepMark,
+                                  set: (v) => _rgbwStepMark = v,
+                                  action: () =>
+                                      _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100),
+                                ),
                               ),
                               SizedBox(width: 16.w),
                               _ToggleColorswitch(
@@ -440,21 +465,25 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               _CircleMiniBtn(
                                 icon: Icons.remove,
                                 marked: _bathroomThermoMark == 1,
-                                onTap: () => setState(() {
-                                  _bathroomThermoMark = 1;
-                                  _bathroomTemp = (_bathroomTemp - 0.5)
-                                      .clamp(10.0, 35.0);
-                                }),
+                                onTap: () => _flashMark(
+                                  value: 1,
+                                  getCurrent: () => _bathroomThermoMark,
+                                  set: (v) => _bathroomThermoMark = v,
+                                  action: () => _bathroomTemp =
+                                      (_bathroomTemp - 0.5).clamp(10.0, 35.0),
+                                ),
                               ),
                               SizedBox(width: 20.w),
                               _CircleMiniBtn(
                                 icon: Icons.add,
                                 marked: _bathroomThermoMark == 2,
-                                onTap: () => setState(() {
-                                  _bathroomThermoMark = 2;
-                                  _bathroomTemp = (_bathroomTemp + 0.5)
-                                      .clamp(10.0, 35.0);
-                                }),
+                                onTap: () => _flashMark(
+                                  value: 2,
+                                  getCurrent: () => _bathroomThermoMark,
+                                  set: (v) => _bathroomThermoMark = v,
+                                  action: () => _bathroomTemp =
+                                      (_bathroomTemp + 0.5).clamp(10.0, 35.0),
+                                ),
                               ),
                             ],
                           ),
@@ -495,13 +524,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                 _CircleMiniBtn(
                                   icon: Icons.keyboard_arrow_down,
                                   marked: _blindStepMark == 2,
-                                  onTap: () => setState(() {
-                                    _blindStepMark = 2;
-                                    _blindPctDown = (_blindPctDown +5).clamp(
-                                      0,
-                                      100,
-                                    );
-                                  }),
+                                  onTap: () => _flashMark(
+                                    value: 2,
+                                    getCurrent: () => _blindStepMark,
+                                    set: (v) => _blindStepMark = v,
+                                    action: () => _blindPctDown =
+                                        (_blindPctDown + 5).clamp(0, 100),
+                                  ),
                                 ),
                                 SizedBox(width: 20.w),
                                 _CircleMiniBtn(
@@ -515,13 +544,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                   //   color: Color(0xFF6B7280),
                                   // ),
                                   marked: _blindStepMark == 2,
-                                  onTap: () => setState(() {
-                                    _blindStepMark = 2;
-                                    _blindPctUp = (_blindPctUp + 5).clamp(
-                                      0,
-                                      100,
-                                    );
-                                  }),
+                                  onTap: () => _flashMark(
+                                    value: 2,
+                                    getCurrent: () => _blindStepMark,
+                                    set: (v) => _blindStepMark = v,
+                                    action: () =>
+                                        _blindPctUp = (_blindPctUp + 5).clamp(0, 100),
+                                  ),
                                 ),
                                 SizedBox(width: 10.w),
                               ],
@@ -588,7 +617,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               value: _brightnessPct / 100.0,
                               onChanged: (v) => setState(
                                 () => _brightnessPct =
-                                    (v * 100).round().clamp(0, 100),
+                                    (v * 100).round().clamp(0, 54),
                               ),
                             ),
                           ),
@@ -950,14 +979,15 @@ class _SearchBarState extends State<_SearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _searchFocusNode,
+      listenable: Listenable.merge([_searchFocusNode, _searchController]),
       builder: (context, _) {
         final hasFocus = _searchFocusNode.hasFocus;
+        final isTyping = hasFocus && _searchController.text.trim().isNotEmpty;
         return Container(
-          padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+          padding: EdgeInsets.all(isTyping ? 1.5.w : 0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24.r),
-            gradient: hasFocus
+            gradient: isTyping
                 ? const LinearGradient(
                     colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
                     begin: Alignment.centerLeft,
@@ -973,7 +1003,7 @@ class _SearchBarState extends State<_SearchBar> {
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
+                borderRadius: BorderRadius.circular(isTyping ? 22.r : 24.r),
               ),
               child: TextField(
                 controller: _searchController,
@@ -1607,18 +1637,18 @@ class _TimeTag extends StatelessWidget {
             'assets/image 81 (1).png', // pin
             width: 16.sp,
             height: 16.sp,
-            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
             color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFFF3F4F6),
             colorBlendMode: BlendMode.srcIn,
           ),
-          SizedBox(width: 11.w),
+          SizedBox(width: 8.w),
           Text(
             text,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 13.sp,
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
-              height: 1.0,
+              // height: 1.0,
               fontFamily: 'Inter',
             ),
           ),
@@ -1644,10 +1674,10 @@ class _StarTimeTag extends StatelessWidget {
           Text(
             time,
             style: TextStyle(
-              fontSize: 16.sp, // ✅ screenshot small
+              fontSize: 13.sp, // ✅ screenshot small
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
-              height: 1.0,
+              // height: 1.0,
               fontFamily: 'Inter',
             ),
           ),
@@ -1665,13 +1695,13 @@ class _StarOnly extends StatelessWidget {
     return Container(
       height: 24.h,
       width: 24.h,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.sp,
-          color: const Color(0xFF000000).withOpacity(0.25),
-        ),
-        //borderRadius: BorderRadius.circular(6.r),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border.all(
+      //     width: 1.sp,
+      //     color: const Color(0xFF000000).withOpacity(0.25),
+      //   ),
+      //   //borderRadius: BorderRadius.circular(6.r),
+      // ),
       child: Center(
         child: Icon(
           Icons.star_rounded,
@@ -2091,6 +2121,9 @@ class _BrightnessPill extends StatelessWidget {
                   width: 22.w,
                   height: 22.h,
                   fit: BoxFit.contain,
+                  color: (f <= 0.0)
+                      ? const Color(0xFF6B7280) // full gray
+                      : const Color(0xFFFAB300), // any white (>= 1%)
                 ),
               ),
             ),

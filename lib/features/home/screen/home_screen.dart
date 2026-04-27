@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         () => _bedroomManual = !_bedroomManual,
                                       ),
                                       onPercentChanged: (v) => setState(
-                                        () => _bedroomDimmer = v.clamp(0.72, 0.72),
+                                        () => _bedroomDimmer = v.clamp(0, 72),
                                       ),
                                       onNavigate: () => context.push(
                                         LightDinningRoomScreen.routeName,
@@ -1138,6 +1138,13 @@ class _CategoryPill extends StatelessWidget {
     }
 
     Widget innerRow({required bool selected}) {
+      const iconBgColor = Color(0xFFF3F4F6);
+      const iconActiveOnWhite = Color(0xFFFAB300);
+      const iconActiveOnGray = Color(0xFF6B7280);
+      const iconInactive = Color(0xFF111827);
+      final iconActiveColor =
+          (iconBgColor == Colors.white) ? iconActiveOnWhite : iconActiveOnGray;
+
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w), // ✅ compact padding
         child: Row(
@@ -1148,7 +1155,7 @@ class _CategoryPill extends StatelessWidget {
               width: 44.w,
               height: 44.w,
               decoration: const BoxDecoration(
-                color: Color(0xFFF3F4F6),
+                color: iconBgColor,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -1159,7 +1166,11 @@ class _CategoryPill extends StatelessWidget {
                       height: 22.w,
                       fit: BoxFit.contain,
                     )
-                  : Icon(icon, size: 20.sp, color: const Color(0xFF111827)),
+                  : Icon(
+                      icon,
+                      size: 20.sp,
+                      color: selected ? iconActiveColor : iconInactive,
+                    ),
             ),
             SizedBox(width: 10.w),
 
@@ -1552,7 +1563,7 @@ class _DimmerPill extends StatelessWidget {
       width: w,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(26),
       ),
       child: Stack(
         children: [
@@ -1564,8 +1575,8 @@ class _DimmerPill extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFE1E1E1),
                   borderRadius: BorderRadius.horizontal(
-                    right: const Radius.circular(999),
-                    left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
+                    right: const Radius.circular(26),
+                    left: Radius.circular((1 - p) >= 0.98 ? 26 : 0),
                   ),
                 ),
               ),
@@ -1578,7 +1589,9 @@ class _DimmerPill extends StatelessWidget {
               child: Icon(
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
-                color: const Color(0xFF6B7280),
+                color: (p <= 0.0)
+                    ? const Color(0xFF6B7280) // full gray (0% white)
+                    : const Color(0xFFFAB300), // any white (>= 1%)
               ),
             ),
           ),

@@ -420,9 +420,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _CircleButton(icon: left, onTap: onLeft ?? () {}),
+        _CircleButton(icon: left, onTap: onLeft),
         SizedBox(width: 20.w),
-        _CircleButton(icon: right, onTap: onRight ?? () {}),
+        _CircleButton(icon: right, onTap: onRight),
         SizedBox(width: 10.w),
       ],
     );
@@ -435,6 +435,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     required String rightAsset,
     VoidCallback? onLeft,
     VoidCallback? onRight,
+    bool disabled = false,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -442,13 +443,15 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
         _CircleAssetButton(
           assetPath: leftAsset,
           emphasized: false,
-          onTap: onLeft ?? () {},
+          onTap: disabled ? null : onLeft,
+          iconColor: disabled ? const Color(0xFF6B7280) : null,
         ),
         SizedBox(width: 20.w),
         _CircleAssetButton(
           assetPath: rightAsset,
           emphasized: true,
-          onTap: onRight ?? () {},
+          onTap: disabled ? null : onRight,
+          iconColor: disabled ? const Color(0xFF6B7280) : null,
         ),
         SizedBox(width: 10.w),
       ],
@@ -726,6 +729,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _deviceControlPairAssets(
                 leftAsset: _icFanUp,
                 rightAsset: _icFanDown,
+                disabled: _fanLevel == 0,
                 onLeft: () => setState(() {
                   _fanLevel = (_fanLevel + 1).clamp(0, 3);
                 }),
@@ -802,6 +806,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: _deviceControlPairAssets(
             leftAsset: _icIrrigationLeft,
             rightAsset: _icIrrigationRight,
+            disabled: _irrigationMinutes == 0,
             onLeft: () => setState(() {
               _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 100);
             }),
@@ -1118,6 +1123,7 @@ class _CircleButton extends StatelessWidget {
   /// Matches `devices_screen` `_CircleMiniBtn`: + and down use the stronger fill.
   static const Color _circleEmphasizedBg = Color(0xFFE1E1E1);
   static const Color _circleSubtleBg = Color(0xFFF3F4F6);
+  static const Color _pressedFill = Color(0xFFD1D5DB);
 
   bool get _emphasized {
     return icon == Icons.add ||
@@ -1129,23 +1135,70 @@ class _CircleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = _emphasized ? _circleEmphasizedBg : _circleSubtleBg;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        splashColor: const Color(0xFFE5E7EB),
-        highlightColor: const Color(0xFFD1D5DB),
-        child: Ink(
-          width: 35.w,
-          height: 35.h,
-          decoration: BoxDecoration(
-            color: bg,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, size: 23.sp, color: const Color(0xFF6B7280)),
-        ),
+    return _PressableCircleSurface(
+      side: 35.w,
+      fill: bg,
+      pressedFill: _pressedFill,
+      onTap: onTap,
+      child: Icon(icon, size: 23.sp, color: const Color(0xFF6B7280)),
+    );
+  }
+}
+
+/// Matches `home_screen` behavior: pressed state is only while pointer is down
+/// (prevents the lingering “dark gray for 1–2 seconds” effect).
+class _PressableCircleSurface extends StatefulWidget {
+  const _PressableCircleSurface({
+    required this.side,
+    required this.fill,
+    required this.pressedFill,
+    required this.child,
+    this.onTap,
+  });
+
+  final double side;
+  final Color fill;
+  final Color pressedFill;
+  final Widget child;
+  final VoidCallback? onTap;
+
+  @override
+  State<_PressableCircleSurface> createState() =>
+      _PressableCircleSurfaceState();
+}
+
+class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final circle = Container(
+      width: widget.side,
+      height: widget.side,
+      decoration: BoxDecoration(
+        color: _pressed ? widget.pressedFill : widget.fill,
+        shape: BoxShape.circle,
       ),
+      alignment: Alignment.center,
+      child: widget.child,
+    );
+
+    if (widget.onTap == null) return circle;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: () {
+        widget.onTap!();
+        _setPressed(false);
+      },
+      child: circle,
     );
   }
 }
@@ -1153,41 +1206,34 @@ class _CircleButton extends StatelessWidget {
 class _CircleAssetButton extends StatelessWidget {
   const _CircleAssetButton({
     required this.assetPath,
-    required this.onTap,
+    this.onTap,
     required this.emphasized,
+    this.iconColor,
   });
 
   final String assetPath;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool emphasized;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
     final bg = emphasized
         ? _CircleButton._circleEmphasizedBg
         : _CircleButton._circleSubtleBg;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        splashColor: const Color(0xFFE5E7EB),
-        highlightColor: const Color(0xFFD1D5DB),
-        child: Ink(
-          width: 35.w,
-          height: 35.h,
-          decoration: BoxDecoration(
-            color: bg,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Image.asset(
-              assetPath,
-              width: 13.w,
-              height: 13.h,
-              fit: BoxFit.contain,
-            ),
-          ),
+    return _PressableCircleSurface(
+      side: 35.w,
+      fill: bg,
+      pressedFill: _CircleButton._pressedFill,
+      onTap: onTap,
+      child: Center(
+        child: Image.asset(
+          assetPath,
+          width: 13.w,
+          height: 13.h,
+          fit: BoxFit.contain,
+          color: iconColor,
+          colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
         ),
       ),
     );

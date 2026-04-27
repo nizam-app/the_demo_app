@@ -172,7 +172,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                         () => _bedroomManual = !_bedroomManual,
                                       ),
                                       onPercentChanged: (v) => setState(
-                                        () => _bedroomDimmer = v.clamp(0.72, 0.72),
+                                        () => _bedroomDimmer = v.clamp(0, 72),
                                       ),
                                       onNavigate: () => context.push(
                                         LightDinningRoomScreen.routeName,
@@ -1668,7 +1668,9 @@ class _DimmerPill extends StatelessWidget {
               child: Icon(
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
-                color: const Color(0xFF6B7280),
+                color: (p <= 0.0)
+                    ? const Color(0xFF6B7280) // full gray
+                    : const Color(0xFFFAB300), // any white (>= 1%)
               ),
             ),
           ),
