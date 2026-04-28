@@ -6,12 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class CategoryMenuSheet extends StatelessWidget {
   const CategoryMenuSheet({super.key});
 
-  static const _bg = Color(0xFFF3F4F6);
-  static final _bgTransparent = _bg.withOpacity(0.74);
-  static final _card = _bg.withOpacity(0.86);
+  // Keep the sheet clearly transparent like the dashboard header/footer.
+  static final _bgTransparent = Colors.white.withOpacity(0.18);
+  static final _card = Colors.white.withOpacity(0.28);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
-  static const _dividerColor = Color(0xFFE5E7EB);
   static const _destructive = Color(0xFFFF2D92);
 
   @override
@@ -63,7 +62,7 @@ class CategoryMenuSheet extends StatelessWidget {
                     width: 30.w,
                     height: 30.h,
                     decoration: BoxDecoration(
-                      color: _bg.withOpacity(0.86),
+                      color: Colors.white.withOpacity(0.28),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -281,17 +280,6 @@ class _ItemRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      margin: EdgeInsets.only(left: 58.w),
-      color: const Color(0xFFE5E7EB),
     );
   }
 }

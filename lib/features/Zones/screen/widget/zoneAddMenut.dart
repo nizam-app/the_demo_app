@@ -6,13 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class ZoneAddMenu extends StatelessWidget {
   const ZoneAddMenu({super.key});
 
-  static const _bg = Color(0xFFF3F4F6);
-  static final _bgTransparent = _bg.withOpacity(0.74);
-  static final _card = _bg.withOpacity(0.86);
+  // Keep the sheet clearly transparent like the dashboard header/footer.
+  static final _bgTransparent = Colors.white.withOpacity(0.18);
+  static final _card = Colors.white.withOpacity(0.28);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
-  static const _dividerColor = Color(0xFFE5E7EB);
-  static const _destructive = Color(0xFFFF2D92);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +60,7 @@ class ZoneAddMenu extends StatelessWidget {
                       width: 30.w,
                       height: 30.h,
                       decoration: BoxDecoration(
-                        color: _bg.withOpacity(0.86),
+                        color: Colors.white.withOpacity(0.28),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -241,8 +239,6 @@ class _ItemRow extends StatelessWidget {
     required this.iconPath,
     required this.title,
     this.trailing,
-    this.titleColor,
-    this.iconColor,
     this.iconWidth,
     this.iconHeight,
   });
@@ -250,8 +246,6 @@ class _ItemRow extends StatelessWidget {
   final String iconPath;
   final String title;
   final Widget? trailing;
-  final Color? titleColor;
-  final Color? iconColor;
   final double? iconWidth;
   final double? iconHeight;
 
@@ -277,7 +271,6 @@ class _ItemRow extends StatelessWidget {
                   width: iconWidth ?? 22.w,
                   height: iconHeight ?? 22.w,
                   fit: BoxFit.contain,
-                  color: iconColor,
                 ),
               ),
             ),
@@ -292,7 +285,7 @@ class _ItemRow extends StatelessWidget {
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Inter',
-                  color: titleColor ?? _textPrimary,
+                  color: _textPrimary,
                 ),
               ),
             ),
@@ -301,17 +294,6 @@ class _ItemRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      margin: EdgeInsets.only(left: 58.w),
-      color: const Color(0xFFE5E7EB),
     );
   }
 }

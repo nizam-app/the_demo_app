@@ -4,12 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-const _bg = Color(0xFFF3F4F6);
-const _cardBg = Color(0xFFF3F4F6);
-const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
-const _danger = Color(0xFFFE019A);
 const _blue = Color(0xFF0088FE);
                           //0xFF1D9BF0
 class AddSectionSheet extends StatefulWidget {
@@ -40,7 +36,8 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             bottom: 0.h,
           ),
           decoration: BoxDecoration(
-            color: _bg.withOpacity(0.74),
+            // Keep the sheet clearly transparent like the dashboard header/footer.
+            color: Colors.white.withOpacity(0.18),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),
@@ -79,7 +76,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     width: 30.w,
                     height: 30.w,
                     decoration: BoxDecoration(
-                      color: _bg.withOpacity(0.86),
+                      color: Colors.white.withOpacity(0.28),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -253,7 +250,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg.withOpacity(0.86),
+        color: Colors.white.withOpacity(0.28),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: child,
@@ -461,7 +458,7 @@ class _SizeSegment extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: _bg,
+        color: Colors.white.withOpacity(0.22),
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Row(

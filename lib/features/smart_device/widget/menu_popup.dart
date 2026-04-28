@@ -48,7 +48,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
-  static const Color _kSheetBg = Color(0xFFF3F4F6);
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
@@ -86,7 +85,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
     return Container(
       decoration: BoxDecoration(
-        color: _kSheetBg.withOpacity(0.74),
+        // Keep the sheet clearly transparent like the dashboard header/footer.
+        color: Colors.white.withOpacity(0.18),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
@@ -298,7 +298,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: _kSheetBg.withOpacity(0.74),
+                        color: Colors.white.withOpacity(0.18),
                         border: Border(
                           bottom: BorderSide(
                             color: const Color(0xFFE5E7EB).withOpacity(0.18),
@@ -375,7 +375,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 width: 30.w,
                 height: 30.h,
                 decoration: BoxDecoration(
-                  color: _kSheetBg.withOpacity(0.86),
+                  color: Colors.white.withOpacity(0.28),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -405,14 +405,13 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 class _Card extends StatelessWidget {
   const _Card({required this.child});
   final Widget child;
-  static const Color _kCardBg = Color(0xFFF3F4F6);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(14.sp),
       decoration: BoxDecoration(
-        color: _kCardBg.withOpacity(0.86),
+        color: Colors.white.withOpacity(0.28),
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: child,

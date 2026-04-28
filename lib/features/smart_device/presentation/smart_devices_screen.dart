@@ -38,6 +38,31 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
 
   static const _selectedRowBg = Color(0xFFEAF1FF);
 
+  /// 0 = none; 1 = left button; 2 = right button.
+  int _fanStepMark = 0;
+  int _heatStepMark = 0;
+  int _irrigationStepMark = 0;
+  int _kitchenStepMark = 0;
+
+  void _flashMark({
+    required int value,
+    required int Function() getCurrent,
+    required void Function(int v) set,
+    VoidCallback? action,
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    setState(() {
+      set(value);
+      action?.call();
+    });
+    Future.delayed(duration, () {
+      if (!mounted) return;
+      if (getCurrent() == value) {
+        setState(() => set(0));
+      }
+    });
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -416,13 +441,15 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     required IconData right,
     VoidCallback? onLeft,
     VoidCallback? onRight,
+    bool markedLeft = false,
+    bool markedRight = false,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _CircleButton(icon: left, onTap: onLeft),
+        _CircleButton(icon: left, onTap: onLeft, marked: markedLeft),
         SizedBox(width: 20.w),
-        _CircleButton(icon: right, onTap: onRight),
+        _CircleButton(icon: right, onTap: onRight, marked: markedRight),
         SizedBox(width: 10.w),
       ],
     );
@@ -435,23 +462,26 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
     required String rightAsset,
     VoidCallback? onLeft,
     VoidCallback? onRight,
-    bool disabled = false,
+    bool disableLeft = false,
+    bool disableRight = false,
+    bool markedLeft = false,
+    bool markedRight = false,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleAssetButton(
           assetPath: leftAsset,
-          emphasized: false,
-          onTap: disabled ? null : onLeft,
-          iconColor: disabled ? const Color(0xFF6B7280) : null,
+          marked: markedLeft,
+          onTap: disableLeft ? null : onLeft,
+          iconColor: disableLeft ? const Color(0xFF6B7280) : null,
         ),
         SizedBox(width: 20.w),
         _CircleAssetButton(
           assetPath: rightAsset,
-          emphasized: true,
-          onTap: disabled ? null : onRight,
-          iconColor: disabled ? const Color(0xFF6B7280) : null,
+          marked: markedRight,
+          onTap: disableRight ? null : onRight,
+          iconColor: disableRight ? const Color(0xFF6B7280) : null,
         ),
         SizedBox(width: 10.w),
       ],
@@ -729,13 +759,22 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               _deviceControlPairAssets(
                 leftAsset: _icFanUp,
                 rightAsset: _icFanDown,
-                disabled: _fanLevel == 0,
-                onLeft: () => setState(() {
-                  _fanLevel = (_fanLevel + 1).clamp(0, 3);
-                }),
-                onRight: () => setState(() {
-                  _fanLevel = (_fanLevel - 1).clamp(0, 3);
-                }),
+                disableLeft: false,
+                disableRight: _fanLevel == 0,
+                markedLeft: _fanStepMark == 1,
+                markedRight: _fanStepMark == 2,
+                onLeft: () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _fanStepMark,
+                  set: (v) => _fanStepMark = v,
+                  action: () => _fanLevel = (_fanLevel + 1).clamp(0, 3),
+                ),
+                onRight: () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _fanStepMark,
+                  set: (v) => _fanStepMark = v,
+                  action: () => _fanLevel = (_fanLevel - 1).clamp(0, 3),
+                ),
               ),
             ],
           ),
@@ -783,12 +822,22 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: _deviceControlPair(
             left: Icons.remove_rounded,
             right: Icons.add_rounded,
-            onLeft: () => setState(() {
-              _heatSetpoint = (_heatSetpoint - 0.5).clamp(0.0, 35.0);
-            }),
-            onRight: () => setState(() {
-              _heatSetpoint = (_heatSetpoint + 0.5).clamp(0.0, 35.0);
-            }),
+            markedLeft: _heatStepMark == 1,
+            markedRight: _heatStepMark == 2,
+            onLeft: () => _flashMark(
+              value: 1,
+              getCurrent: () => _heatStepMark,
+              set: (v) => _heatStepMark = v,
+              action: () =>
+                  _heatSetpoint = (_heatSetpoint - 0.5).clamp(0.0, 35.0),
+            ),
+            onRight: () => _flashMark(
+              value: 2,
+              getCurrent: () => _heatStepMark,
+              set: (v) => _heatStepMark = v,
+              action: () =>
+                  _heatSetpoint = (_heatSetpoint + 0.5).clamp(0.0, 35.0),
+            ),
           ),
         ),
         _buildDivider(),
@@ -806,13 +855,24 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: _deviceControlPairAssets(
             leftAsset: _icIrrigationLeft,
             rightAsset: _icIrrigationRight,
-            disabled: _irrigationMinutes == 0,
-            onLeft: () => setState(() {
-              _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 100);
-            }),
-            onRight: () => setState(() {
-              _irrigationMinutes = (_irrigationMinutes + 5).clamp(0, 100);
-            }),
+            disableLeft: _irrigationMinutes == 0,
+            disableRight: false,
+            markedLeft: _irrigationStepMark == 1,
+            markedRight: _irrigationStepMark == 2,
+            onLeft: () => _flashMark(
+              value: 1,
+              getCurrent: () => _irrigationStepMark,
+              set: (v) => _irrigationStepMark = v,
+              action: () =>
+                  _irrigationMinutes = (_irrigationMinutes - 5).clamp(0, 100),
+            ),
+            onRight: () => _flashMark(
+              value: 2,
+              getCurrent: () => _irrigationStepMark,
+              set: (v) => _irrigationStepMark = v,
+              action: () =>
+                  _irrigationMinutes = (_irrigationMinutes + 5).clamp(0, 100),
+            ),
           ),
         ),
         _buildDivider(),
@@ -867,16 +927,28 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           trailing: _deviceControlPair(
             left: Icons.remove_rounded,
             right: Icons.add_rounded,
-            onLeft: () => setState(() {
-              _kitchenTemp = (_kitchenTemp - 0.5).clamp(10.0, 35.0);
-              _kitchenHumidityPct =
-                  (_kitchenHumidityPct - 5).clamp(0, 100);
-            }),
-            onRight: () => setState(() {
-              _kitchenTemp = (_kitchenTemp + 0.5).clamp(10.0, 35.0);
-              _kitchenHumidityPct =
-                  (_kitchenHumidityPct + 5).clamp(0, 100);
-            }),
+            markedLeft: _kitchenStepMark == 1,
+            markedRight: _kitchenStepMark == 2,
+            onLeft: () => _flashMark(
+              value: 1,
+              getCurrent: () => _kitchenStepMark,
+              set: (v) => _kitchenStepMark = v,
+              action: () {
+                _kitchenTemp = (_kitchenTemp - 0.5).clamp(10.0, 35.0);
+                _kitchenHumidityPct =
+                    (_kitchenHumidityPct - 5).clamp(0, 100);
+              },
+            ),
+            onRight: () => _flashMark(
+              value: 2,
+              getCurrent: () => _kitchenStepMark,
+              set: (v) => _kitchenStepMark = v,
+              action: () {
+                _kitchenTemp = (_kitchenTemp + 0.5).clamp(10.0, 35.0);
+                _kitchenHumidityPct =
+                    (_kitchenHumidityPct + 5).clamp(0, 100);
+              },
+            ),
           ),
         ),
         //Sizedbox(height:200.h),  
@@ -892,9 +964,6 @@ class _InlineText extends StatelessWidget {
 
   final String text;
   final bool bold;
-
-  static const _primary = Color(0xFF111827);
-  static const _secondary = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
@@ -1115,38 +1184,30 @@ class _CircleButton extends StatelessWidget {
   const _CircleButton ({
     required this.icon,
     this.onTap,
+    this.marked = false,
   });
 
   final IconData icon;
   final VoidCallback? onTap;
+  final bool marked;
 
-  /// Matches `devices_screen` `_CircleMiniBtn`: + and down use the stronger fill.
-  static const Color _circleEmphasizedBg = Color(0xFFE1E1E1);
-  static const Color _circleSubtleBg = Color(0xFFF3F4F6);
-  static const Color _pressedFill = Color(0xFFD1D5DB);
-
-  bool get _emphasized {
-    return icon == Icons.add ||
-        icon == Icons.add_rounded ||
-        icon == Icons.keyboard_arrow_down ||
-        icon == Icons.keyboard_arrow_down_rounded;
-  }
+  /// Match `devices_screen` behavior: same idle + same pressed/marked fill.
+  static const Color _idleFill = Color(0xFFF3F4F6);
+  static const Color _markedOrPressFill = Color(0xFFE5E7EB);
 
   @override
   Widget build(BuildContext context) {
-    final bg = _emphasized ? _circleEmphasizedBg : _circleSubtleBg;
     return _PressableCircleSurface(
       side: 35.w,
-      fill: bg,
-      pressedFill: _pressedFill,
+      fill: _idleFill,
+      pressedFill: _markedOrPressFill,
+      marked: marked,
       onTap: onTap,
       child: Icon(icon, size: 23.sp, color: const Color(0xFF6B7280)),
     );
   }
 }
 
-/// Matches `home_screen` behavior: pressed state is only while pointer is down
-/// (prevents the lingering “dark gray for 1–2 seconds” effect).
 class _PressableCircleSurface extends StatefulWidget {
   const _PressableCircleSurface({
     required this.side,
@@ -1154,6 +1215,7 @@ class _PressableCircleSurface extends StatefulWidget {
     required this.pressedFill,
     required this.child,
     this.onTap,
+    this.marked = false,
   });
 
   final double side;
@@ -1161,6 +1223,7 @@ class _PressableCircleSurface extends StatefulWidget {
   final Color pressedFill;
   final Widget child;
   final VoidCallback? onTap;
+  final bool marked;
 
   @override
   State<_PressableCircleSurface> createState() =>
@@ -1180,7 +1243,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       width: widget.side,
       height: widget.side,
       decoration: BoxDecoration(
-        color: _pressed ? widget.pressedFill : widget.fill,
+        color: (_pressed || widget.marked) ? widget.pressedFill : widget.fill,
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -1207,24 +1270,22 @@ class _CircleAssetButton extends StatelessWidget {
   const _CircleAssetButton({
     required this.assetPath,
     this.onTap,
-    required this.emphasized,
+    this.marked = false,
     this.iconColor,
   });
 
   final String assetPath;
   final VoidCallback? onTap;
-  final bool emphasized;
+  final bool marked;
   final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    final bg = emphasized
-        ? _CircleButton._circleEmphasizedBg
-        : _CircleButton._circleSubtleBg;
     return _PressableCircleSurface(
       side: 35.w,
-      fill: bg,
-      pressedFill: _CircleButton._pressedFill,
+      fill: _CircleButton._idleFill,
+      pressedFill: _CircleButton._markedOrPressFill,
+      marked: marked,
       onTap: onTap,
       child: Center(
         child: Image.asset(
