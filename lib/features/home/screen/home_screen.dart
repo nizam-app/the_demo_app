@@ -88,6 +88,25 @@ class _HomeScreenState extends State<HomeScreen> {
   int _favThermoMMark = 0;
   int _favThermoAMark = 0;
 
+  void _flashMark({
+    required int value,
+    required int Function() getCurrent,
+    required void Function(int v) set,
+    VoidCallback? action,
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    setState(() {
+      set(value);
+      action?.call();
+    });
+    Future.delayed(duration, () {
+      if (!mounted) return;
+      if (getCurrent() == value) {
+        setState(() => set(0));
+      }
+    });
+  }
+
   Widget _buildHomeBody(BuildContext context) {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
@@ -214,18 +233,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onModeTap: () => setState(
                                         () => _bathroomManual = !_bathroomManual,
                                       ),
-                                      onMinus: () => setState(() {
-                                        _bathroomThermoMark = 1;
-                                        _bathroomThermostat =
+                                      onMinus: () => _flashMark(
+                                        value: 1,
+                                        getCurrent: () => _bathroomThermoMark,
+                                        set: (v) => _bathroomThermoMark = v,
+                                        action: () => _bathroomThermostat =
                                             (_bathroomThermostat - 0.5)
-                                                .clamp(10.0, 35.0);
-                                      }),
-                                      onPlus: () => setState(() {
-                                        _bathroomThermoMark = 2;
-                                        _bathroomThermostat =
+                                                .clamp(10.0, 35.0),
+                                      ),
+                                      onPlus: () => _flashMark(
+                                        value: 2,
+                                        getCurrent: () => _bathroomThermoMark,
+                                        set: (v) => _bathroomThermoMark = v,
+                                        action: () => _bathroomThermostat =
                                             (_bathroomThermostat + 0.5)
-                                                .clamp(10.0, 35.0);
-                                      }),
+                                                .clamp(10.0, 35.0),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -250,16 +273,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
                                       ),
-                                      onDown: () => setState(() {
-                                        _blindNorthMark = 1;
-                                        _blindNorthDown =
-                                            (_blindNorthDown + 5).clamp(0, 100);
-                                      }),
-                                      onUp: () => setState(() {
-                                        _blindNorthMark = 2;
-                                        _blindNorthUp =
-                                            (_blindNorthUp + 5).clamp(0, 100);
-                                      }),
+                                      onDown: () => _flashMark(
+                                        value: 1,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthDown =
+                                            (_blindNorthDown + 5).clamp(0, 100),
+                                      ),
+                                      onUp: () => _flashMark(
+                                        value: 2,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthUp =
+                                            (_blindNorthUp + 5).clamp(0, 100),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -439,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   deviceName,
                   style: TextStyle(
                     fontSize: 16.sp, // ✅ bigger like image
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
                     height: 1.08,
                   ),
@@ -516,11 +543,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   _CircleBtn(
                     size: 35,
                     marked: _shadeStepMark[rowIndex] == 1,
-                    onTap: () => setState(() {
-                      _shadeStepMark[rowIndex] = 1;
-                      _shadeDown[rowIndex] =
-                          (_shadeDown[rowIndex] - 5).clamp(0, 100);
-                    }),
+                    onTap: () => _flashMark(
+                      value: 1,
+                      getCurrent: () => _shadeStepMark[rowIndex],
+                      set: (v) => _shadeStepMark[rowIndex] = v,
+                      action: () => _shadeDown[rowIndex] =
+                          (_shadeDown[rowIndex] - 5).clamp(0, 100),
+                    ),
                     child: Image.asset(
                       'assets/Mask group (17).png',
                       width: 13.w,
@@ -532,11 +561,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   _CircleBtn(
                     size: 35,
                     marked: _shadeStepMark[rowIndex] == 2,
-                    onTap: () => setState(() {
-                      _shadeStepMark[rowIndex] = 2;
-                      _shadeUp[rowIndex] =
-                          (_shadeUp[rowIndex] + 5).clamp(0, 100);
-                    }),
+                    onTap: () => _flashMark(
+                      value: 2,
+                      getCurrent: () => _shadeStepMark[rowIndex],
+                      set: (v) => _shadeStepMark[rowIndex] = v,
+                      action: () => _shadeUp[rowIndex] =
+                          (_shadeUp[rowIndex] + 5).clamp(0, 100),
+                    ),
                     child: Transform.rotate(
                       angle: math.pi,
                       child: Image.asset(
@@ -578,16 +609,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 onModeTap: () => setState(
                   () => _favThermoMManual = !_favThermoMManual,
                 ),
-                onMinus: () => setState(() {
-                  _favThermoMMark = 1;
-                  _favThermostatM =
-                      (_favThermostatM - 0.5).clamp(10.0, 35.0);
-                }),
-                onPlus: () => setState(() {
-                  _favThermoMMark = 2;
-                  _favThermostatM =
-                      (_favThermostatM + 0.5).clamp(10.0, 35.0);
-                }),
+                onMinus: () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _favThermoMMark,
+                  set: (v) => _favThermoMMark = v,
+                  action: () => _favThermostatM =
+                      (_favThermostatM - 0.5).clamp(10.0, 35.0),
+                ),
+                onPlus: () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _favThermoMMark,
+                  set: (v) => _favThermoMMark = v,
+                  action: () => _favThermostatM =
+                      (_favThermostatM + 0.5).clamp(10.0, 35.0),
+                ),
               ),
             ),
           ],
@@ -610,16 +645,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 onModeTap: () => setState(
                   () => _favThermoAManual = !_favThermoAManual,
                 ),
-                onMinus: () => setState(() {
-                  _favThermoAMark = 1;
-                  _favThermostatA =
-                      (_favThermostatA - 0.5).clamp(10.0, 35.0);
-                }),
-                onPlus: () => setState(() {
-                  _favThermoAMark = 2;
-                  _favThermostatA =
-                      (_favThermostatA + 0.5).clamp(10.0, 35.0);
-                }),
+                onMinus: () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _favThermoAMark,
+                  set: (v) => _favThermoAMark = v,
+                  action: () => _favThermostatA =
+                      (_favThermostatA - 0.5).clamp(10.0, 35.0),
+                ),
+                onPlus: () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _favThermoAMark,
+                  set: (v) => _favThermoAMark = v,
+                  action: () => _favThermostatA =
+                      (_favThermostatA + 0.5).clamp(10.0, 35.0),
+                ),
               ),
             ),
           ],
@@ -1484,7 +1523,7 @@ class _LightDimmerCard extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
             height: 1.18,
           ),
@@ -1518,7 +1557,7 @@ class _LightDimmerCard extends StatelessWidget {
                     '${(percent * 100).round()}%',
                     style: TextStyle(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -1672,6 +1711,7 @@ class _ThermostatCard extends StatelessWidget {
                             : title,
                         style: TextStyle(
                           fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFF111827),
                           height: 1.15,
                         ),
@@ -1727,7 +1767,7 @@ class _ThermostatCard extends StatelessWidget {
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -1853,7 +1893,7 @@ class _BlindCard extends StatelessWidget {
                                 '$downPercent%',
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -1869,7 +1909,7 @@ class _BlindCard extends StatelessWidget {
                                 '$upPercent%',
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -1974,6 +2014,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                   widget.title,
                   style: TextStyle(
                     fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
                     color: const Color(0xFF111827),
                     height: 1.15,
                   ),
@@ -1989,7 +2030,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                     _on ? 'On' : 'Off',
                     style: TextStyle(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -2686,7 +2727,7 @@ class _AnalyticsBody extends StatelessWidget {
           'Analytics',
           style: TextStyle(
             fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
           ),
         ),
