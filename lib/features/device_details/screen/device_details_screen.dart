@@ -1,5 +1,6 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
@@ -10,22 +11,132 @@ import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
-class LightDinningRoomScreen extends StatefulWidget {
-  const LightDinningRoomScreen({super.key});
+/// Controls which primary region appears below the hero (stats stay the same).
+enum DeviceDetailsControlMode {
+  /// Off / On row (hero + stats above).
+  standard,
 
-  static const String routeName = '/light-dinning-room';
+  /// Light scene: main title + "Values" + All On / Night / All Off (no power row, no tune row).
+  lightSceneValues,
 
-  @override
-  State<LightDinningRoomScreen> createState() => _LightDinningRoomScreenState();
+  /// RGBW fixture: hue/saturation wheel + intensity slider (no Off/On tune row).
+  rgbwPicker,
+
+  /// LED dimmer: circular gradient ring + centered % (no Off/On tune row).
+  ledDimmer,
 }
 
-enum _DeviceTab { tools, automation, overview,  chart, activity }
+/// Carried on [GoRouterState.extra] so [DeviceDetailsControlMode] cannot be lost
+/// while navigating (query-only payloads were unreliable in this app shell).
+class DeviceDetailsRouteArgs {
+  const DeviceDetailsRouteArgs({
+    required this.deviceTitle,
+    required this.imageAssetPath,
+    this.controlButtonCount = 3,
+    this.controlMode = DeviceDetailsControlMode.standard,
+  });
 
-class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
+  final String deviceTitle;
+  final String imageAssetPath;
+  final int controlButtonCount;
+  final DeviceDetailsControlMode controlMode;
+}
+
+/// Full-screen device UI (formerly Light Dining Room). Only [deviceTitle],
+/// [imageAssetPath], and [controlButtonCount] vary per device; the rest of the
+/// layout is shared.
+class DeviceDetailsScreen extends StatefulWidget {
+  const DeviceDetailsScreen({
+    super.key,
+    required this.deviceTitle,
+    required this.imageAssetPath,
+    this.controlButtonCount = 3,
+    this.controlMode = DeviceDetailsControlMode.standard,
+  });
+
+  final String deviceTitle;
+  final String imageAssetPath;
+
+  /// Kept for route/navigation compatibility; tune buttons are no longer shown.
+  final int controlButtonCount;
+
+  /// Switches between standard hero + Off/On vs light-scene "Values", RGBW picker, or LED dimmer ring.
+  final DeviceDetailsControlMode controlMode;
+
+  static const String routeName = '/device-details';
+
+  /// Builds a location string for [GoRouter] with query parameters.
+  static String routeUri({
+    required String title,
+    required String imageAssetPath,
+    int controlButtonCount = 3,
+    DeviceDetailsControlMode controlMode = DeviceDetailsControlMode.standard,
+  }) {
+    final n = controlButtonCount.clamp(1, 8);
+    final Map<String, String> query = <String, String>{
+      'title': title,
+      'image': imageAssetPath,
+      'buttons': '$n',
+    };
+    if (controlMode == DeviceDetailsControlMode.lightSceneValues) {
+      query['mode'] = 'lightSceneValues';
+    } else if (controlMode == DeviceDetailsControlMode.rgbwPicker) {
+      query['mode'] = 'rgbw';
+    } else if (controlMode == DeviceDetailsControlMode.ledDimmer) {
+      query['mode'] = 'ledDimmer';
+    }
+    return Uri(path: routeName, queryParameters: query).toString();
+  }
+
+  /// Prefer this over raw [routeUri] + [context.push] so [controlMode] is always applied.
+  static void go(
+    BuildContext context, {
+    required String deviceTitle,
+    required String imageAssetPath,
+    int controlButtonCount = 3,
+    DeviceDetailsControlMode controlMode = DeviceDetailsControlMode.standard,
+  }) {
+    final int n = controlButtonCount.clamp(1, 8);
+    context.push(
+      routeUri(
+        title: deviceTitle,
+        imageAssetPath: imageAssetPath,
+        controlButtonCount: n,
+        controlMode: controlMode,
+      ),
+      extra: DeviceDetailsRouteArgs(
+        deviceTitle: deviceTitle,
+        imageAssetPath: imageAssetPath,
+        controlButtonCount: n,
+        controlMode: controlMode,
+      ),
+    );
+  }
+
+  @override
+  State<DeviceDetailsScreen> createState() => _DeviceDetailsScreenState();
+}
+
+enum _DeviceTab { tools, automation, overview, chart, activity }
+
+class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   bool _isOn = true;
   _DeviceTab _tab = _DeviceTab.tools;
   String _label = 'Lighting';
   String _manualMode = 'A';
+
+  /// Selected scene for [DeviceDetailsControlMode.lightSceneValues]: 0 All On, 1 Night, 2 All Off.
+  int _selectedSceneIndex = 0;
+
+  /// RGBW wheel: hue degrees [0,360), saturation [0,1], intensity [0,1] for brightness slider.
+  double _rgbwHue = 88;
+  double _rgbwSaturation = 0.52;
+  double _rgbwIntensity = 0.7;
+
+  /// LED dimmer ring: 0 = min, 1 = 100%.
+  double _ledDimmerPercent = 1.0;
+
+  static const List<String> _sceneLabels = <String>['All On', 'Night', 'All Off'];
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +147,14 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
       children: [
         const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
-        RepaintBoundary(child: _buildLightDinningRoomBody(context)),
+        RepaintBoundary(child: _buildBody(context)),
         const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
         const RepaintBoundary(child: SettingsScreen()),
       ],
     );
   }
 
-  Widget _buildLightDinningRoomBody(BuildContext context) {
+  Widget _buildBody(BuildContext context) {
     return SafeArea(
       top: true,
       bottom: false,
@@ -59,8 +170,16 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
                 children: [
                   _buildHero(),
                   SizedBox(height: 18.h),
-                  _buildOnOffRow(),
-                  SizedBox(height: 21.h),
+                  if (widget.controlMode ==
+                      DeviceDetailsControlMode.lightSceneValues) ...[
+                    _buildSceneValuesSection(),
+                  ] else if (widget.controlMode !=
+                      DeviceDetailsControlMode.rgbwPicker &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.ledDimmer) ...[
+                    _buildOnOffRow(),
+                  ],
+                  SizedBox(height: 16.h),
                   _buildInfoPill(),
                   SizedBox(height: 32.h),
                   _buildTabsRow(),
@@ -84,7 +203,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         child: Row(
           children: [
             GlobalCircleIconBtn(
-              color: Color(0xFFFFFFFFF),
+              color: const Color(0xFFFFFFFF),
               child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
               onTap: () {
                 if (Navigator.of(context).canPop()) {
@@ -98,7 +217,7 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
             const Spacer(),
             // Ellipsis button + blue plus
             GlobalCircleIconBtn(
-              color: Color(0xFFFFFFFFF),
+              color: const Color(0xFFFFFFFF),
               onTap: () {},
               child: Icon(Icons.more_horiz_rounded, color: Colors.black),
             ),
@@ -123,39 +242,63 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
   }
 
   Widget _buildHero() {
+    if (widget.controlMode == DeviceDetailsControlMode.rgbwPicker) {
+      return _buildRgbwHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.ledDimmer) {
+      return _buildLedDimmerHeroContent();
+    }
     return Column(
       children: [
         SizedBox(height: 4.h),
         Center(
           child: Image.asset(
-            "assets/Mask group (5).png",
+            widget.imageAssetPath,
             height: 88.h,
             width: 88.w,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/Mask group (5).png',
+              height: 88.h,
+              width: 88.w,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         SizedBox(height: 10.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Light dinning room',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
               ),
-            ),
-            SizedBox(width: 10.w),
-            Image.asset(
-              "assets/Group 63.png",
-              height: 13.h,
-              width: 13.w,
-              fit: BoxFit.cover,
-              color: const Color(0xFF111827),
-            ),
-          ],
+              SizedBox(width: 10.w),
+              Padding(
+                padding: EdgeInsets.only(top: 6.h),
+                child: Image.asset(
+                  "assets/Group 63.png",
+                  height: 13.h,
+                  width: 13.w,
+                  fit: BoxFit.cover,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
         ),
         SizedBox(height: 7.h),
         Text(
@@ -181,6 +324,410 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildLedDimmerHeroContent() {
+    final double ringSize = 228.w;
+    final double stroke = 12.r;
+
+    return Column(
+      children: [
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Padding(
+                padding: EdgeInsets.only(top: 6.h),
+                child: Image.asset(
+                  'assets/Group 63.png',
+                  height: 13.h,
+                  width: 13.w,
+                  fit: BoxFit.cover,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 7.h),
+        Text(
+          'SWC 1326 39',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Padding(
+          padding: EdgeInsets.only(left: 80.w, right: 90.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatBlock(top: '12:57', bottom: 'On time'),
+              _StatBlock(top: '5h 58m', bottom: '7 Days'),
+              _StatBlock(top: '1257', bottom: 'Cycles'),
+            ],
+          ),
+        ),
+        SizedBox(height: 22.h),
+        Text(
+          'LED Dimmer',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+          ),
+        ),
+        SizedBox(height: 18.h),
+        Center(
+          child: SizedBox(
+            width: ringSize,
+            height: ringSize,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size sz =
+                    Size(constraints.maxWidth, constraints.maxHeight);
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (d) =>
+                      _ledDimmerUpdateFromLocal(d.localPosition, sz),
+                  onPanUpdate: (d) =>
+                      _ledDimmerUpdateFromLocal(d.localPosition, sz),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      CustomPaint(
+                        size: sz,
+                        painter: _LedDimmerRingPainter(
+                          percent: _ledDimmerPercent.clamp(0.0, 1.0),
+                          strokeWidth: stroke,
+                        ),
+                      ),
+                      Text(
+                        '${(_ledDimmerPercent * 100).round()}%',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 34.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                      Builder(
+                        builder: (context) {
+                          final Offset c =
+                              Offset(sz.width / 2, sz.height / 2);
+                          final double radius =
+                              sz.shortestSide / 2 - stroke / 2 - 2;
+                          final double ang = -math.pi / 2 +
+                              2 * math.pi * _ledDimmerPercent.clamp(0.0, 1.0);
+                          final Offset thumb = c +
+                              Offset(math.cos(ang), math.sin(ang)) * radius;
+                          return Positioned(
+                            left: thumb.dx - 11.r,
+                            top: thumb.dy - 11.r,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: 22.r,
+                                height: 22.r,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF22C55E),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.22),
+                                      blurRadius: 5.r,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _ledDimmerUpdateFromLocal(Offset local, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final Offset d = local - c;
+    final double angle = math.atan2(d.dy, d.dx);
+    double p = (angle + math.pi / 2) / (2 * math.pi);
+    if (p < 0) {
+      p += 1;
+    }
+    if (p >= 1) {
+      p -= 1;
+    }
+    setState(() => _ledDimmerPercent = p.clamp(0.0, 1.0));
+  }
+
+  Widget _buildRgbwHeroContent() {
+    final Color preview = HSVColor.fromAHSV(
+      1.0,
+      _rgbwHue.clamp(0.0, 359.99),
+      _rgbwSaturation.clamp(0.0, 1.0),
+      _rgbwIntensity.clamp(0.0, 1.0),
+    ).toColor();
+    final String hex = preview.value
+        .toRadixString(16)
+        .padLeft(8, '0')
+        .substring(2)
+        .toUpperCase();
+
+    final double wheelSize = 260.w;
+
+    return Column(
+      children: [
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Padding(
+                padding: EdgeInsets.only(top: 6.h),
+                child: Image.asset(
+                  'assets/Group 63.png',
+                  height: 13.h,
+                  width: 13.w,
+                  fit: BoxFit.cover,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 7.h),
+        Text(
+          'SWC 1326 39',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Padding(
+          padding: EdgeInsets.only(left: 80.w, right: 90.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatBlock(top: '12:57', bottom: 'On time'),
+              _StatBlock(top: '5h 58m', bottom: '7 Days'),
+              _StatBlock(top: '1257', bottom: 'Cycles'),
+            ],
+          ),
+        ),
+        SizedBox(height: 22.h),
+        Text(
+          'RGBW',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111827),
+          ),
+        ),
+        SizedBox(height: 14.h),
+        Center(
+          child: SizedBox(
+            width: wheelSize,
+            height: wheelSize,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size layoutSize = Size(constraints.maxWidth, constraints.maxHeight);
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (d) =>
+                      _rgbwUpdateFromLocal(d.localPosition, layoutSize),
+                  onPanUpdate: (d) =>
+                      _rgbwUpdateFromLocal(d.localPosition, layoutSize),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      CustomPaint(
+                        size: layoutSize,
+                        painter: _RgbHueWheelPainter(),
+                      ),
+                      Builder(
+                        builder: (context) {
+                          final Offset c = Offset(layoutSize.width / 2, layoutSize.height / 2);
+                          final double maxR = layoutSize.shortestSide / 2 - 18.r;
+                          final double r = maxR * _rgbwSaturation.clamp(0.0, 1.0);
+                          final double rad = _rgbwHue * math.pi / 180;
+                          final Offset thumb = c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
+                          return Positioned(
+                            left: thumb.dx - 14.w,
+                            top: thumb.dy - 14.w,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: 28.w,
+                                height: 28.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.18),
+                                      blurRadius: 6.r,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        SizedBox(height: 10.h),
+        Text(
+          hex,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF9CA3AF),
+          ),
+        ),
+        SizedBox(height: 22.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 30.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text.rich(
+                TextSpan(
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14.sp,
+                    color: const Color(0xFF6B7280),
+                  ),
+                  children: [
+                    const TextSpan(text: 'Intensity: ',style: TextStyle(fontWeight:FontWeight.w400)),
+                    TextSpan(
+                      text: '${(_rgbwIntensity * 100).round()}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                children: [
+                  Icon(
+                    Icons.wb_sunny_outlined,
+                    size: 18.sp,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 7.h,
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 13.r),
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 18.r),
+                      ),
+                      child: Slider(
+                        value: _rgbwIntensity.clamp(0.0, 1.0),
+                        min: 0,
+                        max: 1,
+                        activeColor: const Color(0xFFE91EAC),
+                        inactiveColor: const Color(0xFFE5E7EB),
+                        onChanged: (v) =>
+                            setState(() => _rgbwIntensity = v.clamp(0.0, 1.0)),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.wb_sunny_rounded,
+                    size: 26.sp,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _rgbwUpdateFromLocal(Offset local, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final Offset d = local - c;
+    final double maxR = size.shortestSide / 2 - 18.r;
+    final double dist = d.distance.clamp(0.0, maxR);
+    double hueDeg = math.atan2(-d.dy, d.dx) * 180 / math.pi;
+    if (hueDeg < 0) {
+      hueDeg += 360;
+    }
+    setState(() {
+      _rgbwHue = hueDeg;
+      _rgbwSaturation = maxR <= 0 ? 0 : dist / maxR;
+    });
   }
 
   Widget _buildOnOffRow() {
@@ -272,6 +819,95 @@ class _LightDinningRoomScreenState extends State<LightDinningRoomScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildSceneValuesSection() {
+    final String headline = _sceneLabels[_selectedSceneIndex.clamp(0, 2)];
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            headline,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111827),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Values',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF6B7280),
+            ),
+          ),
+          SizedBox(height: 20.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(3, (int i) {
+              return _SceneValueOption(
+                label: _sceneLabels[i],
+                selected: _selectedSceneIndex == i,
+                child: _sceneValueIcon(i),
+                onTap: () => setState(() => _selectedSceneIndex = i),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sceneValueIcon(int sceneSlot) {
+    final String path = widget.imageAssetPath;
+    switch (sceneSlot) {
+      case 0:
+        return ClipOval(
+          child: Image.asset(
+            path,
+            width: 44.w,
+            height: 44.w,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.lightbulb_outline,
+              size: 28.sp,
+              color: const Color(0xFF0088FE),
+            ),
+          ),
+        );
+      case 1:
+        return Opacity(
+          opacity: 0.42,
+          child: ClipOval(
+            child: Image.asset(
+              path,
+              width: 44.w,
+              height: 44.w,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.lightbulb_outline,
+                size: 28.sp,
+                color: const Color(0xFF6B7280),
+              ),
+            ),
+          ),
+        );
+      case 2:
+      default:
+        return Icon(
+          Icons.cloud_rounded,
+          size: 28.sp,
+          color: const Color(0xFF6B7280),
+        );
+    }
   }
 
   Widget _buildInfoPill() {
@@ -1321,6 +1957,175 @@ Widget _deviceOverviewGridCell(
   );
 }
 
+
+class _SceneValueOption extends StatelessWidget {
+  const _SceneValueOption({
+    required this.label,
+    required this.selected,
+    required this.child,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 100.w,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64.w,
+              height: 64.w,
+              decoration: BoxDecoration(
+                color: selected ? const Color(0xFFE8EAEE) : Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected
+                      ? const Color(0xFFD1D5DB)
+                      : const Color(0xFFE5E7EB),
+                  width: 1,
+                ),
+                boxShadow: selected
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 8.r,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              alignment: Alignment.center,
+              child: child,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13.sp,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                color: const Color(0xFF111827),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
+class _LedDimmerRingPainter extends CustomPainter {
+  _LedDimmerRingPainter({
+    required this.percent,
+    required this.strokeWidth,
+  });
+
+  final double percent;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+
+    final Paint trackPaint = Paint()
+      ..color = const Color(0xFFE5E7EB)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(arcRect, -math.pi / 2, 2 * math.pi, false, trackPaint);
+
+    final double clamped = percent.clamp(0.0, 1.0);
+    if (clamped <= 0.001) {
+      return;
+    }
+
+    final SweepGradient gradient = SweepGradient(
+      colors: const <Color>[
+        Color(0xFF22D3EE),
+        Color(0xFF34D399),
+        Color(0xFF22C55E),
+      ],
+      stops: const <double>[0.0, 0.55, 1.0],
+      transform: GradientRotation(-math.pi / 2),
+      tileMode: TileMode.clamp,
+    );
+
+    final Paint fgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..shader = gradient.createShader(
+        Rect.fromCircle(center: center, radius: midRadius),
+      );
+
+    canvas.drawArc(
+      arcRect,
+      -math.pi / 2,
+      2 * math.pi * clamped,
+      false,
+      fgPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _LedDimmerRingPainter oldDelegate) {
+    return oldDelegate.percent != percent ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+/// Hue spectrum disk + radial fade toward white (RGBW picker).
+class _RgbHueWheelPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    final double radius = size.shortestSide / 2;
+    final Rect bounds = Rect.fromCircle(center: center, radius: radius);
+
+    final Paint sweep = Paint()
+      ..shader = const SweepGradient(
+        colors: <Color>[
+          Color(0xFFFF0000),
+          Color(0xFFFF00FF),
+          Color(0xFF0000FF),
+          Color(0xFF00FFFF),
+          Color(0xFF00FF00),
+          Color(0xFFFFFF00),
+          Color(0xFFFF0000),
+        ],
+        stops: <double>[0, 0.1666, 0.3333, 0.5, 0.6666, 0.8333, 1],
+      ).createShader(bounds);
+    canvas.drawCircle(center, radius, sweep);
+
+    final Paint soften = Paint()
+      ..shader = RadialGradient(
+        colors: <Color>[
+          Colors.white,
+          Colors.white.withOpacity(0.0),
+        ],
+        stops: const <double>[0.05, 1],
+      ).createShader(bounds)
+      ..blendMode = BlendMode.softLight;
+    canvas.drawCircle(center, radius * 0.98, soften);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
 class _StatBlock extends StatelessWidget {
   const _StatBlock({required this.top, required this.bottom});
