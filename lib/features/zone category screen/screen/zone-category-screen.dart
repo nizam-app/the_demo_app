@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
-import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
+import 'package:workpleis/features/device_details/screen/device_details_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
 import '../../home/widget/Add_section.dart';
@@ -193,8 +193,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                       onPercentChanged: (v) => setState(
                                         () => _bedroomDimmer = v.clamp(0, 72),
                                       ),
-                                      onNavigate: () => context.push(
-                                        LightDinningRoomScreen.routeName,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Bedroom spot light\nsmall patio blue light',
+                                        imageAssetPath:
+                                            'assets/Mask group (5).png',
+                                        controlButtonCount: 2,
                                       ),
                                     ),
                                   ),
@@ -887,9 +892,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 deviceName: 'Light Scene child room',
                 status: 'All On',
                 iconImage:
-                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Light Scene child room',
+                  imageAssetPath:
+                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -898,9 +909,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 deviceName: 'RGBW light patio entry',
                 status: '100%',
                 iconImage:
-                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'RGBW light patio entry',
+                  imageAssetPath:
+                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -915,10 +932,16 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                           deviceName: 'LED Dimmer living room',
                           status: '100%',
                           iconImage:
-                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
-                          onTap: () =>
-                              context.push(LightDinningRoomScreen.routeName),
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'LED Dimmer living room',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                          ),
                         ),
                       ),
                     ],
@@ -949,9 +972,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 deviceName: 'Light Scene child room',
                 status: 'All On',
                 iconImage:
-                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Light Scene child room',
+                  imageAssetPath:
+                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -960,9 +989,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 deviceName: 'RGBW light\npatio entry',
                 status: '100%',
                 iconImage:
-                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'RGBW light\npatio entry',
+                  imageAssetPath:
+                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -977,10 +1012,16 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                           deviceName: 'LED Dimmer living room',
                           status: '100%',
                           iconImage:
-                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
-                          onTap: () =>
-                              context.push(LightDinningRoomScreen.routeName),
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'LED Dimmer living room',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                          ),
                         ),
                       ),
                     ],

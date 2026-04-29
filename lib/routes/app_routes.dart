@@ -14,7 +14,7 @@ import 'package:workpleis/features/automations/screen/automations_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
 import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
-import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
+import 'package:workpleis/features/device_details/screen/device_details_screen.dart';
 import 'package:workpleis/features/menu/screen/menu_screen.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
 import 'package:workpleis/features/profile/screen/profile_screen.dart';
@@ -188,11 +188,41 @@ class AppRouter {
       ),
 
       GoRoute(
-        path: LightDinningRoomScreen.routeName,
-        name: LightDinningRoomScreen.routeName,
-        builder: (context, state) => const LightDinningRoomScreen(),
-      ), 
-
+        path: DeviceDetailsScreen.routeName,
+        name: DeviceDetailsScreen.routeName,
+        builder: (context, state) {
+          final Object? extra = state.extra;
+          if (extra is DeviceDetailsRouteArgs) {
+            return DeviceDetailsScreen(
+              deviceTitle: extra.deviceTitle,
+              imageAssetPath: extra.imageAssetPath,
+              controlButtonCount: extra.controlButtonCount.clamp(1, 8),
+              controlMode: extra.controlMode,
+            );
+          }
+          final Map<String, String> q = state.uri.queryParameters;
+          final String title = q['title'] ?? 'Light dinning room';
+          final String image = q['image'] ?? 'assets/Mask group (5).png';
+          final int buttons =
+              int.tryParse(q['buttons'] ?? '') ?? 3;
+          final String mode = q['mode'] ?? '';
+          DeviceDetailsControlMode controlMode =
+              DeviceDetailsControlMode.standard;
+          if (mode == 'lightSceneValues') {
+            controlMode = DeviceDetailsControlMode.lightSceneValues;
+          } else if (mode == 'rgbw') {
+            controlMode = DeviceDetailsControlMode.rgbwPicker;
+          } else if (mode == 'ledDimmer') {
+            controlMode = DeviceDetailsControlMode.ledDimmer;
+          }
+          return DeviceDetailsScreen(
+            deviceTitle: title,
+            imageAssetPath: image,
+            controlButtonCount: buttons.clamp(1, 8),
+            controlMode: controlMode,
+          );
+        },
+      ),
       GoRoute(
         path: TcpIpIntegrationScreen.routeName,
         name: TcpIpIntegrationScreen.routeName,

@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
-import 'package:workpleis/features/light_dinning_room/screen/light_dinning_room_screen.dart';
+import 'package:workpleis/features/device_details/screen/device_details_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
 import '../../menu/screen/menu_screen.dart';
@@ -152,7 +152,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 imagePath: 'assets/Mask group (3).png',
                                 onTap: () {
                                   setState(() => _homeCategoryIndex = 0);
-                                  context.push(LightDinningRoomScreen.routeName);
+                                  DeviceDetailsScreen.go(
+                                    context,
+                                    deviceTitle: 'Light dinning room',
+                                    imageAssetPath: 'assets/Mask group (5).png',
+                                    controlButtonCount: 3,
+                                  );
                                 },
                               ),
                               SizedBox(width: 12.w),
@@ -211,8 +216,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onPercentChanged: (v) => setState(
                                         () => _bedroomDimmer = v.clamp(0, 72),
                                       ),
-                                      onNavigate: () => context.push(
-                                        LightDinningRoomScreen.routeName,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Bedroom spot light\nsmall patio blue light',
+                                        imageAssetPath:
+                                            'assets/Mask group (5).png',
+                                        controlButtonCount: 2,
                                       ),
                                     ),
                                   ),
@@ -230,6 +240,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       imagePath: 'assets/Mask group (6).png',
                                       minusMarked: _bathroomThermoMark == 1,
                                       plusMarked: _bathroomThermoMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Bathroom heating and boiler thermostat',
+                                        imageAssetPath:
+                                            'assets/Mask group (6).png',
+                                        controlButtonCount: 3,
+                                      ),
                                       onModeTap: () => setState(
                                         () => _bathroomManual = !_bathroomManual,
                                       ),
@@ -270,6 +288,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       imagePath: 'assets/Rectangle 823.png',
                                       downMarked: _blindNorthMark == 1,
                                       upMarked: _blindNorthMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Blind Living Room\nnorth window',
+                                        imageAssetPath:
+                                            'assets/Rectangle 823.png',
+                                        controlButtonCount: 2,
+                                      ),
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
                                       ),
@@ -294,11 +320,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Expanded(
                                   child: SizedBox(
                                     height: 185.h,
-                                    child: const _ToggleCard(
+                                    child: _ToggleCard(
                                       title:
                                           'Irrigation entry and front home two valve',
                                       isOn: true,
                                       imagePath: 'assets/Mask group (7).png',
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Irrigation entry and front home two valve',
+                                        imageAssetPath:
+                                            'assets/Mask group (7).png',
+                                        controlButtonCount: 1,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -823,8 +857,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Light Scene child room',
+                  imageAssetPath:
+                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -834,8 +874,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'RGBW light patio entry',
+                  imageAssetPath:
+                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -852,8 +898,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconImage:
                               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
-                          onTap: () =>
-                              context.push(LightDinningRoomScreen.routeName),
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'LED Dimmer living room',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                          ),
                         ),
                       ),
                     ],
@@ -885,8 +937,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Light Scene child room',
+                  imageAssetPath:
+                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -896,8 +954,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                onTap: () =>
-                    context.push(LightDinningRoomScreen.routeName),
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'RGBW light\npatio entry',
+                  imageAssetPath:
+                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                ),
               ),
             ),
             SizedBox(width: 12.w),
@@ -914,8 +978,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           iconImage:
                               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
-                          onTap: () =>
-                              context.push(LightDinningRoomScreen.routeName),
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'LED Dimmer living room',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                          ),
                         ),
                       ),
                     ],
@@ -1665,6 +1735,7 @@ class _ThermostatCard extends StatelessWidget {
     this.plusMarked = false,
     this.imagePath,
     this.onModeTap,
+    this.onNavigate,
   });
 
   final String title;
@@ -1675,84 +1746,89 @@ class _ThermostatCard extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback? onModeTap;
+  final VoidCallback? onNavigate;
   final bool minusMarked;
   final bool plusMarked;
 
 
   @override
   Widget build(BuildContext context) {
+    final Widget headerColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        imagePath != null
+            ? Image.asset(
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.thermostat_outlined,
+                size: 44.sp,
+                color: const Color(0xFF0088FE),
+              ),
+        SizedBox(height: 10.h),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111827),
+                    height: 1.15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (title.contains('\n')) ...[
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    title.split('\n').length > 1 ? title.split('\n')[1] : '',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: const Color(0xFF111827),
+                      height: 1.15,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              imagePath != null
-                  ? Image.asset(
-                      imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.thermostat_outlined,
-                      size: 44.sp,
-                      color: const Color(0xFF0088FE),
-                    ),
-              SizedBox(height: 10.h),
               Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title.split('\n').isNotEmpty
-                            ? title.split('\n')[0]
-                            : title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF111827),
-                          height: 1.15,
+                child: onNavigate != null
+                    ? Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onNavigate,
+                          borderRadius: BorderRadius.circular(18.r),
+                          child: headerColumn,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (title.contains('\n')) ...[
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          title.split('\n').length > 1
-                              ? title.split('\n')[1]
-                              : '',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: const Color(0xFF111827),
-                            height: 1.15,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                      )
+                    : headerColumn,
               ),
               SizedBox(height: 10.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // _CircleBtn(
-                  //   size: 35,
-                  //   onTap: onMinus,
-                  //   child: Icon(
-                  //     Icons.remove,
-                  //     size: 23.sp,
-                  //     color: const Color(0xFF6B7280),
-                  //   ),
-                  // ),
-
                   _CircleBtn(
                     size: 35,
                     marked: minusMarked,
@@ -1813,6 +1889,7 @@ class _BlindCard extends StatelessWidget {
     this.upMarked = false,
     this.imagePath,
     this.onModeTap,
+    this.onNavigate,
   });
 
   final String title;
@@ -1824,11 +1901,24 @@ class _BlindCard extends StatelessWidget {
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onModeTap;
+  final VoidCallback? onNavigate;
   final bool downMarked;
   final bool upMarked;
 
   @override
   Widget build(BuildContext context) {
+    Widget titleInkWell(Widget child) {
+      if (onNavigate == null) return child;
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onNavigate,
+          borderRadius: BorderRadius.circular(18.r),
+          child: child,
+        ),
+      );
+    }
+
     return Stack(
       children: [
         _CardShell(
@@ -1836,24 +1926,33 @@ class _BlindCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (imagePath != null)
-                Image.asset(
-                  imagePath!,
-                  width: 65.w,
-                  height: 65.w,
-                  fit: BoxFit.contain,
+                titleInkWell(
+                  Image.asset(
+                    imagePath!,
+                    width: 65.w,
+                    height: 65.w,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               SizedBox(height: 10.h),
               Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF111827),
-                    height: 1.18,
+                child: titleInkWell(
+                  SizedBox.expand(
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF111827),
+                          height: 1.18,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -1959,11 +2058,13 @@ class _ToggleCard extends StatefulWidget {
     required this.title,
     required this.isOn,
     this.imagePath,
+    this.onNavigate,
   });
 
   final String title;
   final bool isOn;
   final String? imagePath;
+  final VoidCallback? onNavigate;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -1990,39 +2091,56 @@ class _ToggleCardState extends State<_ToggleCard> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget headerColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        widget.imagePath != null
+            ? Image.asset(
+                widget.imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.water_drop_outlined,
+                size: 42.sp,
+                color: const Color(0xFF00C2FF),
+              ),
+        SizedBox(height: 17.h),
+        Expanded(
+          child: Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111827),
+              height: 1.15,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              widget.imagePath != null
-                  ? Image.asset(
-                      widget.imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.water_drop_outlined,
-                      size: 42.sp,
-                      color: const Color(0xFF00C2FF),
-                    ),
-              SizedBox(height: 17.h),
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-                    height: 1.15,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: widget.onNavigate != null
+                    ? Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onNavigate,
+                          borderRadius: BorderRadius.circular(18.r),
+                          child: headerColumn,
+                        ),
+                      )
+                    : headerColumn,
               ),
-              // SizedBox(height: 4.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
