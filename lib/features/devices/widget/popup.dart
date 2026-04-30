@@ -97,7 +97,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
         child: Container(
           decoration: BoxDecoration(
             // Keep the sheet clearly transparent like the dashboard header/footer.
-            color: Colors.white.withOpacity(0.18),
+           // color: Colors.white.withOpacity(0.18),
+            color: Color(0xFFE5E7EB).withOpacity(0.18),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),

@@ -298,7 +298,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.18),
+                        // color: Colors.white.withOpacity(0.18),
+                        color: Color(0xFFE5E7EB).withOpacity(0.18),
                         border: Border(
                           bottom: BorderSide(
                             color: const Color(0xFFE5E7EB).withOpacity(0.18),
