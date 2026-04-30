@@ -62,7 +62,8 @@ class CategoryMenuSheet extends StatelessWidget {
                     width: 30.w,
                     height: 30.h,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.28),
+                      // color: Colors.white.withOpacity(0.28),
+                      color: Color(0xFFE5E7EB).withOpacity(0.18),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
