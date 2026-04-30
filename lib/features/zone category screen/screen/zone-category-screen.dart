@@ -17,7 +17,6 @@ import '../../home/widget/editAddSectionSheet.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
-import '../../profile/screen/profile_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 
 
@@ -1673,12 +1672,16 @@ class _LightDimmerCard extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  Text(
-                    '${(percent * 100).round()}%',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                  SizedBox(
+                    width: 52.w,
+                    child: Text(
+                      '${(percent * 100).round()}%',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                      textAlign: TextAlign.left,
                     ),
                   ),
                   SizedBox(width: 10.w),
@@ -1722,7 +1725,7 @@ class _DimmerPill extends StatelessWidget {
       width: w,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(26),
       ),
       child: Stack(
         children: [
@@ -1734,8 +1737,8 @@ class _DimmerPill extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFE1E1E1),
                   borderRadius: BorderRadius.horizontal(
-                    right: const Radius.circular(999),
-                    left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
+                    right: const Radius.circular(26),
+                    left: Radius.circular((1 - p) >= 0.98 ? 26 : 0),
                   ),
                 ),
               ),
@@ -1749,7 +1752,7 @@ class _DimmerPill extends StatelessWidget {
                 Icons.wb_sunny_outlined,
                 size: 20.sp,
                 color: (p <= 0.0)
-                    ? const Color(0xFF6B7280) // full gray
+                    ? const Color(0xFF6B7280) // full gray (0% white)
                     : const Color(0xFFFAB300), // any white (>= 1%)
               ),
             ),

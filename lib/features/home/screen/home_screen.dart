@@ -500,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   deviceName,
                   style: TextStyle(
                     fontSize: 16.sp, // ✅ bigger like image
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     height: 1.08,
                   ),
@@ -1593,7 +1593,7 @@ class _LightDimmerCard extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w400,
             color: const Color(0xFF111827),
             height: 1.18,
           ),
@@ -1623,12 +1623,16 @@ class _LightDimmerCard extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  Text(
-                    '${(percent * 100).round()}%',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
+                  SizedBox(
+                    width: 52.w,
+                    child: Text(
+                      '${(percent * 100).round()}%',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF111827),
+                      ),
+                      textAlign: TextAlign.left,
                     ),
                   ),
                   SizedBox(width: 10.w),
@@ -1778,7 +1782,7 @@ class _ThermostatCard extends StatelessWidget {
                   title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     height: 1.15,
                   ),
@@ -2112,7 +2116,7 @@ class _ToggleCardState extends State<_ToggleCard> {
             widget.title,
             style: TextStyle(
               fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
               height: 1.15,
             ),
