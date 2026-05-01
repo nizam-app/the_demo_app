@@ -1,15 +1,23 @@
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
+import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../widget/assign_category_zone.dart';
 
 class DevicesScreen extends StatefulWidget {
-  const DevicesScreen({super.key});
+  const DevicesScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/devices';
+  final bool showBottomNav;
 
   @override
   State<DevicesScreen> createState() => _DevicesScreenState();
@@ -21,13 +29,49 @@ class _DevicesScreenState extends State<DevicesScreen> {
       'Blind Living Room'; // Track selected device, initially "Blind Living Room"
   String _selectedFilter = 'All'; // Track selected filter chip
 
+  // Local demo state for list controls (no backend).
+  bool _rgbwOn = true;
+  int _rgbwLevel = 50;
+  bool _rgbwManual = false;
+  bool _alarmDisarmed = true;
+  double _bathroomTemp = 24.6;
+  bool _bathroomManual = true;
+  int _blindPctDown = 0;
+  int _blindPctUp = 50;
+  /// 0 = neither +/- (or blind arrow) marked; 1 = first control; 2 = second.
+  int _rgbwStepMark = 0;
+  int _bathroomThermoMark = 0;
+  int _blindStepMark = 0;
+  bool _irrigationPlaying = false;
+  int _brightnessPct = 54;
+  bool _cardReaderOn = false;
+
+  void _flashMark({
+    required int value,
+    required int Function() getCurrent,
+    required void Function(int v) set,
+    VoidCallback? action,
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    setState(() {
+      set(value);
+      action?.call();
+    });
+    Future.delayed(duration, () {
+      if (!mounted) return;
+      if (getCurrent() == value) {
+        setState(() => set(0));
+      }
+    });
+  }
+
   void _onNavItemTapped(int index) {
     final routes = [
       '/devices',
       '/analytics',
       '/home', // Voice points to home
       '/notifications',
-      '/automations',
+      '/settings',
     ];
     if (index < routes.length) {
       context.go(routes[index]);
@@ -63,421 +107,709 @@ class _DevicesScreenState extends State<DevicesScreen> {
   @override
   Widget build(BuildContext context) {
     const bg = Colors.white;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final headerRowHeight = 36.w;
+    final headerExtent = topInset + 8.h + headerRowHeight + 8.h;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    // Shell uses CustomBottomNavBar with extendBody — content draws under the 72px
+    // track; keep the same bottom inset when this screen shows BottomNavBarWidget.
+    final scrollBottomPad = 18.h + 72.h + bottomInset;
 
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 18.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: bg,
+        // Match HomeScreen: bottom false so scroll content can sit under the shell
+        // (or standalone) translucent bar; BackdropFilter then blurs real pixels.
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              // -------- Header (top bar) ----------
-              Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
-                child: SizedBox(
-                  height: 36.w,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GlobalCircleIconBtn(
-                          color: Color(0xFFF3F4F6),
-                          child: Image.asset(
-                            'assets/aro.png',
-                            width: 16.w,
-                            height: 16.h,
-                          ),
-                          onTap: () {
-                            if (Navigator.of(context).canPop()) {
-                              Navigator.of(context).pop();
-                            } else {
-                              context.go('/home');
-                            }
-                          },
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          'Devices',
-                          style: TextStyle(
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _CircleIconButton(
-                              icon: Icons.more_horiz_rounded,
-                              onTap: () => _showEditDeviceBottomSheet(context),
-                              size: 32,
-                              bg: const Color(0xFFF3F4F6),
-                              iconColor: const Color(0xFF111827),
-                              iconSize: 22,
-                            ),
-                            SizedBox(width: 10.w),
-                            _CircleIconButton(
-                              icon: Icons.add_rounded,
-                              onTap: () => _showAssignCategoryPopup(context),
-                              size: 32,
-                              bg: const Color(0xFF111827),
-                              //bg: const Color(0xFF0088FE),
-                              iconColor: Colors.white,
-                              iconSize: 23,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: headerExtent,
+                  bottom: scrollBottomPad,
                 ),
-              ),
-
-              // -------- Search ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-                child: _SearchBar(),
-              ),
-
-              SizedBox(height: 10.h),
-
-              // -------- Filter chips ----------
-              SizedBox(
-                height: 40.h,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FilterChipPill(
-                      label: 'All',
-                      selected: _selectedFilter == 'All',
-                      onTap: () => setState(() => _selectedFilter = 'All'),
+                    // -------- Header (top bar) ----------
+                    // Padding(
+                    //   padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 10.h),
+                    //   child: SizedBox(
+                    //     height: 36.w,
+                    //     child: Stack(
+                    //       alignment: Alignment.center,
+                    //       children: [
+                    //         Align(
+                    //           alignment: Alignment.centerLeft,
+                    //           child: GlobalCircleIconBtn(
+                    //             color: Color(0xFFF3F4F6),
+                    //             child: Image.asset(
+                    //               'assets/aro.png',
+                    //               width: 16.w,
+                    //               height: 16.h,
+                    //             ),
+                    //             onTap: () {
+                    //               if (!widget.showBottomNav) {
+                    //                 final shell = CustomBottomNavBar.of(context);
+                    //                 if (shell != null) {
+                    //                   shell.setSelectedIndex(2);
+                    //                   return;
+                    //                 }
+                    //               }
+                    //               if (context.canPop()) {
+                    //                 context.pop();
+                    //               } else {
+                    //                 context.go('/home');
+                    //               }
+                    //             },
+                    //           ),
+                    //         ),
+                    //         Center(
+                    //           child: Text(
+                    //             'Devices',
+                    //             style: TextStyle(
+                    //               fontSize: 22.sp,
+                    //               fontWeight: FontWeight.w600,
+                    //               color: const Color(0xFF111827),
+                    //               fontFamily: 'Inter',
+                    //             ),
+                    //           ),
+                    //         ),
+                    //         Align(
+                    //           alignment: Alignment.centerRight,
+                    //           child: Row(
+                    //             mainAxisSize: MainAxisSize.min,
+                    //             children: [
+                    //               _CircleIconButton(
+                    //                 icon: Icons.more_horiz_rounded,
+                    //                 onTap: () => _showEditDeviceBottomSheet(context),
+                    //                 size: 32,
+                    //                 bg: const Color(0xFFF3F4F6),
+                    //                 iconColor: const Color(0xFF111827),
+                    //                 iconSize: 22,
+                    //               ),
+                    //               SizedBox(width: 10.w),
+                    //               _CircleIconButton(
+                    //                 icon: Icons.add_rounded,
+                    //                 onTap: () => _showAssignCategoryPopup(context),
+                    //                 size: 32,
+                    //                 bg: const Color(0xFF111827),
+                    //                 //bg: const Color(0xFF0088FE),
+                    //                 iconColor: Colors.white,
+                    //                 iconSize: 23,
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
+                    // -------- Search ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                      child: _SearchBar(),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Favorites',
-                      selected: _selectedFilter == 'Favorites',
-                      onTap: () =>
-                          setState(() => _selectedFilter = 'Favorites'),
+
+                    SizedBox(height: 10.h),
+
+                    // -------- Filter chips ----------
+                    SizedBox(
+                      height: 40.h,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        children: [
+                          _FilterChipPill(
+                            label: 'All',
+                            selected: _selectedFilter == 'All',
+                            onTap: () => setState(() => _selectedFilter = 'All'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Favorites',
+                            selected: _selectedFilter == 'Favorites',
+                            onTap: () =>
+                                setState(() => _selectedFilter = 'Favorites'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Smart',
+                            selected: _selectedFilter == 'Smart',
+                            onTap: () => setState(() => _selectedFilter = 'Smart'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Groups',
+                            selected: _selectedFilter == 'Groups',
+                            onTap: () => setState(() => _selectedFilter = 'Groups'),
+                          ),
+                          SizedBox(width: 10),
+                          _FilterChipPill(
+                            label: 'Category',
+                            selected: _selectedFilter == 'Category',
+                            onTap: () => setState(() => _selectedFilter = 'Category'),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Smart',
-                      selected: _selectedFilter == 'Smart',
-                      onTap: () => setState(() => _selectedFilter = 'Smart'),
+
+                    SizedBox(height: 12.h),
+
+                    // -------- Section Title ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Text(
+                        'Devices',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Groups',
-                      selected: _selectedFilter == 'Groups',
-                      onTap: () => setState(() => _selectedFilter = 'Groups'),
+
+                    SizedBox(height: 8.h),
+
+                    // -------- List (rows) ----------
+                    _DeviceListCard(
+                      children: [
+                        // RGBW
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(top: 7.h, right: 10.w),
+                          topRight: const _TimeTag(text: '18:32', blueIcon: true),
+                          leading: const _GradientCircleIcon(size: 34),
+                          title: 'RGBW',
+                          selected: _selectedDeviceTitle == 'RGBW',
+                          onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  _ModeDot(
+                                    manual: _rgbwManual,
+                                    onTap: () => setState(
+                                      () => _rgbwManual = !_rgbwManual,
+                                    ),
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  _SmallText(_rgbwOn ? 'On' : 'Off'),
+                                ],
+                              ),
+                              SizedBox(height: 2.h),
+                              const _TinyGreyText('LCD0C12'),
+                              SizedBox(height: 4.h),
+                              _TinyGreyText('Level $_rgbwLevel%'),
+                              SizedBox(height: 6.h),
+                              // Wrap(
+                              //   spacing: 6.w,
+                              //   runSpacing: 6.h,
+                              //   children: const [
+                              //     _TagChip(
+                              //       text: 'Lighting',
+                              //       bg: Color(0xFF0088fe),
+                              //       outlined: true,
+                              //     ),
+                              //     _TagChip(
+                              //       text: 'Bathroom',
+                              //       bg: Color(0xFFFE019A),
+                              //       outlined: false,
+                              //     ),
+                              //   ],
+                              // ),
+
+                              Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6.r),
+                                      border: Border.all(color: Color(0xFF0088FE)),
+                                    ),
+                                    child: _TagChip(
+                                      label: 'Lighting',
+                                      bg: Color(0xFFFFFFFF),
+                                      fg: Color(0xFF111827),
+                                      onTap: () => _showAssignCategoryPopup(context),
+                                    ),
+                                  ),
+                                  SizedBox(width: 5.w),
+                                  _TagChip(
+                                    label: 'Bathroom',
+                                    bg: Color(0xFFFF2D92),
+                                    fg: Colors.white,
+                                    onTap: () => _showAssignCategoryPopup(context),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _CircleMiniBtn(
+                                icon: Icons.remove,
+                                marked: _rgbwStepMark == 1,
+                                onTap: () => _flashMark(
+                                  value: 1,
+                                  getCurrent: () => _rgbwStepMark,
+                                  set: (v) => _rgbwStepMark = v,
+                                  action: () =>
+                                      _rgbwLevel = (_rgbwLevel - 5).clamp(0, 100),
+                                ),
+                              ),
+                              SizedBox(width: 20.w),
+                              _CircleMiniBtn(
+                                icon: Icons.add,
+                                marked: _rgbwStepMark == 2,
+                                onTap: () => _flashMark(
+                                  value: 2,
+                                  getCurrent: () => _rgbwStepMark,
+                                  set: (v) => _rgbwStepMark = v,
+                                  action: () =>
+                                      _rgbwLevel = (_rgbwLevel + 5).clamp(0, 100),
+                                ),
+                              ),
+                              SizedBox(width: 16.w),
+                              _ToggleColorswitch(
+                                value: _rgbwOn,
+                                onChanged: (v) => setState(() => _rgbwOn = v),
+                              ),
+                              SizedBox(width: 8.w),
+                            ],
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Alarm
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(top: 7.h, right: 0.w),
+                          topRight: const _PinOnly(),
+                          leading: const _LockIcon(),
+                          title: 'Alarm',
+                          selected: _selectedDeviceTitle == 'Alarm',
+                          onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
+                          subtitle: _SmallText(
+                            _alarmDisarmed ? 'Disarmed' : 'Armed',
+                          ),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(right: 20.w),
+                            child: _CircleActionBlue(
+                              imagePath: _alarmDisarmed ?'assets/Mask group (15).png':'assets/images/Group 48 (1).png',
+                              // Must track armed state, not inverted: when disarmed, `active`
+                              // must be false so the asset is tint-only (avoids wrong full-color glyph).
+                              active: _alarmDisarmed,
+                              onTap: () => setState(
+                                () => _alarmDisarmed = !_alarmDisarmed,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Bathroom
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 20.w,
+                            bottom: 7.h,
+                          ),
+                          leading: const _PowerRingIcon(),
+                          title: 'Bathroom',
+                          selected: _selectedDeviceTitle == 'Bathroom',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Bathroom'),
+                          subtitle: Row(
+                            children: [
+                              _ModeDot(
+                                manual: _bathroomManual,
+                                onTap: () => setState(
+                                  () => _bathroomManual = !_bathroomManual,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Image.asset(
+                                'assets/low-temperature 1.png',
+                                width: 9.w,
+                                height: 19.h,
+                                fit: BoxFit.contain,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${_bathroomTemp.toStringAsFixed(1)}°C',
+                                style: const TextStyle(
+                                  fontSize: 16, // screenshot vibe
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF111827),
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _CircleMiniBtn(
+                                icon: Icons.remove,
+                                marked: _bathroomThermoMark == 1,
+                                onTap: () => _flashMark(
+                                  value: 1,
+                                  getCurrent: () => _bathroomThermoMark,
+                                  set: (v) => _bathroomThermoMark = v,
+                                  action: () => _bathroomTemp =
+                                      (_bathroomTemp - 0.5).clamp(10.0, 35.0),
+                                ),
+                              ),
+                              SizedBox(width: 20.w),
+                              _CircleMiniBtn(
+                                icon: Icons.add,
+                                marked: _bathroomThermoMark == 2,
+                                onTap: () => _flashMark(
+                                  value: 2,
+                                  getCurrent: () => _bathroomThermoMark,
+                                  set: (v) => _bathroomThermoMark = v,
+                                  action: () => _bathroomTemp =
+                                      (_bathroomTemp + 0.5).clamp(10.0, 35.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Blind Living Room (selected highlight row)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 8.w,
+                            bottom: 7.h,
+                          ),
+                          selected: _selectedDeviceTitle == 'Blind Living Room',
+                          topRight: const _StarTimeTag(time: '20:36'),
+                          leading: const _BlindGreenIcon(),
+                          title: 'Blind Living Room',
+                          onTap: () => setState(
+                            () => _selectedDeviceTitle = 'Blind Living Room',
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 2),
+                              _BlindStatsRow(
+                                closedPct: _blindPctDown,
+                                openPct: _blindPctUp,
+                              ),
+                              const _TinyGreyText('D012U12'),
+                            ],
+                          ),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(right: 4.w, top: 15.h),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _CircleMiniBtn(
+                                  icon: Icons.keyboard_arrow_down,
+                                  marked: _blindStepMark == 2,
+                                  onTap: () => _flashMark(
+                                    value: 2,
+                                    getCurrent: () => _blindStepMark,
+                                    set: (v) => _blindStepMark = v,
+                                    action: () => _blindPctDown =
+                                        (_blindPctDown + 5).clamp(0, 100),
+                                  ),
+                                ),
+                                SizedBox(width: 20.w),
+                                _CircleMiniBtn(
+
+                                  icon:Icons.keyboard_arrow_up,
+                                  //image: 'assets/Mask group (17).png',
+                                  // Image.asset(
+                                  //   'assets/Mask group (17).png',
+                                  //   width: 13.w,
+                                  //   height: 13.h,
+                                  //   color: Color(0xFF6B7280),
+                                  // ),
+                                  marked: _blindStepMark == 2,
+                                  onTap: () => _flashMark(
+                                    value: 2,
+                                    getCurrent: () => _blindStepMark,
+                                    set: (v) => _blindStepMark = v,
+                                    action: () =>
+                                        _blindPctUp = (_blindPctUp + 5).clamp(0, 100),
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Block Irrigation Schedule (blue play row)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 7.h,
+                            right: 20.w,
+                            bottom: 5.h,
+                          ),
+                          leading: const _PlayCircleIcon(),
+                          title: 'Block Irrigation Schedule',
+                          selected:
+                              _selectedDeviceTitle == 'Block Irrigation Schedule',
+                          onTap: () => setState(
+                            () => _selectedDeviceTitle = 'Block Irrigation Schedule',
+                          ),
+                          subtitle: _SmallText(
+                            _irrigationPlaying ? 'Blocked' : 'Running',
+                          ),
+                          trailing: _CircleActionBlue(
+                            imagePath: 'assets/play.png',
+                            isPlay: true,
+                            active: _irrigationPlaying,
+                            onTap: () => setState(
+                              () => _irrigationPlaying = !_irrigationPlaying,
+                            ),
+                          ),
+                        ),
+
+                        const _RowDivider(),
+
+                        // Brightness (with pill slider)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 2.h,
+                            right: 8.w,
+                            bottom: 5.h,
+                          ),
+                          brightness: true,
+                          topRight: const _StarOnly(),
+                          leading: const _SunIcon(),
+                          title: 'Brightness',
+                          selected: _selectedDeviceTitle == 'Brightness',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Brightness'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _BoldSmall('$_brightnessPct%'),
+                              const SizedBox(height: 2),
+                              const _TinyGreyText('W5BT'),
+                            ],
+                          ),
+                          trailing: Padding(
+                            padding: EdgeInsets.only(top: 15.h, right: 15.w),
+                            child: _BrightnessPill(
+                              value: _brightnessPct / 100.0,
+                              onChanged: (v) => setState(
+                                () => _brightnessPct =
+                                    (v * 100).round().clamp(0, 54),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const _RowDivider(),
+
+                        // Card Reader(s)
+                        _DeviceRow(
+                          outerPadding: EdgeInsets.only(
+                            top: 10.h,
+                            right: 22.w,
+                            bottom: 5.h,
+                          ),
+                          leading: const _BulbIcon(),
+                          title: 'Card Reader(s)',
+                          selected: _selectedDeviceTitle == 'Card Reader(s)',
+                          onTap: () =>
+                              setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
+                          subtitle: _SmallText(
+                            _cardReaderOn ? 'Active' : 'Blocked',
+                          ),
+                          trailing: _ToggleSwitch(
+                            value: _cardReaderOn,
+                            onChanged: (v) =>
+                                setState(() => _cardReaderOn = v),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 10),
-                    _FilterChipPill(
-                      label: 'Category',
-                      selected: _selectedFilter == 'Category',
-                      onTap: () => setState(() => _selectedFilter = 'Category'),
+
+                    const _RowDivider(),
+
+                    SizedBox(height: 20.h),
+
+                    // -------- Control units ----------
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      child: Text(
+                        'Control units',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    _DeviceListCard(
+                      children: [
+                        const _ControlUnitRow(
+                          imagePath: 'assets/image 124.png',
+                          title: 'CORE20',
+                          sub2: 'CORE20-4B37-3419-363A',
+                        ),
+                        _RowDivider(
+                          leftMargin: 56.w,
+                        ), // 12 (padding) + 34 (icon) + 10 (spacing)
+                        const _ControlUnitRow(
+                          imagePath: 'assets/image 124.png',
+                          title: 'D012',
+                          sub: '11 Devices',
+                          sub2: 'CORE20-4B37-3419-363A',
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-
-              SizedBox(height: 12.h),
-
-              // -------- Section Title ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Devices',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              // -------- List (rows) ----------
-              _DeviceListCard(
-                children: [
-                  // RGBW
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 10.w),
-                    topRight: const _TimeTag(text: '18:32', blueIcon: true),
-                    leading: const _GradientCircleIcon(size: 34),
-                    title: 'RGBW',
-                    selected: _selectedDeviceTitle == 'RGBW',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'RGBW'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.20),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 14.w,
+                        right: 14.w,
+                        top: topInset + 8.h,
+                        bottom: 12.h,
+                      ),
+                      child: SizedBox(
+                        height: headerRowHeight,
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            const _ModeDot(text: 'A', filledA: false),
-                            SizedBox(width: 6.w),
-                            const _SmallText('Off'),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: GlobalCircleIconBtn(
+                                color: Color(0xFFF3F4F6),
+                                child: Image.asset(
+                                  'assets/aro.png',            
+                                  width: 16.w,
+                                  height: 16.h,
+                                ),
+                                onTap: () {
+                                  if (!widget.showBottomNav) {
+                                    final shell = CustomBottomNavBar.of(context);
+                                    if (shell != null) {
+                                      shell.setSelectedIndex(2);
+                                      return;
+                                    }
+                                  }
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go('/home');
+                                  }
+                                },
+                              ),
+                            ),
+                            Center(
+                              child: Text(
+                                'Devices',
+                                style: TextStyle(
+                                  fontSize: 22.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF111827),
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    height:36.h,
+                                    width: 36.w,
+                                    child: _CircleIconButton(
+                                      icon: Icons.more_horiz_rounded,
+                                      onTap: () => _showEditDeviceBottomSheet(context),
+                                      size: 22,
+                                      bg: const Color(0xFFF3F4F6),
+                                      iconColor: const Color(0xFF111827),
+                                      iconSize: 22,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Container(
+                                    height: 36.h,
+                                    width: 36.w,
+                                    child: _CircleIconButton(
+                                      icon: Icons.add_rounded,
+                                      onTap: () => _showAssignCategoryPopup(context),
+                                      size: 23,
+                                      bg: const Color(0xFF111827),
+                                      iconColor: Colors.white,
+                                      iconSize: 23,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                        SizedBox(height: 2.h),
-                        const _TinyGreyText('LCD0C12'),
-                        SizedBox(height: 6.h),
-                        Wrap(
-                          spacing: 6.w,
-                          runSpacing: 6.h,
-                          children: const [
-                            _TagChip(
-                              text: 'Lighting',
-                              bg: Color(0xFF0088fe),
-                              outlined: true,
-                            ),
-                            _TagChip(
-                              text: 'Bathroom',
-                              bg: Color(0xFFFE019A),
-                              outlined: false,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 8.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                        SizedBox(width: 8.w),
-                        const _ToggleColorswitch(isOn: true),
-                        SizedBox(width: 8.w),
-                      ],
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Alarm
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(top: 7.h, right: 0.w),
-                    topRight: const _PinOnly(),
-                    leading: const _LockIcon(),
-                    title: 'Alarm',
-                    selected: _selectedDeviceTitle == 'Alarm',
-                    onTap: () => setState(() => _selectedDeviceTitle = 'Alarm'),
-                    subtitle: const _SmallText('Disarmed'),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(right: 20.w),
-                      child: _CircleActionBlue(
-                        imagePath: 'assets/Mask group (15).png',
                       ),
                     ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Bathroom
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 20.w,
-                      bottom: 7.h,
-                    ),
-                    leading: const _PowerRingIcon(),
-                    title: 'Bathroom',
-                    selected: _selectedDeviceTitle == 'Bathroom',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Bathroom'),
-                    subtitle: Row(
-                      children: [
-                        const _ModeDot(text: 'M', filledA: true),
-                        const SizedBox(width: 10),
-                        Image.asset(
-                          'assets/low-temperature 1.png',
-                          width: 9.w,
-                          height: 19.h,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
-                          '24.6°C',
-                          style: TextStyle(
-                            fontSize: 14, // screenshot vibe
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111827),
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _CircleMiniBtn(icon: Icons.remove),
-                        SizedBox(width: 14.w),
-                        const _CircleMiniBtn(icon: Icons.add),
-                      ],
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Blind Living Room (selected highlight row)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 8.w,
-                      bottom: 7.h,
-                    ),
-                    selected: _selectedDeviceTitle == 'Blind Living Room',
-                    topRight: const _StarTimeTag(time: '20:36'),
-                    leading: const _BlindGreenIcon(),
-                    title: 'Blind Living Room',
-                    onTap: () => setState(
-                      () => _selectedDeviceTitle = 'Blind Living Room',
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        SizedBox(height: 2),
-                        _BlindStatsRow(),
-                        _TinyGreyText('D012U12'),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(right: 4.w, top: 15.h),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _CircleMiniBtn(icon: Icons.keyboard_arrow_up),
-                          SizedBox(width: 10.w),
-                          _CircleMiniBtn(icon: Icons.keyboard_arrow_down),
-                          SizedBox(width: 10.w),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Block Irrigation Schedule (blue play row)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 7.h,
-                      right: 20.w,
-                      bottom: 5.h,
-                    ),
-                    leading: const _PlayCircleIcon(),
-                    title: 'Block Irrigation Schedule',
-                    selected:
-                        _selectedDeviceTitle == 'Block Irrigation Schedule',
-                    onTap: () => setState(
-                      () => _selectedDeviceTitle = 'Block Irrigation Schedule',
-                    ),
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: _CircleActionBlue(
-                      imagePath: 'assets/play.png',
-                      isPlay: true,
-                    ),
-                  ),
-
-                  const _RowDivider(),
-
-                  // Brightness (with pill slider)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 2.h,
-                      right: 8.w,
-                      bottom: 5.h,
-                    ),
-                    brightness: true,
-                    topRight: const _StarOnly(),
-                    leading: const _SunIcon(),
-                    title: 'Brightness',
-                    selected: _selectedDeviceTitle == 'Brightness',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Brightness'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        _BoldSmall('54%'),
-                        SizedBox(height: 2),
-                        _TinyGreyText('W5BT'),
-                      ],
-                    ),
-                    trailing: Padding(
-                      padding: EdgeInsets.only(top: 15.h, right: 15.w),
-                      child: const _BrightnessPill(),
-                    ),
-                  ),
-                  const _RowDivider(),
-
-                  // Card Reader(s)
-                  _DeviceRow(
-                    outerPadding: EdgeInsets.only(
-                      top: 10.h,
-                      right: 22.w,
-                      bottom: 5.h,
-                    ),
-                    leading: const _BulbIcon(),
-                    title: 'Card Reader(s)',
-                    selected: _selectedDeviceTitle == 'Card Reader(s)',
-                    onTap: () =>
-                        setState(() => _selectedDeviceTitle = 'Card Reader(s)'),
-                    subtitle: const _SmallText('Blocked'),
-                    trailing: const _ToggleSwitch(isOn: false),
-                  ),
-                ],
-              ),
-
-              const _RowDivider(),
-
-              SizedBox(height: 20.h),
-
-              // -------- Control units ----------
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: Text(
-                  'Control units',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
                   ),
                 ),
               ),
-
-              SizedBox(height: 8.h),
-
-              _DeviceListCard(
-                children: [
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'CORE20',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                  _RowDivider(
-                    leftMargin: 56.w,
-                  ), // 12 (padding) + 34 (icon) + 10 (spacing)
-                  const _ControlUnitRow(
-                    imagePath: 'assets/image 124.png',
-                    title: 'D012',
-                    sub: '11 Devices',
-                    sub2: 'CORE20-4B37-3419-363A',
-                  ),
-                ],
+            ),
+            if (widget.showBottomNav)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BottomNavBarWidget(
+                  selectedIndex: _selectedNavIndex,
+                  onItemTapped: _onNavItemTapped,
+                  backgroundOpacity: 0,
+                  useBackdropBlur: true,
+                ),
               ),
-            ],
-          ),
+          ],
         ),
+      ),
       ),
     );
   }
@@ -540,57 +872,66 @@ class _DeviceRow extends StatelessWidget {
           )
         : basePadding;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: selected ? const Color(0xFFEAF1FF) : Colors.white,
-        padding: finalPadding,
-        child: Stack(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // ✅ bigger leading slot like Image-1
-                SizedBox(
-                  width: 46.w,
-                  height: 46.w,
-                  child: Center(child: leading),
-                ),
-
-                SizedBox(width: 12.w),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      color: selected ? const Color(0xFFEAF1FF) : Colors.white,
+      padding: finalPadding,
+      child: Stack(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onTap,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: brightness ? 11.h : 0.h),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF111827),
-                            height: 1.05,
-                            fontFamily: 'Inter',
-                          ),
+                      SizedBox(
+                        width: 46.w,
+                        height: 46.h,
+                        child: Center(child: leading),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: brightness ? 11.h : 0.h),
+                              child: Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF111827),
+                                  height: 1.05,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            subtitle,
+                          ],
                         ),
                       ),
-                      SizedBox(height: 4.h),
-                      subtitle,
                     ],
                   ),
                 ),
-
-                SizedBox(width: 12.w),
-                trailing,
-              ],
+              ),
+              SizedBox(width: 12.w),
+              trailing,
+            ],
+          ),
+          // topRight is decorative; without IgnorePointer the Stack layer blocks
+          // hit tests to `trailing` (e.g. Blind Living Room chevrons).
+          if (topRight != null)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: IgnorePointer(ignoring: true, child: topRight!),
             ),
-
-            if (topRight != null)
-              Positioned(right: 0, top: 0, child: topRight!),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -638,14 +979,15 @@ class _SearchBarState extends State<_SearchBar> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: _searchFocusNode,
+      listenable: Listenable.merge([_searchFocusNode, _searchController]),
       builder: (context, _) {
         final hasFocus = _searchFocusNode.hasFocus;
+        final isTyping = hasFocus && _searchController.text.trim().isNotEmpty;
         return Container(
-          padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+          padding: EdgeInsets.all(isTyping ? 1.5.w : 0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24.r),
-            gradient: hasFocus
+            gradient: isTyping
                 ? const LinearGradient(
                     colors: [Color(0xFF0088FE), Color(0xFF8B5CF6)],
                     begin: Alignment.centerLeft,
@@ -661,7 +1003,7 @@ class _SearchBarState extends State<_SearchBar> {
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(hasFocus ? 22.r : 24.r),
+                borderRadius: BorderRadius.circular(isTyping ? 22.r : 24.r),
               ),
               child: TextField(
                 controller: _searchController,
@@ -805,136 +1147,268 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size.w,
-        height: size.w,
-        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-        child: Center(
-          child: imagePath != null
-              ? Image.asset(
-                  imagePath!,
-                  width: iconSize.w,
-                  height: iconSize.h,
-                  fit: BoxFit.contain,
-                )
-              : Icon(icon!, size: iconSize.sp, color: iconColor),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: size.w,
+          height: size.h,
+          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+          child: Center(
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    width: iconSize.w,
+                    height: iconSize.h,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(icon!, size: iconSize.sp, color: iconColor),
+          ),
         ),
       ),
     );
   }
 }
 
-class _CircleMiniBtn extends StatelessWidget {
-  const _CircleMiniBtn({required this.icon});
-  final IconData icon;
+// class _CircleMiniBtn extends StatelessWidget {
+//   const _CircleMiniBtn({required this.icon, this.onTap});
+//   final IconData icon;
+//   final VoidCallback? onTap;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final isArrow =
+//         icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+//
+//     return Material(
+//       color: Colors.transparent,
+//       child: InkWell(
+//         customBorder: const CircleBorder(),
+//         onTap: onTap,
+//         splashColor: const Color(0xFFE5E7EB),
+//         highlightColor: const Color(0xFFD1D5DB),
+//         child: Ink(
+//           width: 36.w,
+//           height: 36.h,
+//           decoration: const BoxDecoration(
+//             color: Color(0xFFE1E1E1),
+//             shape: BoxShape.circle,
+//           ),
+//           child: Icon(
+//             icon,
+//             size: (isArrow ? 36 : 22).sp,
+//             color: const Color(0xFF6B7280),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class _CircleMiniBtn extends StatefulWidget {
+  const _CircleMiniBtn({
+    this.icon,
+    this.onTap,
+    this.marked = false,
+    this.image,
+  });
+
+  final IconData? icon;
+  final VoidCallback? onTap;
+  final bool marked;
+  final String? image;
+
+  static const Color _markedOrPressFill = Color(0xFFE5E7EB);
+  static const Color _idleFill = Color(0xFFF3F4F6);
+
+  @override
+  State<_CircleMiniBtn> createState() => _CircleMiniBtnState();
+}
+
+class _CircleMiniBtnState extends State<_CircleMiniBtn> {
+  bool _pressed = false;
+
+  void _setPressed(bool v) {
+    if (_pressed != v) setState(() => _pressed = v);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isArrow =
-        icon == Icons.keyboard_arrow_up || icon == Icons.keyboard_arrow_down;
+    final fill = (widget.marked || _pressed)
+        ? _CircleMiniBtn._markedOrPressFill
+        : _CircleMiniBtn._idleFill;
+    final isBlindArrow = widget.icon == Icons.keyboard_arrow_down ||
+        widget.icon == Icons.keyboard_arrow_up;
 
-    return Container(
-      width: 35.w, // ✅ closer to Image-1
+    final circle = Container(
+      width: 35.w,
       height: 35.h,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(
+        color: fill, shape: BoxShape.circle),
       alignment: Alignment.center,
-      child: Icon(icon, size: (isArrow ? 26 : 22).sp, color: Color(0xFF6B7280)),
+      child: isBlindArrow
+          ? Transform.rotate(
+              angle: widget.icon == Icons.keyboard_arrow_up ? math.pi : 0,
+              child: Image.asset(
+                'assets/Mask group (17).png',
+                width: 13.sp,
+                height: 13.sp,
+                fit: BoxFit.contain,
+                color: const Color(0xFF6B7280),
+              ),
+            )
+          : Icon(
+              widget.icon,
+              size: 23.sp,
+              color: const Color(0xFF6B7280),
+            ),
+    );
+
+    // final circles = Container(
+    //   width: 36.w,
+    //   height: 36.h,
+    //   decoration: BoxDecoration(color: fill, shape: BoxShape.circle,
+    //   ),
+    //   alignment: Alignment.center,
+    //   child: Image.asset(
+    //     widget.image!,
+    //     height: 13.h,
+    //     width: 13.w,
+    //     color: const Color(0xFF6B7280),
+    //   ),
+    // );
+
+    if (widget.onTap == null) return circle;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: () {
+        widget.onTap!();
+        _setPressed(false);
+      },
+      child: circle,
     );
   }
 }
 
 class _CircleActionBlue extends StatelessWidget {
-  _CircleActionBlue({this.icon, this.imagePath, this.isPlay = false})
-    : assert(
-        icon != null || imagePath != null,
-        'Either icon or imagePath must be provided',
-      );
+  const _CircleActionBlue({
+    this.icon,
+    this.imagePath,
+    this.isPlay = true,
+    this.onTap,
+    this.active = false,
+  }) : assert(
+         icon != null || imagePath != null,
+         'Either icon or imagePath must be provided',
+       );
 
   final IconData? icon;
   final String? imagePath;
   final bool isPlay;
+  final VoidCallback? onTap;
+  final bool active;
+
+  static const Color _softGrey = Color(0xFFF3F4F6);
+  static const Color _themeBlue = Color(0xFF0088FE);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // ✅ Screenshot-এর real size (56 ❌)
-      width: 44.w,
-      height: 44.w,
-      decoration: const BoxDecoration(
-        color: Color(0xFF0088FE),
-        shape: BoxShape.circle,
+    final bg = active ? _themeBlue : _softGrey;
+    final fg = active ? Colors.white : const Color(0xFF6B7280);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: const Color(0xFFE5E7EB),
+        highlightColor: const Color(0xFFD1D5DB),
+        child: Ink(
+          width: 44.w,
+          height: 44.w,
+          decoration: BoxDecoration(
+            color: bg,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: ClipOval(
+              child: SizedBox(
+                width: 30.w,
+                height: 30.h,
+                child: Center(
+                  child: imagePath != null
+                      ? (active
+                          ? Image.asset(
+                              imagePath!,
+                              width: isPlay ? 27.sp : 21.sp,
+                              height: isPlay ? 24.sp : 20.sp,
+                              fit: BoxFit.scaleDown,
+                            )
+                          : Image.asset(
+                              imagePath!,
+                              width: isPlay ? 27.sp : 21.sp,
+                              height: isPlay ? 24.sp : 20.sp,
+                              fit: BoxFit.scaleDown,
+                              color: fg,
+                              colorBlendMode: BlendMode.srcIn,
+                            ))
+                      : Icon(icon!, size: 20.sp, color: fg),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      alignment: Alignment.center,
-      child: imagePath != null
-          ? Image.asset(
-              imagePath!,
-              width: isPlay ? 27.sp : 21.sp,
-              height: isPlay ? 24.sp : 20.sp,
-              fit: BoxFit.contain,
-            )
-          : Icon(icon!, size: 20.sp, color: Colors.white),
     );
   }
 }
 
 class _ToggleSwitch extends StatelessWidget {
-  const _ToggleSwitch({required this.isOn});
-  final bool isOn;
+  const _ToggleSwitch({
+    required this.value,
+    required this.onChanged,
+  });
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60.w, // ✅ closer to iOS toggle size
+    return SizedBox(
       height: 35.h,
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Align(
-        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 30.w,
-          height: 30.h,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
+      width: 60.w,
+      child: CupertinoSwitch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: const Color(0xFF0088FE),
       ),
     );
   }
 }
 
 class _ToggleColorswitch extends StatelessWidget {
-  const _ToggleColorswitch({required this.isOn});
-  final bool isOn;
+  const _ToggleColorswitch({
+    required this.value,
+    required this.onChanged,
+  });
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 60.w, // ✅ closer to iOS toggle size
+    return SizedBox(
       height: 35.h,
-      padding: EdgeInsets.all(2.w),
-      decoration: BoxDecoration(
-        color: isOn ? const Color(0xFF0088FE) : const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Align(
-        alignment: isOn ? Alignment.centerRight : Alignment.centerLeft,
-        child: Container(
-          width: 28.w,
-          height: 28.w,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
+      width: 60.w,
+      child: CupertinoSwitch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: const Color(0xFF0088FE),
       ),
     );
   }
@@ -947,12 +1421,18 @@ class _SmallText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final v = text.trim().toLowerCase();
-    final isStrong = v == 'disarmed' || v == 'blocked' || v == "off";
+    final isStrong = v == 'disarmed' ||
+        v == 'armed' ||
+        v == 'blocked' ||
+        v == 'active' ||
+        v == 'running' ||
+        v == 'off' ||
+        v == 'on';
 
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         fontWeight: isStrong ? FontWeight.w700 : FontWeight.w400,
         color: isStrong ? const Color(0xFF111827) : const Color(0xFF6B7280),
         height: 1.05,
@@ -987,7 +1467,7 @@ class _BoldSmall extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF111827),
         fontFamily: 'Inter',
@@ -1005,7 +1485,7 @@ class _TinyGreyText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        // ✅ Screenshot: id/text খুব ছোট (18 ❌)
+        
         fontSize: 12.sp,
         fontWeight: FontWeight.w400,
         color: const Color(0xFF6B7280),
@@ -1018,66 +1498,123 @@ class _TinyGreyText extends StatelessWidget {
 /* ---------------- Badges / Tags ---------------- */
 
 class _ModeDot extends StatelessWidget {
-  const _ModeDot({required this.text, required this.filledA});
-  final String text;
-  final bool filledA;
+  const _ModeDot({required this.manual, this.onTap});
+
+  /// `true` = manual (M), `false` = auto (A).
+  final bool manual;
+  final VoidCallback? onTap;
+
+  static const Color _softGrey = Color(0xFFE1E1E1);
+  static const Color _themeBlue = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
-    // ✅ A ছোট, M বড় (same call, no structure change)
-    final isBig = filledA; // M row filled=true => bigger
-    final s = (isBig ? 26 : 26);
-
-    return Container(
-      width: s.w,
-      height: s.h,
+    final letter = manual ? 'M' : 'A';
+    final badge = Container(
+      width: 26.w,
+      height: 26.w,
       decoration: BoxDecoration(
-        color: filledA ? const Color(0xFF6B7280) : const Color(0xFFE5E7EB),
+        color: manual ? _themeBlue : _softGrey,
         shape: BoxShape.circle,
+        // border: manual
+        //     ? null
+        //     : Border.all(color: _themeBlue.withValues(alpha: 0.45)),
       ),
       alignment: Alignment.center,
       child: Text(
-        text,
+        letter,
         style: TextStyle(
-          fontSize: (isBig ? 14 : 14).sp,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w700,
-          color: filledA ? Colors.white : const Color(0xFF6b7280),
+          color: manual ? Colors.white : _themeBlue,
           height: 1.0,
           fontFamily: 'Inter',
         ),
       ),
     );
+    if (onTap == null) return badge;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        splashColor: _softGrey,
+        highlightColor: const Color(0xFFE5E7EB),
+        child: badge,
+      ),
+    );
   }
 }
 
+// class _TagChip extends StatelessWidget {
+//   const _TagChip({required this.text, required this.bg, this.outlined = false});
+//   final String text;
+//   final Color bg;
+//   final bool outlined;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 22.h,
+//       width: 75.w,
+//       alignment: Alignment.center,
+//       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+//       decoration: BoxDecoration(
+//         color: outlined ? Colors.white : bg,
+//         borderRadius: BorderRadius.circular(4.r),
+//         border: outlined ? Border.all(color: bg, width: 1.5) : null,
+//       ),
+//       child: Text(
+//         text,
+//         style: TextStyle(
+//           fontSize: 11.sp,
+//           fontWeight: FontWeight.w600,
+//           color: outlined ? bg : Colors.white,
+//           height: 1.0,
+//           fontFamily: 'Inter',
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class _TagChip extends StatelessWidget {
-  const _TagChip({required this.text, required this.bg, this.outlined = false});
-  final String text;
+  const _TagChip({
+    required this.label,
+    required this.bg,
+    required this.fg,
+    this.onTap,
+  });
+
+  final String label;
   final Color bg;
-  final bool outlined;
+  final Color fg;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 22.h,
-      width: 75.w,
-      alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+    final chip = Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: outlined ? Colors.white : bg,
-        borderRadius: BorderRadius.circular(4.r),
-        border: outlined ? Border.all(color: bg, width: 1.5) : null,
+        color: bg,
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        text,
+        label,
         style: TextStyle(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
-          color: outlined ? bg : Colors.white,
-          height: 1.0,
+          color: fg,
           fontFamily: 'Inter',
+          height: 1.0,
         ),
       ),
+    );
+    if (onTap == null) return chip;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: chip,
     );
   }
 }
@@ -1100,18 +1637,18 @@ class _TimeTag extends StatelessWidget {
             'assets/image 81 (1).png', // pin
             width: 16.sp,
             height: 16.sp,
-            fit: BoxFit.contain,
-            color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFF9CA3AF),
+            filterQuality: FilterQuality.high,
+            color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFFF3F4F6),
             colorBlendMode: BlendMode.srcIn,
           ),
-          SizedBox(width: 11.w),
+          SizedBox(width: 8.w),
           Text(
             text,
             style: TextStyle(
               fontSize: 13.sp,
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
-              height: 1.0,
+              // height: 1.0,
               fontFamily: 'Inter',
             ),
           ),
@@ -1140,7 +1677,7 @@ class _StarTimeTag extends StatelessWidget {
               fontSize: 13.sp, // ✅ screenshot small
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w400,
-              height: 1.0,
+              // height: 1.0,
               fontFamily: 'Inter',
             ),
           ),
@@ -1158,13 +1695,13 @@ class _StarOnly extends StatelessWidget {
     return Container(
       height: 24.h,
       width: 24.h,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.sp,
-          color: const Color(0xFF000000).withOpacity(0.25),
-        ),
-        //borderRadius: BorderRadius.circular(6.r),
-      ),
+      // decoration: BoxDecoration(
+      //   border: Border.all(
+      //     width: 1.sp,
+      //     color: const Color(0xFF000000).withOpacity(0.25),
+      //   ),
+      //   //borderRadius: BorderRadius.circular(6.r),
+      // ),
       child: Center(
         child: Icon(
           Icons.star_rounded,
@@ -1384,31 +1921,29 @@ class _BulbIcon extends StatelessWidget {
 
 /* ---------------- Blind stats row ---------------- */
 
-class _BlindStatsRow extends StatelessWidget {
-  const _BlindStatsRow();
+class _BlindStatsRow extends StatefulWidget {
+  const _BlindStatsRow({
+    required this.closedPct,
+    required this.openPct,
+  });
 
+  final int closedPct;
+  final int openPct;
+
+  @override
+  State<_BlindStatsRow> createState() => _BlindStatsRowState();
+}
+
+class _BlindStatsRowState extends State<_BlindStatsRow> {
+  bool _rgbwManual = false;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // A badge (light grey circle)
-        Container(
-          width: 26.w,
-          height: 26.w,
-          decoration: const BoxDecoration(
-            color: Color(0xFFE5E7EB),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            'A',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF6B7280),
-              height: 1.0,
-              fontFamily: 'Inter',
-            ),
+        _ModeDot(
+          manual: _rgbwManual,
+          onTap: () => setState(
+                () => _rgbwManual = !_rgbwManual,
           ),
         ),
         SizedBox(width: 10.w),
@@ -1421,9 +1956,9 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '0%',
+          '${widget.closedPct.clamp(0, 100)}%',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
             fontFamily: 'Inter',
@@ -1440,9 +1975,9 @@ class _BlindStatsRow extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          '50%',
+          '${widget.openPct.clamp(0, 100)}%',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111827),
             fontFamily: 'Inter',
@@ -1528,63 +2063,82 @@ class _WedgePainter extends CustomPainter {
 /* ---------------- Brightness pill slider ---------------- */
 
 class _BrightnessPill extends StatelessWidget {
-  const _BrightnessPill({this.leftFactor = 0.52});
+  const _BrightnessPill({
+    required this.value,
+    this.onChanged,
+  });
 
-  /// left side width ratio (0.0 - 1.0)
-  final double leftFactor;
+  /// Filled portion 0.0 - 1.0 (brighter / higher level to the left).
+  final double value;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 150.w,
-      height: 34.h, // ছবির মতো একটু বেশি height
+    final f = value.clamp(0.0, 1.0);
+    final w = 150.w;
+    final h = 34.h;
+
+    void applyFromDx(double dx) {
+      if (onChanged == null) return;
+      onChanged!((dx / w).clamp(0.0, 1.0));
+    }
+
+    final pill = SizedBox(
+      width: w,
+      height: h,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(999.r),
+        borderRadius: BorderRadius.circular(26.r),
         child: Stack(
           children: [
-            // Right (darker) background
-            Container(color: const Color(0xFFE5E7EB)),
-
-            // Left (lighter) section
+            Container(color: const Color(0xFFE1E1E1)),
             Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: leftFactor.clamp(0.0, 1.0),
+                widthFactor: f,
                 child: Container(color: const Color(0xFFF3F4F6)),
               ),
             ),
-
-            // Middle divider (subtle)
             Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: leftFactor.clamp(0.0, 1.0),
+                widthFactor: f,
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Container(
                     width: 1.w,
                     height: double.infinity,
-                    color: const Color(0xFFD1D5DB), // subtle line
+                    color: const Color(0xFFD1D5DB),
                   ),
                 ),
               ),
             ),
-
-            // Sun icon on left
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: EdgeInsets.only(left: 14.w),
-                child: Icon(
-                  Icons.wb_sunny_outlined,
-                  size: 20.sp,
-                  color: Color(0xFF6B7280),
+                child: Image.asset(
+                  'assets/Mask group (14).png',
+                  width: 22.w,
+                  height: 22.h,
+                  fit: BoxFit.contain,
+                  color: (f <= 0.0)
+                      ? const Color(0xFF6B7280) // full gray
+                      : const Color(0xFFFAB300), // any white (>= 1%)
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+
+    if (onChanged == null) return pill;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (d) => applyFromDx(d.localPosition.dx),
+      onHorizontalDragUpdate: (d) => applyFromDx(d.localPosition.dx),
+      child: pill,
     );
   }
 }
@@ -1634,7 +2188,7 @@ class _ControlUnitRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
                     fontFamily: 'Inter',
                   ),

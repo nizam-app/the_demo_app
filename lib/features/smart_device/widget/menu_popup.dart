@@ -1,5 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
 /// Public widget
 class EditDeviceSheetContent extends StatelessWidget {
@@ -13,12 +17,14 @@ class _EditDeviceSheetContent extends StatefulWidget {
   const _EditDeviceSheetContent();
 
   @override
-  State<_EditDeviceSheetContent> createState() => _EditDeviceSheetContentState();
+  State<_EditDeviceSheetContent> createState() =>
+      _EditDeviceSheetContentState();
 }
 
 class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
-  final TextEditingController _renameController =
-  TextEditingController(text: 'Light living room');
+  final TextEditingController _renameController = TextEditingController(
+    text: 'Light living room',
+  );
 
   bool _dashboardDropdownOpen = false;
   int _selectedDashboardIndex = 0;
@@ -42,7 +48,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   static const Color _kTextPrimary = Color(0xFF111827);
   static const Color _kTextSecondary = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
-  static const Color _kSheetBg = Color(0xFFF3F4F6);
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
@@ -61,36 +66,66 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     }
   }
 
-  
+  void _showAssignCategoryPopup(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AssignCategoryZoneSheet(),
+    );
+  }
+
   // bool select = true;
   // late  ValueChanged<bool> onChanged;
 
-
-
   @override
   Widget build(BuildContext context) {
+    final topPad = MediaQuery.viewPaddingOf(context).top;
+    final headerH = 56.h;
+
     return Container(
       decoration: BoxDecoration(
-        color: _kSheetBg.withOpacity(0.74),
+        // Keep the sheet clearly transparent like the dashboard header/footer.
+        color: Colors.white.withOpacity(0.18),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
         ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // ===== Main content =====
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(context),
-
-                Padding(
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.hardEdge,
+            children: [
+              Positioned.fill(
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  topPad + headerH + 8.h,
+                  0,
+                  16.h,
+                ),
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Rename Card
                       _Card(
@@ -99,19 +134,31 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                           iconWidth: 22.w,
                           iconHeight: 22.h,
                           label: 'Rename',
-                          trailing: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 170.w),
-                            child: Text(
-                              _renameController.text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w400,
-                                color: _kTextSecondary,
-                                fontFamily: 'Inter',
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: 155.w),
+                                child: Text(
+                                  _renameController.text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: _kTextSecondary,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(width: 6.w),
+                              Image.asset(
+                                'assets/Group 63.png',
+                                width: 14.w,
+                                height: 13.h,
+                                fit: BoxFit.contain,
+                              ),
+                            ],
                           ),
                           onTap: () {
                             // TODO: open rename dialog if needed
@@ -171,7 +218,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                 children: [
                                   _ChipPill(
                                     text: 'Light',
-                                    bg: Colors. white,
+                                    bg: Colors.white,
                                     border: _kBlue,
                                     textColor: _kBlue,
                                   ),
@@ -184,7 +231,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                   ),
                                 ],
                               ),
-                              onTap: () {},
+                              onTap: () => _showAssignCategoryPopup(context),
                             ),
 
                             SizedBox(height: 10.h),
@@ -195,53 +242,15 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconWidth: 26.w,
                               iconHeight: 26.h,
                               label: 'Last activities',
-                              trailing: Transform.scale(
-                                scale: 1.00,
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _lastActivitiesOn = !_lastActivitiesOn),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 180),
-                                    width: 60.w,
-                                    height: 35.h,
-                                    padding: EdgeInsets.all(2.w),
-                                    decoration: BoxDecoration(
-                                      color:   _lastActivitiesOn
-                                          ? const Color(0xFF0088FE)
-                                          : const Color(0xFFE1E1E1),
-                                      borderRadius: BorderRadius.circular(30.r),
-                                    ),
-                                    child: AnimatedAlign(
-                                      duration: const Duration(milliseconds: 180),
-                                      curve: Curves.easeOut,
-                                      alignment:  _lastActivitiesOn
-                                          ? Alignment.centerRight
-                                          : Alignment.centerLeft,
-                                      child: Container(
-                                        width: 31.w,
-                                        height: 31.w,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                              trailing: SizedBox(
+                                height: 35.h,
+                                width: 60.w,
+                                child: CupertinoSwitch(
+                                  value: _lastActivitiesOn,
+                                  onChanged: (v) =>
+                                      setState(() => _lastActivitiesOn = v),
+                                  activeColor: _kBlue,
                                 ),
-
-                                // SizedBox(
-                                //   height: 35.h,
-                                //   width: 60.w,
-                                //   child: Switch(
-                                //     value: _lastActivitiesOn,
-                                //     onChanged: (v) =>
-                                //         setState(() => _lastActivitiesOn = v),
-                                //     activeColor: Colors.white,
-                                //     activeTrackColor: _kBlue,
-                                //     inactiveThumbColor: Colors.white,
-                                //     inactiveTrackColor:
-                                //     const Color(0xFFE5E7EB),
-                                //   ),
-                                // ),
                               ),
                             ),
                           ],
@@ -278,12 +287,37 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        // color: Colors.white.withOpacity(0.18),
+                        color: Color(0xFFE5E7EB).withOpacity(0.18),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.only(top: topPad),
+                        child: _buildHeader(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
             // ===== Outside tap closes dropdown =====
             if (_dashboardDropdownOpen)
-              
               Positioned.fill(
                 child: GestureDetector(
                   onTap: _closeDashboardMenu,
@@ -292,72 +326,72 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
 
-            // ===== Dropdown overlay (on top, auto positioned under trigger) =====
+            // ===== Dropdown overlay (anchored just under the trigger, like design) =====
             if (_dashboardDropdownOpen)
-              Positioned(
-                top: 250.h,
-                right: 32.w,
-                child: CompositedTransformFollower(
-                  link: _dropdownLink,
-                  showWhenUnlinked: false,
-                  offset: Offset(-10.w, 36.h), // trigger এর নিচে
-                  child: _DashboardDropdownMenu(
-                    width: 220.w,
-                    items: _dashboards,
-                    selectedIndex: _selectedDashboardIndex,
-                    onSelect: (index) => setState(() {
-                      _selectedDashboardIndex = index;
-                      _dashboardDropdownOpen = false;
-                    }),
-                  ),
+              CompositedTransformFollower(
+                link: _dropdownLink,
+                showWhenUnlinked: false,
+                offset: Offset(0, 34.h), // small gap under text+arrow row
+                child: _DashboardDropdownMenu(
+                  width: 220.w,
+                  items: _dashboards,
+                  selectedIndex: _selectedDashboardIndex,
+                  onSelect: (index) => setState(() {
+                    _selectedDashboardIndex = index;
+                    _dashboardDropdownOpen = false;
+                  }),
                 ),
               ),
           ],
+        ),
         ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return SizedBox(
+      height: 56.h,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          // Left spacer (same as close button) => title becomes truly centered
-          SizedBox(width: 30.w, height: 30.w),
-
-          Expanded(
-            child: Center(
-              child: Text(
-                'Edit smart device',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _kTextPrimary,
-                  fontFamily: 'Inter',
-                ),
+          Center(
+            child: Text(
+              'Edit smart device',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: _kTextPrimary,
+                fontFamily: 'Inter',
               ),
             ),
           ),
-
-          // Close button (right)
-          Container(
-            width: 30.w,
-            height: 30.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFFFFF),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: Icon(
-                Icons.close_rounded,
-                size: 20.sp,
-                color: _kTextPrimary,
+          Positioned(
+            right: 20.w,
+            top: 14.h,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 30.w,
+                height: 30.h,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.28),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF111827).withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 20.sp,
+                  color: _kTextPrimary,
+                ),
               ),
             ),
           ),
@@ -365,52 +399,6 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       ),
     );
   }
-
-
-  // Widget _buildHeader(BuildContext context) {
-  //   return Padding(
-  //     padding: EdgeInsets.fromLTRB(18.w, 10.h, 12.w, 4.h),
-  //
-  //     child: Row(
-  //        crossAxisAlignment: CrossAxisAlignment.center,
-  //        mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Expanded(
-  //           child: Center(
-  //             child: Text(
-  //               'Edit smart device',
-  //               style: TextStyle(
-  //                 fontSize: 16.sp,
-  //                 fontWeight: FontWeight.w600,
-  //                 color: _kTextPrimary,
-  //                 fontFamily: 'Inter',
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //         // close
-  //
-  //         Container(
-  //           width: 30.w,
-  //           height: 30.w,
-  //           decoration: const BoxDecoration(
-  //             color: Color(0xFFFFFFFF),
-  //             shape: BoxShape.circle,
-  //           ),
-  //           child: IconButton(
-  //             onPressed: () => Navigator.of(context).pop(),
-  //             icon: Center(
-  //               child: Icon(Icons.close_rounded,
-  //                   size: 20.sp, color: _kTextPrimary),
-  //             ),
-  //             padding: EdgeInsets.zero,
-  //             constraints: const BoxConstraints(),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }
 
 // ====================== UI PARTS ======================
@@ -419,14 +407,12 @@ class _Card extends StatelessWidget {
   const _Card({required this.child});
   final Widget child;
 
-  static const Color _kCardBg = Colors.white;
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(14.sp),
       decoration: BoxDecoration(
-        color: _kCardBg,
+        color: Colors.white.withOpacity(0.28),
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: child,
@@ -441,14 +427,12 @@ class _EditSheetRow extends StatelessWidget {
     this.iconHeight,
     this.iconWidth,
     this.trailing,
-    this.icon,
     this.isDestructive = false,
     this.onTap,
   });
 
   final String? imagePath;
   final String label;
-  final IconData? icon;
   final Widget? trailing;
   final bool isDestructive;
   final double? iconWidth;
@@ -456,28 +440,21 @@ class _EditSheetRow extends StatelessWidget {
   final VoidCallback? onTap;
 
   static const Color _kTextPrimary = Color(0xFF111827);
-  static const Color _kIconGrey = Color(0xFF6B7280);
   static const Color _kDestructiveRed = Color(0xFFFE019A);
 
   @override
   Widget build(BuildContext context) {
     final color = isDestructive ? _kDestructiveRed : _kTextPrimary;
-    final iconColor = isDestructive ? _kDestructiveRed : _kIconGrey;
 
-    final Widget leading;
-    if (imagePath != null) {
-      leading = Image.asset(
-        imagePath!,
-        width: iconWidth ?? 20.w,
-        height: iconHeight ?? 20.w,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.high,
-      );
-    } else if (icon != null) {
-      leading = Icon(icon, size: iconWidth ?? 20.w, color: iconColor);
-    } else {
-      leading = SizedBox(width: 20.w, height: 20.w);
-    }
+    final Widget leading = imagePath != null
+        ? Image.asset(
+            imagePath!,
+            width: iconWidth ?? 20.w,
+            height: iconHeight ?? 20.w,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          )
+        : SizedBox(width: 20.w, height: 20.w);
 
     return InkWell(
       onTap: onTap,
@@ -489,7 +466,7 @@ class _EditSheetRow extends StatelessWidget {
             height: 32.w,
             child: Center(child: leading),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 7.w),
           Expanded(
             child: Text(
               label,
@@ -509,7 +486,6 @@ class _EditSheetRow extends StatelessWidget {
     );
   }
 }
-
 
 class _DashboardDropdownTrigger extends StatelessWidget {
   const _DashboardDropdownTrigger({
@@ -545,7 +521,7 @@ class _DashboardDropdownTrigger extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 6.w),
+            SizedBox(width: 7.w),
             Icon(
               isOpen
                   ? Icons.keyboard_arrow_up_rounded
@@ -578,8 +554,8 @@ class _DashboardDropdownMenu extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: width,
-        constraints: BoxConstraints(maxHeight: 195.h),
+        width: 185.w,
+        constraints: BoxConstraints(maxHeight: 150.h),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(26.r),
@@ -591,43 +567,65 @@ class _DashboardDropdownMenu extends StatelessWidget {
             ),
           ],
         ),
-        child: ListView.separated(
-          padding: EdgeInsets.symmetric(vertical: 20.h),
-          shrinkWrap: true,
-          itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox.shrink(),
-          itemBuilder: (context, i) {
-            final selected = i == selectedIndex;
-            return InkWell(
-              onTap: () => onSelect(i),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        items[i],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF111827),
-                          fontFamily: 'Inter',
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26.r),
+          child: ListView.separated(
+            //padding: EdgeInsets.symmetric(vertical: 8.h),
+            shrinkWrap: true,
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const SizedBox.shrink(),
+            itemBuilder: (context, i) {
+              final selected = i == selectedIndex;
+              final bgColor = selected
+                  ? const Color(
+                      0xFFE5F0FF,
+                    ) // light blue row highlight as in design
+                  : Colors.white;
+              return InkWell(
+                onTap: () => onSelect(i),
+                child: Container(
+                  color: bgColor,
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
+                  child: Row(
+                    children: [
+                      // Reserve space for check icon so text lines up in all rows
+                      SizedBox(
+                        width: 23.w,
+                        //height: 26.h,
+                        child: selected
+                            ? Image.asset(
+                                "assets/popup_done.png",
+                                height: 23.h,
+                                width: 23.w,
+                                fit: BoxFit.cover,
+                              )
+                            // Icon(
+                            //         Icons.check_rounded,
+                            //         size: 18.sp,
+                            //         color: const Color(0xFF0088FE),
+                            //       )
+                            : const SizedBox.shrink(),
+                      ),
+                      // SizedBox(width: 4.w),
+                      Expanded(
+                        child: Text(
+                          items[i],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
-                    ),
-                    if (selected)
-                      Icon(
-                        Icons.check_rounded,
-                        size: 20.sp,
-                        color: const Color(0xFF2563EB),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -650,7 +648,8 @@ class _ChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+      height: 25.h,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6.r),

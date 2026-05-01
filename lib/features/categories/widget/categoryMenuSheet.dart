@@ -1,29 +1,40 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CategoryMenuSheet extends StatelessWidget {
   const CategoryMenuSheet({super.key});
 
-  static const _bg = Color(0xFFF3F4F6);
-  static final _bgTransparent = _bg.withOpacity(0.74);
-  static const _card = Colors.white;
+  // Keep the sheet clearly transparent like the dashboard header/footer.
+  static final _bgTransparent = Colors.white.withOpacity(0.18);
+  static final _card = Colors.white.withOpacity(0.28);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
-  static const _dividerColor = Color(0xFFE5E7EB);
   static const _destructive = Color(0xFFFF2D92);
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      bottom: false,
-      child: Container(
-        decoration: BoxDecoration(
-          color: _bgTransparent,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r)),
-        ),
-        padding: EdgeInsets.only(left: 16.w, right: 16.w),
-        child: Column(
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Container(
+            decoration: BoxDecoration(
+              color: _bgTransparent,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24.r),
+                topRight: Radius.circular(24.r),
+              ),
+            ),
+            padding: EdgeInsets.only(left: 16.w, right: 16.w),
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             /// HEADER
@@ -50,8 +61,9 @@ class CategoryMenuSheet extends StatelessWidget {
                   Container(
                     width: 30.w,
                     height: 30.h,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFFFFF),
+                    decoration: BoxDecoration(
+                      // color: Colors.white.withOpacity(0.28),
+                      color: Color(0xFFE5E7EB).withOpacity(0.18),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -87,13 +99,25 @@ class CategoryMenuSheet extends StatelessWidget {
                     title: 'Rename',
                     iconWidth: 22.w,
                     iconHeight: 22.h,
-                    trailing: Text(
-                      'Living room',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: _textSecondary,
-                        fontFamily: 'Inter',
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Living room',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: _textSecondary,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Image.asset(
+                          'assets/Group 63.png',
+                          width: 14.w,
+                          height: 13.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
                     ),
                   ),
 
@@ -186,6 +210,8 @@ class CategoryMenuSheet extends StatelessWidget {
             ),
             SizedBox(height: 41.h),
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -255,17 +281,6 @@ class _ItemRow extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 1,
-      margin: EdgeInsets.only(left: 58.w),
-      color: const Color(0xFFE5E7EB),
     );
   }
 }

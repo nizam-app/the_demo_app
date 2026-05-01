@@ -1,7 +1,14 @@
-import 'dart:ui';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/features/devices/screen/devices_screen.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
+import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
+import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 import '../widget/categoryAddmenu.dart';
@@ -39,7 +46,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    int _selectedIndex = 2;
     final zones = <ZoneItem>[
       ZoneItem(
         title: "Lighting",
@@ -103,49 +109,103 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
     ];
 
-    return Scaffold(
+    return CustomBottomNavBar(
+      initialIndex: 2,
+      translucentBottomBar: true,
+      bottomBarBackgroundOpacity: 0,
       backgroundColor: Colors.white,
-      bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedIndex,
-        notificationCount: 12,
-        onTap: (i) => setState(() => _selectedIndex = i),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 18.w),
-          child: Column(
-            children: [
-              SizedBox(height: 8.h),
+      children: [
+        const RepaintBoundary(child: DevicesScreen(showBottomNav: false)),
+        const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
+        RepaintBoundary(child: _buildCategoriesBody(context, zones)),
+        const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
+        const RepaintBoundary(child: SettingsScreen()),
+      ],
+    );
+  }
 
-              // ✅ Top bar (same to same)
-              _TopBar(
-                onBack: () => Navigator.pop(context),
-                onMenu: () => showCategoryMenuSheet(context),
-                onAdd: () => showCategoryAddMenuSheet(context),
+  Widget _buildCategoriesBody(BuildContext context, List<ZoneItem> zones) {
+    const screenBg = Color(0xFFFFFFFF);
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final scrollTopPad = topInset + 8.h + 44.h + 14.h;
+    final scrollBottomPad = 18.h + 72.h + bottomInset;
+
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(color: screenBg),
+            ),
+          ),
+          Positioned.fill(
+            child: GridView.builder(
+              padding: EdgeInsets.fromLTRB(
+                18.w,
+                scrollTopPad,
+                18.w,
+                scrollBottomPad,
               ),
-
-              SizedBox(height: 14.h),
-
-              // ✅ Grid
-              Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: zones.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 14.w,
-                    mainAxisSpacing: 14.h,
-                    childAspectRatio: 1.13, // ✅ screenshot-like
+              physics: const BouncingScrollPhysics(),
+              itemCount: zones.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 14.w,
+                mainAxisSpacing: 14.h,
+                childAspectRatio: 1.13,
+              ),
+              itemBuilder: (_, i) {
+                return ZoneCard(
+                  item: zones[i],
+                  onTap: () => context.push(
+                    Zone_Category_Screen.routeWithTitle(zones[i].title),
                   ),
-                  itemBuilder: (_, i) {
-                    return ZoneCard(item: zones[i], onTap: () {});
-                  },
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.20),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      18.w,
+                      topInset + 8.h,
+                      18.w,
+                      8.h,
+                    ),
+                    child: SizedBox(
+                      height: 44.h,
+                      child: _TopBar(
+                        onBack: () => Navigator.pop(context),
+                        onMenu: () => showCategoryMenuSheet(context),
+                        onAdd: () => showCategoryAddMenuSheet(context),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -252,14 +312,12 @@ class _CircleIconButton extends StatelessWidget {
     required this.onTap,
     required this.borderColor,
     required this.iconColor,
-    this.image,
   });
 
   final IconData? icon;
   final VoidCallback onTap;
   final Color borderColor;
   final Color iconColor;
-  final String? image;
 
   @override
   Widget build(BuildContext context) {
@@ -273,9 +331,7 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           // border: Border.all(color: borderColor, width: 1),
         ),
-        child: image != null
-            ? Image.asset(image!)
-            : Icon(icon, size: 22.sp, color: iconColor),
+        child: Icon(icon, size: 22.sp, color: iconColor),
       ),
     );
   }
@@ -439,138 +495,4 @@ class FrostCircle extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.selectedIndex,
-    required this.onTap,
-    required this.notificationCount,
-  });
-
-  final int selectedIndex;
-  final void Function(int) onTap;
-  final int notificationCount;
-
-  @override
-  Widget build(BuildContext context) {
-    //     const selected = Color(0xFF0088FE);
-    const selected = Color(0xFF111827);
-    const unselected = Color(0xFF111827);
-
-    final items = <_NavItem>[
-      const _NavItem(label: "Devices", icon: "assets/Group 28.png"),
-      const _NavItem(label: "Analytics", icon: "assets/bar 5.png"),
-      const _NavItem(label: "Dashboard", icon: "assets/Mask group copy 6.png"),
-      // const _NavItem(label: "Voice", icon: "assets/image 98.png"),
-      const _NavItem(label: "Notifications", icon: "assets/Group 43.png"),
-      const _NavItem(label: "Automations", icon: "assets/Mask group (8).png"),
-    ];
-
-    return Container(
-      height: 72.h,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.74),
-        border: const Border(
-          top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
-        ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth / items.length;
-          return Stack(
-            children: [
-              // selection indicator (blue 3px bar like your figma)
-              Positioned(
-                top: 0,
-                left: w * selectedIndex + (w - 46.w) / 2,
-                child: Container(
-                  width: 46.w,
-                  height: 3.h,
-                  decoration: BoxDecoration(
-                    color: selected,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(2.r),
-                      bottomRight: Radius.circular(2.r),
-                    ),
-                  ),
-                ),
-              ),
-
-              Row(
-                children: List.generate(items.length, (i) {
-                  final isSel = i == selectedIndex;
-                  final color = isSel ? selected : unselected;
-                  final item = items[i];
-
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () => onTap(i),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Image.asset(
-                                item.icon,
-                                width: 26.sp,
-                                height: 26.sp,
-                                color: color,
-                              ),
-                              if (item.label == "Notifications" &&
-                                  notificationCount > 0)
-                                Positioned(
-                                  right: -10.w,
-                                  top: -6.h,
-                                  child: Container(
-                                    width: 19.w,
-                                    height: 15.h,
-                                    alignment: Alignment.center,
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 2.w,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFE019A),
-                                      borderRadius: BorderRadius.circular(18.r),
-                                    ),
-                                    child: Text(
-                                      notificationCount.toString(),
-                                      style: TextStyle(
-                                        fontSize: 10.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w700,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _NavItem {
-  final String label;
-  final String icon;
-  const _NavItem({required this.label, required this.icon});
 }

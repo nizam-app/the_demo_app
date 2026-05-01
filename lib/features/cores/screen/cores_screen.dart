@@ -1,7 +1,11 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 
 class CoresScreen extends StatefulWidget {
   const CoresScreen({super.key});
@@ -16,8 +20,22 @@ class _CoresScreenState extends State<CoresScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String? _selectedCoreId = 'aican_demo';
+  static const int _bottomNavIndex = 2;
 
-  static const _bg = Color(0xFFF3F4F6);
+  void _onNavItemTapped(int index) {
+    const routes = [
+      '/devices',
+      '/analytics',
+      '/home',
+      '/notifications',
+      '/settings',
+    ];
+    if (index >= 0 && index < routes.length) {
+      context.go(routes[index]);
+    }
+  }
+
+  static const _bg = Color(0xFFE1E1E1);
   static const _cardBg = Color(0xFFFFFFFF);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -38,145 +56,203 @@ class _CoresScreenState extends State<CoresScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 100.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  //  SizedBox(height: 10.h),
-                    _buildSearchBar(),
-                    SizedBox(height: 16.h),
-                    _buildSectionTitle('Local access'),
-                    SizedBox(height: 12.h),
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final scrollBottomPad = 18.h + 72.h + bottomInset + 88.h;
 
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26.r),
-                          color: Colors.white,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: _bg.withOpacity(0.10),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(decoration: BoxDecoration(color: _bg)),
+              ),
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    top: scrollTopPadding,
+                    bottom: scrollBottomPad,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSearchBar(),
+                      SizedBox(height: 16.h),
+                      _buildSectionTitle('Local access'),
+                      SizedBox(height: 12.h),
+
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 14.h,
                         ),
-                        child: _buildCoreCard(
-                          id: 'node24',
-                          name: 'Node 24',
-                          pillText: '*KX5Z',
-                          timeText: 'Today 12:25',
-                          isSelected: _selectedCoreId == 'node24',
-                          onTap: () => setState(() => _selectedCoreId = 'node24'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
-                    _buildSectionTitle('Remote access'),
-                    SizedBox(height: 12.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-                      child: Container(
-                        decoration: BoxDecoration(
+                        child: Container(
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(26.r),
-                          color: Colors.white
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildCoreCard(
-                              id: 'rd_suta',
-                              name: 'RD Suta',
-                              pillText: '*KX5Z',
-                              timeText: 'Yesterday 13:26',
-                              isSelected: _selectedCoreId == 'rd_suta',
-                              onTap: () => setState(() => _selectedCoreId = 'rd_suta'),
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(26.r),
-                                topRight: Radius.circular(26.r),
-                              ),
-                            ),
-                          _InnerDivider(),
-                    
-                            _buildCoreCard(
-                              id: 'aican_demo',
-                              name: 'Aican Demo Account',
-                              pillText: '*KX5Z',
-                              timeText: 'Before 10 days',
-                              isSelected: _selectedCoreId == 'aican_demo',
-                              showCheckmark: true,
-                              onTap: () =>
-                                  setState(() => _selectedCoreId = 'aican_demo'),
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(26.r),
-                                bottomRight: Radius.circular(26.r),
-                              ),
-                            ),
-
-                          ],
+                            color: Colors.white,
+                          ),
+                          child: _buildCoreCard(
+                            id: 'node24',
+                            name: 'Node 24',
+                            pillText: '*KX5Z',
+                            timeText: 'Today 12:25',
+                            isSelected: _selectedCoreId == 'node24',
+                            onTap: () =>
+                                setState(() => _selectedCoreId = 'node24'),
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(height: 24.h),
+                      _buildSectionTitle('Remote access'),
+                      SizedBox(height: 12.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 2.h,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(26.r),
+                            color: Colors.white,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildCoreCard(
+                                id: 'rd_suta',
+                                name: 'RD Suta',
+                                pillText: '*KX5Z',
+                                timeText: 'Yesterday 13:26',
+                                isSelected: _selectedCoreId == 'rd_suta',
+                                onTap: () =>
+                                    setState(() => _selectedCoreId = 'rd_suta'),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(26.r),
+                                  topRight: Radius.circular(26.r),
+                                ),
+                              ),
+                              _InnerDivider(),
 
-                  ],
+                              _buildCoreCard(
+                                id: 'aican_demo',
+                                name: 'Aican Demo Account',
+                                pillText: '*KX5Z',
+                                timeText: 'Before 10 days',
+                                isSelected: _selectedCoreId == 'aican_demo',
+                                showCheckmark: true,
+                                onTap: () => setState(
+                                  () => _selectedCoreId = 'aican_demo',
+                                ),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(26.r),
+                                  bottomRight: Radius.circular(26.r),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 200.h),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.20),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: _buildHeader(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: _buildFAB(context),
+        bottomNavigationBar: BottomNavBarWidget(
+          selectedIndex: _bottomNavIndex,
+          onItemTapped: _onNavItemTapped,
+          backgroundOpacity: 0.10,
+          useBackdropBlur: true,
         ),
       ),
-      floatingActionButton: _buildFAB(context),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-      child: Row(
-        children: [
-          GlobalCircleIconBtn(
-            child: Image.asset(
-              'assets/aro.png',
-              width: 16.w,
-              height: 16.h,
-            ),
-            onTap: () => Navigator.maybePop(context),
-            // color: Color(0xFFF3F4F6),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Cores',
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _primary,
-                  fontFamily: 'Inter',
-                ),
+    return Row(
+      children: [
+        GlobalCircleIconBtn(
+          color: const Color(0xFFFFFFFF),
+          child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+          onTap: () => Navigator.maybePop(context),
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              'Cores',
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w600,
+                color: _primary,
+                fontFamily: 'Inter',
               ),
             ),
           ),
-          SizedBox(width: 36.w),
-        ],
-      ),
+        ),
+        SizedBox(width: 36.w),
+      ],
     );
   }
 
   Widget _buildSearchBar() {
     return ListenableBuilder(
-      listenable: _searchFocusNode,
+      listenable: Listenable.merge([_searchFocusNode, _searchController]),
       builder: (context, _) {
         final hasFocus = _searchFocusNode.hasFocus;
+        final isTyping = hasFocus && _searchController.text.trim().isNotEmpty;
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
           child: Container(
-            padding: EdgeInsets.all(hasFocus ? 1.5.w : 0),
+            padding: EdgeInsets.all(isTyping ? 1.5.w : 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(26.r),
-              gradient: hasFocus
+              gradient: isTyping
                   ? const LinearGradient(
                       colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
                       begin: Alignment.centerLeft,
@@ -192,7 +268,7 @@ class _CoresScreenState extends State<CoresScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.circular(hasFocus ? 22.r : 26.r),
+                  borderRadius: BorderRadius.circular(isTyping ? 22.r : 26.r),
                 ),
                 child: TextField(
                   controller: _searchController,
@@ -201,7 +277,9 @@ class _CoresScreenState extends State<CoresScreen> {
                     hintText: 'Search',
                     hintStyle: TextStyle(
                       fontSize: 16.sp,
-                      color: Color(0xFF6B7280), // 0xFF6B7280 - visible on white0xFF6B7280
+                      color: Color(
+                        0xFF6B7280,
+                      ), // 0xFF6B7280 - visible on white0xFF6B7280
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
                     ),
@@ -321,7 +399,7 @@ class _CoresScreenState extends State<CoresScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                  timeText,
+                    timeText,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
@@ -331,16 +409,11 @@ class _CoresScreenState extends State<CoresScreen> {
                   ),
                   SizedBox(height: 14.h),
                   if (isSelected)
-                    Icon(
-                      Icons.check,
-                      size: 26.sp,
-                      color:_fabIcon,
-                    )
+                    Icon(Icons.check, size: 26.sp, color: _fabIcon)
                   else
                     SizedBox(height: 22.sp),
                 ],
               ),
-
             ],
           ),
         ),
@@ -355,7 +428,13 @@ class _CoresScreenState extends State<CoresScreen> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-           Center(child: Image.asset("assets/images/rd_suta.png", height: 20.h, width: 20.w,)),
+          Center(
+            child: Image.asset(
+              "assets/images/rd_suta.png",
+              height: 20.h,
+              width: 20.w,
+            ),
+          ),
           if (showCheckmark)
             Positioned(
               right: 6.w,
@@ -382,7 +461,7 @@ class _CoresScreenState extends State<CoresScreen> {
   Widget _buildFAB(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-         shape: BoxShape.circle,
+        shape: BoxShape.circle,
         //borderRadius: BorderRadius.all(Radius.circular(100)),
         // boxShadow: [
         //   BoxShadow(
@@ -403,20 +482,13 @@ class _CoresScreenState extends State<CoresScreen> {
           child: SizedBox(
             width: 46.w,
             height: 46.h,
-            child: Icon(
-              Icons.add_rounded,
-              size: 30.sp,
-              color: _primary, 
-            
-            ),
+            child: Icon(Icons.add_rounded, size: 30.sp, color: _primary),
           ),
         ),
       ),
     );
   }
 }
-
-
 
 class _InnerDivider extends StatelessWidget {
   const _InnerDivider();
@@ -427,7 +499,7 @@ class _InnerDivider extends StatelessWidget {
     final left = 40.w + 12.w + 14.w;
     return Container(
       height: 1.h,
-      margin: EdgeInsets.only(left: left, ),
+      margin: EdgeInsets.only(left: left),
       color: const Color(0xFFE5E7EB),
     );
   }

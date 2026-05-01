@@ -165,7 +165,7 @@ Widget _pillField({
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            padding: EdgeInsets.symmetric(horizontal: 25.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -210,7 +210,7 @@ Widget _pillField({
                   keyboardType: TextInputType.emailAddress,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
 
                 // ✅ Password (only changed field container logic)
                 _pillField(
@@ -220,7 +220,7 @@ Widget _pillField({
                   obscureText: true,
                 ),
 
-                SizedBox(height: 32.h),
+                SizedBox(height: 18.h),
 
                 // Login button with gradient
                 GestureDetector(
@@ -252,7 +252,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
 
                 // "Or via social networks" text
                 Center(
@@ -267,7 +267,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 18.h),
 
                 // Social login buttons - Apple first, then Google
                 Row(
@@ -292,8 +292,8 @@ Widget _pillField({
                             children: [
                               Image.asset(
                                 ImagePath.appleLogo,
-                                width: 26.w,
-                                height: 26.h,
+                                width: 22.w,
+                                height: 22.h,
                               ),
                               SizedBox(width: 8.w),
                               Text(
@@ -332,8 +332,8 @@ Widget _pillField({
                             children: [
                               Image.asset(
                                 ImagePath.googleLogo,
-                                width: 26.w,
-                                height: 26.h,
+                                width: 22.w,
+                                height: 22.h,
                               ),
                               SizedBox(width: 8.w),
                               Text(
@@ -353,7 +353,7 @@ Widget _pillField({
                   ],
                 ),
 
-                SizedBox(height: 40.h),
+                SizedBox(height: 18.h),
 
                 // "Forgot Password ?" link at bottom center
                 Center(
@@ -380,7 +380,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 130.h),
+                SizedBox(height: 200.h),
 
                 // "Don't have an account? Register" text
                 Center(
@@ -412,7 +412,7 @@ Widget _pillField({
                   ),
                 ),
 
-                SizedBox(height: 40.h),
+                SizedBox(height: 20.h),
               ],
             ),
           ),

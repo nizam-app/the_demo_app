@@ -21,7 +21,7 @@ class _VoiceScreenState extends State<VoiceScreen> {
       '/analytics',
       '/home', // Voice points to home
       '/notifications',
-      '/automations',
+      '/settings',
     ];
     if (index < routes.length) {
       context.go(routes[index]);

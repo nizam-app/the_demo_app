@@ -1,10 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-const _bg = Color(0xFFF3F4F6);
-const _cardBg = Colors.white;
-const _border = Color(0xFFE5E7EB);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _danger = Color(0xFFFE019A);
@@ -23,17 +22,29 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 10.h, bottom: 0.h),
-      decoration: BoxDecoration(
-        color: _bg.withOpacity(0.74),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
       ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 10.h, bottom: 0.h),
+          decoration: BoxDecoration(
+            // Keep the sheet clearly transparent like the dashboard header/footer.
+            // color: Colors.white.withOpacity(0.28),
+            color: Color(0xFFE5E7EB).withOpacity(0.18),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24.r),
+              topRight: Radius.circular(24.r),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
             Padding(
               padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
               child: Row(
@@ -61,8 +72,8 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   Container(
                     width: 30.w,
                     height: 30.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFFFFFF),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -81,24 +92,73 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             ),
 
             /// CARD 1
+           
+
+            SizedBox(height: 10.h),
+
+            /// CARD 2
             _Card(
               child: Column(
                 children: [
-                  /// WIDGET SIZE
-                  // _RowItem(
-                  //   imagePath: 'assets/images/widget_size.png',
-                  //   title: 'Widget size',
-                  //   trailing: _SizeSegment(
-                  //     value: _selectedSize,
-                  //     onChanged: (v) => setState(() => _selectedSize = v),
-                  //     imageWidth: 22.w, // custom image width
-                  //     imageHeight: 22.h, // custom image height
-                  //   ),
+                  // _SimpleRow(
+                  //   imagePath: 'assets/images/add_device.png',
+                  //   title: 'Add device',
+                  //   imageWidth: 23.w,
+                  //   imageHeight: 23.h,
                   // ),
-                  /// SLIDER WIDGET
+                  _SimpleRow(
+                    imagePath: 'assets/images/rename.png',
+                    title: 'Rename',
+                    trailingText: 'Light',
+                    iconPath: 'assets/images/edit_image.png',
+                    imageWidth: 26.w,
+                    imageHeight: 26.h,
+                    iconHeight: 13.h,
+                    iconWidth: 14.w,
+                  ),
+                  
+                  _SimpleRow(
+                    imagePath: 'assets/images/add_device.png',
+                    title: 'Add device',
+                    imageWidth: 23.w,
+                    imageHeight: 23.h,
+                  ),
+
+                  
+                ],
+              ),
+            ),
+              SizedBox(height:10.h,),
+           // Card 2
+            _Card(
+              child: Column(
+                children: [
+                  _RowItem(
+                    imagePath: 'assets/images/header_icon.png',
+                    title: 'Header background',
+                    imageHeight: 26.h,
+                    imageWidth: 26.w,
+                    trailing: Image.asset("assets/images/header_image.png", height: 39.h, width: 39.w,fit: BoxFit.cover,),
+                  ),
+                  _SimpleRow(
+                    imagePath: 'assets/images/move_up.png',
+                    title: 'Move up',
+                    imageWidth: 22.w,
+                    imageHeight: 22.h,
+                  ),
+
+                  _SimpleRow(
+                    title: 'Move down',
+                    imagePath: 'assets/images/move_down.png',
+                    imageWidth: 22.w,
+                    imageHeight: 22.h,
+                  ),
+
+                  
+                  
                   _RowItem(
                     imagePath: 'assets/images/Slider.png',
-                    title: 'Slider widget',
+                    title: 'Horizontal scrolling',
                     imageHeight: 22.h,
                     imageWidth: 22.w,
                     trailing: SizedBox(
@@ -122,53 +182,12 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       imageHeight: 22.h, // custom image height
                     ),
                   ),
+                  SizedBox(
+                    height: 13.h,
+                  )
                 ],
               ),
-            ),
-
-            SizedBox(height: 10.h),
-
-            /// CARD 2
-            _Card(
-              child: Column(
-                children: [
-                  // _SimpleRow(
-                  //   imagePath: 'assets/images/add_device.png',
-                  //   title: 'Add device',
-                  //   imageWidth: 23.w,
-                  //   imageHeight: 23.h,
-                  // ),
-                  _SimpleRow(
-                    imagePath: 'assets/images/rename.png',
-                    title: 'Rename',
-                    trailingText: 'Light',
-                    imageWidth: 26.w,
-                    imageHeight: 26.h,
-                  ),
-
-                  _SimpleRow(
-                    imagePath: 'assets/images/add_device.png',
-                    title: 'Add device',
-                    imageWidth: 23.w,
-                    imageHeight: 23.h,
-                  ),
-
-                  _SimpleRow(
-                    imagePath: 'assets/images/move_up.png',
-                    title: 'Move up',
-                    imageWidth: 22.w,
-                    imageHeight: 22.h,
-                  ),
-
-                  _SimpleRow(
-                    title: 'Move down',
-                    imagePath: 'assets/images/move_down.png',
-                    imageWidth: 22.w,
-                    imageHeight: 22.h,
-                  ),
-                ],
-              ),
-            ),
+            ), 
 
             SizedBox(height: 10.h),
             /// REMOVE
@@ -177,7 +196,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               height: 49.h,
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(26.r),
               ),
               child: Row(
@@ -202,6 +221,8 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             )
          
           ],
+            ),
+          ),
         ),
       ),
     );
@@ -217,7 +238,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: Color(0xFFE5E7EB).withOpacity(0.18),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: child,
@@ -254,30 +275,28 @@ class _RowItem extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 14.w,
-        right: 14.w,
-        top: 10.h,
-        bottom: 10.h,
-      ),
-      child: Row(
-        children: [
-          leading,
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
-                color: _textPrimary,
+    return Container(
+      height: 55.h,
+      child: Padding(
+        padding: EdgeInsets.only(left: 12.w, right: 14.w),
+        child: Row(
+          children: [
+            leading,
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: _textPrimary,
+                ),
               ),
             ),
-          ),
-          trailing,
-        ],
+            trailing,
+          ],
+        ),
       ),
     );
   }
@@ -286,19 +305,27 @@ class _RowItem extends StatelessWidget {
 /// SIMPLE ROW
 class _SimpleRow extends StatelessWidget {
   final String? imagePath;
+  final String? iconPath; 
   final IconData? icon;
   final String title;
   final String? trailingText;
   final double imageWidth;
   final double imageHeight;
+  final double iconWidth;
+  final double iconHeight;
 
   const _SimpleRow({
     this.imagePath,
+    this.iconPath, 
     this.icon,
     required this.title,
     this.trailingText,
     this.imageWidth = 20,
     this.imageHeight = 20,
+    this.iconWidth = 14,
+    this.iconHeight = 14,
+
+    
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
 
   @override
@@ -312,34 +339,50 @@ class _SimpleRow extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-      child: Row(
-        children: [
-          leading,
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
-                color: _textPrimary,
+    return Container(
+      height: 55.h,
+      child: Padding(
+        padding: EdgeInsets.only(left: 12.w, right: 17.w,),
+        child: Row(
+          children: [
+            leading,
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Inter',
+                  color: _textPrimary,
+                ),
               ),
             ),
-          ),
-          if (trailingText != null)
-            Text(
-              trailingText!,
-              style: TextStyle(
-                color: _textSecondary,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Inter',
+            if (trailingText != null)
+              Row(
+                children: [
+                  Text(
+                    trailingText!,
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+
+
+                  ),
+                  SizedBox(width: 5.w,),
+                  Image.asset(
+                    iconPath!,
+                    width: iconWidth.w,
+                    height: iconHeight.h,
+                    fit: BoxFit.contain,
+                  )
+                ],
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -402,7 +445,7 @@ class _SizeSegment extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: _bg,
+        color: Colors.white.withOpacity(0.22),
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Row(

@@ -1,9 +1,17 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
-import 'package:workpleis/features/cores/screen/cores_screen.dart';
+import 'package:workpleis/features/core/screen/core_screen.dart';
+import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
+import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
+
+import '../../profile/screen/profile_screen.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
@@ -14,7 +22,6 @@ class SettingsScreen extends StatelessWidget {
   static const String routeName = '/settings';
 
   // Colors (match design)
-  static const _bg = Color(0xFFF3F4F6);
   static const _card = Colors.white;
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -23,75 +30,121 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(context),
-            // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: 22.h),
-                child: Column(
-                  children: [
-                    SizedBox(height: 16.h),
-                    // Account Information Card
-                    _buildAccountCard(),
-                    SizedBox(height: 30.h),
-                    // General Settings Card
-                    _buildGeneralSettingsCard(context),
-                    SizedBox(height: 30.h),
-                    // Assistance and Preferences Card
-                    _buildAssistanceCard(),
-                    SizedBox(height: 30.h),
-                    // Sign Out Card
-                    _buildSignOutCard(),
-                  ],
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
+    final inHomeShell = CustomBottomNavBar.of(context) != null;
+    final scrollBottomPad =
+        22.h + bottomInset + (inHomeShell ? 72.h : 0);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: Scaffold(
+        backgroundColor: Color(0xFFF3F4F6),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    top: scrollTopPadding,
+                    bottom: scrollBottomPad,
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 16.h),
+                      _buildAccountCard(context),
+                      SizedBox(height: 30.h),
+                      _buildGeneralSettingsCard(context),
+                      SizedBox(height: 30.h),
+                      _buildAssistanceCard(),
+                      SizedBox(height: 30.h),
+                      _buildSignOutCard(),
+                       SizedBox(height: 200.h),
+                        
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          8.h,
+                        ),
+                        child: _buildHeader(context),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-      child: Row(
-        children: [
-          GlobalCircleIconBtn(
-            child: Image.asset(
-              'assets/aro.png',
-              width: 16.w,
-              height: 16.h,
-            ),
-            onTap: () => Navigator.maybePop(context),
-            // color: Color(0xFFF3F4F6),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _primary,
-                  fontFamily: 'Inter',
-                ),
+    return Row(
+      children: [
+        GlobalCircleIconBtn(
+          color: _card,
+          child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+          onTap: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/menu');
+            }
+          },
+        ),
+        Expanded(
+          child: Center(
+            child: Text(
+              'Settings',
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w600,
+                color: _primary,
+                fontFamily: 'Inter',
               ),
             ),
           ),
-          SizedBox(width: 36.w),
-        ],
-      ),
+        ),
+        SizedBox(width: 36.w),
+      ],
     );
   }
 
-  Widget _buildAccountCard() {
+  Widget _buildAccountCard(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -154,13 +207,9 @@ class SettingsScreen extends StatelessWidget {
                           fontFamily: 'Inter',
                         ),
                       ),
-                      SizedBox(height: 15,),
+                      SizedBox(height: 15),
 
-                      Container(
-                        height: 1.h,
-                        color: _divider,
-                      ),
-
+                      Container(height: 1.h, color: _divider),
                     ],
                   ),
                 ),
@@ -169,12 +218,15 @@ class SettingsScreen extends StatelessWidget {
           ),
           // Divider
           // Profile Option
-         Padding(
-           padding:  EdgeInsets.only(left: 22.w, right: 20.w,bottom: 18.h,),
-           child: Row(
-              children: [
+          Padding(
+            padding: EdgeInsets.only(left: 22.w, right: 20.w, bottom: 18.h),
+            child: InkWell(
+              onTap: () => context.push(ProfileScreen.routeName),
+
+              child: Row(
+                children: [
                   SizedBox(
-                    width:18.w,                     
+                    width: 18.w,
                     height: 18.h,
                     child: Center(
                       child: Image.asset(
@@ -187,27 +239,27 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    "Profile",
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                      color:  _primary,
-                      fontFamily: 'Inter',
+                  Expanded(
+                    child: Text(
+                      "Profile",
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: _primary,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
-                ),
 
-                Image.asset(
-                  "assets/Mask group copy 4.png",
-                  width: 13.sp,
-                  height: 13.sp,
-
-                ),
-              ],
+                  Image.asset(
+                    "assets/Mask group copy 4.png",
+                    width: 13.sp,
+                    height: 13.sp,
+                  ),
+                ],
+              ),
             ),
-         ),
+          ),
         ],
       ),
     );
@@ -216,7 +268,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildGeneralSettingsCard(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
-     // padding: EdgeInsets.only(left: 22.w, top: 17.h, right: 22.w, bottom: 16.h),
+      // padding: EdgeInsets.only(left: 22.w, top: 17.h, right: 22.w, bottom: 16.h),
       decoration: BoxDecoration(
         color: _card,
         borderRadius: BorderRadius.circular(22.r),
@@ -228,7 +280,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Core',
             iconWidth: 22,
             iconHeight: 22,
-            onTap: () => context.push(CoresScreen.routeName),
+            onTap: () => context.go(CoreScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
@@ -236,7 +288,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Interfaces',
             iconWidth: 20,
             iconHeight: 20,
-            onTap: () {},
+            onTap: () => context.push(InterfacesScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
@@ -244,7 +296,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'Integrations',
             iconWidth: 20,
             iconHeight: 20,
-            onTap: () {},
+            onTap: () => context.push(IntegrationsScreen.routeName),
           ),
           _Divider(),
           _SettingsRow(
@@ -253,7 +305,7 @@ class SettingsScreen extends StatelessWidget {
             badge: '1',
             iconWidth: 22,
             iconHeight: 22,
-            onTap: ()=>context.push(UsersScreen.routeName),
+            onTap: () => context.push(UsersScreen.routeName),
           ),
         ],
       ),
@@ -283,9 +335,7 @@ class SettingsScreen extends StatelessWidget {
             iconWidth: 30,
             iconHeight: 30,
             onTap: () {},
-            
           ),
-
         ],
       ),
     );
@@ -342,13 +392,18 @@ class _SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final imgW = (iconWidth ?? _settingsIconSize);
     final imgH = (iconHeight ?? _settingsIconSize);
-    
+
     return InkWell(
       onTap: onTap,
       highlightColor: Colors.transparent,
       splashColor: _primary.withOpacity(0.04),
       child: Padding(
-        padding:EdgeInsets.only(left: 20.w, right: 22.w, top: 17.h , bottom: 16.h),
+        padding: EdgeInsets.only(
+          left: 20.w,
+          right: 22.w,
+          top: 17.h,
+          bottom: 16.h,
+        ),
         child: Row(
           children: [
             if (imagePath != null) ...[
@@ -382,10 +437,10 @@ class _SettingsRow extends StatelessWidget {
               Container(
                 width: 30.w,
                 height: 30.h,
-                decoration:  BoxDecoration(
+                decoration: BoxDecoration(
                   color: _blue,
-                 borderRadius: BorderRadius.circular(30.sp),
-                 // shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(30.sp),
+                  // shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
@@ -407,7 +462,6 @@ class _SettingsRow extends StatelessWidget {
                 'assets/Mask group copy 4.png',
                 width: 13.w,
                 height: 13.h,
-
               ),
           ],
         ),
