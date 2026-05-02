@@ -267,12 +267,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         ),
         SizedBox(height: 10.h),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          padding: EdgeInsets.only(left: 60.w,),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(
+                flex:9, 
                 child: Text(
                   widget.deviceTitle,
                   textAlign: TextAlign.center,
@@ -280,7 +281,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 22.sp,
+                    fontSize: 23.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF111827),
                   ),
@@ -288,7 +289,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               ),
               SizedBox(width: 10.w),
               Padding(
-                padding: EdgeInsets.only(top: 6.h),
+                padding: EdgeInsets.only(top: 8.h),
                 child: Image.asset(
                   "assets/Group 63.png",
                   height: 13.h,
