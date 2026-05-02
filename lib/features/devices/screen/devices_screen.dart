@@ -450,8 +450,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               const SizedBox(width: 6),
                               Text(
                                 '${_bathroomTemp.toStringAsFixed(1)}°C',
-                                style: const TextStyle(
-                                  fontSize: 16, // screenshot vibe
+                                style:  TextStyle(
+                                  fontSize: 16.sp, // screenshot vibe
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF111827),
                                   fontFamily: 'Inter',
@@ -617,7 +617,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               value: _brightnessPct / 100.0,
                               onChanged: (v) => setState(
                                 () => _brightnessPct =
-                                    (v * 100).round().clamp(0, 54),
+                                    (v * 100).round().clamp(0, 100),
                               ),
                             ),
                           ),
@@ -1636,11 +1636,11 @@ class _TimeTag extends StatelessWidget {
           Image.asset(
             'assets/image 81 (1).png', // pin
             width: 16.sp,
-            height: 16.sp,
+            height: 16.sp,              
             filterQuality: FilterQuality.high,
             color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFFF3F4F6),
             colorBlendMode: BlendMode.srcIn,
-          ),
+          ),                                                                                                                                                                                                                                
           SizedBox(width: 8.w),
           Text(
             text,

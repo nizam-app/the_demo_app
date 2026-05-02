@@ -35,7 +35,7 @@ class _CoresScreenState extends State<CoresScreen> {
     }
   }
 
-  static const _bg = Color(0xFFE1E1E1);
+  static const _bg = Color(0xFFF3F4F6);
   static const _cardBg = Color(0xFFFFFFFF);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -96,8 +96,8 @@ class _CoresScreenState extends State<CoresScreen> {
 
                       Padding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 14.w,
-                          vertical: 14.h,
+                          horizontal: 15.w,
+                          vertical: 15.h,
                         ),
                         child: Container(
                           decoration: BoxDecoration(
@@ -204,12 +204,12 @@ class _CoresScreenState extends State<CoresScreen> {
           ),
         ),
         floatingActionButton: _buildFAB(context),
-        bottomNavigationBar: BottomNavBarWidget(
-          selectedIndex: _bottomNavIndex,
-          onItemTapped: _onNavItemTapped,
-          backgroundOpacity: 0.10,
-          useBackdropBlur: true,
-        ),
+        // bottomNavigationBar: BottomNavBarWidget(
+        //   selectedIndex: _bottomNavIndex,
+        //   onItemTapped: _onNavItemTapped,
+        //  // backgroundOpacity: 0.10,
+        //   useBackdropBlur: true,
+        // ),
       ),
     );
   }

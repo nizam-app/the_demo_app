@@ -60,6 +60,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   /// Dashboard category pills (0 Light … 3 Security).
   int _homeCategoryIndex = 0;
+  int _brightnessPct = 50;
 
   double _bedroomDimmer = 0.72;
   double _bathroomThermostat = 24.6;
@@ -205,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _LightDimmerCard(
                                       title:
-                                          'Bedroom spot light\nsmall patio blue light',
+                                          'Bedroom spot light  \n small patio blue light',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -1625,14 +1626,20 @@ class _LightDimmerCard extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: 52.w,
-                    child: Text(
-                      '${(percent * 100).round()}%',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111827),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${(percent * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                        textAlign: TextAlign.left,
+                        maxLines: 1,
+                        softWrap: false,
                       ),
-                      textAlign: TextAlign.left,
                     ),
                   ),
                   SizedBox(width: 10.w),
@@ -1661,54 +1668,80 @@ class _LightDimmerCard extends StatelessWidget {
   }
 }
 
+
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent, this.onChanged});
+  const _DimmerPill({
+    required this.percent,
+    this.onChanged,
+  });
+
   final double percent;
   final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
+
+    // Bigger button width
     final w = 133.w;
+    final h = 35.h;
+    final radius = 24.r;
+
+    //final textValue = '${(p * 100).round()}%';
 
     final pill = Container(
-      height: 35.h,
       width: w,
+      height: h,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(radius),
+        boxShadow: const [],
       ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: FractionallySizedBox(
-              widthFactor: (1 - p),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE1E1E1),
-                  borderRadius: BorderRadius.horizontal(
-                    right: const Radius.circular(26),
-                    left: Radius.circular((1 - p) >= 0.98 ? 26 : 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Stack(
+          children: [
+            /// Right gray dim area
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: FractionallySizedBox(
+                  widthFactor: (1 - p),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE1E1E1),
+
+                      /// Fix right corner radius
+                      borderRadius: BorderRadius.horizontal(
+                        right: Radius.circular(radius),
+                        left: Radius.circular(
+                          (1 - p) >= 0.98 ? radius : 0,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: EdgeInsets.only(left: 14.w),
-              child: Icon(
-                Icons.wb_sunny_outlined,
-                size: 20.sp,
-                color: (p <= 0.0)
-                    ? const Color(0xFF6B7280) // full gray (0% white)
-                    : const Color(0xFFFAB300), // any white (>= 1%)
+
+            /// Sun Icon
+            Positioned(
+              left: 12.w,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 18.sp,
+                  color: p <= 0
+                      ? const Color(0xFF6B7280)
+                      : const Color(0xFFFAB300),
+                ),
               ),
             ),
-          ),
-        ],
+
+          ],
+        ),
       ),
     );
 
@@ -1726,6 +1759,9 @@ class _DimmerPill extends StatelessWidget {
     );
   }
 }
+
+
+
 
 class _ThermostatCard extends StatelessWidget {
   const _ThermostatCard({
