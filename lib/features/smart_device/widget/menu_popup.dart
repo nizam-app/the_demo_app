@@ -299,7 +299,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         // color: Colors.white.withOpacity(0.18),
-                        color: Color(0xFFE5E7EB).withOpacity(0.18),
+                        color: Color(0xFFFFFFFF).withOpacity(0.4),
                         border: Border(
                           bottom: BorderSide(
                             color: const Color(0xFFE5E7EB).withOpacity(0.18),
@@ -376,7 +376,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 width: 30.w,
                 height: 30.h,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.28),
+                  color: Colors.white.withOpacity(0.6),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -412,7 +412,7 @@ class _Card extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(14.sp),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.28),
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: child,

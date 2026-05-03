@@ -136,7 +136,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   /// LED dimmer ring: 0 = min, 1 = 100%.
   double _ledDimmerPercent = 1.0;
 
-  static const List<String> _sceneLabels = <String>['All On', 'Night', 'All Off'];
+  static const List<String> _sceneLabels = <String>[
+    'All On',
+    'Night',
+    'All Off',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +178,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       DeviceDetailsControlMode.lightSceneValues) ...[
                     _buildSceneValuesSection(),
                   ] else if (widget.controlMode !=
-                      DeviceDetailsControlMode.rgbwPicker &&
+                          DeviceDetailsControlMode.rgbwPicker &&
                       widget.controlMode !=
                           DeviceDetailsControlMode.ledDimmer) ...[
                     _buildOnOffRow(),
@@ -267,13 +271,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         ),
         SizedBox(height: 10.h),
         Padding(
-          padding: EdgeInsets.only(left: 60.w,),
+          padding: EdgeInsets.only(left: 24.w, right: 24.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(
-                flex:9, 
+                flex: 9,
                 child: Text(
                   widget.deviceTitle,
                   textAlign: TextAlign.center,
@@ -397,7 +401,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF111827),
           ),
         ),
@@ -408,8 +412,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             height: ringSize,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final Size sz =
-                    Size(constraints.maxWidth, constraints.maxHeight);
+                final Size sz = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) =>
@@ -431,21 +437,21 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         '${(_ledDimmerPercent * 100).round()}%',
                         style: TextStyle(
                           fontFamily: 'Inter',
-                          fontSize: 34.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 52.sp,
+                          fontWeight: FontWeight.w600,
                           color: const Color(0xFF111827),
                         ),
                       ),
                       Builder(
                         builder: (context) {
-                          final Offset c =
-                              Offset(sz.width / 2, sz.height / 2);
+                          final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double ang = -math.pi / 2 +
+                          final double ang =
+                              -math.pi / 2 +
                               2 * math.pi * _ledDimmerPercent.clamp(0.0, 1.0);
-                          final Offset thumb = c +
-                              Offset(math.cos(ang), math.sin(ang)) * radius;
+                          final Offset thumb =
+                              c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           return Positioned(
                             left: thumb.dx - 11.r,
                             top: thumb.dy - 11.r,
@@ -454,15 +460,20 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                                 width: 22.r,
                                 height: 22.r,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF22C55E),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.22),
-                                      blurRadius: 5.r,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                  color: const Color(0xFF00E52A),
+                                  borderRadius: BorderRadius.circular(26.r),
+                                  border: Border.all(
+                                    width: 3,
+                                    color: Colors.white,
+                                  ),
+                                  //shape: BoxShape.circle,
+                                  // boxShadow: [
+                                  //   BoxShadow(
+                                  //     color: Colors.white,
+                                  //     blurRadius: 5.r,
+                                  //     offset: const Offset(0, 8),
+                                  //   ),
+                                  // ],
                                 ),
                               ),
                             ),
@@ -575,7 +586,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           style: TextStyle(
             fontFamily: 'Inter',
             fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF111827),
           ),
         ),
@@ -586,7 +597,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             height: wheelSize,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final Size layoutSize = Size(constraints.maxWidth, constraints.maxHeight);
+                final Size layoutSize = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) =>
@@ -603,24 +617,33 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       ),
                       Builder(
                         builder: (context) {
-                          final Offset c = Offset(layoutSize.width / 2, layoutSize.height / 2);
-                          final double maxR = layoutSize.shortestSide / 2 - 18.r;
-                          final double r = maxR * _rgbwSaturation.clamp(0.0, 1.0);
+                          final Offset c = Offset(
+                            layoutSize.width / 2,
+                            layoutSize.height / 2,
+                          );
+                          final double maxR =
+                              layoutSize.shortestSide / 2 - 10.r;
+                          final double r =
+                              maxR * _rgbwSaturation.clamp(0.0, 1.0);
                           final double rad = _rgbwHue * math.pi / 180;
-                          final Offset thumb = c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
+                          final Offset thumb =
+                              c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
                           return Positioned(
-                            left: thumb.dx - 14.w,
-                            top: thumb.dy - 14.w,
+                            left: thumb.dx - 20.w,
+                            top: thumb.dy - 20.w,
                             child: IgnorePointer(
                               child: Container(
                                 width: 28.w,
                                 height: 28.w,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 3),
+                                  borderRadius: BorderRadius.circular(26.r),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.18),
+                                      color: Colors.black.withOpacity(0.0),
                                       blurRadius: 6.r,
                                       offset: const Offset(0, 2),
                                     ),
@@ -644,7 +667,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF9CA3AF),
           ),
@@ -659,11 +682,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 TextSpan(
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 14.sp,
-                    color: const Color(0xFF6B7280),
+                    fontSize: 17.sp,
+                    height: 1.2,
                   ),
                   children: [
-                    const TextSpan(text: 'Intensity: ',style: TextStyle(fontWeight:FontWeight.w400)),
+                    TextSpan(
+                      text: 'Intensity: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
                     TextSpan(
                       text: '${(_rgbwIntensity * 100).round()}%',
                       style: TextStyle(
@@ -679,32 +708,44 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 children: [
                   Icon(
                     Icons.wb_sunny_outlined,
-                    size: 18.sp,
+                    size: 15.sp,
                     color: const Color(0xFF9CA3AF),
                   ),
+                  SizedBox(width: 6.w),
                   Expanded(
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        trackHeight: 7.h,
-                        thumbShape:
-                            RoundSliderThumbShape(enabledThumbRadius: 13.r),
-                        overlayShape:
-                            RoundSliderOverlayShape(overlayRadius: 18.r),
+                        trackHeight: 8.h,
+                        trackShape: const _RgbwIntensityGradientTrackShape(),
+                        thumbShape: _RgbwMagentaThumbShape(
+                          enabledOuterRadius: 15.5.r,
+                          enabledInnerRadius: 12.r,
+                        ),
+                        overlayShape: RoundSliderOverlayShape(
+                          overlayRadius: 22.r,
+                        ),
+                        activeTrackColor: const Color(0xFFE91EAC),
+                        inactiveTrackColor: const Color(0xFFFFFFFF),
+                        disabledActiveTrackColor: const Color(0xFFE91EAC),
+                        disabledInactiveTrackColor: const Color(0xFFFFFFFF),
+                        thumbColor: const Color(0xFFE91EAC),
+                        disabledThumbColor: const Color(0xFFE91EAC),
                       ),
                       child: Slider(
                         value: _rgbwIntensity.clamp(0.0, 1.0),
                         min: 0,
                         max: 1,
                         activeColor: const Color(0xFFE91EAC),
-                        inactiveColor: const Color(0xFFE5E7EB),
+                        inactiveColor: const Color(0xFFFFFFFF),
                         onChanged: (v) =>
                             setState(() => _rgbwIntensity = v.clamp(0.0, 1.0)),
                       ),
                     ),
                   ),
+                  SizedBox(width: 6.w),
                   Icon(
-                    Icons.wb_sunny_rounded,
-                    size: 26.sp,
+                    Icons.wb_sunny,
+                    size: 28.sp,
                     color: const Color(0xFF6B7280),
                   ),
                 ],
@@ -732,6 +773,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildOnOffRow() {
+    const Color offSelectedBg = Color(0xFF6B7280);
+    const Color onSelectedBg = Color(0xFF0088FE);
+    const Color inactiveBg = Colors.white;
+    const Color inactiveBorder = Color(0xFFE5E7EB);
+    const Color inactiveFg = Color(0xFF6B7280);
+
     return Padding(
       padding: EdgeInsets.only(left: 130.w, right: 130.w),
       child: Row(
@@ -743,22 +790,23 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 height: 39.h,
                 width: 78.w,
                 decoration: BoxDecoration(
-                  color: _isOn ? Color(0xFF6B7280) : const Color(0xFF0088FE),
+                  color: !_isOn ? offSelectedBg : inactiveBg,
                   borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(
+                    color: !_isOn ? offSelectedBg : inactiveBorder,
+                    width: 1,
+                  ),
                 ),
                 child: Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        "assets/off_logo.png",
+                        'assets/off_logo.png',
                         height: 13.h,
                         width: 13.w,
                         fit: BoxFit.cover,
-                        color:    Colors.white,
-                        // _isOn
-                        //     ? Color(0xFF111827)
-                        //     : const Color(0xFF6B7280),
+                        color: !_isOn ? Colors.white : inactiveFg,
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -767,10 +815,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color:  Color(0xFFFFFFFF),
-                          // _isOn
-                          //     ? Color(0xFF111827)
-                          //     : const Color(0xFFFFFFFF),
+                          color: !_isOn ? Colors.white : inactiveFg,
                         ),
                       ),
                     ],
@@ -787,8 +832,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 height: 39.h,
                 width: 78.w,
                 decoration: BoxDecoration(
-                  color: _isOn ? const Color(0xFF0088FE) : Color(0xFF6B7280),
+                  color: _isOn ? onSelectedBg : inactiveBg,
                   borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(
+                    color: _isOn ? onSelectedBg : inactiveBorder,
+                    width: 1,
+                  ),
                 ),
                 child: Center(
                   child: Row(
@@ -797,8 +846,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       Icon(
                         Icons.power_settings_new_rounded,
                         size: 18.sp,
-                        color:  Color(0xFFFFFFFF),
-                        //_isOn ? Colors.white : const Color(0xFF111827),
+                        color: _isOn ? Colors.white : inactiveFg,
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -807,8 +855,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color:Colors.white,
-                          //_isOn ? Colors.white : const Color(0xFF111827),
+                          color: _isOn ? Colors.white : inactiveFg,
                         ),
                       ),
                     ],
@@ -845,7 +892,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 13.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF6B7280),
             ),
@@ -874,14 +921,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         return ClipOval(
           child: Image.asset(
             path,
-            width: 44.w,
-            height: 44.w,
+            width: 28.w,
+            height: 28.w,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Icon(
-              Icons.lightbulb_outline,
-              size: 28.sp,
-              color: const Color(0xFF0088FE),
-            ),
+            errorBuilder: (_, __, ___) => 
+            Image.asset(
+                "assets/light_image.png",
+                height:28.h, 
+                width:28.w,
+                fit:BoxFit.cover, 
+                //color: const Color(0xFF6B7280),
+              ),
           ),
         );
       case 1:
@@ -890,24 +940,30 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           child: ClipOval(
             child: Image.asset(
               path,
-              width: 44.w,
-              height: 44.w,
+              width: 28.w,
+              height: 28.w,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.lightbulb_outline,
-                size: 28.sp,
-                color: const Color(0xFF6B7280),
+              errorBuilder: (_, __, ___) => Image.asset(
+                "assets/gray_image.png",
+                height: 28.h,
+                width: 28.w,
+                fit: BoxFit.cover,
+                //color: const Color(0xFF6B7280),
               ),
             ),
           ),
         );
       case 2:
       default:
-        return Icon(
-          Icons.cloud_rounded,
-          size: 28.sp,
-          color: const Color(0xFF6B7280),
+        return Image.asset(
+          "assets/black_image.png",
+          height: 28.h,
+          width: 28.w,
+          fit: BoxFit.cover,
+          //color: const Color(0xFF6B7280),
         );
+
+        // Icon(Icons.cloud_rounded, size: 28.sp, color: const Color(0xFF6B7280));
     }
   }
 
@@ -1065,7 +1121,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               child: Text(
                 'Manage your device',
                 style: TextStyle(
-                  fontFamily: 'Inter',                                            
+                  fontFamily: 'Inter',
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF111827),
@@ -1140,7 +1196,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 border: Colors.transparent,
               ),
 
-          
               SizedBox(width: 10.w),
               _ChipPill(
                 text: _label,
@@ -1342,7 +1397,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           ),
           const Divider(height: 1, color: Color(0xFFE1E1E1)),
           Padding(
-            padding: EdgeInsets.only(left:  5.w, top:  5.h, right:  5.w, bottom:  5.h),
+            padding: EdgeInsets.only(
+              left: 5.w,
+              top: 5.h,
+              right: 5.w,
+              bottom: 5.h,
+            ),
             child: _miniAutomationRow(
               title: 'Set actions based on value of',
               subtitle: 'Multi-Value Switch',
@@ -1351,13 +1411,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               imagewidth: 40.w,
             ),
           ),
-           Padding(
-             padding: EdgeInsets.only(left: 65.w, right:  14.w,),
-             child: Divider(height: 1, color: Color(0xFFE1E1E1)),
-           ),
           Padding(
-
-            padding: EdgeInsets.only(left:  5.w, top:  5.h, right:  5.w, bottom:  5.h),
+            padding: EdgeInsets.only(left: 65.w, right: 14.w),
+            child: Divider(height: 1, color: Color(0xFFE1E1E1)),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+              left: 5.w,
+              top: 5.h,
+              right: 5.w,
+              bottom: 5.h,
+            ),
             child: _miniAutomationRow(
               title: 'Temperature hysteresis controller (2)',
               subtitle: 'Multi-Value Switch',
@@ -1417,10 +1481,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       height: 120.h,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Color(0xFFCDE5FF),
-                            Color(0xFFFFFFFF),
-                          ],
+                          colors: [Color(0xFFCDE5FF), Color(0xFFFFFFFF)],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -1433,8 +1494,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         children: [
                           /// ✅ Chart (transparent background হওয়া লাগবে)
                           Positioned.fill(
-                            child: CustomPaint(painter: _SimpleChartPainter(),
-                              child: Container(color: Colors.transparent),),
+                            child: CustomPaint(
+                              painter: _SimpleChartPainter(),
+                              child: Container(color: Colors.transparent),
+                            ),
                           ),
 
                           /// ✅ Top Right Tag
@@ -1776,7 +1839,12 @@ Widget deviceOverviewCard() {
         SizedBox(
           height: 55.h,
           child: Padding(
-            padding: EdgeInsets.only(left:  14.w, top:  14.h, bottom:  14.h, right: 14.w),
+            padding: EdgeInsets.only(
+              left: 14.w,
+              top: 14.h,
+              bottom: 14.h,
+              right: 14.w,
+            ),
             child: Text(
               'Device overview',
               style: TextStyle(
@@ -1788,13 +1856,9 @@ Widget deviceOverviewCard() {
             ),
           ),
         ),
-        Divider(
-          color: const Color(0xFFE1E1E1),
-          height: 1,
-          thickness: 1,
-        ),
+        Divider(color: const Color(0xFFE1E1E1), height: 1, thickness: 1),
         Padding(
-          padding: EdgeInsets.only(top: 14.h, bottom:  14.h),
+          padding: EdgeInsets.only(top: 14.h, bottom: 14.h),
           child: Column(
             children: [
               Row(
@@ -1836,7 +1900,7 @@ Widget deviceOverviewCard() {
                   _deviceOverviewGridCell(
                     'Avr cost',
                     '₪ 139.8',
-                     valueColor: overviewValueGreen,
+                    valueColor: overviewValueGreen,
                     labelColor: overviewLabel,
                     titleColor: overviewTitle,
                     shekelSymbolUsesTitleColor: true,
@@ -1898,7 +1962,8 @@ Widget _deviceOverviewGridCell(
   );
 
   final String trimmedValue = value.trimLeft();
-  final bool splitShekel = shekelSymbolUsesTitleColor &&
+  final bool splitShekel =
+      shekelSymbolUsesTitleColor &&
       trimmedValue.startsWith('₪') &&
       trimmedValue.length > 1;
 
@@ -1958,7 +2023,6 @@ Widget _deviceOverviewGridCell(
   );
 }
 
-
 class _SceneValueOption extends StatelessWidget {
   const _SceneValueOption({
     required this.label,
@@ -1983,10 +2047,10 @@ class _SceneValueOption extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64.w,
-              height: 64.w,
+              width: 48.w,
+              height: 48.w,
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFFE8EAEE) : Colors.white,
+                color: selected ? const Color(0xFFE1E1E1) : Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected
@@ -2025,12 +2089,168 @@ class _SceneValueOption extends StatelessWidget {
   }
 }
 
+/// Light pink → magenta active track; white inactive (matches RGBW intensity spec).
+class _RgbwIntensityGradientTrackShape extends SliderTrackShape
+    with BaseSliderTrackShape {
+  const _RgbwIntensityGradientTrackShape();
+
+  static const List<Color> _gradientColors = <Color>[
+    Color(0xFFFFD6EC),
+    Color(0xFFE91EAC),
+  ];
+
+  @override
+  bool get isRounded => true;
+
+  static Paint _gradientPaint(Rect bounds, {required bool ltrActive}) {
+    return Paint()
+      ..shader = LinearGradient(
+        begin: ltrActive ? Alignment.centerLeft : Alignment.centerRight,
+        end: ltrActive ? Alignment.centerRight : Alignment.centerLeft,
+        colors: _gradientColors,
+      ).createShader(bounds);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
+    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
+      return;
+    }
+
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    final double trackHeight = sliderTheme.trackHeight!;
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
+    const double additionalActiveTrackHeight = 0;
+    final Radius activeTrackRadius = Radius.circular(
+      (trackRect.height + additionalActiveTrackHeight) / 2,
+    );
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
+
+    final Paint inactivePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    // Same segment map as [RoundedRectSliderTrackShape]: leading segment uses
+    // "left" paint, trailing uses "right" paint. Active (gradient) follows the
+    // slider start edge (LTR = left, RTL = right).
+    final bool leadingSegmentGradient = isLTR;
+    final bool trailingSegmentGradient = isRTL;
+
+    final bool drawInactiveTrack =
+        thumbCenter.dx < (trackRect.right - (trackHeight / 2));
+    if (drawInactiveTrack) {
+      final RRect trailing = RRect.fromLTRBR(
+        thumbCenter.dx - (trackHeight / 2),
+        isRTL
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        trackRect.right,
+        isRTL
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? trackRadius : activeTrackRadius,
+      );
+      context.canvas.drawRRect(
+        trailing,
+        trailingSegmentGradient
+            ? _gradientPaint(trailing.outerRect, ltrActive: false)
+            : inactivePaint,
+      );
+    }
+    final bool drawActiveTrack =
+        thumbCenter.dx > (trackRect.left + (trackHeight / 2));
+    if (drawActiveTrack) {
+      final RRect leading = RRect.fromLTRBR(
+        trackRect.left,
+        isLTR
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        thumbCenter.dx + (trackHeight / 2),
+        isLTR
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? activeTrackRadius : trackRadius,
+      );
+      context.canvas.drawRRect(
+        leading,
+        leadingSegmentGradient
+            ? _gradientPaint(leading.outerRect, ltrActive: true)
+            : inactivePaint,
+      );
+    }
+  }
+}
+
+/// Magenta fill with white outer ring (RGBW intensity thumb).
+class _RgbwMagentaThumbShape extends SliderComponentShape {
+  _RgbwMagentaThumbShape({
+    required this.enabledOuterRadius,
+    required this.enabledInnerRadius,
+    this.disabledOuterRadius,
+    this.disabledInnerRadius,
+  });
+
+  final double enabledOuterRadius;
+  final double enabledInnerRadius;
+  final double? disabledOuterRadius;
+  final double? disabledInnerRadius;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    final double r = isEnabled
+        ? enabledOuterRadius
+        : (disabledOuterRadius ?? enabledOuterRadius);
+    return Size.fromRadius(r);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final double outer = Tween<double>(
+      begin: disabledOuterRadius ?? enabledOuterRadius,
+      end: enabledOuterRadius,
+    ).evaluate(enableAnimation);
+    final double inner = Tween<double>(
+      begin: disabledInnerRadius ?? enabledInnerRadius,
+      end: enabledInnerRadius,
+    ).evaluate(enableAnimation);
+    final Canvas canvas = context.canvas;
+    canvas.drawCircle(center, outer, Paint()..color = Colors.white);
+    canvas.drawCircle(center, inner, Paint()..color = const Color(0xFFE91EAC));
+  }
+}
+
 /// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
 class _LedDimmerRingPainter extends CustomPainter {
-  _LedDimmerRingPainter({
-    required this.percent,
-    required this.strokeWidth,
-  });
+  _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
 
   final double percent;
   final double strokeWidth;
@@ -2042,7 +2262,7 @@ class _LedDimmerRingPainter extends CustomPainter {
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
     final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE5E7EB)
+      ..color = const Color(0xFFE1E1E1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -2056,11 +2276,11 @@ class _LedDimmerRingPainter extends CustomPainter {
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
-        Color(0xFF22D3EE),
-        Color(0xFF34D399),
-        Color(0xFF22C55E),
+        Color(0xFF00E52A),
+        Color(0xFF00D1FF),
+        Color(0xFF00E52A),
       ],
-      stops: const <double>[0.0, 0.55, 1.0],
+      stops: const <double>[0.0, 0.70, 1.0],
       transform: GradientRotation(-math.pi / 2),
       tileMode: TileMode.clamp,
     );
@@ -2114,10 +2334,7 @@ class _RgbHueWheelPainter extends CustomPainter {
 
     final Paint soften = Paint()
       ..shader = RadialGradient(
-        colors: <Color>[
-          Colors.white,
-          Colors.white.withOpacity(0.0),
-        ],
+        colors: <Color>[Colors.white, Colors.white.withOpacity(0.0)],
         stops: const <double>[0.05, 1],
       ).createShader(bounds)
       ..blendMode = BlendMode.softLight;
@@ -2198,7 +2415,6 @@ class _StatBlock extends StatelessWidget {
 //   }
 // }
 
-
 class _ChipPill extends StatelessWidget {
   const _ChipPill({
     required this.text,
@@ -2237,7 +2453,6 @@ class _ChipPill extends StatelessWidget {
     );
   }
 }
-
 
 class _ModeButton extends StatelessWidget {
   const _ModeButton({

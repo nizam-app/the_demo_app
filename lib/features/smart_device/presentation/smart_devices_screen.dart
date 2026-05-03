@@ -873,7 +873,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.black,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'Inter',
                 ),
               ),
@@ -883,7 +883,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             percent: _bathroomDimmerPercent,
             comfortOn: _bathroomComfortOn,
             onChanged: (v) =>
-                setState(() => _bathroomDimmerPercent = v.clamp(0.0, 0.5)),
+                setState(() => _bathroomDimmerPercent = v.clamp(0.0, 1.0)),
             onSunTap: () =>
                 setState(() => _bathroomComfortOn = !_bathroomComfortOn),
           ),
