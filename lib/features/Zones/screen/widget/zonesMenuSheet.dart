@@ -7,7 +7,7 @@ class ZonesMenuSheet extends StatelessWidget {
   const ZonesMenuSheet({super.key});
 
   // Keep the sheet clearly transparent like the dashboard header/footer.
-  static final _bgTransparent = Colors.white.withOpacity(0.18);
+  static final _bgTransparent = Colors.white.withOpacity(0.4);
   static final _card = Colors.white.withOpacity(0.6);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
@@ -63,7 +63,7 @@ class ZonesMenuSheet extends StatelessWidget {
               height: 30.h,
               decoration: BoxDecoration(
                 //color: Colors.white.withOpacity(0.28),
-                color: Color(0xFFE5E7EB).withOpacity(0.18),
+                color: Color(0xFFFFFFFF).withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
