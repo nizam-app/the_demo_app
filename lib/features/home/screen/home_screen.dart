@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _LightDimmerCard(
                                       title:
-                                          'Bedroom spot light  \n small patio blue light',
+                                          'Bedroom spot light \n small patio blue light',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -532,8 +532,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -550,8 +550,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -810,8 +810,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
                       ),
@@ -1632,17 +1632,16 @@ class _LightDimmerCard extends StatelessWidget {
                       child: Text(
                         '${(percent * 100).round()}%',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 17.sp, fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
                         textAlign: TextAlign.left,
-                        maxLines: 1,
-                        softWrap: false,
+                        // maxLines: 1,
+                        softWrap: false
                       ),
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                  //SizedBox(width: 10.w),
                   Expanded(
                     child: _DimmerPill(
                       percent: percent,
@@ -1835,6 +1834,7 @@ class _ThermostatCard extends StatelessWidget {
                       fontSize: 16.sp,
                       color: const Color(0xFF111827),
                       height: 1.15,
+                      //fontWeight: FontWeight.w700,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1882,8 +1882,8 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -2020,39 +2020,39 @@ class _BlindCard extends StatelessWidget {
                                 ),
                                 size: 35,
                               ),
-                              SizedBox(width: 7.w),
+                              SizedBox(width: 5.w),
                               Image.asset(
                                 'assets/Group 32.jpg',
                                 width: 10.w,
                                 height: 17.h,
                                 fit: BoxFit.contain,
                               ),
-                              SizedBox(width: 3.w),
+                              SizedBox(width: 2.w),
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize:18.sp,
+                                  fontWeight: FontWeight.w800,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
+                             SizedBox(width: 5.w),
                               Image.asset(
                                 'assets/Vector 4.jpg',
                                 width: 8.w,
                                 height: 17.h,
                                 fit: BoxFit.contain,
                               ),
-                              SizedBox(width: 3.w),
+                              SizedBox(width: 2.w),
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w800,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
-                              SizedBox(width: 7.w),
+                              SizedBox(width: 5.w),
                               _CircleBtn(
                                 marked: upMarked,
                                 onTap: onUp,
@@ -2187,8 +2187,8 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
                       color: const Color(0xFF111827),
                     ),
                   ),

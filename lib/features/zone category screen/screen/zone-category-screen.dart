@@ -315,7 +315,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                         // ✅ Chart card
                         _ChartCard(),
 
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 60.h),
                       ],
                     ),
                   ),
@@ -566,8 +566,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -584,8 +584,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -844,8 +844,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
                       ),
@@ -1677,14 +1677,14 @@ class _LightDimmerCard extends StatelessWidget {
                     child: Text(
                       '${(percent * 100).round()}%',
                       style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
                       textAlign: TextAlign.left,
                     ),
                   ),
-                  SizedBox(width: 10.w),
+                 // SizedBox(width: 10.w),
                   Expanded(
                     child: _DimmerPill(
                       percent: percent,
@@ -1879,8 +1879,8 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -1994,39 +1994,39 @@ class _BlindCard extends StatelessWidget {
                                 ),
                                 size: 35,
                               ),
-                              SizedBox(width: 7.w),
+                              SizedBox(width: 5.w),
                               Image.asset(
                                 'assets/Group 32.jpg',
                                 width: 10.w,
                                 height: 17.h,
                                 fit: BoxFit.contain,
                               ),
-                              SizedBox(width: 3.w),
+                              SizedBox(width: 2.w),
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w800,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
+                              SizedBox(width: 5.w),
                               Image.asset(
                                 'assets/Vector 4.jpg',
                                 width: 8.w,
                                 height: 17.h,
                                 fit: BoxFit.contain,
                               ),
-                              SizedBox(width: 3.w),
+                              SizedBox(width: 2.w),
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w800,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
-                              SizedBox(width: 7.w),
+                              SizedBox(width: 5.w),
                               _CircleBtn(
                                 marked: upMarked,
                                 onTap: onUp,
@@ -2141,8 +2141,8 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
                       color: const Color(0xFF111827),
                     ),
                   ),
