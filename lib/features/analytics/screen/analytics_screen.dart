@@ -360,6 +360,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                     .state =
                                 i,
                       ),
+                      SizedBox(height: 80.h,),
                     ],
                   ),
                 ),
@@ -368,7 +369,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 0,
+                  bottom: 10,
                   child: BottomNavBarWidget(
                     selectedIndex: 1,
                     onItemTapped: _onNavItemTapped,

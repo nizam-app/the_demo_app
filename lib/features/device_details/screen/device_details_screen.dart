@@ -189,7 +189,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   _buildTabsRow(),
                   SizedBox(height: 12.h),
                   _buildTabContent(),
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 80.h),
                 ],
               ),
             ),
@@ -394,18 +394,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             ],
           ),
         ),
-        SizedBox(height: 22.h),
-        Text(
-          'LED Dimmer',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
-        SizedBox(height: 18.h),
+        // SizedBox(height: 22.h),
+        // Text(
+        //   'LED Dimmer',
+        //   textAlign: TextAlign.center,
+        //   style: TextStyle(
+        //     fontFamily: 'Inter',
+        //     fontSize: 20.sp,
+        //     fontWeight: FontWeight.w600,
+        //     color: const Color(0xFF111827),
+        //   ),
+        // ),
+        SizedBox(height: 14.h),
         Center(
           child: SizedBox(
             width: ringSize,
@@ -579,17 +579,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             ],
           ),
         ),
-        SizedBox(height: 22.h),
-        Text(
-          'RGBW',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-          ),
-        ),
+        // SizedBox(height: 22.h),
+        // Text(
+        //   'RGBW',
+        //   textAlign: TextAlign.center,
+        //   style: TextStyle(
+        //     fontFamily: 'Inter',
+        //     fontSize: 20.sp,
+        //     fontWeight: FontWeight.w600,
+        //     color: const Color(0xFF111827),
+        //   ),
+        // ),
         SizedBox(height: 14.h),
         Center(
           child: SizedBox(
@@ -684,13 +684,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                     fontFamily: 'Inter',
                     fontSize: 17.sp,
                     height: 1.2,
+                    // color: Color(0xFF111827)  ,
+                    // fontWeight: FontWeight.w600,
                   ),
                   children: [
                     TextSpan(
                       text: 'Intensity: ',
                       style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
                       ),
                     ),
                     TextSpan(
@@ -893,8 +895,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF6B7280),
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF111827),
             ),
           ),
           SizedBox(height: 20.h),

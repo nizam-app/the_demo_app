@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:workpleis/features/Zones/screen/zones_screen.dart';
+
+import '../../categories/screen/categories_screen.dart';
 
 const _bgOverlay = Color(0x99000000);
 const _sheetBg = Color(0xFFF2F3F5);
@@ -145,7 +149,12 @@ class _AssignCategoryZoneSheetState
                         },
                       );
                     }),
-                    _AddRow(label: "Add category")
+                    InkWell(
+                          onTap: (){
+                            context.push(CategoriesScreen.routeName);
+                          },
+                        
+                        child: _AddRow(label: "Add category"))
                   ],
                 ),
 
@@ -172,7 +181,11 @@ class _AssignCategoryZoneSheetState
                         },
                       );
                     }),
-                    _AddRow(label: "Add zone")
+                    InkWell(
+                        onTap: (){
+                          context.push(ZonesScreen.routeName);
+                        },
+                        child: _AddRow(label: "Add zone"))
                   ],
                 ),
                       ],
