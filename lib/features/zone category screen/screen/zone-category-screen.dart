@@ -181,7 +181,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                     height: 185.h,
                                     child: _LightDimmerCard(
                                       title:
-                                          'Bedroom spot light\nsmall patio blue light',
+                                          'Bedroom spot light small patio blue light',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -195,10 +195,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Bedroom spot light\nsmall patio blue light',
+                                            'Bedroom spot light small patio blue light',
                                         imageAssetPath:
                                             'assets/Mask group (5).png',
-                                        controlButtonCount: 2,
+                                        controlButtonCount: 1,
                                       ),
                                     ),
                                   ),
@@ -248,7 +248,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _BlindCard(
-                                      title: 'Blind Living Room\nnorth window',
+                                      title: 'Blind Living Room north window',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
                                       mode: _blindManual ? 'M' : 'A',
@@ -566,8 +566,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -584,8 +584,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -844,7 +844,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
@@ -1677,8 +1677,8 @@ class _LightDimmerCard extends StatelessWidget {
                     child: Text(
                       '${(percent * 100).round()}%',
                       style: TextStyle(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
                       textAlign: TextAlign.left,
@@ -1879,8 +1879,8 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -2006,7 +2006,7 @@ class _BlindCard extends StatelessWidget {
                                 '$downPercent%',
                                 style: TextStyle(
                                   fontSize: 18.sp,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -2022,7 +2022,7 @@ class _BlindCard extends StatelessWidget {
                                 '$upPercent%',
                                 style: TextStyle(
                                   fontSize: 18.sp,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -2141,8 +2141,8 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
                   ),
