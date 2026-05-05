@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _LightDimmerCard(
                                       title:
-                                          'Bedroom spot light \n small patio blue light',
+                                          'Bedroom spot light small patio blue light',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -220,10 +220,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Bedroom spot light\nsmall patio blue light',
+                                            'Bedroom spot light small patio blue light',
                                         imageAssetPath:
                                             'assets/Mask group (5).png',
-                                        controlButtonCount: 2,
+                                        controlButtonCount: 1,
                                       ),
                                     ),
                                   ),
@@ -281,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _BlindCard(
-                                      title: 'Blind Living Room\nnorth window',
+                                      title: 'Blind Living Room north window',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
                                       mode: _blindManual ? 'M' : 'A',
@@ -292,10 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Blind Living Room\nnorth window',
+                                            'Blind Living Room north window',
                                         imageAssetPath:
                                             'assets/Rectangle 823.png',
-                                        controlButtonCount: 2,
+                                        controlButtonCount: 1,
                                       ),
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
@@ -532,7 +532,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 17.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
@@ -550,7 +550,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 17.sp,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF111827),
                       ),
@@ -810,7 +810,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
@@ -951,13 +951,13 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'RGBW light\npatio entry',
+                deviceName: 'RGBW light patio entry',
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'RGBW light\npatio entry',
+                  deviceTitle: 'RGBW light patio entry',
                   imageAssetPath:
                       'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                   controlButtonCount: 2,
@@ -1632,7 +1632,7 @@ class _LightDimmerCard extends StatelessWidget {
                       child: Text(
                         '${(percent * 100).round()}%',
                         style: TextStyle(
-                          fontSize: 17.sp, fontWeight: FontWeight.w800,
+                          fontSize: 18.sp, fontWeight: FontWeight.w800,
                           color: const Color(0xFF111827),
                         ),
                         textAlign: TextAlign.left,
@@ -1882,7 +1882,7 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 17.sp,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF111827),
                     ),
@@ -2031,8 +2031,8 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize:18.sp,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize:19.sp,
+                                  fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -2047,8 +2047,8 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 19.sp,
+                                  fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
                               ),
@@ -2187,8 +2187,8 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 19.sp,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
                   ),

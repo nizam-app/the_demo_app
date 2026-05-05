@@ -159,6 +159,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildBody(BuildContext context) {
+    final bool isLightSceneValues =
+        widget.controlMode == DeviceDetailsControlMode.lightSceneValues;
     return SafeArea(
       top: true,
       bottom: false,
@@ -173,7 +175,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildHero(),
-                  SizedBox(height: 18.h),
+                  SizedBox(height: isLightSceneValues ? 10.h : 18.h),
                   if (widget.controlMode ==
                       DeviceDetailsControlMode.lightSceneValues) ...[
                     _buildSceneValuesSection(),
@@ -183,7 +185,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           DeviceDetailsControlMode.ledDimmer) ...[
                     _buildOnOffRow(),
                   ],
-                  SizedBox(height: 16.h),
+                  SizedBox(height: isLightSceneValues ? 10.h : 16.h),
                   _buildInfoPill(),
                   SizedBox(height: 32.h),
                   _buildTabsRow(),
@@ -260,12 +262,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             widget.imageAssetPath,
             height: 88.h,
             width: 88.w,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Image.asset(
               'assets/Mask group (5).png',
               height: 88.h,
               width: 88.w,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
           ),
         ),
@@ -795,7 +797,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   color: !_isOn ? offSelectedBg : inactiveBg,
                   borderRadius: BorderRadius.circular(26.r),
                   border: Border.all(
-                    color: !_isOn ? offSelectedBg : inactiveBorder,
+                    color: !_isOn ? offSelectedBg : inactiveBg,
                     width: 1,
                   ),
                 ),
@@ -817,7 +819,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: !_isOn ? Colors.white : inactiveFg,
+                          color: !_isOn ? Colors.white : Colors.black,
                         ),
                       ),
                     ],
@@ -837,7 +839,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   color: _isOn ? onSelectedBg : inactiveBg,
                   borderRadius: BorderRadius.circular(26.r),
                   border: Border.all(
-                    color: _isOn ? onSelectedBg : inactiveBorder,
+                    color: _isOn ? onSelectedBg : inactiveBg,
                     width: 1,
                   ),
                 ),
@@ -857,7 +859,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: _isOn ? Colors.white : inactiveFg,
+                          color: _isOn ? Colors.white : Colors.black,
                         ),
                       ),
                     ],
@@ -899,15 +901,20 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               color: const Color(0xFF111827),
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 12.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(3, (int i) {
-              return _SceneValueOption(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List<Widget>.generate(3, (int i) {
+              final option = _SceneValueOption(
                 label: _sceneLabels[i],
                 selected: _selectedSceneIndex == i,
                 child: _sceneValueIcon(i),
                 onTap: () => setState(() => _selectedSceneIndex = i),
+              );
+              if (i == 0) return option;
+              return Padding(
+                padding: EdgeInsets.only(left: 6.w),
+                child: option,
               );
             }),
           ),
@@ -918,6 +925,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
   Widget _sceneValueIcon(int sceneSlot) {
     final String path = widget.imageAssetPath;
+    
     switch (sceneSlot) {
       case 0:
         return ClipOval(
@@ -925,13 +933,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             path,
             width: 28.w,
             height: 28.w,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => 
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) =>
             Image.asset(
                 "assets/light_image.png",
-                height:28.h, 
+                height:28.h,
                 width:28.w,
-                fit:BoxFit.cover, 
+                fit:BoxFit.contain,
                 //color: const Color(0xFF6B7280),
               ),
           ),
@@ -944,12 +952,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               path,
               width: 28.w,
               height: 28.w,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => Image.asset(
                 "assets/gray_image.png",
                 height: 28.h,
                 width: 28.w,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 //color: const Color(0xFF6B7280),
               ),
             ),
@@ -957,12 +965,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         );
       case 2:
       default:
-        return Image.asset(
-          "assets/black_image.png",
-          height: 28.h,
-          width: 28.w,
-          fit: BoxFit.cover,
-          //color: const Color(0xFF6B7280),
+        return ClipOval(
+          child: Image.asset(
+            "assets/black_image.png",
+            height: 28.h,
+            width: 28.w,
+            fit: BoxFit.contain,
+            //color: const Color(0xFF6B7280),
+          ),
         );
 
         // Icon(Icons.cloud_rounded, size: 28.sp, color: const Color(0xFF6B7280));
@@ -2044,13 +2054,13 @@ class _SceneValueOption extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 100.w,
+        width: 84.w,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 48.w,
-              height: 48.w,
+              height: 48.h,
               decoration: BoxDecoration(
                 color: selected ? const Color(0xFFE1E1E1) : Colors.white,
                 shape: BoxShape.circle,
@@ -2073,7 +2083,7 @@ class _SceneValueOption extends StatelessWidget {
               alignment: Alignment.center,
               child: child,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
             Text(
               label,
               textAlign: TextAlign.center,
@@ -2251,30 +2261,144 @@ class _RgbwMagentaThumbShape extends SliderComponentShape {
 }
 
 /// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
+//Final code; 
+
+// class _LedDimmerRingPainter extends CustomPainter {
+//   _LedDimmerRingPainter({
+//     required this.percent,
+//     required this.strokeWidth,
+//   });
+//
+//   final double percent;
+//   final double strokeWidth;
+//
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final Offset center =
+//     Offset(size.width / 2, size.height / 2);
+//
+//     final double midRadius =
+//         size.shortestSide / 2 - strokeWidth / 2 - 2;
+//
+//     final Rect arcRect =
+//     Rect.fromCircle(center: center, radius: midRadius);
+//
+//     // ----------------------
+//     // 🔘 Track (Background)
+//     // ----------------------
+//     final Paint trackPaint = Paint()
+//       ..color = const Color(0xFFE1E1E1)
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = strokeWidth
+//       ..strokeCap = StrokeCap.round;
+//
+//     canvas.drawArc(
+//       arcRect,
+//       math.pi / 2, // ✅ bottom start
+//       2 * math.pi,
+//       false,
+//       trackPaint,
+//     );
+//
+//     // ----------------------
+//     // 🔘 Progress Arc
+//     // ----------------------
+//     final double clamped = percent.clamp(0.0, 1.0);
+//     if (clamped <= 0.001) return;
+//
+//     final SweepGradient gradient = SweepGradient(
+//       colors: const <Color>[
+//         Color(0xFF00E52A),
+//         Color(0xFF00D1FF),
+//         Color(0xFF00E52A),
+//       ],
+//       stops: const <double>[0.0, 0.50, 1.0],
+//       transform: GradientRotation(math.pi / 2), // ✅ match start
+//       tileMode: TileMode.clamp,
+//     );
+//
+//     final Paint fgPaint = Paint()
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = strokeWidth
+//       ..strokeCap = StrokeCap.round
+//       ..shader = gradient.createShader(arcRect);
+//
+//     canvas.drawArc(
+//       arcRect,
+//       math.pi / 2, // ✅ bottom start
+//       2 * math.pi * clamped,
+//       false,
+//       fgPaint,
+//     );
+//
+//     // ----------------------
+//     // 🔘 Pointer (Dot)
+//     // ----------------------
+//     final double angle =
+//         math.pi / 2 + (2 * math.pi * clamped);
+//
+//     final Offset pointer = Offset(
+//       center.dx + midRadius * math.cos(angle),
+//       center.dy + midRadius * math.sin(angle),
+//     );
+//
+//     final Paint dotPaint = Paint()
+//       ..color = const Color(0xFF00E52A)
+//       ..style = PaintingStyle.fill;
+//
+//     canvas.drawCircle(pointer, strokeWidth * 0.6, dotPaint);
+//   }
+//
+//   @override
+//   bool shouldRepaint(
+//       covariant _LedDimmerRingPainter oldDelegate) {
+//     return oldDelegate.percent != percent ||
+//         oldDelegate.strokeWidth != strokeWidth;
+//   }
+// }
+
 class _LedDimmerRingPainter extends CustomPainter {
-  _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
+  _LedDimmerRingPainter({
+    required this.percent,
+    required this.strokeWidth,
+  });
 
   final double percent;
   final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
-    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+    final Offset center =
+    Offset(size.width / 2, size.height / 2);
 
+    final double midRadius =
+        size.shortestSide / 2 - strokeWidth / 2 - 2;
+
+    final Rect arcRect =
+    Rect.fromCircle(center: center, radius: midRadius);
+
+    // ----------------------
+    // 🔘 Track (Background)
+    // ----------------------
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(arcRect, -math.pi / 2, 2 * math.pi, false, trackPaint);
+    canvas.drawArc(
+      arcRect,
+      math.pi / 2,
+      2 * math.pi,
+      false,
+      trackPaint,
+    );
 
+    // ----------------------
+    // 🔘 Progress Arc
+    // ----------------------
     final double clamped = percent.clamp(0.0, 1.0);
-    if (clamped <= 0.001) {
-      return;
-    }
+    if (clamped <= 0.001) return;
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
@@ -2282,34 +2406,119 @@ class _LedDimmerRingPainter extends CustomPainter {
         Color(0xFF00D1FF),
         Color(0xFF00E52A),
       ],
-      stops: const <double>[0.0, 0.70, 1.0],
-      transform: GradientRotation(-math.pi / 2),
+      stops: const <double>[0.0, 0.50, 1.0],
+      transform: GradientRotation(math.pi / 2),
       tileMode: TileMode.clamp,
     );
 
     final Paint fgPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..shader = gradient.createShader(
-        Rect.fromCircle(center: center, radius: midRadius),
-      );
+      ..strokeCap = StrokeCap.butt // 🔥 important fix
+      ..shader = gradient.createShader(arcRect);
 
     canvas.drawArc(
       arcRect,
-      -math.pi / 2,
+      math.pi / 2,
       2 * math.pi * clamped,
       false,
       fgPaint,
     );
+
+    // ----------------------
+    // 🔘 Pointer (Single Dot)
+    // ----------------------
+    final double angle =
+        math.pi / 2 + (2 * math.pi * clamped);
+
+    final Offset pointer = Offset(
+      center.dx + midRadius * math.cos(angle),
+      center.dy + midRadius * math.sin(angle),
+    );
+
+    // Outer white border (optional but matches your image look)
+    final Paint outerDot = Paint()
+      ..color = const Color(0xFFFFFFFF)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(pointer, strokeWidth * 1.5, outerDot);
+
+    // Inner green dot
+    final Paint innerDot = Paint()
+      ..color = const Color(0xFF00E52A)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(pointer, strokeWidth * 1, innerDot);
   }
 
   @override
-  bool shouldRepaint(covariant _LedDimmerRingPainter oldDelegate) {
+  bool shouldRepaint(
+      covariant _LedDimmerRingPainter oldDelegate) {
     return oldDelegate.percent != percent ||
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
+
+
+// class _LedDimmerRingPainter extends CustomPainter {
+//   _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
+//
+//   final double percent;
+//   final double strokeWidth;
+//
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final Offset center = Offset(size.width / 2, size.height / 2);
+//     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+//     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+//
+//     final Paint trackPaint = Paint()
+//       ..color = const Color(0xFFE1E1E1)
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = strokeWidth
+//       ..strokeCap = StrokeCap.round;
+//
+//     canvas.drawArc(arcRect, -math.pi / 2, 2 * math.pi, false, trackPaint);
+//
+//     final double clamped = percent.clamp(0.0, 1.0);
+//     if (clamped <= 0.001) {
+//       return;
+//     }
+//
+//     final SweepGradient gradient = SweepGradient(
+//       colors: const <Color>[
+//         Color(0xFF00E52A),
+//         Color(0xFF00D1FF),
+//         Color(0xFF00E52A),
+//       ],
+//       stops: const <double>[0.0, 0.70, 1.0],
+//       transform: GradientRotation(-math.pi / 2),
+//       tileMode: TileMode.clamp,
+//     );
+//
+//     final Paint fgPaint = Paint()
+//       ..style = PaintingStyle.stroke
+//       ..strokeWidth = strokeWidth
+//       ..strokeCap = StrokeCap.round
+//       ..shader = gradient.createShader(
+//         Rect.fromCircle(center: center, radius: midRadius),
+//       );
+//
+//     canvas.drawArc(
+//       arcRect,
+//       -math.pi / 2,
+//       2 * math.pi * clamped,
+//       false,
+//       fgPaint,
+//     );
+//   }
+//
+//   @override
+//   bool shouldRepaint(covariant _LedDimmerRingPainter oldDelegate) {
+//     return oldDelegate.percent != percent ||
+//         oldDelegate.strokeWidth != strokeWidth;
+//   }
+// }
 
 /// Hue spectrum disk + radial fade toward white (RGBW picker).
 class _RgbHueWheelPainter extends CustomPainter {
@@ -2380,42 +2589,6 @@ class _StatBlock extends StatelessWidget {
     );
   }
 }
-
-// class _Chip extends StatelessWidget {
-//   const _Chip({
-//     required this.label,
-//     required this.bg,
-//     required this.textColor,
-//     required this.border,
-//   });
-//
-//   final String label;
-//   final Color bg;
-//   final Color textColor;
-//   final Color border;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 25,
-//       padding: EdgeInsets.only(right: 10.w, left: 10.h),
-//       decoration: BoxDecoration(
-//         color: bg,
-//         borderRadius: BorderRadius.circular(8.r),
-//         border: Border.all(color: border, width: 1),
-//       ),
-//       child: Text(
-//         label,
-//         style: TextStyle(
-//           fontFamily: 'Inter',
-//           fontSize: 14.sp,
-//           fontWeight: FontWeight.w400,
-//           color: textColor,
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class _ChipPill extends StatelessWidget {
   const _ChipPill({

@@ -34,7 +34,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           decoration: BoxDecoration(
             // Keep the sheet clearly transparent like the dashboard header/footer.
             // color: Colors.white.withOpacity(0.28),
-            color: Color(0xFFFFFFFF).withOpacity(0.4),
+            color: Color(0xFFFFFFFF).withOpacity(0.6),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),
@@ -73,7 +73,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     width: 30.w,
                     height: 30.w,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withOpacity(0.86),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -196,7 +196,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               height: 49.h,
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withOpacity(0.86),
                 borderRadius: BorderRadius.circular(26.r),
               ),
               child: Row(
@@ -238,7 +238,7 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFFFFFFFF).withOpacity(0.4),
+        color: Color(0xFFFFFFFF).withOpacity(0.6),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: child,
