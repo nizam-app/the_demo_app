@@ -63,7 +63,7 @@ class ZonesMenuSheet extends StatelessWidget {
               height: 30.h,
               decoration: BoxDecoration(
                 //color: Colors.white.withOpacity(0.28),
-                color: Color(0xFFFFFFFF).withOpacity(0.6),
+                color: Colors.white.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -195,7 +195,7 @@ class ZonesMenuSheet extends StatelessWidget {
                 height: 52.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Color(0xFFFFFFFF).withOpacity(0.6),
+                  color: Colors.white.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(26.r),
                     border: Border.all(width: 1.w, color: Color(0xFF0088FE))
                 ),

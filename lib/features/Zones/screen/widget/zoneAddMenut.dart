@@ -61,7 +61,7 @@ class ZoneAddMenu extends StatelessWidget {
                       height: 30.h,
                       decoration: BoxDecoration(
                        // color: Colors.white.withOpacity(0.28),
-                        color: Color(0xFFFFFFFF).withOpacity(0.6),
+                        color: Colors.white.withOpacity(0.6),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(

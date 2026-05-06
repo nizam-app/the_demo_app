@@ -566,7 +566,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
@@ -584,7 +584,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
@@ -844,8 +844,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
                           color: const Color(0xFF111827),
                         ),
                       ),
@@ -1677,7 +1677,7 @@ class _LightDimmerCard extends StatelessWidget {
                     child: Text(
                       '${(percent * 100).round()}%',
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),

@@ -337,8 +337,77 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 ),
+                               
                               ],
                             ),
+
+                            SizedBox(height: 12.h),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _BlindCard(
+                                      title: 'Blind Living Room north window',
+                                      downPercent: _blindNorthDown,
+                                      upPercent: _blindNorthUp,
+                                      mode: _blindManual ? 'M' : 'A',
+                                      modeFilled: _blindManual,
+                                      imagePath: 'assets/Rectangle 823.png',
+                                      downMarked: _blindNorthMark == 1,
+                                      upMarked: _blindNorthMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                        'Blind Living Room north window',
+                                        imageAssetPath:
+                                        'assets/Rectangle 823.png',
+                                        controlButtonCount: 1,
+                                      ),
+                                      onModeTap: () => setState(
+                                            () => _blindManual = !_blindManual,
+                                      ),
+                                      onDown: () => _flashMark(
+                                        value: 1,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthDown =
+                                            (_blindNorthDown + 5).clamp(0, 100),
+                                      ),
+                                      onUp: () => _flashMark(
+                                        value: 2,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthUp =
+                                            (_blindNorthUp + 5).clamp(0, 100),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _ToggleCard(
+                                      title:
+                                      'Motion Sensor',
+                                      isOn: true,
+                                      imagePath: 'assets/images/kitchen.png',
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                        'Motion Sensor',
+                                        imageAssetPath:
+                                        'assets/images/kitchen.png',
+                                        controlButtonCount: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            
                           ],
                         ),
 
@@ -532,8 +601,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$downPercent%',
                       style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -550,8 +619,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '$upPercent%',
                       style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF111827),
                       ),
                     ),
@@ -780,7 +849,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 8.h), // ✅ smaller
 
               Text(
-                'Bedroom Thermostat\nparents room',
+                'Bedroom Thermostat parents room',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w400,
@@ -810,8 +879,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         '${value.toStringAsFixed(1)}°c',
                         style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
                           color: const Color(0xFF111827),
                         ),
                       ),
@@ -934,15 +1003,15 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'Light Scene child room',
+                deviceName: 'Heating & Cooling',
                 status: 'All On',
                 iconImage:
-                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                    'assets/images/heating_cooling.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'Light Scene child room',
+                  deviceTitle: 'Heating & Cooling',
                   imageAssetPath:
-                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                      'assets/images/heating_cooling.png',
                   controlButtonCount: 3,
                   controlMode: DeviceDetailsControlMode.lightSceneValues,
                 ),
@@ -951,16 +1020,16 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'RGBW light patio entry',
+                deviceName: 'Tunable white light',
                 status: '100%',
                 iconImage:
-                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                    'assets/white_light.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'RGBW light patio entry',
+                  deviceTitle: 'Tunable white light',
                   imageAssetPath:
-                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                  controlButtonCount: 2,
+                      'assets/white_light.png',
+                  controlButtonCount: 1,
                   controlMode: DeviceDetailsControlMode.rgbwPicker,
                 ),
               ),
@@ -1000,6 +1069,85 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () => setState(
                         () => _lightingLedBadge2Manual =
                             !_lightingLedBadge2Manual,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'Light Scene child room',
+                status: 'All On',
+                iconImage:
+                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Light Scene child room',
+                  imageAssetPath:
+                  'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'RGBW light patio entry',
+                status: '100%',
+                iconImage:
+                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'RGBW light patio entry',
+                  imageAssetPath:
+                  'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'LED Dimmer living room',
+                          status: '100%',
+                          iconImage:
+                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'LED Dimmer living room',
+                            imageAssetPath:
+                            'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 7.w,
+                    top: 7.h,
+                    child: _ModeBadge(
+                      mode: _lightingLedBadge2Manual ? 'M' : 'A',
+                      filled: _lightingLedBadge2Manual,
+                      onTap: () => setState(
+                            () => _lightingLedBadge2Manual =
+                        !_lightingLedBadge2Manual,
                       ),
                     ),
                   ),
@@ -1069,7 +1217,7 @@ class _HomeScreenState extends State<HomeScreen> {
             status,
             style: TextStyle(
               fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
               fontFamily: "Inter",
             ),
@@ -1632,7 +1780,7 @@ class _LightDimmerCard extends StatelessWidget {
                       child: Text(
                         '${(percent * 100).round()}%',
                         style: TextStyle(
-                          fontSize: 18.sp, fontWeight: FontWeight.w800,
+                          fontSize: 16.sp, fontWeight: FontWeight.bold,
                           color: const Color(0xFF111827),
                         ),
                         textAlign: TextAlign.left,
@@ -1882,8 +2030,8 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
                   ),
@@ -2031,7 +2179,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize:19.sp,
+                                  fontSize:18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2047,7 +2195,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 19.sp,
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2187,7 +2335,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 19.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),

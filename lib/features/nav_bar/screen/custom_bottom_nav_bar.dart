@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 // Standalone bottom nav bar widget for individual screens (uses route navigation)
 class BottomNavBarWidget extends StatelessWidget {
@@ -36,56 +37,60 @@ class BottomNavBarWidget extends StatelessWidget {
       NavItemData('Settings', 'assets/seting.png'),
     ];
 
-    final track = Container(
-      height: 72.h,
-      decoration: BoxDecoration(
-        color: trackColor ??
-            Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
-        border: const Border(
-          top: BorderSide(
-            color: Color(0xFFE1E1E1),
-            width: 1,
+    final track = Material(
+      type: MaterialType.transparency,
+      child: Container(
+        height: 72.h,
+        decoration: BoxDecoration(
+          color: trackColor ??
+              Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
+          border: const Border(
+            top: BorderSide(
+              color: Color(0xFFE1E1E1),
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth / items.length;
-          return Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: w * selectedIndex + (w - 46.w) / 2,
-                child: Container(
-                  width: 46.w,
-                  height: 3.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF111827),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(2.r),
-                      bottomRight: Radius.circular(2.r),
+        child: LayoutBuilder(
+          builder: (context, c) {
+            final w = c.maxWidth / items.length;
+            return Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: w * selectedIndex + (w - 46.w) / 2,
+                  child: Container(
+                    width: 46.w,
+                    height: 3.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF111827),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(2.r),
+                        bottomRight: Radius.circular(2.r),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Row(
-                children: List.generate(items.length, (i) {
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () => onItemTapped(i),
-                      child: BottomNavItem(
-                        label: items[i].label,
-                        imagePath: items[i].imagePath,
-                        isSelected: i == selectedIndex,
-                        showBadge: items[i].label == 'Notifications',
+                Row(
+                  children: List.generate(items.length, (i) {
+                    return Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => onItemTapped(i),
+                        child: BottomNavItem(
+                          label: items[i].label,
+                          imagePath: items[i].imagePath,
+                          isSelected: i == selectedIndex,
+                          showBadge: items[i].label == 'Notifications',
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          );
-        },
+                    );
+                  }),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
 
@@ -136,6 +141,7 @@ class CustomBottomNavBar extends StatefulWidget {
 class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   late int _selectedIndex;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  static const String _dashboardRoute = '/home';
 
   @override
   void initState() {
@@ -156,6 +162,13 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   }
 
   void _onItemTapped(int index) {
+    // "Dashboard" in the footer must always open the main dashboard screen,
+    // not just switch the local IndexedStack (which can display zone/category
+    // pages under the dashboard tab).
+    if (index == 2) {
+      context.go(_dashboardRoute);
+      return;
+    }
     setSelectedIndex(index);
   }
 
@@ -182,7 +195,9 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
             ? ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Container(
                     height: 72.h,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(
@@ -218,13 +233,15 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                             Row(
                               children: List.generate(items.length, (i) {
                                 return Expanded(
-                                  child: InkWell(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
                                     onTap: () => _onItemTapped(i),
                                     child: BottomNavItem(
                                       label: items[i].label,
                                       imagePath: items[i].imagePath,
                                       isSelected: i == _selectedIndex,
-                                      showBadge: items[i].label == 'Notifications',
+                                      showBadge:
+                                          items[i].label == 'Notifications',
                                     ),
                                   ),
                                 );
@@ -234,58 +251,64 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                         );
                       },
                     ),
-                  ),
-                ),
-              )
-            : Container(
-                height: 72.h,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: Color(0xFFE1E1E1),
-                      width: 1,
                     ),
                   ),
                 ),
-                child: LayoutBuilder(
-                  builder: (context, c) {
-                    final w = c.maxWidth / items.length;
-                    return Stack(
-                      children: [
-                        Positioned(
-                          top: 0,
-                          left: w * _selectedIndex + (w - 46.w) / 2,
-                          child: Container(
-                            width: 46.w,
-                            height: 3.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF111827),
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(2.r),
-                                bottomRight: Radius.circular(2.r),
+              )
+            : Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  height: 72.h,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: Color(0xFFE1E1E1),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      final w = c.maxWidth / items.length;
+                      return Stack(
+                        children: [
+                          Positioned(
+                            top: 0,
+                            left: w * _selectedIndex + (w - 46.w) / 2,
+                            child: Container(
+                              width: 46.w,
+                              height: 3.h,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF111827),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(2.r),
+                                  bottomRight: Radius.circular(2.r),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Row(
-                          children: List.generate(items.length, (i) {
-                            return Expanded(
-                              child: InkWell(
-                                onTap: () => _onItemTapped(i),
-                                child: BottomNavItem(
-                                  label: items[i].label,
-                                  imagePath: items[i].imagePath,
-                                  isSelected: i == _selectedIndex,
-                                  showBadge: items[i].label == 'Notifications',
+                          Row(
+                            children: List.generate(items.length, (i) {
+                              return Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _onItemTapped(i),
+                                  child: BottomNavItem(
+                                    label: items[i].label,
+                                    imagePath: items[i].imagePath,
+                                    isSelected: i == _selectedIndex,
+                                    showBadge:
+                                        items[i].label == 'Notifications',
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    );
-                  },
+                              );
+                            }),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
       ),
