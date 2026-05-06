@@ -98,7 +98,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           decoration: BoxDecoration(
             // Keep the sheet clearly transparent like the dashboard header/footer.
            // color: Colors.white.withOpacity(0.18),
-            color: Color(0xFFFFFFFF).withOpacity(0.8),
+            color: Colors.white.withOpacity(0.4),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),
@@ -343,15 +343,15 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 width: 30.w,
                 height: 30.h,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.86),
+                  color: Colors.white.withOpacity(0.6),
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF111827).withOpacity(0.06),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     color: const Color(0xFF111827).withOpacity(0.06),
+                  //     blurRadius: 12,
+                  //     offset: const Offset(0, 6),
+                  //   ),
+                  // ],
                 ),
                 alignment: Alignment.center,
                 child: Icon(
@@ -379,7 +379,7 @@ class _Card extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(14.sp),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.86),
+        color: Colors.white.withOpacity(0.6),
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: child,
@@ -524,7 +524,7 @@ class _DashboardDropdownMenu extends StatelessWidget {
         width: 185.w,
         constraints: BoxConstraints(maxHeight: 150.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(26.r),
           boxShadow: [
             BoxShadow(
