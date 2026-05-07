@@ -24,6 +24,20 @@ enum DeviceDetailsControlMode {
 
   /// LED dimmer: circular gradient ring + centered % (no Off/On tune row).
   ledDimmer,
+
+  /// Tunable white: temperature disk + intensity slider (no Off/On tune row).
+  tunableWhite,
+
+  /// Heating & Cooling: device image hero + dropdown chevron + Heating/Cooling
+  /// pill toggle (no Off/On tune row).
+  heatingCooling,
+
+  /// Fan: device image hero + Off / Speed 1 / Speed 2 / Speed 3 selector row
+  /// (no Off/On tune row).
+  fanLevel,
+
+  /// Ventilation: cyan→blue gradient ring + centered % + fan icon (no Off/On row).
+  ventilation,
 }
 
 /// Carried on [GoRouterState.extra] so [DeviceDetailsControlMode] cannot be lost
@@ -84,6 +98,14 @@ class DeviceDetailsScreen extends StatefulWidget {
       query['mode'] = 'rgbw';
     } else if (controlMode == DeviceDetailsControlMode.ledDimmer) {
       query['mode'] = 'ledDimmer';
+    } else if (controlMode == DeviceDetailsControlMode.tunableWhite) {
+      query['mode'] = 'tunableWhite';
+    } else if (controlMode == DeviceDetailsControlMode.heatingCooling) {
+      query['mode'] = 'heatingCooling';
+    } else if (controlMode == DeviceDetailsControlMode.fanLevel) {
+      query['mode'] = 'fanLevel';
+    } else if (controlMode == DeviceDetailsControlMode.ventilation) {
+      query['mode'] = 'ventilation';
     }
     return Uri(path: routeName, queryParameters: query).toString();
   }
@@ -134,7 +156,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   double _rgbwIntensity = 0.7;
 
   /// LED dimmer ring: 0 = min, 1 = 100%.
-  double _ledDimmerPercent = 1.0;
+  double _ledDimmerPercent = 0.0;
+
+  /// Tunable white: temperature position (0 warm → 1 cool) and intensity (0..1).
+  double _tunableWhiteTempT = 0.62; // ~5850K feel
+  double _tunableWhiteIntensity = 0.70;
+
+  /// Tunable white: last tap point on the disk, normalized 0..1.
+  /// Used so the on-disk pointer (white ring + "Daylight" label) sits exactly
+  /// where the user clicked. Defaults to the disk center.
+  double _tunableWhiteDotDx = 0.5;
+  double _tunableWhiteDotDy = 0.5;
+
+  /// Heating & Cooling: which pill is selected. 'heating' or 'cooling'.
+  String _heatingCoolingMode = 'heating';
+
+  /// Fan level selection: 0 = Off, 1 = Speed 1, 2 = Speed 2, 3 = Speed 3.
+  /// Defaults to Speed 1 to match the design screenshot's initial state.
+  int _selectedFanLevel = 1;
+
+  /// Ventilation ring: 0 = min (pointer at start), 1 = max along the arc.
+  /// Never displayed as 100% in the UI (capped for display); starts at 0.
+  double _ventilationPercent = 0.0;
 
   static const List<String> _sceneLabels = <String>[
     'All On',
@@ -182,7 +225,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   ] else if (widget.controlMode !=
                           DeviceDetailsControlMode.rgbwPicker &&
                       widget.controlMode !=
-                          DeviceDetailsControlMode.ledDimmer) ...[
+                          DeviceDetailsControlMode.ledDimmer &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.tunableWhite &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.heatingCooling &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.fanLevel &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.ventilation) ...[
                     _buildOnOffRow(),
                   ],
                   SizedBox(height: isLightSceneValues ? 10.h : 16.h),
@@ -253,6 +304,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     }
     if (widget.controlMode == DeviceDetailsControlMode.ledDimmer) {
       return _buildLedDimmerHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.tunableWhite) {
+      return _buildTunableWhiteHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.heatingCooling) {
+      return _buildHeatingCoolingHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.fanLevel) {
+      return _buildFanLevelHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.ventilation) {
+      return _buildVentilationHeroContent();
     }
     return Column(
       children: [
@@ -336,6 +399,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   Widget _buildLedDimmerHeroContent() {
     final double ringSize = 228.w;
     final double stroke = 12.r;
+    // Keep this consistent with `_LedDimmerRingPainter`.
+    final double startAngle = math.pi / 2; // bottom
+    final double maxSweep = (2 * math.pi) - 0.08;
 
     return Column(
       children: [
@@ -449,33 +515,36 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double ang =
-                              -math.pi / 2 +
-                              2 * math.pi * _ledDimmerPercent.clamp(0.0, 1.0);
+                          final double p = _ledDimmerPercent.clamp(0.0, 1.0);
+                          final double ang = startAngle + (maxSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
+                          final double thumbSize = 32.r;
                           return Positioned(
-                            left: thumb.dx - 11.r,
-                            top: thumb.dy - 11.r,
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
                             child: IgnorePointer(
                               child: Container(
-                                width: 22.r,
-                                height: 22.r,
+                                width: thumbSize,
+                                height: thumbSize,
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF00E52A),
-                                  borderRadius: BorderRadius.circular(26.r),
+                                  shape: BoxShape.circle,
                                   border: Border.all(
-                                    width: 3,
-                                    color: Colors.white,
+                                    width: 2,
+                                    color: Colors.white.withOpacity(0.95),
                                   ),
-                                  //shape: BoxShape.circle,
-                                  // boxShadow: [
-                                  //   BoxShadow(
-                                  //     color: Colors.white,
-                                  //     blurRadius: 5.r,
-                                  //     offset: const Offset(0, 8),
-                                  //   ),
-                                  // ],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.white.withOpacity(0.85),
+                                      blurRadius: 10,
+                                    ),
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.14),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -497,14 +566,534 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
-    double p = (angle + math.pi / 2) / (2 * math.pi);
-    if (p < 0) {
-      p += 1;
+    // Keep this consistent with `_LedDimmerRingPainter`:
+    // - 0% starts at the bottom (pi/2)
+    // - max sweep stops short of a full circle so 100% doesn't overlap 0%
+    const double startAngle = math.pi / 2;
+    const double fullTurn = 2 * math.pi;
+    const double maxSweep = fullTurn - 0.08;
+
+    // Normalize angle into [0, 2pi) relative to startAngle.
+    double a = angle - startAngle;
+    a = (a % fullTurn + fullTurn) % fullTurn;
+
+    // Convert to percent. Anything inside the "gap" snaps to 100%.
+    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
+
+    // Hysteresis near the start to avoid 100% -> 0% wrap.
+    final double prev = _ledDimmerPercent.clamp(0.0, 1.0);
+    if (prev > 0.85 && next < 0.15) next = 1.0;
+    if (prev < 0.15 && next > 0.85) next = 0.0;
+
+    setState(() => _ledDimmerPercent = next.clamp(0.0, 1.0));
+  }
+
+  /// Percent shown in the center label: never "100" — caps at 99.
+  int _ventilationDisplayPercent(double p) {
+    final int v = (p.clamp(0.0, 1.0) * 100).round();
+    return v >= 100 ? 99 : v;
+  }
+
+  void _ventilationUpdateFromLocal(Offset local, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final Offset d = local - c;
+    final double angle = math.atan2(d.dy, d.dx);
+    // Same geometry as `_VentilationRingPainter` / LED dimmer:
+    // 0% at bottom (pi/2), arc stops short of a full turn (gap) so you cannot
+    // jump from ~100% back to 0% by crossing the gap — you must travel back.
+    const double startAngle = math.pi / 2;
+    const double fullTurn = 2 * math.pi;
+    const double maxSweep = fullTurn - 0.08;
+
+    double a = angle - startAngle;
+    a = (a % fullTurn + fullTurn) % fullTurn;
+
+    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
+
+    final double prev = _ventilationPercent.clamp(0.0, 1.0);
+    if (prev > 0.85 && next < 0.15) next = 1.0;
+    if (prev < 0.15 && next > 0.85) next = 0.0;
+
+    setState(() => _ventilationPercent = next.clamp(0.0, 1.0));
+  }
+
+  /// "SWC 1326 39" subtitle + the 3-stat row (On time / 7 Days / Cycles).
+  ///
+  /// Same identity block already shown by the standard hero (used by Light
+  /// scene values & RGBW). Reused on Heating & Cooling, Tunable White,
+  /// Ventilation and Fan Level hero builders so they match the rest of the
+  /// app — no per-screen tweaks here.
+  Widget _buildHeroIdentityStats() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: 7.h),
+        Text(
+          'SWC 1326 39',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 10.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Padding(
+          padding: EdgeInsets.only(left: 80.w, right: 90.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatBlock(top: '12:57', bottom: 'On time'),
+              _StatBlock(top: '5h 58m', bottom: '7 Days'),
+              _StatBlock(top: '1257', bottom: 'Cycles'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Hero for [DeviceDetailsControlMode.ventilation]: cyan→blue ring, large %
+  /// + fan asset in the center, single blue thumb (larger than LED dimmer).
+  Widget _buildVentilationHeroContent() {
+    final double ringSize = 228.w;
+    final double stroke = 12.r;
+    final double startAngle = math.pi / 2;
+    final double maxSweep = (2 * math.pi) - 0.08;
+    final double thumbSize = 38.r;
+    const Color thumbBlue = Color(0xFF0088FE);
+
+    final int shownPct =
+        _ventilationDisplayPercent(_ventilationPercent);
+
+    return Column(
+      children: [
+        SizedBox(height: 10.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Text(
+            widget.deviceTitle,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111827),
+            ),
+          ),
+        ),
+        _buildHeroIdentityStats(),
+        SizedBox(height: 14.h),
+        Center(
+          child: SizedBox(
+            width: ringSize,
+            height: ringSize,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size sz = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (d) =>
+                      _ventilationUpdateFromLocal(d.localPosition, sz),
+                  onPanUpdate: (d) =>
+                      _ventilationUpdateFromLocal(d.localPosition, sz),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      CustomPaint(
+                        size: sz,
+                        painter: _VentilationRingPainter(
+                          percent: _ventilationPercent.clamp(0.0, 1.0),
+                          strokeWidth: stroke,
+                        ),
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$shownPct%',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 44.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF111827),
+                              height: 1.05,
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          Image.asset(
+                            widget.imageAssetPath,
+                            height: 40.h,
+                            width: 40.w,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Image.asset(
+                              'assets/images/ventilations.png',
+                              height: 40.h,
+                              width: 40.w,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Builder(
+                        builder: (context) {
+                          final Offset c =
+                              Offset(sz.width / 2, sz.height / 2);
+                          final double radius =
+                              sz.shortestSide / 2 - stroke / 2 - 2;
+                          final double p =
+                              _ventilationPercent.clamp(0.0, 1.0);
+                          final double ang =
+                              startAngle + (maxSweep * p);
+                          final Offset thumb = c +
+                              Offset(math.cos(ang), math.sin(ang)) * radius;
+                          return Positioned(
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: thumbSize,
+                                height: thumbSize,
+                                decoration: BoxDecoration(
+                                  color: thumbBlue,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    width: 3,
+                                    color: Colors.white,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.12),
+                                      blurRadius: 10.r,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTunableWhiteHeroContent() {
+    final double diskSize = 228.w;
+    final double thumbSize = 22.r;
+
+    // Approximate warm↔cool kelvin range for the UI.
+    const int warmK = 2700;
+    const int coolK = 7500;
+    final double t = _tunableWhiteTempT.clamp(0.0, 1.0);
+    final int kelvin = (warmK + (coolK - warmK) * t).round();
+
+    final Color dialBorder = const Color(0xFFE5E7EB);
+    final Color dialShadow = Colors.black.withOpacity(0.08);
+    final Color textPrimary = const Color(0xFF111827);
+    final Color textSecondary = const Color(0xFF6B7280);
+    final Color accent = const Color(0xFF00D1FF);
+
+    return Column(
+      children: [
+        SizedBox(height: 10.h),
+        Text(
+          'Tunable white light',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+          ),
+        ),
+        _buildHeroIdentityStats(),
+        SizedBox(height: 14.h),
+        Center(
+          child: SizedBox(
+            width: diskSize,
+            height: diskSize,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size sz = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (d) =>
+                      _tunableWhiteUpdateFromLocal(d.localPosition, sz),
+                  onPanUpdate: (d) =>
+                      _tunableWhiteUpdateFromLocal(d.localPosition, sz),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: dialShadow,
+                              blurRadius: 24.r,
+                              offset: const Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: sz.width,
+                                height: sz.height,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Color(0xFFFFF1BF),
+                                      Color(0xFFFFFBF0),
+                                      Color(0xFFF2FDFF),
+                                      Color(0xFFBFF6FF),
+                                    ],
+                                    stops: <double>[0.0, 0.38, 0.72, 1.0],
+                                  ),
+                                ),
+                              ),
+                              // Soft vignette for depth.
+                              Positioned.fill(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        Colors.white.withOpacity(0.0),
+                                        Colors.black.withOpacity(0.06),
+                                      ],
+                                      stops: const [0.65, 1.0],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Outer stroke to match modern dial look.
+                      IgnorePointer(
+                        child: Container(
+                          width: sz.width,
+                          height: sz.height,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: dialBorder, width: 2),
+                          ),
+                        ),
+                      ),
+                      // White hollow ring + "Daylight" label. Sits exactly at
+                      // the user's tap point on the disk (clamped to the dial).
+                      Builder(
+                        builder: (context) {
+                          final double x = _tunableWhiteDotDx * sz.width;
+                          final double y = _tunableWhiteDotDy * sz.height;
+                          final double ringSize = 50.r;
+                          final double ringStroke = 7.r;
+                          final double labelGap = 6.h;
+                          final double labelHeight = 16.h;
+                          // Anchor the ring's center on (x, y); place the label
+                          // just below the ring.
+                          return Positioned(
+                            left: x - ringSize / 2,
+                            top: y - ringSize / 2,
+                            width: ringSize,
+                            height: ringSize + labelGap + labelHeight,
+                            child: IgnorePointer(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: ringSize,
+                                    height: ringSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: ringStroke,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.12),
+                                          blurRadius: 14.r,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: labelGap),
+                                  SizedBox(
+                                    height: labelHeight,
+                                    child: Text(
+                                      'Daylight',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Text(
+          'Temperature',
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            color: textSecondary,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          '${kelvin}K',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 22.sp,
+            fontWeight: FontWeight.w800,
+            color: textPrimary,
+            height: 1.0,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 30.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text.rich(
+                TextSpan(
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15.sp,
+                    height: 1.2,
+                    color: textPrimary,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'Intensity: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '${(_tunableWhiteIntensity * 100).round()}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+
+              Row(
+                children: [
+                  Icon(
+                    Icons.wb_sunny_outlined,
+                    size: 16.sp,
+
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 6.h,
+                        activeTrackColor: accent,
+                        inactiveTrackColor: dialBorder,
+                        thumbColor: accent,
+                        overlayColor: accent.withOpacity(0.18),
+                        thumbShape: _TunableWhiteThumbShape(
+                          radius: thumbSize / 2,
+                          fillColor: accent,
+                        ),
+                      ),
+                      child: Slider(
+                        value: _tunableWhiteIntensity.clamp(0.0, 1.0),
+                        min: 0,
+                        max: 1,
+                        onChanged: (v) => setState(
+                          () => _tunableWhiteIntensity = v.clamp(0.0, 1.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Icon(Icons.wb_sunny, size: 26.sp, color: textSecondary),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _tunableWhiteUpdateFromLocal(Offset local, Size size) {
+    // Map vertical drag within the disk to temperature t in [0,1].
+    final double y = local.dy.clamp(0.0, size.height);
+    final double tValue = ((y / size.height) - 0.18) / 0.64;
+
+    // Clamp the visual pointer to the circular disk so it can't sit outside
+    // the visible dial (corners of the SizedBox are outside the circle).
+    final double cx = size.width / 2;
+    final double cy = size.height / 2;
+    final double maxR = size.shortestSide / 2 - 28.r; // keep ring inside dial
+    Offset d = local - Offset(cx, cy);
+    if (d.distance > maxR && maxR > 0) {
+      d = d / d.distance * maxR;
     }
-    if (p >= 1) {
-      p -= 1;
-    }
-    setState(() => _ledDimmerPercent = p.clamp(0.0, 1.0));
+    final Offset clamped = Offset(cx, cy) + d;
+
+    setState(() {
+      _tunableWhiteTempT = tValue.clamp(0.0, 1.0);
+      _tunableWhiteDotDx = size.width <= 0
+          ? 0.5
+          : (clamped.dx / size.width).clamp(0.0, 1.0);
+      _tunableWhiteDotDy = size.height <= 0
+          ? 0.5
+          : (clamped.dy / size.height).clamp(0.0, 1.0);
+    });
   }
 
   Widget _buildRgbwHeroContent() {
@@ -776,6 +1365,319 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     });
   }
 
+  /// Hero for [DeviceDetailsControlMode.heatingCooling].
+  ///
+  /// Layout (top-to-bottom, matches the design screenshot):
+  /// 1. "Heating & Cooling" title (uses [DeviceDetailsScreen.deviceTitle]).
+  /// 2. The asset image (e.g. `assets/images/heating_cooling.png`).
+  /// 3. A row of three controls:
+  ///      - circular white "dropdown" chevron button (placeholder for a
+  ///        future mode list — kept tappable so the UI matches),
+  ///      - "Heating" pill with steam-waves icon,
+  ///      - "Cooling" pill with snowflake icon.
+  ///    Tapping a pill toggles [_heatingCoolingMode] between 'heating' and
+  ///    'cooling' (selected pill gets a subtle highlight).
+  Widget _buildHeatingCoolingHeroContent() {
+    const Color textPrimary = Color(0xFF111827);
+    const Color pillBg = Colors.white;
+    const Color pillSelectedBg = Color(0xFFF3F4F6);
+    const Color pillBorder = Color(0xFFE5E7EB);
+
+    final bool isHeating = _heatingCoolingMode == 'heating';
+    final bool isCooling = _heatingCoolingMode == 'cooling';
+
+    return Column(
+      children: [
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Text(
+            widget.deviceTitle,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+        ),
+        _buildHeroIdentityStats(),
+        SizedBox(height: 14.h),
+        Center(
+          child: Image.asset(
+            widget.imageAssetPath,
+            height: 110.h,
+            width: 110.w,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/images/heating_cooling.png',
+              height: 110.h,
+              width: 110.w,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        SizedBox(height: 18.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: pillBg,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 8.r,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/off_logo.png',
+                    height: 13.h,
+                    width: 13.w,
+                    fit: BoxFit.cover,
+                    color: !_isOn ? Colors.white : Colors.black,
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              _heatingCoolingPill(
+                label: 'Heating',
+                selected: isHeating,
+                onTap: () => setState(() => _heatingCoolingMode = 'heating'),
+                bg: pillBg,
+                selectedBg: pillSelectedBg,
+                border: pillBorder,
+                textColor: textPrimary,
+                leading: Icon(
+                  Icons.waves_rounded,
+                  size: 18.sp,
+                  color: textPrimary,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              _heatingCoolingPill(
+                label: 'Colling',
+                selected: isCooling,
+                onTap: () => setState(() => _heatingCoolingMode = 'cooling'),
+                bg: pillBg,
+                selectedBg: pillSelectedBg,
+                border: pillBorder,
+                textColor: textPrimary,
+                leading: Icon(
+                  Icons.ac_unit_rounded,
+                  size: 16.sp,
+                  color: textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _heatingCoolingPill({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    required Color bg,
+    required Color selectedBg,
+    required Color border,
+    required Color textColor,
+    required Widget leading,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        height: 36.h,
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        decoration: BoxDecoration(
+          color: selected ? selectedBg : bg,
+          borderRadius: BorderRadius.circular(26.r),
+          border: Border.all(
+            color: selected ? border : Colors.transparent,
+            width: 1,
+          ),
+          boxShadow: selected
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8.r,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            leading,
+            SizedBox(width: 6.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Hero for [DeviceDetailsControlMode.fanLevel].
+  ///
+  /// Layout (top-to-bottom, matches the design screenshot):
+  /// 1. The device title (e.g. "Fan Level 3").
+  /// 2. The fan asset rendered at hero size.
+  /// 3. A row of four [_SceneValueOption]-styled buttons:
+  ///      Off, Speed 1, Speed 2, Speed 3.
+  ///    Tapping a button updates [_selectedFanLevel] and the selected pill
+  ///    gets the standard gray-fill + bold-label highlight.
+  Widget _buildFanLevelHeroContent() {
+    const Color textPrimary = Color(0xFF111827);
+
+    final List<({String label, int value})> options =
+        <({String label, int value})>[
+          (label: 'Off', value: 0),
+          (label: 'Speed 1', value: 1),
+          (label: 'Speed 2', value: 2),
+          (label: 'Speed 3', value: 3),
+        ];
+
+    return Column(
+      children: [
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Text(
+            widget.deviceTitle,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+        ),
+        _buildHeroIdentityStats(),
+        SizedBox(height: 14.h),
+        Center(
+          child: Image.asset(
+            widget.imageAssetPath,
+            height: 140.h,
+            width: 140.w,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/images/fan.png',
+              height: 140.h,
+              width: 140.w,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+        SizedBox(height: 18.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List<Widget>.generate(options.length, (int i) {
+              final opt = options[i];
+              final option = _SceneValueOption(
+                label: opt.label,
+                selected: _selectedFanLevel == opt.value,
+                child: _fanLevelOptionIcon(opt.value),
+                onTap: () => setState(() => _selectedFanLevel = opt.value),
+              );
+              if (i == 0) return option;
+              return Padding(
+                padding: EdgeInsets.only(left: 4.w),
+                child: option,
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Icon shown inside each [_SceneValueOption] of the fan-level row.
+  ///
+  /// - 0 (Off)     -> chevron-down caret (matches the screenshot).
+  /// - 1 (Speed 1) -> small fan asset, tinted dark.
+  /// - 2/3         -> small fan asset, tinted dark, with a tiny "2"/"3" badge.
+  Widget _fanLevelOptionIcon(int level) {
+    const Color iconColor = Color(0xFF111827);
+
+    if (level == 0) {
+      return Image.asset(
+        'assets/off_logo.png',
+        height: 13.h,
+        width: 13.w,
+        fit: BoxFit.cover,
+        color: !_isOn ? Colors.white : Colors.black,
+      );
+    }
+
+    final Widget fan = Image.asset(
+      'assets/images/fan.png',
+      width: 26.w,
+      height: 26.w,
+      fit: BoxFit.contain,
+      color: iconColor,
+      colorBlendMode: BlendMode.srcIn,
+      errorBuilder: (_, __, ___) =>
+          Icon(Icons.toys_rounded, size: 22.sp, color: iconColor),
+    );
+
+    if (level == 1) {
+      return fan;
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        fan,
+        Positioned(
+          right: -2,
+          bottom: -2,
+          child: Text(
+            '$level',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: iconColor,
+              height: 1.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildOnOffRow() {
     const Color offSelectedBg = Color(0xFF6B7280);
     const Color onSelectedBg = Color(0xFF0088FE);
@@ -810,7 +1712,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         height: 13.h,
                         width: 13.w,
                         fit: BoxFit.cover,
-                        color: !_isOn ? Colors.white : inactiveFg,
+                        color: !_isOn ? Colors.white : Colors.black,
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -850,7 +1752,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       Icon(
                         Icons.power_settings_new_rounded,
                         size: 18.sp,
-                        color: _isOn ? Colors.white : inactiveFg,
+                        color: _isOn ? Colors.white : Colors.black,
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -925,57 +1827,48 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
   Widget _sceneValueIcon(int sceneSlot) {
     final String path = widget.imageAssetPath;
-    
+
+    // No ClipOval here: the surrounding [_SceneValueOption] already provides the
+    // circular background. Clipping the icon to an oval was slicing the bubble
+    // artwork on every side; we just render the asset at its natural shape.
     switch (sceneSlot) {
       case 0:
-        return ClipOval(
-          child: Image.asset(
-            path,
+        return Image.asset(
+          path,
+          width: 28.w,
+          height: 28.w,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => Image.asset(
+            'assets/light_image.png',
+            height: 28.h,
             width: 28.w,
-            height: 28.w,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) =>
-            Image.asset(
-                "assets/light_image.png",
-                height:28.h,
-                width:28.w,
-                fit:BoxFit.contain,
-                //color: const Color(0xFF6B7280),
-              ),
           ),
         );
       case 1:
         return Opacity(
           opacity: 0.42,
-          child: ClipOval(
-            child: Image.asset(
-              path,
+          child: Image.asset(
+            path,
+            width: 28.w,
+            height: 28.w,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Image.asset(
+              'assets/gray_image.png',
+              height: 28.h,
               width: 28.w,
-              height: 28.w,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Image.asset(
-                "assets/gray_image.png",
-                height: 28.h,
-                width: 28.w,
-                fit: BoxFit.contain,
-                //color: const Color(0xFF6B7280),
-              ),
             ),
           ),
         );
       case 2:
       default:
-        return ClipOval(
-          child: Image.asset(
-            "assets/black_image.png",
-            height: 28.h,
-            width: 28.w,
-            fit: BoxFit.contain,
-            //color: const Color(0xFF6B7280),
-          ),
+        return Image.asset(
+          'assets/black_image.png',
+          height: 28.h,
+          width: 28.w,
+          fit: BoxFit.contain,
         );
-
-        // Icon(Icons.cloud_rounded, size: 28.sp, color: const Color(0xFF6B7280));
     }
   }
 
@@ -2260,105 +3153,143 @@ class _RgbwMagentaThumbShape extends SliderComponentShape {
   }
 }
 
-/// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
-//Final code; 
+/// Filled thumb with a soft white circular shadow (tunable white intensity).
+class _TunableWhiteThumbShape extends SliderComponentShape {
+  const _TunableWhiteThumbShape({
+    required this.radius,
+    required this.fillColor,
+  });
 
-// class _LedDimmerRingPainter extends CustomPainter {
-//   _LedDimmerRingPainter({
-//     required this.percent,
-//     required this.strokeWidth,
-//   });
-//
-//   final double percent;
-//   final double strokeWidth;
-//
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Offset center =
-//     Offset(size.width / 2, size.height / 2);
-//
-//     final double midRadius =
-//         size.shortestSide / 2 - strokeWidth / 2 - 2;
-//
-//     final Rect arcRect =
-//     Rect.fromCircle(center: center, radius: midRadius);
-//
-//     // ----------------------
-//     // 🔘 Track (Background)
-//     // ----------------------
-//     final Paint trackPaint = Paint()
-//       ..color = const Color(0xFFE1E1E1)
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..strokeCap = StrokeCap.round;
-//
-//     canvas.drawArc(
-//       arcRect,
-//       math.pi / 2, // ✅ bottom start
-//       2 * math.pi,
-//       false,
-//       trackPaint,
-//     );
-//
-//     // ----------------------
-//     // 🔘 Progress Arc
-//     // ----------------------
-//     final double clamped = percent.clamp(0.0, 1.0);
-//     if (clamped <= 0.001) return;
-//
-//     final SweepGradient gradient = SweepGradient(
-//       colors: const <Color>[
-//         Color(0xFF00E52A),
-//         Color(0xFF00D1FF),
-//         Color(0xFF00E52A),
-//       ],
-//       stops: const <double>[0.0, 0.50, 1.0],
-//       transform: GradientRotation(math.pi / 2), // ✅ match start
-//       tileMode: TileMode.clamp,
-//     );
-//
-//     final Paint fgPaint = Paint()
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..strokeCap = StrokeCap.round
-//       ..shader = gradient.createShader(arcRect);
-//
-//     canvas.drawArc(
-//       arcRect,
-//       math.pi / 2, // ✅ bottom start
-//       2 * math.pi * clamped,
-//       false,
-//       fgPaint,
-//     );
-//
-//     // ----------------------
-//     // 🔘 Pointer (Dot)
-//     // ----------------------
-//     final double angle =
-//         math.pi / 2 + (2 * math.pi * clamped);
-//
-//     final Offset pointer = Offset(
-//       center.dx + midRadius * math.cos(angle),
-//       center.dy + midRadius * math.sin(angle),
-//     );
-//
-//     final Paint dotPaint = Paint()
-//       ..color = const Color(0xFF00E52A)
-//       ..style = PaintingStyle.fill;
-//
-//     canvas.drawCircle(pointer, strokeWidth * 0.6, dotPaint);
-//   }
-//
-//   @override
-//   bool shouldRepaint(
-//       covariant _LedDimmerRingPainter oldDelegate) {
-//     return oldDelegate.percent != percent ||
-//         oldDelegate.strokeWidth != strokeWidth;
-//   }
-// }
+  final double radius;
+  final Color fillColor;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size.fromRadius(radius);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+
+    // No Canvas.drawShadow: it can render a cross-shaped artifact on circular
+    // thumb paths on some Skia builds. Keep a clean fill + ring only.
+    canvas.drawCircle(center, radius, Paint()..color = fillColor);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.w
+        ..color = Colors.white.withOpacity(0.95),
+    );
+  }
+}
+
+/// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
 
 class _LedDimmerRingPainter extends CustomPainter {
-  _LedDimmerRingPainter({
+  _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
+
+  final double percent;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // =========================
+    // CENTER & RADIUS
+    // =========================
+    final Offset center = Offset(size.width / 2, size.height / 2);
+
+    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+
+    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+
+    // =========================
+    // START FROM BOTTOM
+    // =========================
+    final double startAngle = math.pi / 2;
+
+    // =========================
+    // TRACK
+    // =========================
+    final Paint trackPaint = Paint()
+      ..color = const Color(0xFFE1E1E1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(arcRect, startAngle, 2 * math.pi, false, trackPaint);
+
+    // =========================
+    // PERCENT
+    // =========================
+    final double clamped = percent.clamp(0.0, 1.0);
+
+    // ✅ no progress at 0
+    if (clamped <= 0.001) {
+      return;
+    }
+
+    // =========================
+    // PREVENT OVERLAP
+    // =========================
+
+    // ✅ stop before crossing start point
+    final double maxSweep = (2 * math.pi) - 0.08;
+
+    final double sweepAngle = maxSweep * clamped;
+
+    // =========================
+    // GRADIENT
+    // =========================
+    final SweepGradient gradient = SweepGradient(
+      colors: const <Color>[
+        Color(0xFF00E52A),
+        Color(0xFF00D1FF),
+        Color(0xFF00E52A),
+      ],
+      stops: const <double>[0.0, 0.70, 1.0],
+      transform: GradientRotation(math.pi / 2),
+      tileMode: TileMode.clamp,
+    );
+
+    // =========================
+    // PROGRESS ARC
+    // =========================
+    final Paint fgPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..shader = gradient.createShader(arcRect);
+
+    canvas.drawArc(arcRect, startAngle, sweepAngle, false, fgPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LedDimmerRingPainter oldDelegate) {
+    return oldDelegate.percent != percent ||
+        oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+/// Cyan→blue gradient arc track for ventilation % (matches dashboard mini ring).
+class _VentilationRingPainter extends CustomPainter {
+  _VentilationRingPainter({
     required this.percent,
     required this.strokeWidth,
   });
@@ -2368,18 +3299,16 @@ class _LedDimmerRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center =
-    Offset(size.width / 2, size.height / 2);
-
+    final Offset center = Offset(size.width / 2, size.height / 2);
     final double midRadius =
         size.shortestSide / 2 - strokeWidth / 2 - 2;
+    final Rect arcRect = Rect.fromCircle(
+      center: center,
+      radius: midRadius,
+    );
 
-    final Rect arcRect =
-    Rect.fromCircle(center: center, radius: midRadius);
+    final double startAngle = math.pi / 2;
 
-    // ----------------------
-    // 🔘 Track (Background)
-    // ----------------------
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
       ..style = PaintingStyle.stroke
@@ -2388,25 +3317,28 @@ class _LedDimmerRingPainter extends CustomPainter {
 
     canvas.drawArc(
       arcRect,
-      math.pi / 2,
+      startAngle,
       2 * math.pi,
       false,
       trackPaint,
     );
 
-    // ----------------------
-    // 🔘 Progress Arc
-    // ----------------------
     final double clamped = percent.clamp(0.0, 1.0);
-    if (clamped <= 0.001) return;
+    if (clamped <= 0.001) {
+      return;
+    }
+
+    final double maxSweep = (2 * math.pi) - 0.08;
+    final double sweepAngle = maxSweep * clamped;
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
-        Color(0xFF00E52A),
-        Color(0xFF00D1FF),
-        Color(0xFF00E52A),
+        Color(0xFF15DFFE),
+        Color(0xFF87CEEB),
+        Color(0xFF00BFFF),
+        Color(0xFF15DFFE),
       ],
-      stops: const <double>[0.0, 0.50, 1.0],
+      stops: const <double>[0.0, 0.5, 0.75, 1.0],
       transform: GradientRotation(math.pi / 2),
       tileMode: TileMode.clamp,
     );
@@ -2414,111 +3346,24 @@ class _LedDimmerRingPainter extends CustomPainter {
     final Paint fgPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.butt // 🔥 important fix
+      ..strokeCap = StrokeCap.round
       ..shader = gradient.createShader(arcRect);
 
     canvas.drawArc(
       arcRect,
-      math.pi / 2,
-      2 * math.pi * clamped,
+      startAngle,
+      sweepAngle,
       false,
       fgPaint,
     );
-
-    // ----------------------
-    // 🔘 Pointer (Single Dot)
-    // ----------------------
-    final double angle =
-        math.pi / 2 + (2 * math.pi * clamped);
-
-    final Offset pointer = Offset(
-      center.dx + midRadius * math.cos(angle),
-      center.dy + midRadius * math.sin(angle),
-    );
-
-    // Outer white border (optional but matches your image look)
-    final Paint outerDot = Paint()
-      ..color = const Color(0xFFFFFFFF)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(pointer, strokeWidth * 1.5, outerDot);
-
-    // Inner green dot
-    final Paint innerDot = Paint()
-      ..color = const Color(0xFF00E52A)
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(pointer, strokeWidth * 1, innerDot);
   }
 
   @override
-  bool shouldRepaint(
-      covariant _LedDimmerRingPainter oldDelegate) {
+  bool shouldRepaint(covariant _VentilationRingPainter oldDelegate) {
     return oldDelegate.percent != percent ||
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
-
-
-// class _LedDimmerRingPainter extends CustomPainter {
-//   _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
-//
-//   final double percent;
-//   final double strokeWidth;
-//
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final Offset center = Offset(size.width / 2, size.height / 2);
-//     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
-//     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
-//
-//     final Paint trackPaint = Paint()
-//       ..color = const Color(0xFFE1E1E1)
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..strokeCap = StrokeCap.round;
-//
-//     canvas.drawArc(arcRect, -math.pi / 2, 2 * math.pi, false, trackPaint);
-//
-//     final double clamped = percent.clamp(0.0, 1.0);
-//     if (clamped <= 0.001) {
-//       return;
-//     }
-//
-//     final SweepGradient gradient = SweepGradient(
-//       colors: const <Color>[
-//         Color(0xFF00E52A),
-//         Color(0xFF00D1FF),
-//         Color(0xFF00E52A),
-//       ],
-//       stops: const <double>[0.0, 0.70, 1.0],
-//       transform: GradientRotation(-math.pi / 2),
-//       tileMode: TileMode.clamp,
-//     );
-//
-//     final Paint fgPaint = Paint()
-//       ..style = PaintingStyle.stroke
-//       ..strokeWidth = strokeWidth
-//       ..strokeCap = StrokeCap.round
-//       ..shader = gradient.createShader(
-//         Rect.fromCircle(center: center, radius: midRadius),
-//       );
-//
-//     canvas.drawArc(
-//       arcRect,
-//       -math.pi / 2,
-//       2 * math.pi * clamped,
-//       false,
-//       fgPaint,
-//     );
-//   }
-//
-//   @override
-//   bool shouldRepaint(covariant _LedDimmerRingPainter oldDelegate) {
-//     return oldDelegate.percent != percent ||
-//         oldDelegate.strokeWidth != strokeWidth;
-//   }
-// }
 
 /// Hue spectrum disk + radial fade toward white (RGBW picker).
 class _RgbHueWheelPainter extends CustomPainter {

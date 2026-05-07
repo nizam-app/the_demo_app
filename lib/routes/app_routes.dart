@@ -214,6 +214,14 @@ class AppRouter {
             controlMode = DeviceDetailsControlMode.rgbwPicker;
           } else if (mode == 'ledDimmer') {
             controlMode = DeviceDetailsControlMode.ledDimmer;
+          } else if (mode == 'tunableWhite') {
+            controlMode = DeviceDetailsControlMode.tunableWhite;
+          } else if (mode == 'heatingCooling') {
+            controlMode = DeviceDetailsControlMode.heatingCooling;
+          } else if (mode == 'fanLevel') {
+            controlMode = DeviceDetailsControlMode.fanLevel;
+          } else if (mode == 'ventilation') {
+            controlMode = DeviceDetailsControlMode.ventilation;
           }
           return DeviceDetailsScreen(
             deviceTitle: title,

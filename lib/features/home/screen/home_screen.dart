@@ -1013,7 +1013,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   imageAssetPath:
                       'assets/images/heating_cooling.png',
                   controlButtonCount: 3,
-                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                  controlMode: DeviceDetailsControlMode.heatingCooling,
                 ),
               ),
             ),
@@ -1030,7 +1030,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   imageAssetPath:
                       'assets/white_light.png',
                   controlButtonCount: 1,
-                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                  controlMode: DeviceDetailsControlMode.tunableWhite,
                 ),
               ),
             ),
@@ -1043,19 +1043,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Expanded(
                         child: _buildLightingCard(
-                          deviceName: 'LED Dimmer living room',
+                          deviceName: 'Ventilation',
                           status: '100%',
                           iconImage:
-                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                              'assets/images/ventilations.png',
                           progressCircle: true,
-                          onTap: () => DeviceDetailsScreen.go(
-                            context,
-                            deviceTitle: 'LED Dimmer living room',
-                            imageAssetPath:
-                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                            controlButtonCount: 1,
-                            controlMode: DeviceDetailsControlMode.ledDimmer,
-                          ),
+                onTap: () => DeviceDetailsScreen.go(
+                          context,
+                          deviceTitle: 'Ventilation',
+                          imageAssetPath:
+                              'assets/images/ventilations.png',
+                          controlButtonCount: 1,
+                          controlMode: DeviceDetailsControlMode.ventilation,
+                        ),
                         ),
                       ),
                     ],
@@ -1082,17 +1082,17 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'Light Scene child room',
+                deviceName: 'Fan Level 3',
                 status: 'All On',
                 iconImage:
-                'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                'assets/images/fan.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'Light Scene child room',
+                  deviceTitle: 'Fan Level 3',
                   imageAssetPath:
-                  'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                  'assets/images/fan.png',
                   controlButtonCount: 3,
-                  controlMode: DeviceDetailsControlMode.lightSceneValues,
+                  controlMode: DeviceDetailsControlMode.fanLevel,
                 ),
               ),
             ),
