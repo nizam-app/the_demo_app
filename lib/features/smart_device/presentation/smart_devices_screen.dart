@@ -924,17 +924,11 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: _irrigationBoostOn
-                        ? Image.asset(
-                            'assets/images/charge.png',
-                            height: 22.h,
-                          )
-                        : Image.asset(
-                            'assets/images/charge.png',
-                            height: 22.h,
-                            color: _muted,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
+                    child: Icon(
+                      Icons.electric_bolt_rounded,
+                      size: 24.sp,
+                      color: _irrigationBoostOn ? Colors.white : _muted,
+                    ),
                   ),
                 ),
               ),
@@ -1335,39 +1329,38 @@ class _DimmerPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
     final w = 133.w;
+    final h = 35.h;
+    // Stadium capsule so both ends are true semicircles (avoids flat/clipped caps).
+    final r = h / 2;
 
-    final pill = Container(
-      height: 35.h,
-      width: w,
-      decoration: BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: FractionallySizedBox(
-              widthFactor: (1 - p),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE1E1E1),
-                  borderRadius: BorderRadius.horizontal(
-                    right: const Radius.circular(999),
-                    left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
-                  ),
-                ),
+    final pill = ClipRRect(
+      borderRadius: BorderRadius.circular(r),
+      child: SizedBox(
+        height: h,
+        width: w,
+        child: Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.hardEdge,
+          children: [
+            ColoredBox(color: Color(0xFFF3F4F6)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: (1 - p).clamp(0.0, 1.0),
+                heightFactor: 1,
+                alignment: Alignment.centerRight,
+                child: const ColoredBox(color: Color(0xFFE1E1E1)),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: EdgeInsets.only(left: 8.w),
-              child: _buildComfortLead(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 8.w),
+                child: _buildComfortLead(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 

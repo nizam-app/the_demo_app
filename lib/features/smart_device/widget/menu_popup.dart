@@ -83,38 +83,27 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     final topPad = MediaQuery.viewPaddingOf(context).top;
     final headerH = 56.h;
 
-    return Container(
-      decoration: BoxDecoration(
-        // Keep the sheet clearly transparent like the dashboard header/footer.
-        color: Colors.white.withOpacity(0.4),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(24.r),
+        topRight: Radius.circular(24.r),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.hardEdge,
-            children: [
-              Positioned.fill(
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: const DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color(0xFFFFFFFF).withOpacity(0.4),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24.r),
+              topRight: Radius.circular(24.r),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.hardEdge,
+              children: [
               SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   0,
@@ -293,26 +282,9 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        // color: Colors.white.withOpacity(0.18),
-                        color: Colors.white.withOpacity(0.6),
-                        // border: Border(
-                        //   bottom: BorderSide(
-                        //     color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                        //     width: 1,
-                        //   ),
-                        // ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.only(top: topPad),
-                        child: _buildHeader(context),
-                      ),
-                    ),
-                  ),
+                child: Padding(
+                  padding: EdgeInsets.only(top: topPad),
+                  child: _buildHeader(context),
                 ),
               ),
 
@@ -343,7 +315,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 ),
               ),
           ],
-        ),
+            ),
+          ),
         ),
       ),
     );

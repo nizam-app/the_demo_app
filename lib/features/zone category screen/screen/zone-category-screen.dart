@@ -1879,7 +1879,7 @@ class _ThermostatCard extends StatelessWidget {
                   Text(
                     '${value.toStringAsFixed(1)}° c',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
@@ -2005,7 +2005,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize: 18.sp,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2021,7 +2021,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 18.sp,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2141,7 +2141,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                   Text(
                     _on ? 'On' : 'Off',
                     style: TextStyle(
-                      fontSize: 19.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
