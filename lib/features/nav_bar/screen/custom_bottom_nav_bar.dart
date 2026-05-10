@@ -167,6 +167,9 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     // pages under the dashboard tab).
     if (index == 2) {
       context.go(_dashboardRoute);
+      // When already on `/home`, [context.go] does not rebuild the shell; the
+      // IndexedStack would otherwise stay on Devices/Analytics/etc.
+      setSelectedIndex(2);
       return;
     }
     setSelectedIndex(index);

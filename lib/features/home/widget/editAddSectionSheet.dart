@@ -151,7 +151,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     title: 'Move down',
                     imagePath: 'assets/images/move_down.png',
                     imageWidth: 22.w,
-                    imageHeight: 22.h,
+                    imageHeight: 26.h,
                   ),
 
                   

@@ -393,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title:
                                       'Motion Sensor',
                                       isOn: true,
-                                      imagePath: 'assets/images/kitchen.png',
+                                      imagePath: 'assets/images/update_sensor.png',
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
@@ -1085,12 +1085,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 deviceName: 'Fan Level 3',
                 status: 'All On',
                 iconImage:
-                'assets/images/fan.png',
+                'assets/images/Fun_level3.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Fan Level 3',
                   imageAssetPath:
-                  'assets/images/fan.png',
+                  'assets/images/Fun_level3.png',
                   controlButtonCount: 3,
                   controlMode: DeviceDetailsControlMode.fanLevel,
                 ),

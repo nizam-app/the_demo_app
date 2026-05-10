@@ -400,7 +400,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final double ringSize = 228.w;
     final double stroke = 12.r;
     // Keep this consistent with `_LedDimmerRingPainter`.
-    final double startAngle = math.pi / 2; // bottom
+    // 0% at lower-left (~8 o'clock); sweep still ends just before start (gap).
+    final double startAngle = 3 * math.pi / 4;
     final double maxSweep = (2 * math.pi) - 0.08;
 
     return Column(
@@ -494,20 +495,24 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      CustomPaint(
-                        size: sz,
-                        painter: _LedDimmerRingPainter(
-                          percent: _ledDimmerPercent.clamp(0.0, 1.0),
-                          strokeWidth: stroke,
+                      IgnorePointer(
+                        child: CustomPaint(
+                          size: sz,
+                          painter: _LedDimmerRingPainter(
+                            percent: _ledDimmerPercent.clamp(0.0, 1.0),
+                            strokeWidth: stroke,
+                          ),
                         ),
                       ),
-                      Text(
-                        '${(_ledDimmerPercent * 100).round()}%',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 52.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
+                      IgnorePointer(
+                        child: Text(
+                          '${(_ledDimmerPercent * 100).round()}%',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 52.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                          ),
                         ),
                       ),
                       Builder(
@@ -519,7 +524,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           final double ang = startAngle + (maxSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
-                          final double thumbSize = 32.r;
+                          final double thumbSize = 44.r;
                           return Positioned(
                             left: thumb.dx - thumbSize / 2,
                             top: thumb.dy - thumbSize / 2,
@@ -531,7 +536,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                                   color: const Color(0xFF00E52A),
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    width: 2,
+                                    width: 5,
                                     color: Colors.white.withOpacity(0.95),
                                   ),
                                   boxShadow: [
@@ -567,9 +572,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
     // Keep this consistent with `_LedDimmerRingPainter`:
-    // - 0% starts at the bottom (pi/2)
+    // - 0% starts at lower-left (3*pi/4), matching design
     // - max sweep stops short of a full circle so 100% doesn't overlap 0%
-    const double startAngle = math.pi / 2;
+    const double startAngle = 3 * math.pi / 4;
     const double fullTurn = 2 * math.pi;
     const double maxSweep = fullTurn - 0.08;
 
@@ -794,7 +799,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
   Widget _buildTunableWhiteHeroContent() {
     final double diskSize = 228.w;
-    final double thumbSize = 22.r;
+    final double thumbSize = 30.r;
 
     // Approximate warm↔cool kelvin range for the UI.
     const int warmK = 2700;
@@ -842,54 +847,56 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: dialShadow,
-                              blurRadius: 24.r,
-                              offset: const Offset(0, 12),
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: Stack(
-                            children: [
-                              Container(
-                                width: sz.width,
-                                height: sz.height,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: <Color>[
-                                      Color(0xFFFFF1BF),
-                                      Color(0xFFFFFBF0),
-                                      Color(0xFFF2FDFF),
-                                      Color(0xFFBFF6FF),
-                                    ],
-                                    stops: <double>[0.0, 0.38, 0.72, 1.0],
-                                  ),
-                                ),
+                      IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: dialShadow,
+                                blurRadius: 24.r,
+                                offset: const Offset(0, 12),
                               ),
-                              // Soft vignette for depth.
-                              Positioned.fill(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: sz.width,
+                                  height: sz.height,
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        Colors.white.withOpacity(0.0),
-                                        Colors.black.withOpacity(0.06),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: <Color>[
+                                        Color(0xFFFFF1BF),
+                                        Color(0xFFFFFBF0),
+                                        Color(0xFFF2FDFF),
+                                        Color(0xFFBFF6FF),
                                       ],
-                                      stops: const [0.65, 1.0],
+                                      stops: <double>[0.0, 0.38, 0.72, 1.0],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                // Soft vignette for depth.
+                                Positioned.fill(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          Colors.white.withOpacity(0.0),
+                                          Colors.black.withOpacity(0.06),
+                                        ],
+                                        stops: const [0.65, 1.0],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -910,7 +917,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         builder: (context) {
                           final double x = _tunableWhiteDotDx * sz.width;
                           final double y = _tunableWhiteDotDy * sz.height;
-                          final double ringSize = 50.r;
+                          final double ringSize = 58.r;
                           final double ringStroke = 7.r;
                           final double labelGap = 6.h;
                           final double labelHeight = 16.h;
@@ -1043,6 +1050,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         inactiveTrackColor: dialBorder,
                         thumbColor: accent,
                         overlayColor: accent.withOpacity(0.18),
+                        overlayShape: RoundSliderOverlayShape(
+                          overlayRadius: 36.r,
+                        ),
                         thumbShape: _TunableWhiteThumbShape(
                           radius: thumbSize / 2,
                           fillColor: accent,
@@ -1078,7 +1088,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     // the visible dial (corners of the SizedBox are outside the circle).
     final double cx = size.width / 2;
     final double cy = size.height / 2;
-    final double maxR = size.shortestSide / 2 - 28.r; // keep ring inside dial
+    final double maxR = size.shortestSide / 2 - 32.r; // keep ring inside dial
     Offset d = local - Offset(cx, cy);
     if (d.distance > maxR && maxR > 0) {
       d = d / d.distance * maxR;
@@ -1202,9 +1212,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
                     children: [
-                      CustomPaint(
-                        size: layoutSize,
-                        painter: _RgbHueWheelPainter(),
+                      IgnorePointer(
+                        child: CustomPaint(
+                          size: layoutSize,
+                          painter: _RgbHueWheelPainter(),
+                        ),
                       ),
                       Builder(
                         builder: (context) {
@@ -1219,15 +1231,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           final double rad = _rgbwHue * math.pi / 180;
                           final Offset thumb =
                               c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
+                          final double thumbD = 38.r;
                           return Positioned(
-                            left: thumb.dx - 20.w,
-                            top: thumb.dy - 20.w,
+                            left: thumb.dx - thumbD / 2,
+                            top: thumb.dy - thumbD / 2,
                             child: IgnorePointer(
                               child: Container(
-                                width: 28.w,
-                                height: 28.w,
+                                width: thumbD,
+                                height: thumbD,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(26.r),
+                                  shape: BoxShape.circle,
                                   border: Border.all(
                                     color: Colors.white,
                                     width: 3,
@@ -1311,11 +1324,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         trackHeight: 8.h,
                         trackShape: const _RgbwIntensityGradientTrackShape(),
                         thumbShape: _RgbwMagentaThumbShape(
-                          enabledOuterRadius: 15.5.r,
-                          enabledInnerRadius: 12.r,
+                          enabledOuterRadius: 21.r,
+                          enabledInnerRadius: 16.r,
                         ),
                         overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 22.r,
+                          overlayRadius: 36.r,
                         ),
                         activeTrackColor: const Color(0xFFE91EAC),
                         inactiveTrackColor: const Color(0xFFFFFFFF),
@@ -3220,9 +3233,9 @@ class _LedDimmerRingPainter extends CustomPainter {
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
     // =========================
-    // START FROM BOTTOM
+    // START FROM LOWER-LEFT (~8 o'clock); 0% lives here
     // =========================
-    final double startAngle = math.pi / 2;
+    final double startAngle = 3 * math.pi / 4;
 
     // =========================
     // TRACK
@@ -3264,7 +3277,7 @@ class _LedDimmerRingPainter extends CustomPainter {
         Color(0xFF00E52A),
       ],
       stops: const <double>[0.0, 0.70, 1.0],
-      transform: GradientRotation(math.pi / 2),
+      transform: GradientRotation(startAngle),
       tileMode: TileMode.clamp,
     );
 
