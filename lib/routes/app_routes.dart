@@ -222,6 +222,10 @@ class AppRouter {
             controlMode = DeviceDetailsControlMode.fanLevel;
           } else if (mode == 'ventilation') {
             controlMode = DeviceDetailsControlMode.ventilation;
+          } else if (mode == 'blindControl') {
+            controlMode = DeviceDetailsControlMode.blindControl;
+          } else if (mode == 'awningControl') {
+            controlMode = DeviceDetailsControlMode.awningControl;
           }
           return DeviceDetailsScreen(
             deviceTitle: title,
