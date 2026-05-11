@@ -281,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _BlindCard(
-                                      title: 'Blind Living Room north window',
+                                      title: 'Awning garden 123',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
                                       mode: _blindManual ? 'M' : 'A',
@@ -292,10 +292,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Blind Living Room north window',
+                                            'Awning garden 123',
                                         imageAssetPath:
                                             'assets/Rectangle 823.png',
                                         controlButtonCount: 1,
+                                        controlMode: DeviceDetailsControlMode
+                                            .awningControl,
                                       ),
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
@@ -364,6 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         imageAssetPath:
                                         'assets/Rectangle 823.png',
                                         controlButtonCount: 1,
+                                        controlMode: DeviceDetailsControlMode
+                                            .blindControl,
                                       ),
                                       onModeTap: () => setState(
                                             () => _blindManual = !_blindManual,

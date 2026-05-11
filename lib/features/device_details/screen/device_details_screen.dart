@@ -38,6 +38,12 @@ enum DeviceDetailsControlMode {
 
   /// Ventilation: cyan→blue gradient ring + centered % + fan icon (no Off/On row).
   ventilation,
+
+  /// Blind/shutter: venetian-slat visualisation + level % + angle % + slider.
+  blindControl,
+
+  /// Awning/roller-blind: image clipped by level % + up/down handle (no slats, no angle).
+  awningControl,
 }
 
 /// Carried on [GoRouterState.extra] so [DeviceDetailsControlMode] cannot be lost
@@ -106,6 +112,10 @@ class DeviceDetailsScreen extends StatefulWidget {
       query['mode'] = 'fanLevel';
     } else if (controlMode == DeviceDetailsControlMode.ventilation) {
       query['mode'] = 'ventilation';
+    } else if (controlMode == DeviceDetailsControlMode.blindControl) {
+      query['mode'] = 'blindControl';
+    } else if (controlMode == DeviceDetailsControlMode.awningControl) {
+      query['mode'] = 'awningControl';
     }
     return Uri(path: routeName, queryParameters: query).toString();
   }
@@ -179,6 +189,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   /// Never displayed as 100% in the UI (capped for display); starts at 0.
   double _ventilationPercent = 0.0;
 
+  /// Blind level: 0 = fully open (up), 1 = fully down. Displayed as 0–100%.
+  double _blindLevel = 1.0;
+
+  /// Blind slat angle: 0 = flat (fully open), 1 = fully closed. Displayed as 0–100%.
+  double _blindAngle = 0.7;
+
   static const List<String> _sceneLabels = <String>[
     'All On',
     'Night',
@@ -233,12 +249,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       widget.controlMode !=
                           DeviceDetailsControlMode.fanLevel &&
                       widget.controlMode !=
-                          DeviceDetailsControlMode.ventilation) ...[
+                          DeviceDetailsControlMode.ventilation &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.blindControl &&
+                      widget.controlMode !=
+                          DeviceDetailsControlMode.awningControl) ...[
                     _buildOnOffRow(),
                   ],
                   SizedBox(height: isLightSceneValues ? 10.h : 16.h),
-                  _buildInfoPill(),
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 16.h),
                   _buildTabsRow(),
                   SizedBox(height: 12.h),
                   _buildTabContent(),
@@ -316,6 +335,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     }
     if (widget.controlMode == DeviceDetailsControlMode.ventilation) {
       return _buildVentilationHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.blindControl) {
+      return _buildBlindControlHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
+      return _buildAwningControlHeroContent();
     }
     return Column(
       children: [
@@ -1885,44 +1910,316 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     }
   }
 
-  Widget _buildInfoPill() {
-    return Center(
-      child: Container(
-        height: 22.h,
-        padding: EdgeInsets.only(right: 10.w, left: 10.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.circular(26.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6.r,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              "assets/message_icon.png",
-              height: 15.h,
-              width: 15.w,
-              fit: BoxFit.cover,
-            ),
-            SizedBox(width: 10.w),
-            Text(
-              'Don\'t ON this device while you sleeping',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF6B7280),
+  // ─── Blind Control ────────────────────────────────────────────────────────
+
+  Widget _buildBlindControlHeroContent() {
+    final int levelPct = (_blindLevel * 100).round();
+    final int anglePct = (_blindAngle * 100).round();
+
+    const TextStyle labelStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF111827),
+    );
+    const TextStyle valueStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      color: Color(0xFF111827),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: 4.h),
+
+        // ── Title + edit icon ──────────────────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 23.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
               ),
-            ),
-          ],
+              SizedBox(width: 8.w),
+              Image.asset(
+                'assets/Group 63.png',
+                height: 14.h,
+                width: 14.w,
+                fit: BoxFit.contain,
+                color: const Color(0xFF111827),
+              ),
+            ],
+          ),
         ),
-      ),
+
+        // ── SWC + stats ───────────────────────────────────────────────────
+        _buildHeroIdentityStats(),
+        SizedBox(height: 12.h),
+
+        // ── "Level 100%" ──────────────────────────────────────────────────
+        Text.rich(
+          TextSpan(children: [
+            TextSpan(text: 'Level ', style: labelStyle),
+            TextSpan(text: '$levelPct%', style: valueStyle),
+          ]),
+        ),
+        SizedBox(height: 10.h),
+
+        // ── Blind visualisation ───────────────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double w = constraints.maxWidth;
+              final double h = w * 0.55; // compact height
+              return SizedBox(
+                width: w,
+                height: h,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (d) => setState(() {
+                    _blindLevel =
+                        (_blindLevel + d.delta.dy / (h * 1.2)).clamp(0.0, 1.0);
+                  }),
+                  child: Stack(
+                    clipBehavior: Clip.hardEdge,
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      // Slats canvas
+                      Positioned.fill(
+                        child: ClipRect(
+                          child: CustomPaint(
+                            painter: _BlindSlatsPainter(
+                              level: _blindLevel,
+                              angle: _blindAngle,
+                            ),
+                            child: const SizedBox.expand(),
+                          ),
+                        ),
+                      ),
+                      // Drag handle — tap up/down to adjust level
+                      Positioned(
+                        bottom: 10,
+                        child: _BlindHandle(
+                          onUp: () => setState(() {
+                            _blindLevel =
+                                (_blindLevel - 0.05).clamp(0.0, 1.0);
+                          }),
+                          onDown: () => setState(() {
+                            _blindLevel =
+                                (_blindLevel + 0.05).clamp(0.0, 1.0);
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 12.h),
+
+        // ── "Angle: 70%" ──────────────────────────────────────────────────
+        Text.rich(
+          TextSpan(children: [
+            TextSpan(text: 'Angle: ', style: labelStyle),
+            TextSpan(text: '$anglePct%', style: valueStyle),
+          ]),
+        ),
+        SizedBox(height: 14.h),
+
+        // ── Slider (controls blind level) ─────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 5.h,
+              activeTrackColor: const Color(0xFF29B6F6),
+              inactiveTrackColor: const Color(0xFFDDE1E7),
+              thumbColor: const Color(0xFF0088FE),
+              thumbShape:
+                  RoundSliderThumbShape(enabledThumbRadius: 14.r),
+              overlayShape:
+                  RoundSliderOverlayShape(overlayRadius: 20.r),
+              overlayColor: const Color(0x220088FE),
+            ),
+            child: Slider(
+              value: _blindLevel,
+              onChanged: (v) => setState(() => _blindLevel = v),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ─── Awning / Roller-Blind Control ────────────────────────────────────────
+
+  Widget _buildAwningControlHeroContent() {
+    final int levelPct = (_blindLevel * 100).round();
+
+    const TextStyle labelStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF111827),
+    );
+    const TextStyle valueStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      color: Color(0xFF111827),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: 4.h),
+
+        // ── Title + edit icon ────────────────────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 23.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Image.asset(
+                'assets/Group 63.png',
+                height: 14.h,
+                width: 14.w,
+                fit: BoxFit.contain,
+                color: const Color(0xFF111827),
+              ),
+            ],
+          ),
+        ),
+
+        // ── SWC + stats ──────────────────────────────────────────────────────
+        _buildHeroIdentityStats(),
+        SizedBox(height: 12.h),
+
+        // ── "Level X%" ───────────────────────────────────────────────────────
+        Text.rich(
+          TextSpan(children: [
+            TextSpan(text: 'Level ', style: labelStyle),
+            TextSpan(text: '$levelPct%', style: valueStyle),
+          ]),
+        ),
+        SizedBox(height: 10.h),
+
+        // ── Awning image, clipped by level ───────────────────────────────────
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double w = constraints.maxWidth;
+              final double maxH = w * 0.75;
+              final double visibleH = (maxH * _blindLevel).clamp(4.0, maxH);
+
+              return SizedBox(
+                width: w,
+                height: maxH,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (d) => setState(() {
+                    _blindLevel =
+                        (_blindLevel + d.delta.dy / (maxH * 1.2))
+                            .clamp(0.0, 1.0);
+                  }),
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      // Clipped image (fills from top down based on level)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: SizedBox(
+                            width: w,
+                            height: visibleH,
+                            child: Image.asset(
+                              widget.imageAssetPath,
+                              width: w,
+                              height: maxH,
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: w,
+                                height: maxH,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0xFF87CEEB),
+                                      Color(0xFF29B6F6),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Handle pinned at the bottom of the visible region
+                      Positioned(
+                        top: visibleH - 20,
+                        child: _BlindHandle(
+                          onUp: () => setState(() {
+                            _blindLevel =
+                                (_blindLevel - 0.05).clamp(0.0, 1.0);
+                          }),
+                          onDown: () => setState(() {
+                            _blindLevel =
+                                (_blindLevel + 0.05).clamp(0.0, 1.0);
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: 16.h),
+      ],
     );
   }
 
@@ -2732,6 +3029,155 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 }
+
+// ─── Blind Slats Painter ──────────────────────────────────────────────────────
+
+/// Draws a venetian-blind visualisation exactly matching the design screenshot.
+///
+/// - [level]  0 = blind retracted (no slats visible), 1 = blind fully down
+///            (all slats visible).
+/// - [angle]  0 = slats flat (thin lines), 1 = slats fully closed (thick bars).
+///            The design screenshot uses ~0.70.
+class _BlindSlatsPainter extends CustomPainter {
+  const _BlindSlatsPainter({required this.level, required this.angle});
+
+  final double level;
+  final double angle;
+
+  static const int _slatCount = 11;
+
+  // Slat fill colour — sky blue matching the design screenshot.
+  static const Color _slatColor = Color(0xFF42B5F5);
+  // Slightly darker shade used for the shadow edge of each slat.
+  static const Color _slatShadow = Color(0xFF2196F3);
+  // Box border colour.
+  static const Color _borderColor = Color(0xFF42B5F5);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect bounds = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    // ── White background ────────────────────────────────────────────────────
+    canvas.drawRect(bounds, Paint()..color = Colors.white);
+
+    // ── Clip so slat parallelograms never bleed outside the border ──────────
+    canvas.save();
+    canvas.clipRect(bounds);
+
+    final double bandH = size.height / _slatCount;
+    // Slat occupies `angle` fraction of its band (clamped so the gap stays).
+    final double slatH = bandH * angle.clamp(0.12, 0.92);
+    // Horizontal skew that gives the venetian-blind 3-D perspective.
+    // Left edge is `skewPx` lower than the right edge.
+    final double skewPx = bandH * 0.30;
+
+    // How many of the 11 bands contain a visible slat.
+    final int visible = (_slatCount * level.clamp(0.0, 1.0)).round();
+
+    final Paint fill = Paint()..style = PaintingStyle.fill;
+    final Paint edge = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = _slatShadow.withOpacity(0.40);
+
+    for (int i = 0; i < visible; i++) {
+      final double bandTop = i * bandH;
+      // Centre the slat vertically inside its band.
+      final double top = bandTop + (bandH - slatH) / 2;
+      final double bot = top + slatH;
+
+      // Parallelogram: TL & BL are skewPx lower than TR & BR.
+      //   TR(right, top) — TR is the highest point.
+      //   TL(0, top+skew)
+      //   BR(right, bot)
+      //   BL(0, bot+skew)
+      final Path slat = Path()
+        ..moveTo(0, top + skewPx)
+        ..lineTo(size.width, top)
+        ..lineTo(size.width, bot)
+        ..lineTo(0, bot + skewPx)
+        ..close();
+
+      // Solid fill.
+      fill.color = _slatColor;
+      canvas.drawPath(slat, fill);
+
+      // Subtle darker stripe along the top edge (gives depth / shadow).
+      canvas.drawLine(Offset(0, top + skewPx), Offset(size.width, top), edge);
+
+      // White highlight just below the top edge.
+      canvas.drawLine(
+        Offset(0, top + skewPx + 2),
+        Offset(size.width, top + 2),
+        Paint()
+          ..color = Colors.white.withOpacity(0.28)
+          ..strokeWidth = 1.2,
+      );
+    }
+
+    canvas.restore();
+
+    // ── Border drawn last so it's always fully visible ───────────────────────
+    canvas.drawRect(
+      bounds,
+      Paint()
+        ..color = _borderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_BlindSlatsPainter old) =>
+      old.level != level || old.angle != angle;
+}
+
+// Drag-handle widget drawn on top of the slats.
+class _BlindHandle extends StatelessWidget {
+  const _BlindHandle({this.onUp, this.onDown});
+
+  final VoidCallback? onUp;
+  final VoidCallback? onDown;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.18),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onUp,
+            child: const Icon(Icons.keyboard_arrow_up_rounded,
+                size: 18, color: Color(0xFF374151)),
+          ),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onDown,
+            child: const Icon(Icons.keyboard_arrow_down_rounded,
+                size: 18, color: Color(0xFF374151)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 Widget deviceOverviewCard() {
   const overviewTitle = Color(0xFF111827);
