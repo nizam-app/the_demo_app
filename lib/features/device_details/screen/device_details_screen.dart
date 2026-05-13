@@ -44,6 +44,16 @@ enum DeviceDetailsControlMode {
 
   /// Awning/roller-blind: image clipped by level % + up/down handle (no slats, no angle).
   awningControl,
+
+  /// Thermostat set-point: full blue→pink gradient ring + draggable thumb,
+  /// "Set Point XX.X°" in centre, current temp & humidity below.
+  thermostatRing,
+
+  /// Presence: Comfort / Auto / Eco / Dynamic / Individual circular modes.
+  presenceModes,
+
+  /// Multi-value switch: 12-position grid (3×4) with On Light / Irrigation / Alarm labels.
+  multiValueSwitch,
 }
 
 /// Carried on [GoRouterState.extra] so [DeviceDetailsControlMode] cannot be lost
@@ -116,6 +126,12 @@ class DeviceDetailsScreen extends StatefulWidget {
       query['mode'] = 'blindControl';
     } else if (controlMode == DeviceDetailsControlMode.awningControl) {
       query['mode'] = 'awningControl';
+    } else if (controlMode == DeviceDetailsControlMode.thermostatRing) {
+      query['mode'] = 'thermostatRing';
+    } else if (controlMode == DeviceDetailsControlMode.presenceModes) {
+      query['mode'] = 'presenceModes';
+    } else if (controlMode == DeviceDetailsControlMode.multiValueSwitch) {
+      query['mode'] = 'multiValueSwitch';
     }
     return Uri(path: routeName, queryParameters: query).toString();
   }
@@ -185,7 +201,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   /// Defaults to Speed 1 to match the design screenshot's initial state.
   int _selectedFanLevel = 1;
 
-  /// Ventilation ring: 0 = min (pointer at start), 1 = max along the arc.
+  /// Ventilation ring: 0 = min at lower-left (~8 o'clock, same as LED dimmer), 1 = max along the arc.
   /// Never displayed as 100% in the UI (capped for display); starts at 0.
   double _ventilationPercent = 0.0;
 
@@ -194,6 +210,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
   /// Blind slat angle: 0 = flat (fully open), 1 = fully closed. Displayed as 0–100%.
   double _blindAngle = 0.7;
+
+  /// Thermostat set-point ring: 0 = 19 °C, 1 = 35 °C.
+  /// Thumb starts at the arc origin (lower-left, ~8 o'clock) = 19 °C.
+  double _thermostatSetPercent = 0.0;
+
+  /// Presence screen: selected circular mode (0 Comfort … 4 Individual).
+  int _selectedPresenceModeIndex = 0;
+
+  /// Multi-value switch grid: selected tile index 0 … 11 (displayed as 1 … 12).
+  int _selectedMultiValueSwitchIndex = 0;
 
   static const List<String> _sceneLabels = <String>[
     'All On',
@@ -220,50 +246,84 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   Widget _buildBody(BuildContext context) {
     final bool isLightSceneValues =
         widget.controlMode == DeviceDetailsControlMode.lightSceneValues;
+    final bool presenceModes =
+        widget.controlMode == DeviceDetailsControlMode.presenceModes;
+    final bool multiValueSwitch =
+        widget.controlMode == DeviceDetailsControlMode.multiValueSwitch;
+    final bool scrollNeedsMinHeight = presenceModes || multiValueSwitch;
+
+    /// These demo devices use a fixed (non-scroll) body; other modes unchanged.
+    final String titleLc = widget.deviceTitle.toLowerCase();
+    final bool disableBodyScroll =
+        widget.controlMode == DeviceDetailsControlMode.ventilation ||
+            (widget.controlMode == DeviceDetailsControlMode.thermostatRing &&
+                titleLc == 'living room') ||
+            (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
+                widget.deviceTitle == 'LED Dimmer living room');
+
+    final ScrollPhysics scrollPhysics = disableBodyScroll
+        ? const NeverScrollableScrollPhysics()
+        : scrollNeedsMinHeight
+            ? const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              )
+            : const AlwaysScrollableScrollPhysics();
+
+    final Widget scrollColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildTopHeader(context),
+        _buildSwcBelowHeader(),
+        _buildHero(),
+        SizedBox(height: isLightSceneValues ? 10.h : 18.h),
+        if (widget.controlMode ==
+            DeviceDetailsControlMode.lightSceneValues) ...[
+          _buildSceneValuesSection(),
+        ] else if (widget.controlMode != DeviceDetailsControlMode.rgbwPicker &&
+            widget.controlMode != DeviceDetailsControlMode.ledDimmer &&
+            widget.controlMode != DeviceDetailsControlMode.tunableWhite &&
+            widget.controlMode != DeviceDetailsControlMode.heatingCooling &&
+            widget.controlMode != DeviceDetailsControlMode.fanLevel &&
+            widget.controlMode != DeviceDetailsControlMode.ventilation &&
+            widget.controlMode != DeviceDetailsControlMode.blindControl &&
+            widget.controlMode !=
+                DeviceDetailsControlMode.awningControl &&
+            widget.controlMode != DeviceDetailsControlMode.thermostatRing &&
+            widget.controlMode != DeviceDetailsControlMode.presenceModes &&
+            widget.controlMode !=
+                DeviceDetailsControlMode.multiValueSwitch) ...[
+          _buildOnOffRow(),
+        ],
+        _buildTabsRow(),
+        SizedBox(height: scrollNeedsMinHeight ? 4.h : 12.h),
+        _buildTabContent(),
+        SizedBox(height: 80.h),
+      ],
+    );
+
     return SafeArea(
       top: true,
       bottom: false,
-
+      left: true,
+      right: true,
       child: Column(
         children: [
-          _buildTopHeader(context),
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildHero(),
-                  SizedBox(height: isLightSceneValues ? 10.h : 18.h),
-                  if (widget.controlMode ==
-                      DeviceDetailsControlMode.lightSceneValues) ...[
-                    _buildSceneValuesSection(),
-                  ] else if (widget.controlMode !=
-                          DeviceDetailsControlMode.rgbwPicker &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.ledDimmer &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.tunableWhite &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.heatingCooling &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.fanLevel &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.ventilation &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.blindControl &&
-                      widget.controlMode !=
-                          DeviceDetailsControlMode.awningControl) ...[
-                    _buildOnOffRow(),
-                  ],
-                  SizedBox(height: isLightSceneValues ? 10.h : 16.h),
-                  SizedBox(height: 16.h),
-                  _buildTabsRow(),
-                  SizedBox(height: 12.h),
-                  _buildTabContent(),
-                  SizedBox(height: 80.h),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, viewportConstraints) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  physics: scrollPhysics,
+                  child: scrollNeedsMinHeight
+                      ? ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: viewportConstraints.maxHeight,
+                          ),
+                          child: scrollColumn,
+                        )
+                      : scrollColumn,
+                );
+              },
             ),
           ),
         ],
@@ -272,47 +332,76 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildTopHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 14.w, right: 14.w),
-      child: SizedBox(
-        height: 40.h,
-        child: Row(
-          children: [
-            GlobalCircleIconBtn(
-              color: const Color(0xFFFFFFFF),
-              child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
-              onTap: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                } else {
-                  context.go('/setting-device');
-                }
-              },
-            ),
+    return _buildDefaultTopHeader(context);
+  }
 
-            const Spacer(),
-            // Ellipsis button + blue plus
-            GlobalCircleIconBtn(
-              color: const Color(0xFFFFFFFF),
-              onTap: () {},
-              child: Icon(Icons.more_horiz_rounded, color: Colors.black),
-            ),
-            SizedBox(width: 10.w),
-            Container(
-              width: 32.w,
-              height: 32.h,
-              decoration: const BoxDecoration(
-                color: Color(0xFF111827),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: const Icon(Icons.add_rounded, color: Colors.white),
-                onPressed: () {},
-              ),
-            ),
-          ],
+  /// Model / device id — shown under [_buildTopHeader], above the hero.
+  Widget _buildSwcBelowHeader() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 10.h),
+      child: Text(
+        'SWC 1326 39',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xFF6B7280),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDefaultTopHeader(BuildContext context) {
+    const Color textPrimary = Color(0xFF111827);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GlobalCircleIconBtn(
+            color: const Color(0xFFFFFFFF),
+            child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+            onTap: () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                context.go('/setting-device');
+              }
+            },
+          ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    widget.deviceTitle,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 23.sp,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Image.asset(
+                  'assets/Group 63.png',
+                  height: 13.h,
+                  width: 13.w,
+                  fit: BoxFit.cover,
+                  color: textPrimary,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 36.w),
+        ],
       ),
     );
   }
@@ -342,9 +431,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
       return _buildAwningControlHeroContent();
     }
+    if (widget.controlMode == DeviceDetailsControlMode.thermostatRing) {
+      return _buildThermostatRingHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.presenceModes) {
+      return _buildPresenceModesHeroContent();
+    }
+    if (widget.controlMode == DeviceDetailsControlMode.multiValueSwitch) {
+      return _buildMultiValueSwitchHeroContent();
+    }
     return Column(
       children: [
-        SizedBox(height: 4.h),
+        SizedBox(height: 8.h),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -360,61 +458,314 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           ),
         ),
         SizedBox(height: 10.h),
-        Padding(
-          padding: EdgeInsets.only(left: 24.w, right: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                flex: 9,
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 23.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
+        _buildHeroIdentityStats(),
+      ],
+    );
+  }
+
+  /// Hero for [DeviceDetailsControlMode.presenceModes]: five selectable modes.
+  Widget _buildPresenceModesHeroContent() {
+    const Color textPrimary = Color(0xFF111827);
+    const Color labelMuted = Color(0xFF111827);
+    final double circleDm = 86.w;
+    final double ringInset = 3.8.w;
+
+    Widget presenceModeTile({
+      required int index,
+      required String label,
+      required Widget iconChild,
+    }) {
+      final bool sel = _selectedPresenceModeIndex == index;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _selectedPresenceModeIndex = index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              width: circleDm,
+              height: circleDm,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: sel
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
+                      )
+                    : null,
+                color: sel ? null : Colors.white,
+                border: sel
+                    ? null
+                    : Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(sel ? 0.10 : 0.05),
+                    blurRadius: sel ? 10 : 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: sel ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
+              child: ClipOval(
+                clipBehavior: Clip.antiAlias,
+                child: ColoredBox(
+                  color: const Color(0xFFFFFFFF),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double inset = 10.w;
+                      final double rawSide = math.min(
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                      );
+                      final double side = math.max(0.0, rawSide - inset * 2);
+                      return Padding(
+                        padding: EdgeInsets.all(inset),
+                        child: Center(
+                          child: SizedBox(
+                            width: side,
+                            height: side,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              alignment: Alignment.center,
+                              child: iconChild,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
-              SizedBox(width: 10.w),
-              Padding(
-                padding: EdgeInsets.only(top: 8.h),
-                child: Image.asset(
-                  "assets/Group 63.png",
-                  height: 13.h,
-                  width: 13.w,
-                  fit: BoxFit.cover,
-                  color: const Color(0xFF111827),
-                ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 14.sp,
+                fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
+                color: sel ? textPrimary : textPrimary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        SizedBox(height: 22.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  presenceModeTile(
+                    index: 0,
+                    label: 'Comfort',
+                    iconChild: Image.asset(
+                      widget.imageAssetPath,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (_, __, ___) => Image.asset(
+                        'assets/images/comfort.png',
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.medium,
+                      ),
+                    ),
+                  ),
+                  presenceModeTile(
+                    index: 1,
+                    label: 'Auto',
+                    iconChild: Image.asset(
+                      'assets/images/auto.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                  presenceModeTile(
+                    index: 2,
+                    label: 'Eco',
+                    iconChild: Image.asset(
+                      'assets/images/Eco.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 18.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  presenceModeTile(
+                    index: 3,
+                    label: 'Dynamic',
+                    iconChild: Image.asset(
+                      'assets/images/dynamic.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                  SizedBox(width: 44.w),
+                  presenceModeTile(
+                    index: 4,
+                    label: 'Individual',
+                    iconChild: Image.asset(
+                      'assets/images/Individual.png',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
-        SizedBox(height: 7.h),
-        Text(
-          'SWC 1326 39',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF6B7280),
-          ),
+        SizedBox(height: 8.h),
+      ],
+    );
+  }
+
+  /// Hero for [DeviceDetailsControlMode.multiValueSwitch]: 3×4 value grid.
+  Widget _buildMultiValueSwitchHeroContent() {
+    const Color textPrimary = Color(0xFF111827);
+    const Color labelMuted = Color(0xFF9CA3AF);
+    const List<String> rowLabels = <String>[
+      'On Light',
+      'On Irrigation',
+      'On Alarm',
+    ];
+    const LinearGradient selectedBorderGradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
+    );
+
+    Widget valueTile(int index) {
+      final int displayed = index + 1;
+      final bool sel = _selectedMultiValueSwitchIndex == index;
+      final String caption = rowLabels[index % 3];
+      final double radiusOuter = 26.r;
+      final double radiusInner = sel
+          ? (radiusOuter - 3.w).clamp(12.r, radiusOuter)
+          : radiusOuter;
+
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => setState(() => _selectedMultiValueSwitchIndex = index),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              decoration: BoxDecoration(
+                gradient: sel ? selectedBorderGradient : null,
+                color: sel ? null : Colors.white,
+                borderRadius: BorderRadius.circular(26.r),
+                border: sel
+                    ? null
+                    : Border.all(color: const Color(0xFFFFFFFF), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(sel ? 0.08 : 0.04),
+                    blurRadius: sel ? 10 : 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              padding: sel ? EdgeInsets.all(3.w) : EdgeInsets.zero,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26.r),
+                ),
+                child: SizedBox(
+                  height: 48.h,
+                  width: double.infinity,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Center(
+                        child: Text(
+                          '$displayed',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w700,
+                            color: sel ? textPrimary : textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (sel)
+                        Positioned(
+                          top: 8.h,
+                          right: 5.w,
+                          child: Icon(
+                            Icons.check_circle,
+                            size: 30.sp,
+                            color: const Color(0xFF22C55E),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              caption,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 12.sp,
+                fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
+                color: sel ? textPrimary : textPrimary,
+                height: 1.15,
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 16.h),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        SizedBox(height: 22.h),
         Padding(
-          padding: EdgeInsets.only(left: 80.w, right: 90.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _StatBlock(top: '12:57', bottom: 'On time'),
-              _StatBlock(top: '5h 58m', bottom: '7 Days'),
-              _StatBlock(top: '1257', bottom: 'Cycles'),
-            ],
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: Column(
+            children: List<Widget>.generate(4, (int row) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: row < 3 ? 12.h : 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List<Widget>.generate(3, (int col) {
+                    final int idx = row * 3 + col;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 4.h,
+                        ),
+                        child: valueTile(idx),
+                      ),
+                    );
+                  }),
+                ),
+              );
+            }),
           ),
         ),
       ],
@@ -431,63 +782,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 4.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Padding(
-                padding: EdgeInsets.only(top: 6.h),
-                child: Image.asset(
-                  'assets/Group 63.png',
-                  height: 13.h,
-                  width: 13.w,
-                  fit: BoxFit.cover,
-                  color: const Color(0xFF111827),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 7.h),
-        Text(
-          'SWC 1326 39',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Padding(
-          padding: EdgeInsets.only(left: 80.w, right: 90.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _StatBlock(top: '12:57', bottom: 'On time'),
-              _StatBlock(top: '5h 58m', bottom: '7 Days'),
-              _StatBlock(top: '1257', bottom: 'Cycles'),
-            ],
-          ),
-        ),
+        _buildHeroIdentityStats(),
         // SizedBox(height: 22.h),
         // Text(
         //   'LED Dimmer',
@@ -628,10 +923,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
-    // Same geometry as `_VentilationRingPainter` / LED dimmer:
-    // 0% at bottom (pi/2), arc stops short of a full turn (gap) so you cannot
-    // jump from ~100% back to 0% by crossing the gap — you must travel back.
-    const double startAngle = math.pi / 2;
+    // Same geometry as `_VentilationRingPainter` / `_LedDimmerRingPainter`:
+    // 0% at lower-left (3*pi/4).
+    const double startAngle = 3 * math.pi / 4;
     const double fullTurn = 2 * math.pi;
     const double maxSweep = fullTurn - 0.08;
 
@@ -647,38 +941,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     setState(() => _ventilationPercent = next.clamp(0.0, 1.0));
   }
 
-  /// "SWC 1326 39" subtitle + the 3-stat row (On time / 7 Days / Cycles).
-  ///
-  /// Same identity block already shown by the standard hero (used by Light
-  /// scene values & RGBW). Reused on Heating & Cooling, Tunable White,
-  /// Ventilation and Fan Level hero builders so they match the rest of the
-  /// app — no per-screen tweaks here.
-  Widget _buildHeroIdentityStats() {
+  /// Three-column stats row (On time / 7 Days / Cycles).
+  Widget _buildHeroStatsRow({String onTimeTop = '12:57'}) {
+    return Padding(
+      padding: EdgeInsets.only(left: 80.w, right: 90.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _StatBlock(top: onTimeTop, bottom: 'On time'),
+          _StatBlock(top: '5h 58m', bottom: '7 Days'),
+          _StatBlock(top: '1257', bottom: 'Cycles'),
+        ],
+      ),
+    );
+  }
+
+  /// Spacer + stats only — device title lives in [_buildTopHeader]; SWC in [_buildSwcBelowHeader].
+  Widget _buildHeroIdentityStats({String onTimeTop = '12:57'}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(height: 7.h),
-        Text(
-          'SWC 1326 39',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
         SizedBox(height: 16.h),
-        Padding(
-          padding: EdgeInsets.only(left: 80.w, right: 90.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _StatBlock(top: '12:57', bottom: 'On time'),
-              _StatBlock(top: '5h 58m', bottom: '7 Days'),
-              _StatBlock(top: '1257', bottom: 'Cycles'),
-            ],
-          ),
-        ),
+        _buildHeroStatsRow(onTimeTop: onTimeTop),
       ],
     );
   }
@@ -688,7 +972,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   Widget _buildVentilationHeroContent() {
     final double ringSize = 228.w;
     final double stroke = 12.r;
-    final double startAngle = math.pi / 2;
+    // Matches [_LedDimmerRingPainter] / LED dimmer: 0% at lower-left.
+    final double startAngle = 3 * math.pi / 4;
     final double maxSweep = (2 * math.pi) - 0.08;
     final double thumbSize = 38.r;
     const Color thumbBlue = Color(0xFF0088FE);
@@ -698,22 +983,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 10.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Text(
-            widget.deviceTitle,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF111827),
-            ),
-          ),
-        ),
         _buildHeroIdentityStats(),
         SizedBox(height: 14.h),
         Center(
@@ -823,7 +1092,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildTunableWhiteHeroContent() {
-    final double diskSize = 228.w;
+    final double diskSize = 280.w;
     final double thumbSize = 30.r;
 
     // Approximate warm↔cool kelvin range for the UI.
@@ -840,17 +1109,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 10.h),
-        Text(
-          'Tunable white light',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w700,
-            color: textPrimary,
-          ),
-        ),
+        // SizedBox(height: 10.h),
+        // Text(
+        //   'Tunable white light',
+        //   textAlign: TextAlign.center,
+        //   style: TextStyle(
+        //     fontFamily: 'Inter',
+        //     fontSize: 22.sp,
+        //     fontWeight: FontWeight.w700,
+        //     color: textPrimary,
+        //   ),
+        // ),
         _buildHeroIdentityStats(),
         SizedBox(height: 14.h),
         Center(
@@ -876,13 +1145,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: dialShadow,
-                                blurRadius: 24.r,
-                                offset: const Offset(0, 12),
-                              ),
-                            ],
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: dialShadow,
+                            //     blurRadius: 24.r,
+                            //     offset: const Offset(0, 12),
+                            //   ),
+                            // ],
                           ),
                           child: ClipOval(
                             child: Stack(
@@ -1148,63 +1417,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 4.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10.w),
-              Padding(
-                padding: EdgeInsets.only(top: 6.h),
-                child: Image.asset(
-                  'assets/Group 63.png',
-                  height: 13.h,
-                  width: 13.w,
-                  fit: BoxFit.cover,
-                  color: const Color(0xFF111827),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 7.h),
-        Text(
-          'SWC 1326 39',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF6B7280),
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Padding(
-          padding: EdgeInsets.only(left: 80.w, right: 90.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _StatBlock(top: '12:57', bottom: 'On time'),
-              _StatBlock(top: '5h 58m', bottom: '7 Days'),
-              _StatBlock(top: '1257', bottom: 'Cycles'),
-            ],
-          ),
-        ),
+        _buildHeroIdentityStats(),
         // SizedBox(height: 22.h),
         // Text(
         //   'RGBW',
@@ -1414,11 +1627,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   ///      - "Heating" pill with steam-waves icon,
   ///      - "Cooling" pill with snowflake icon.
   ///    Tapping a pill toggles [_heatingCoolingMode] between 'heating' and
-  ///    'cooling' (selected pill gets a subtle highlight).
+  ///    'cooling' (selected pill uses its accent color; inactive is white).
   Widget _buildHeatingCoolingHeroContent() {
-    const Color textPrimary = Color(0xFF111827);
     const Color pillBg = Colors.white;
-    const Color pillSelectedBg = Color(0xFFF3F4F6);
     const Color pillBorder = Color(0xFFE5E7EB);
 
     final bool isHeating = _heatingCoolingMode == 'heating';
@@ -1426,22 +1637,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 4.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Text(
-            widget.deviceTitle,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
-          ),
-        ),
         _buildHeroIdentityStats(),
         SizedBox(height: 14.h),
         Center(
@@ -1463,6 +1658,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -1492,33 +1688,60 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 ),
               ),
               SizedBox(width: 10.w),
-              _heatingCoolingPill(
-                label: 'Heating',
-                selected: isHeating,
-                onTap: () => setState(() => _heatingCoolingMode = 'heating'),
-                bg: pillBg,
-                selectedBg: pillSelectedBg,
-                border: pillBorder,
-                textColor: textPrimary,
-                leading: Icon(
-                  Icons.waves_rounded,
-                  size: 18.sp,
-                  color: textPrimary,
-                ),
-              ),
-              SizedBox(width: 10.w),
-              _heatingCoolingPill(
-                label: 'Colling',
-                selected: isCooling,
-                onTap: () => setState(() => _heatingCoolingMode = 'cooling'),
-                bg: pillBg,
-                selectedBg: pillSelectedBg,
-                border: pillBorder,
-                textColor: textPrimary,
-                leading: Icon(
-                  Icons.ac_unit_rounded,
-                  size: 16.sp,
-                  color: textPrimary,
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _heatingCoolingPill(
+                        label: 'Heating',
+                        selected: isHeating,
+                        onTap: () =>
+                            setState(() => _heatingCoolingMode = 'heating'),
+                        accentBg: Color(0xFFFE019A),
+                        inactiveBg: pillBg,
+                        border: pillBorder,
+                        leading: Image.asset(
+                          'assets/Heating.png',
+                          height: 22.h,
+                          width: 22.w,
+                          fit: BoxFit.cover,
+                          color: isHeating ? Colors.white : Colors.black,
+                          colorBlendMode: BlendMode.srcIn,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.asset(
+                            'assets/hvac.png',
+                            height: 22.h,
+                            width: 22.w,
+                            fit: BoxFit.cover,
+                            color: isHeating ? Colors.white : Colors.black,
+                            colorBlendMode: BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      _heatingCoolingPill(
+                        label: 'Colling',
+                        selected: isCooling,
+                        onTap: () =>
+                            setState(() => _heatingCoolingMode = 'cooling'),
+                        accentBg: Color(0xFF0088FE),
+                        inactiveBg: pillBg,
+                        border: pillBorder,
+                        leading: Image.asset(
+                          'assets/colling.png',
+                          height: 22.h,
+                          width: 22.w,
+                          fit: BoxFit.cover,
+                          color: isCooling ? Colors.white : Colors.black,
+                          colorBlendMode: BlendMode.srcIn,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1532,12 +1755,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     required String label,
     required bool selected,
     required VoidCallback onTap,
-    required Color bg,
-    required Color selectedBg,
+    required Color accentBg,
+    required Color inactiveBg,
     required Color border,
-    required Color textColor,
     required Widget leading,
   }) {
+    final Color foreground = selected ? Colors.white : Colors.black;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -1545,10 +1768,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         height: 36.h,
         padding: EdgeInsets.symmetric(horizontal: 14.w),
         decoration: BoxDecoration(
-          color: selected ? selectedBg : bg,
+          color: selected ? accentBg : inactiveBg,
           borderRadius: BorderRadius.circular(26.r),
           border: Border.all(
-            color: selected ? border : Colors.transparent,
+            color: selected ? Colors.transparent : border,
             width: 1,
           ),
           boxShadow: selected
@@ -1572,7 +1795,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 fontFamily: 'Inter',
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: textColor,
+                color: foreground,
               ),
             ),
           ],
@@ -1581,18 +1804,237 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // THERMOSTAT RING HERO
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /// Hero for [DeviceDetailsControlMode.thermostatRing].
+  ///
+  /// Renders a full blue→purple→pink gradient ring whose draggable thumb sets
+  /// the set-point temperature (range 19–35 °C). The arc origin sits at the
+  /// lower-left (~8 o'clock, same as the LED dimmer) so at 0 % the thumb
+  /// starts there and the display reads "19.0°".
+  Widget _buildThermostatRingHeroContent() {
+    const double startAngle = 3 * math.pi / 4;
+    const double maxSweep = (2 * math.pi) - 0.08;
+    final double ringSize = 300.w;
+    final double stroke = 15.r;
+
+    // Temperature: 19 °C at 0 % → 35 °C at 100 %.
+    final double setTemp = 19.0 + _thermostatSetPercent.clamp(0.0, 1.0) * 16.0;
+    final int tempInt = setTemp.floor();
+    final int tempFrac = ((setTemp - tempInt) * 10).round();
+
+    return Column(
+      children: [
+        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        SizedBox(height: 14.h),
+
+        // ── Thermostat ring ──────────────────────────────────────────────────
+        Center(
+          child: SizedBox(
+            width: ringSize,
+            height: ringSize,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final Size sz = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (d) =>
+                      _thermostatUpdateFromLocal(d.localPosition, sz),
+                  onPanUpdate: (d) =>
+                      _thermostatUpdateFromLocal(d.localPosition, sz),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Gradient ring track (always full circle)
+                      IgnorePointer(
+                        child: CustomPaint(
+                          size: sz,
+                          painter: _ThermostatRingPainter(strokeWidth: stroke),
+                        ),
+                      ),
+
+                      // Centre: set point + dotted divider + current temp / humidity
+                      IgnorePointer(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24.w),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Set Point',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF6B7280),
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '$tempInt',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 52.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF111827),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '.$tempFrac°',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 24.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF111827),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              CustomPaint(
+                                size: Size(132.w, 4),
+                                painter: const _ThermostatDottedDividerPainter(
+                                  color: Color(0xFFD1D5DB),
+                                ),
+                              ),
+                              SizedBox(height: 5.h),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/low-temperature 1.png',
+                                    height: 19.h,
+                                    width: 8.w,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '24.6°C',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF111827),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Image.asset(
+                                    'assets/hot-prsend.png',
+                                    height: 20.h,
+                                    width: 20.w,
+                                    fit: BoxFit.cover,
+                                  ),
+
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '21%',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF111827),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Draggable thumb
+                      Builder(
+                        builder: (context) {
+                          final Offset c = Offset(sz.width / 2, sz.height / 2);
+                          final double radius =
+                              sz.shortestSide / 2 - stroke / 2 - 2;
+                          final double ang =
+                              startAngle +
+                              maxSweep * _thermostatSetPercent.clamp(0.0, 1.0);
+                          final Offset thumb =
+                              c + Offset(math.cos(ang), math.sin(ang)) * radius;
+                          final double thumbSize = 38.r;
+                          return Positioned(
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
+                            child: IgnorePointer(
+                              child: Container(
+                                width: thumbSize,
+                                height: thumbSize,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFF007C),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    width: 5,
+                                    color: Colors.white,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.18),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Updates [_thermostatSetPercent] from a pan gesture on the thermostat ring.
+  void _thermostatUpdateFromLocal(Offset local, Size size) {
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final Offset d = local - c;
+    final double angle = math.atan2(d.dy, d.dx);
+    const double startAngle = 3 * math.pi / 4;
+    const double fullTurn = 2 * math.pi;
+    const double maxSweep = fullTurn - 0.08;
+
+    double a = angle - startAngle;
+    a = (a % fullTurn + fullTurn) % fullTurn;
+    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
+
+    final double prev = _thermostatSetPercent.clamp(0.0, 1.0);
+    if (prev > 0.85 && next < 0.15) next = 1.0;
+    if (prev < 0.15 && next > 0.85) next = 0.0;
+
+    setState(() => _thermostatSetPercent = next.clamp(0.0, 1.0));
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+
   /// Hero for [DeviceDetailsControlMode.fanLevel].
   ///
   /// Layout (top-to-bottom, matches the design screenshot):
-  /// 1. The device title (e.g. "Fan Level 3").
+  /// 1. Identity stats row (title lives in the top header).
   /// 2. The fan asset rendered at hero size.
   /// 3. A row of four [_SceneValueOption]-styled buttons:
   ///      Off, Speed 1, Speed 2, Speed 3.
   ///    Tapping a button updates [_selectedFanLevel] and the selected pill
   ///    gets the standard gray-fill + bold-label highlight.
   Widget _buildFanLevelHeroContent() {
-    const Color textPrimary = Color(0xFF111827);
-
     final List<({String label, int value})> options =
         <({String label, int value})>[
           (label: 'Off', value: 0),
@@ -1603,22 +2045,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 4.h),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Text(
-            widget.deviceTitle,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
-          ),
-        ),
         _buildHeroIdentityStats(),
         SizedBox(height: 14.h),
         Center(
@@ -1932,43 +2358,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 4.h),
-
-        // ── Title + edit icon ──────────────────────────────────────────────
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 23.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Image.asset(
-                'assets/Group 63.png',
-                height: 14.h,
-                width: 14.w,
-                fit: BoxFit.contain,
-                color: const Color(0xFF111827),
-              ),
-            ],
-          ),
-        ),
-
-        // ── SWC + stats ───────────────────────────────────────────────────
         _buildHeroIdentityStats(),
         SizedBox(height: 12.h),
 
@@ -2091,43 +2480,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 4.h),
-
-        // ── Title + edit icon ────────────────────────────────────────────────
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 23.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Image.asset(
-                'assets/Group 63.png',
-                height: 14.h,
-                width: 14.w,
-                fit: BoxFit.contain,
-                color: const Color(0xFF111827),
-              ),
-            ],
-          ),
-        ),
-
-        // ── SWC + stats ──────────────────────────────────────────────────────
         _buildHeroIdentityStats(),
         SizedBox(height: 12.h),
 
@@ -2224,12 +2576,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildTabsRow() {
-    const tabs = [
+    const List<(_DeviceTab, String)> tabs = <(_DeviceTab, String)>[
       (_DeviceTab.tools, 'Tools'),
       (_DeviceTab.automation, 'Automation'),
       (_DeviceTab.chart, 'Chart'),
       (_DeviceTab.overview, 'Overview'),
-
       (_DeviceTab.activity, 'Activity'),
     ];
 
@@ -2246,7 +2597,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 10.h),
                   SizedBox(
                     width: double.infinity,
                     child: Center(
@@ -2255,21 +2606,21 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF111827),
-                          // active
-                          //     ? const Color(0xFF111827)
-                          //     : const Color(0xFF111827),
+                          height: 1.0,
+                          fontWeight: active
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                          color: active
+                              ? const Color(0xFF111827)
+                              : const Color(0xFF111827),
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 6.h),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     height: 3.h,
                     width: active ? 49.w : 0.w,
-                    //width: active ? double.infinity : 0, // ✅ FIX
                     margin: EdgeInsets.symmetric(horizontal: 4.w),
                     decoration: BoxDecoration(
                       color: const Color(0xFF111827),
@@ -2591,6 +2942,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(26.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10.r,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2610,40 +2968,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               ),
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE1E1E1)),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 5.w,
-              top: 5.h,
-              right: 5.w,
-              bottom: 5.h,
-            ),
-            child: _miniAutomationRow(
-              title: 'Set actions based on value of',
-              subtitle: 'Multi-Value Switch',
-              image: "assets/set_actions_icon.png",
-              imageheight: 40.h,
-              imagewidth: 40.w,
-            ),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+          _miniAutomationRow(
+            title: 'Set actions based on value of',
+            subtitle: 'Multi-Value Switch',
+            image: "assets/set_actions_icon.png",
+            imageheight: 32.h,
+            imagewidth: 32.w,
           ),
           Padding(
-            padding: EdgeInsets.only(left: 65.w, right: 14.w),
-            child: Divider(height: 1, color: Color(0xFFE1E1E1)),
+            padding: EdgeInsets.only(right: 14.w, left: 48.w),
+            child: const Divider(
+              height: 1,
+              thickness: 1,
+              color: Color(0xFFE1E1E1),
+            ),
           ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 5.w,
-              top: 5.h,
-              right: 5.w,
-              bottom: 5.h,
-            ),
-            child: _miniAutomationRow(
-              title: 'Temperature hysteresis controller (2)',
-              subtitle: 'Multi-Value Switch',
-              image: "assets/temperature_icon.png",
-              imageheight: 34.h,
-              imagewidth: 34.w,
-            ),
+          _miniAutomationRow(
+            title: 'Temperature hysteresis controller (2)',
+            subtitle: 'Multi-Value Switch',
+            image: "assets/temperature_icon.png",
+            imageheight: 30.h,
+            imagewidth: 30.w,
           ),
         ],
       ),
@@ -2894,12 +3240,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     required double imageheight,
     required double imagewidth,
   }) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 8.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(18.r),
-      ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -2909,18 +3251,20 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             width: imagewidth,
             fit: BoxFit.cover,
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
+                    height: 1.2,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                   ),
@@ -2932,7 +3276,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
+                    height: 1.2,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
                   ),
@@ -2940,12 +3285,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               ],
             ),
           ),
-          SizedBox(width: 6.w),
+          SizedBox(width: 8.w),
           Image.asset(
-            "assets/images/back_arro.png",
+            "assets/back_arro.png",
             height: 13.h,
             width: 13.w,
             fit: BoxFit.cover,
+            color: const Color(0xFF6B7280),
           ),
         ],
       ),
@@ -3746,7 +4092,89 @@ class _LedDimmerRingPainter extends CustomPainter {
   }
 }
 
+/// Thin dotted divider shown inside the thermostat ring below set-point °.
+class _ThermostatDottedDividerPainter extends CustomPainter {
+  const _ThermostatDottedDividerPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    const double dotRadius = 1.1;
+    final double cy = size.height / 2;
+    double x = dotRadius + 0.5;
+    while (x < size.width - dotRadius) {
+      canvas.drawCircle(Offset(x, cy), dotRadius, dotPaint);
+      x += dotRadius * 2 + 4;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ThermostatDottedDividerPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Full blue→purple→pink gradient ring used as the thermostat set-point track.
+///
+/// The gradient always covers the entire circle (no gray track). The draggable
+/// thumb is rendered separately on top; this painter only draws the ring itself.
+class _ThermostatRingPainter extends CustomPainter {
+  const _ThermostatRingPainter({required this.strokeWidth});
+
+  final double strokeWidth;
+
+  // Arc origin (lower-left, ~8 o'clock) — matches the LED dimmer start angle.
+  static const double _startAngle = 3 * math.pi / 4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+
+    // Gradient: blue (cold, arc start at ~8 o'clock) → purple (mid) →
+    //           pink/magenta (hot, arc end just before start).
+    // GradientRotation aligns stop 0 with the arc origin at _startAngle so
+    // the visual colours follow the arc direction naturally.
+    const SweepGradient gradient = SweepGradient(
+      colors: <Color>[
+        Color(0xFF4A9EFF), // blue  (cold — arc origin / left side)
+        Color(0xFF9B5DE5), // purple
+        Color(0xFFFF007C), // pink/magenta (hot — approaching arc origin)
+        Color(0xFFFF007C), // hold pink
+        Color(0xFF4A9EFF), // return to blue (seamless wrap)
+      ],
+      stops: <double>[0.0, 0.35, 0.62, 0.88, 1.0],
+      transform: GradientRotation(_startAngle),
+    );
+
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..shader = gradient.createShader(arcRect);
+
+    // Draw the full circle, leaving a tiny (~3°) gap at the start so the arc
+    // cap doesn't overlap itself and looks clean.
+    canvas.drawArc(
+      arcRect,
+      _startAngle + 0.04,
+      (2 * math.pi) - 0.08,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ThermostatRingPainter old) =>
+      old.strokeWidth != strokeWidth;
+}
+
 /// Cyan→blue gradient arc track for ventilation % (matches dashboard mini ring).
+/// 0 % aligns with the LED dimmer / [_LedDimmerRingPainter] origin (lower-left, `3*pi/4`).
 class _VentilationRingPainter extends CustomPainter {
   _VentilationRingPainter({
     required this.percent,
@@ -3766,7 +4194,7 @@ class _VentilationRingPainter extends CustomPainter {
       radius: midRadius,
     );
 
-    final double startAngle = math.pi / 2;
+    final double startAngle = 3 * math.pi / 4;
 
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
@@ -3798,7 +4226,7 @@ class _VentilationRingPainter extends CustomPainter {
         Color(0xFF15DFFE),
       ],
       stops: const <double>[0.0, 0.5, 0.75, 1.0],
-      transform: GradientRotation(math.pi / 2),
+      transform: GradientRotation(startAngle),
       tileMode: TileMode.clamp,
     );
 
