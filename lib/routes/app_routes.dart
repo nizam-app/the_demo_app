@@ -226,6 +226,12 @@ class AppRouter {
             controlMode = DeviceDetailsControlMode.blindControl;
           } else if (mode == 'awningControl') {
             controlMode = DeviceDetailsControlMode.awningControl;
+          } else if (mode == 'thermostatRing') {
+            controlMode = DeviceDetailsControlMode.thermostatRing;
+          } else if (mode == 'presenceModes') {
+            controlMode = DeviceDetailsControlMode.presenceModes;
+          } else if (mode == 'multiValueSwitch') {
+            controlMode = DeviceDetailsControlMode.multiValueSwitch;
           }
           return DeviceDetailsScreen(
             deviceTitle: title,

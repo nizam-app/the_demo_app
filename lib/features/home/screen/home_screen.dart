@@ -1103,17 +1103,17 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'RGBW light patio entry',
+                deviceName: 'Presence',
                 status: '100%',
                 iconImage:
-                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                'assets/images/comfort.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'RGBW light patio entry',
+                  deviceTitle: 'Presence',
                   imageAssetPath:
-                  'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                  'assets/images/comfort.png',
                   controlButtonCount: 2,
-                  controlMode: DeviceDetailsControlMode.rgbwPicker,
+                  controlMode: DeviceDetailsControlMode.presenceModes,
                 ),
               ),
             ),
@@ -1126,18 +1126,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Expanded(
                         child: _buildLightingCard(
-                          deviceName: 'LED Dimmer living room',
+                          deviceName: 'Living room',
                           status: '100%',
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           progressCircle: true,
                           onTap: () => DeviceDetailsScreen.go(
                             context,
-                            deviceTitle: 'LED Dimmer living room',
+                            deviceTitle: 'Living Room',
                             imageAssetPath:
                             'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                             controlButtonCount: 1,
-                            controlMode: DeviceDetailsControlMode.ledDimmer,
+                            controlMode: DeviceDetailsControlMode.thermostatRing,
                           ),
                         ),
                       ),
@@ -1160,6 +1160,76 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      
+      SizedBox(height:12.h),  
+
+       Row(
+          children: [
+          
+            
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'Multi-Value Switch',
+                          status: '100%',
+                          iconImage:
+                          'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'Multi-Value Switch',
+                            imageAssetPath:
+                            'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 12,
+                            controlMode: DeviceDetailsControlMode.multiValueSwitch,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Positioned(
+                  //   right: 7.w,
+                  //   top: 7.h,
+                  //   child: _ModeBadge(
+                  //     mode: _lightingLedBadge2Manual ? 'M' : 'A',
+                  //     filled: _lightingLedBadge2Manual,
+                  //     onTap: () => setState(
+                  //           () => _lightingLedBadge2Manual =
+                  //       !_lightingLedBadge2Manual,
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
+            ),
+          
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(), 
+                  ],
+              ),
+            ),
+          
+          Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(), 
+                  ],
+              ),
+            ),
+           
+          ],
+        ),
+       
+      
       ],
     );
   }
