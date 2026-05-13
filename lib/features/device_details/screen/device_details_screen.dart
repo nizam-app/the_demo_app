@@ -13,7 +13,7 @@ import '../../../core/widget/global_back_button.dart';
 
 /// Controls which primary region appears below the hero (stats stay the same).
 enum DeviceDetailsControlMode {
-  /// Off / On row (hero + stats above).
+  /// Hero + stats + Off/On row + instruction (Motion Sensor omits Off/On).
   standard,
 
   /// Light scene: main title + "Values" + All On / Night / All Off (no power row, no tune row).
@@ -165,11 +165,24 @@ class DeviceDetailsScreen extends StatefulWidget {
   State<DeviceDetailsScreen> createState() => _DeviceDetailsScreenState();
 }
 
-enum _DeviceTab { tools, automation, overview, chart, activity }
+enum _DeviceTab { tools, automation, chart, overview, activity }
 
-class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
+class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
+    with SingleTickerProviderStateMixin {
   bool _isOn = true;
-  _DeviceTab _tab = _DeviceTab.tools;
+
+  late final TabController _tabController;
+
+  static const List<_DeviceTab> _deviceTabsOrder = <_DeviceTab>[
+    _DeviceTab.tools,
+    _DeviceTab.automation,
+    _DeviceTab.chart,
+    _DeviceTab.overview,
+    _DeviceTab.activity,
+  ];
+
+  _DeviceTab _tabFromIndex(int i) =>
+      _deviceTabsOrder[i.clamp(0, _deviceTabsOrder.length - 1)];
   String _label = 'Lighting';
   String _manualMode = 'A';
 
@@ -228,6 +241,19 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _deviceTabsOrder.length, vsync: this);
+    _tabController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
       initialIndex: 2,
@@ -272,9 +298,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final Widget scrollColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildTopHeader(context),
-        _buildSwcBelowHeader(),
-        _buildHero(),
+        if (widget.controlMode == DeviceDetailsControlMode.standard) ...[
+          _buildTopHeader(context),
+          _buildHero(),
+        ] else ...[
+          _buildTopHeader(context),
+          _buildSwcBelowHeader(),
+          _buildHero(),
+        ],
         SizedBox(height: isLightSceneValues ? 10.h : 18.h),
         if (widget.controlMode ==
             DeviceDetailsControlMode.lightSceneValues) ...[
@@ -292,7 +323,25 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             widget.controlMode != DeviceDetailsControlMode.presenceModes &&
             widget.controlMode !=
                 DeviceDetailsControlMode.multiValueSwitch) ...[
-          _buildOnOffRow(),
+          if (widget.deviceTitle == 'Motion Sensor') ...[
+            SizedBox(height: 14.h),
+            Text(
+              'Motion Cleared',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF111827),
+              ),
+            ),
+            SizedBox(height: 14.h),
+          ],
+          if (widget.deviceTitle != 'Motion Sensor') ...[
+            _buildOnOffRow(),
+            SizedBox(height: 28.h),
+          ],
+          _buildStandardDeviceCommentSection(),
         ],
         _buildTabsRow(),
         SizedBox(height: scrollNeedsMinHeight ? 4.h : 12.h),
@@ -332,10 +381,80 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildTopHeader(BuildContext context) {
+    if (widget.controlMode == DeviceDetailsControlMode.standard) {
+      return _buildBackOnlyHeader(context);
+    }
     return _buildDefaultTopHeader(context);
   }
 
-  /// Model / device id — shown under [_buildTopHeader], above the hero.
+  /// Back chevron only — used when title sits below the hero ([standard] layout).
+  Widget _buildBackOnlyHeader(BuildContext context) {
+    final double topPad =
+        widget.deviceTitle == 'Motion Sensor' ? 0 : 2.h;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14.w, topPad, 14.w, 0),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GlobalCircleIconBtn(
+          color: const Color(0xFFFFFFFF),
+          child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+          onTap: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/setting-device');
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Device title + edit icon (shared by header row and standard hero below image).
+  Widget _buildTitleEditRow() {
+    const Color textPrimary = Color(0xFF111827);
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double iconSlot = 13.w + 8.w;
+        final double maxTextW =
+            math.max(0.0, constraints.maxWidth - iconSlot);
+        return Center(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            alignment: WrapAlignment.center,
+            spacing: 8.w,
+            runSpacing: 4.h,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxTextW),
+                child: Text(
+                  widget.deviceTitle,
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 23.sp,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+              Image.asset(
+                'assets/Group 63.png',
+                height: 13.h,
+                width: 13.w,
+                fit: BoxFit.cover,
+                color: textPrimary,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Model / device id — under title for [standard], else under top header.
   Widget _buildSwcBelowHeader() {
     return Padding(
       padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 10.h),
@@ -353,7 +472,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 
   Widget _buildDefaultTopHeader(BuildContext context) {
-    const Color textPrimary = Color(0xFF111827);
     return Padding(
       padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 0),
       child: Row(
@@ -370,37 +488,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               }
             },
           ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    widget.deviceTitle,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 23.sp,
-                      fontWeight: FontWeight.w700,
-                      color: textPrimary,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Image.asset(
-                  'assets/Group 63.png',
-                  height: 13.h,
-                  width: 13.w,
-                  fit: BoxFit.cover,
-                  color: textPrimary,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 36.w),
+          Expanded(child: _buildTitleEditRow()),
         ],
       ),
     );
@@ -441,8 +529,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
       return _buildMultiValueSwitchHeroContent();
     }
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: 8.h),
+        SizedBox(
+          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
+        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -457,8 +548,19 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             ),
           ),
         ),
+        if (widget.controlMode == DeviceDetailsControlMode.standard) ...[
+          SizedBox(height: 14.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            child: _buildTitleEditRow(),
+          ),
+          _buildSwcBelowHeader(),
+        ],
         SizedBox(height: 10.h),
-        _buildHeroIdentityStats(),
+        _buildHeroIdentityStats(
+          onTimeTop:
+              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+        ),
       ],
     );
   }
@@ -557,7 +659,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        _buildHeroIdentityStats(),
         SizedBox(height: 22.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -741,7 +843,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        _buildHeroIdentityStats(),
         SizedBox(height: 22.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -1827,7 +1929,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
     return Column(
       children: [
-        _buildHeroIdentityStats(onTimeTop: '12:45'),
+        _buildHeroIdentityStats(),
         SizedBox(height: 14.h),
 
         // ── Thermostat ring ──────────────────────────────────────────────────
@@ -2239,6 +2341,81 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     );
   }
 
+  /// Comment under Off/On (standard). Motion Sensor uses alternate copy + layout only.
+  Widget _buildStandardDeviceCommentSection() {
+    const Color noteColor = Color(0xFF6B7280);
+
+    if (widget.deviceTitle == 'Motion Sensor') {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 22.h,
+              width: 22.w,
+              child: Image.asset(
+                'assets/images/message_icon.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                'Here we will write instruction how to control and more information about that device',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14.sp,
+                  height: 1.45,
+                  fontWeight: FontWeight.w400,
+                  color: noteColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(50.w, 0, 50.w, 8.h),
+      child: Center(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 15.h,
+              width: 15.w,
+              child: Image.asset(
+                'assets/images/message_icon.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Flexible(
+              child: Text(
+                'Don\'t ON this device while you sleeping\n'
+                'Here we will write comments to user\n'
+                'how to use and control that device with\n'
+                'all information that needed!!',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 12.sp,
+                  height: 1.45,
+                  fontWeight: FontWeight.w400,
+                  color: noteColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSceneValuesSection() {
     final String headline = _sceneLabels[_selectedSceneIndex.clamp(0, 2)];
     return Padding(
@@ -2342,17 +2519,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
     final int levelPct = (_blindLevel * 100).round();
     final int anglePct = (_blindAngle * 100).round();
 
-    const TextStyle labelStyle = TextStyle(
+    final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16,
+      fontSize: 16.sp,
       fontWeight: FontWeight.w400,
-      color: Color(0xFF111827),
+      color: const Color(0xFF111827),
     );
-    const TextStyle valueStyle = TextStyle(
+    final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16,
+      fontSize: 16.sp,
       fontWeight: FontWeight.w700,
-      color: Color(0xFF111827),
+      color: const Color(0xFF111827),
     );
 
     return Column(
@@ -2361,7 +2538,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         _buildHeroIdentityStats(),
         SizedBox(height: 12.h),
 
-        // ── "Level 100%" ──────────────────────────────────────────────────
         Text.rich(
           TextSpan(children: [
             TextSpan(text: 'Level ', style: labelStyle),
@@ -2370,41 +2546,79 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         ),
         SizedBox(height: 10.h),
 
-        // ── Blind visualisation ───────────────────────────────────────────
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.symmetric(horizontal: 40.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final double w = constraints.maxWidth;
-              final double h = w * 0.55; // compact height
+              final double slatsBoxH = w * 0.72;
+              /// Lets the handle overlap the bottom slat + card rim like the design.
+              final double handlePeek = 18.h;
+
               return SizedBox(
                 width: w,
-                height: h,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (d) => setState(() {
-                    _blindLevel =
-                        (_blindLevel + d.delta.dy / (h * 1.2)).clamp(0.0, 1.0);
-                  }),
-                  child: Stack(
-                    clipBehavior: Clip.hardEdge,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      // Slats canvas
-                      Positioned.fill(
-                        child: ClipRect(
-                          child: CustomPaint(
-                            painter: _BlindSlatsPainter(
-                              level: _blindLevel,
-                              angle: _blindAngle,
+                height: slatsBoxH + handlePeek,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: slatsBoxH,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(26.r),
+                          border: Border.all(
+                            color: const Color(0xFFFFFFFF),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 12.r,
+                              offset: Offset(0, 3.h),
                             ),
-                            child: const SizedBox.expand(),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12.r),
+                          child: Padding(
+                            padding: EdgeInsets.all(10.h),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onVerticalDragUpdate: (d) => setState(() {
+                                _blindLevel = (_blindLevel +
+                                        d.delta.dy / (slatsBoxH * 1.2))
+                                    .clamp(0.0, 1.0);
+                              }),
+                              child: Stack(
+                                clipBehavior: Clip.hardEdge,
+                                alignment: Alignment.center,
+                                children: [
+                                  Positioned.fill(
+                                    child: CustomPaint(
+                                      painter: _BlindSlatsPainter(
+                                        level: _blindLevel,
+                                        angle: _blindAngle,
+                                      ),
+                                      child: const SizedBox.expand(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      // Drag handle — tap up/down to adjust level
-                      Positioned(
-                        bottom: 10,
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Center(
                         child: _BlindHandle(
                           onUp: () => setState(() {
                             _blindLevel =
@@ -2416,8 +2630,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           }),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -2425,34 +2639,63 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         ),
         SizedBox(height: 12.h),
 
-        // ── "Angle: 70%" ──────────────────────────────────────────────────
         Text.rich(
           TextSpan(children: [
             TextSpan(text: 'Angle: ', style: labelStyle),
             TextSpan(text: '$anglePct%', style: valueStyle),
           ]),
         ),
-        SizedBox(height: 14.h),
+        //SizedBox(height: 14.h),
 
-        // ── Slider (controls blind level) ─────────────────────────────────
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 5.h,
-              activeTrackColor: const Color(0xFF29B6F6),
-              inactiveTrackColor: const Color(0xFFDDE1E7),
-              thumbColor: const Color(0xFF0088FE),
-              thumbShape:
-                  RoundSliderThumbShape(enabledThumbRadius: 14.r),
-              overlayShape:
-                  RoundSliderOverlayShape(overlayRadius: 20.r),
-              overlayColor: const Color(0x220088FE),
-            ),
-            child: Slider(
-              value: _blindLevel,
-              onChanged: (v) => setState(() => _blindLevel = v),
-            ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 28.w,
+                height: 26.h,
+                child: Image.asset(
+                  'assets/images/light-Menu.png',
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
+              SizedBox(width: 5.w),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    trackHeight: 4.h,
+                    activeTrackColor: const Color(0xFF0088FE),
+                    inactiveTrackColor: const Color(0xFFE5E7EB),
+                    thumbColor: const Color(0xFF0088FE),
+                    thumbShape: const _BlindAngleSliderThumbShape(
+                      innerRadius: 10,
+                      borderWidth: 4,
+                      fillColor: Color(0xFF0088FE),
+                      borderColor: Colors.white,
+                    ),
+                    overlayShape:
+                        RoundSliderOverlayShape(overlayRadius: 22.r),
+                    overlayColor: const Color(0x220088FE),
+                  ),
+                  child: Slider(
+                    value: _blindAngle.clamp(0.0, 1.0),
+                    onChanged: (v) => setState(() => _blindAngle = v),
+                  ),
+                ),
+              ),
+              SizedBox(width: 5.w),
+              SizedBox(
+                width: 28.w,
+                height: 26.h,
+                child: Image.asset(
+                  'assets/images/light-line-menu.png',
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -2461,87 +2704,248 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
 
   // ─── Awning / Roller-Blind Control ────────────────────────────────────────
 
-  Widget _buildAwningControlHeroContent() {
-    final int levelPct = (_blindLevel * 100).round();
 
-    const TextStyle labelStyle = TextStyle(
-      fontFamily: 'Inter',
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-      color: Color(0xFF111827),
-    );
-    const TextStyle valueStyle = TextStyle(
-      fontFamily: 'Inter',
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-      color: Color(0xFF111827),
-    );
+//   Widget _buildAwningControlHeroContent() {
+//   final int levelPct = (_blindLevel * 100).round();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildHeroIdentityStats(),
-        SizedBox(height: 12.h),
+//   const TextStyle labelStyle = TextStyle(
+//     fontFamily: 'Inter',
+//     fontSize: 16,
+//     fontWeight: FontWeight.w400,
+//     color: Color(0xFF111827),
+//   );
 
-        // ── "Level X%" ───────────────────────────────────────────────────────
-        Text.rich(
-          TextSpan(children: [
+//   const TextStyle valueStyle = TextStyle(
+//     fontFamily: 'Inter',
+//     fontSize: 16,
+//     fontWeight: FontWeight.w700,
+//     color: Color(0xFF111827),
+//   );
+
+//   return Column(
+//     children: [
+//       _buildHeroIdentityStats(),
+//       SizedBox(height: 14.h),
+
+//       Text.rich(
+//         TextSpan(
+//           children: [
+//             TextSpan(text: 'Level ', style: labelStyle),
+//             TextSpan(text: '$levelPct%', style: valueStyle),
+//           ],
+//         ),
+//       ),
+
+//       SizedBox(height: 12.h),
+
+//       Padding(
+//         padding: EdgeInsets.symmetric(horizontal: 40.w),
+//         child: LayoutBuilder(
+//           builder: (context, constraints) {
+//             final double w = constraints.maxWidth;
+//             final double maxH = w * 1.12;
+//             final double visibleH = (maxH * _blindLevel).clamp(2.0, maxH);
+
+//             return SizedBox(
+//               width: w,
+//               height: maxH + 34,
+//               child: GestureDetector(
+//                 behavior: HitTestBehavior.opaque,
+//                 onVerticalDragUpdate: (d) {
+//                   setState(() {
+//                     _blindLevel =
+//                         (_blindLevel + d.delta.dy / (maxH * 1.15))
+//                             .clamp(0.0, 1.0);
+//                   });
+//                 },
+//                 child: Stack(
+//                   clipBehavior: Clip.none,
+//                   alignment: Alignment.topCenter,
+//                   children: [
+//                     Positioned(
+//                       top: 0,
+//                       left: 0,
+//                       right: 0,
+//                       child: Container(
+//                         padding: const EdgeInsets.all(10),
+//                         decoration: BoxDecoration(
+//                           color: Colors.white,
+//                           borderRadius: BorderRadius.circular(22.r),
+//                         ),
+//                         child: ClipRRect(
+//                           borderRadius: BorderRadius.circular(26.r),
+//                           child: SizedBox(
+//                             width: w,
+//                             height: maxH,
+//                             child: Stack(
+//                               children: [
+//                                 Align(
+//                                   alignment: Alignment.topCenter,
+//                                   child: SizedBox(
+//                                     width: w,
+//                                     height: visibleH,
+//                                     child: Image.asset(
+//                                       widget.imageAssetPath,
+//                                       fit: BoxFit.cover,
+//                                       alignment: Alignment.topCenter,
+//                                       errorBuilder: (_, __, ___) {
+//                                         return Container(
+//                                           decoration: const BoxDecoration(
+//                                             gradient: LinearGradient(
+//                                               begin: Alignment.topCenter,
+//                                               end: Alignment.bottomCenter,
+//                                               colors: [
+//                                                 Color(0xFF3FA4F4),
+//                                                 Color(0xFF25CBE8),
+//                                               ],
+//                                             ),
+//                                           ),
+//                                         );
+//                                       },
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+
+//                     Positioned(
+//                       bottom: 0,
+//                       child: Material(
+//                         color: Colors.transparent,
+//                         child: Container(
+//                           width: 52,
+//                           height: 52,
+//                           decoration: BoxDecoration(
+//                             color: Colors.white,
+//                             shape: BoxShape.circle,
+//                             boxShadow: [
+//                               BoxShadow(
+//                                 blurRadius: 8,
+//                                 offset: const Offset(0, 3),
+//                                 color: Colors.black.withOpacity(0.12),
+//                               ),
+//                             ],
+//                           ),
+//                           child: _BlindHandle(
+//                             onUp: () {
+//                               setState(() {
+//                                 _blindLevel =
+//                                     (_blindLevel - 0.05).clamp(0.0, 1.0);
+//                               });
+//                             },
+//                             onDown: () {
+//                               setState(() {
+//                                 _blindLevel =
+//                                     (_blindLevel + 0.05).clamp(0.0, 1.0);
+//                               });
+//                             },
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             );
+//           },
+//         ),
+//       ),
+//     ],
+//   );
+// }
+
+
+Widget _buildAwningControlHeroContent() {
+  final int levelPct = (_blindLevel * 100).round();
+
+  const TextStyle labelStyle = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: Color(0xFF111827),
+  );
+
+  const TextStyle valueStyle = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    color: Color(0xFF111827),
+  );
+
+  return Column(
+    children: [
+      _buildHeroIdentityStats(),
+      SizedBox(height: 14.h),
+
+      Text.rich(
+        TextSpan(
+          children: [
             TextSpan(text: 'Level ', style: labelStyle),
             TextSpan(text: '$levelPct%', style: valueStyle),
-          ]),
+          ],
         ),
-        SizedBox(height: 10.h),
+      ),
 
-        // ── Awning image, clipped by level ───────────────────────────────────
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final double w = constraints.maxWidth;
-              final double maxH = w * 0.75;
-              final double visibleH = (maxH * _blindLevel).clamp(4.0, maxH);
+      SizedBox(height: 12.h),
 
-              return SizedBox(
-                width: w,
-                height: maxH,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (d) => setState(() {
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 40.w),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double w = constraints.maxWidth;
+            final double maxH = w * 1.12;
+            final double visibleH = (maxH * _blindLevel).clamp(4.0, maxH);
+
+            return SizedBox(
+              width: w,
+              height: maxH + 40,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (d) {
+                  setState(() {
                     _blindLevel =
                         (_blindLevel + d.delta.dy / (maxH * 1.2))
                             .clamp(0.0, 1.0);
-                  }),
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      // Clipped image (fills from top down based on level)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
+                  });
+                },
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22.r),
+                        ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
-                          child: SizedBox(
-                            width: w,
-                            height: visibleH,
-                            child: Image.asset(
-                              widget.imageAssetPath,
+                          borderRadius: BorderRadius.circular(26.r),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: SizedBox(
                               width: w,
-                              height: maxH,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                              errorBuilder: (_, __, ___) => Container(
-                                width: w,
-                                height: maxH,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Color(0xFF87CEEB),
-                                      Color(0xFF29B6F6),
-                                    ],
+                              height: visibleH,
+                              child: Image.asset(
+                                widget.imageAssetPath,
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                                errorBuilder: (_, __, ___) => Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xFF3FA4F4),
+                                        Color(0xFF25CBE8),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2549,95 +2953,111 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           ),
                         ),
                       ),
-                      // Handle pinned at the bottom of the visible region
-                      Positioned(
-                        top: visibleH - 20,
-                        child: _BlindHandle(
-                          onUp: () => setState(() {
-                            _blindLevel =
-                                (_blindLevel - 0.05).clamp(0.0, 1.0);
-                          }),
-                          onDown: () => setState(() {
-                            _blindLevel =
-                                (_blindLevel + 0.05).clamp(0.0, 1.0);
-                          }),
+                    ),
+
+                    // moving button
+                    Positioned(
+                      top: visibleH - 20,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                                color: Colors.black.withOpacity(0.15),
+                              ),
+                            ],
+                          ),
+                          child: _BlindHandle(
+                            onUp: () {
+                              setState(() {
+                                _blindLevel =
+                                    (_blindLevel - 0.05).clamp(0.0, 1.0);
+                              });
+                            },
+                            onDown: () {
+                              setState(() {
+                                _blindLevel =
+                                    (_blindLevel + 0.05).clamp(0.0, 1.0);
+                              });
+                            },
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
-        SizedBox(height: 16.h),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
+
 
   Widget _buildTabsRow() {
-    const List<(_DeviceTab, String)> tabs = <(_DeviceTab, String)>[
-      (_DeviceTab.tools, 'Tools'),
-      (_DeviceTab.automation, 'Automation'),
-      (_DeviceTab.chart, 'Chart'),
-      (_DeviceTab.overview, 'Overview'),
-      (_DeviceTab.activity, 'Activity'),
-    ];
-
-    return Padding(
-      padding: EdgeInsets.only(left: 6.w, right: 6.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(tabs.length, (index) {
-          final tab = tabs[index];
-          final active = _tab == tab.$1;
-          return Expanded(
-            child: InkWell(
-              onTap: () => setState(() => _tab = tab.$1),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 10.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Center(
-                      child: Text(
-                        tab.$2,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          height: 1.0,
-                          fontWeight: active
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: active
-                              ? const Color(0xFF111827)
-                              : const Color(0xFF111827),
-                        ),
-                      ),
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    height: 3.h,
-                    width: active ? 49.w : 0.w,
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF111827),
-                      borderRadius: BorderRadius.circular(26.r),
-                    ),
-                  ),
-                ],
-              ),
+    return Container(
+      // decoration: const BoxDecoration(
+      //   color: Color(0xFFF3F4F6),
+      //   border: Border(
+      //     top: BorderSide(color: Color(0xFFE1E1E1), width: 5),
+      //   ),
+      // ),
+      child: Padding(
+        padding: EdgeInsets.only(left: 4.w, right: 4.w),
+        child: TabBar(
+          controller: _tabController,
+          dividerHeight: 0,
+          dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.label,
+          indicatorPadding: EdgeInsets.zero,
+          tabAlignment: TabAlignment.fill,
+          labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
+          labelStyle: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 13.sp,
+            height: 1.0,
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 13.sp,
+            height: 1.0,
+            fontWeight: FontWeight.w500,
+          ),
+          labelColor: const Color(0xFF111827),
+          unselectedLabelColor: const Color(0xFF111827),
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(width: 3.h, color: const Color(0xFF111827)),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(2.r),
+              bottomRight: Radius.circular(2.r),
             ),
-          );
-        }),
+          ),
+          tabs: const [
+            Tab(text: 'Tools'),
+            Tab(text: 'Automation'),
+            Tab(text: 'Chart'),
+            Tab(text: 'Overview'),
+            Tab(text: 'Activity'),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTabContent() {
-    switch (_tab) {
+    switch (_tabFromIndex(_tabController.index)) {
       case _DeviceTab.tools:
         return _buildManageDeviceCard();
       case _DeviceTab.automation:
@@ -2645,15 +3065,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
           padding: EdgeInsets.symmetric(horizontal: 15.w),
           child: _automationCard(),
         );
-      case _DeviceTab.overview:
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: deviceOverviewCard(),
-        );
       case _DeviceTab.chart:
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: 15.w),
           child: _chartCard(),
+        );
+      case _DeviceTab.overview:
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15.w),
+          child: deviceOverviewCard(),
         );
       case _DeviceTab.activity:
         return Padding(
@@ -2669,7 +3089,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(26.r),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r), bottom: Radius.circular(26.r)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -2681,49 +3101,32 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: 55.h,
-              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
-              child: Text(
-                'Manage your device',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF111827),
+            SizedBox(
+              height: 52.h,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Manage your device',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF111827),
+                    ),
+                  ),
                 ),
               ),
             ),
             const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowLabels(),
-            Padding(
-              padding: EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(
-                height: 1,
-                thickness: 1,
-                color: Color(0xFFE1E1E1),
-              ),
-            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowAlerts(),
-            Padding(
-              padding: EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(
-                height: 1,
-                thickness: 1,
-                color: Color(0xFFE1E1E1),
-              ),
-            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowSafeValue(),
-            Padding(
-              padding: EdgeInsets.only(right: 14.w, left: 48.w),
-              child: const Divider(
-                height: 1,
-                thickness: 1,
-                color: Color(0xFFE1E1E1),
-              ),
-            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
             _manageRowManualOverride(),
-            //SizedBox(height: 14.h),
           ],
         ),
       ),
@@ -2747,8 +3150,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             'Labels',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
             ),
           ),
@@ -2769,13 +3172,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 textColor: const Color(0xFF0088FE),
                 border: const Color(0xFF0088FE),
               ),
-              SizedBox(width: 8.w),
-              Image.asset(
-                "assets/back_arro.png",
-                height: 13.h,
-                width: 13.w,
-                fit: BoxFit.cover,
-                color: Color(0xFF6B7280),
+              SizedBox(width: 6.w),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 22.sp,
+                color: const Color(0xFF9CA3AF),
               ),
             ],
           ),
@@ -2801,38 +3202,33 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             'Alerts',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
             ),
           ),
           const Spacer(),
           Container(
-            width: 38.w,
-            height: 29.h,
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
             decoration: BoxDecoration(
               color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(26.r),
+              borderRadius: BorderRadius.circular(24.r),
             ),
-            child: Center(
-              child: Text(
-                '12',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF111827),
-                ),
+            child: Text(
+              '12',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF111827),
               ),
             ),
           ),
-          SizedBox(width: 8.w),
-          Image.asset(
-            "assets/back_arro.png",
-            height: 13.h,
-            width: 13.w,
-            fit: BoxFit.cover,
-            color: Color(0xFF6B7280),
+          SizedBox(width: 6.w),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 22.sp,
+            color: const Color(0xFF9CA3AF),
           ),
         ],
       ),
@@ -2856,8 +3252,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             'Safe Value',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
             ),
           ),
@@ -2866,18 +3262,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             'On',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
             ),
           ),
-          SizedBox(width: 8.w),
-          Image.asset(
-            "assets/back_arro.png",
-            height: 13.h,
-            width: 13.w,
-            fit: BoxFit.cover,
-            color: Color(0xFF6B7280),
+          SizedBox(width: 6.w),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 22.sp,
+            color: const Color(0xFF9CA3AF),
           ),
         ],
       ),
@@ -2901,8 +3295,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             'Manual Override',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
             ),
           ),
@@ -2911,7 +3305,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
             height: 36.h,
             width: 69.w,
             decoration: BoxDecoration(
-              color: Color(0xFFF3F4F6),
+              color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(30.r),
             ),
             child: Row(
@@ -2931,6 +3325,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                 ),
               ],
             ),
+          ),
+          SizedBox(width: 6.w),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 22.sp,
+            color: const Color(0xFF9CA3AF),
           ),
         ],
       ),
@@ -3028,9 +3428,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
               ),
             ),
           ),
-          Divider(height: 1.h, color: const Color(0xFFE1E1E1)),
+          Divider(height: 1.h, thickness: 1, color: const Color(0xFFE1E1E1)),
           Padding(
-            padding: EdgeInsets.only(top: 15.h, right: 12.w),
+            padding: EdgeInsets.only(top: 15.h, right: 12.w, bottom: 14.h),
             child: SizedBox(
               height: 150.h,
               child: Row(
@@ -3041,8 +3441,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       width: double.infinity,
                       height: 120.h,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFCDE5FF), Color(0xFFFFFFFF)],
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFCDE5FF),
+                            Color(0xFFFFFFFF),
+                          ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -3050,18 +3453,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                           bottomLeft: Radius.circular(14.r),
                         ),
                       ),
-                      clipBehavior: Clip.antiAlias, // 👈 important
+                      clipBehavior: Clip.antiAlias,
                       child: Stack(
                         children: [
-                          /// ✅ Chart (transparent background হওয়া লাগবে)
                           Positioned.fill(
                             child: CustomPaint(
-                              painter: _SimpleChartPainter(),
-                              child: Container(color: Colors.transparent),
+                              painter: const _SimpleChartPainter(),
+                              child: const SizedBox.expand(),
                             ),
                           ),
-
-                          /// ✅ Top Right Tag
                           Positioned(
                             top: 15.h,
                             right: 8.w,
@@ -3085,15 +3485,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                               ),
                             ),
                           ),
-
-                          /// ✅ Bottom Time Axis
                           Positioned(
                             bottom: 12.h,
                             left: 10.w,
                             right: 10.w,
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                              children: [
                                 _TimeAxis('12:00'),
                                 _TimeAxis('14:00'),
                                 _TimeAxis('16:00'),
@@ -3106,12 +3505,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
                       ),
                     ),
                   ),
-
                   SizedBox(width: 4.w),
-
-                  /// ✅ Right Side Labels
                   Padding(
-                    padding: EdgeInsets.only(top: 0.h, bottom: 58.h),
+                    padding: EdgeInsets.only(bottom: 58.h),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -3376,107 +3772,166 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen> {
   }
 }
 
-// ─── Blind Slats Painter ──────────────────────────────────────────────────────
+/// Slider thumb with a fixed-[borderWidth] ring around the blue disk (design spec).
+class _BlindAngleSliderThumbShape extends SliderComponentShape {
+  const _BlindAngleSliderThumbShape({
+    required this.innerRadius,
+    required this.borderWidth,
+    required this.fillColor,
+    required this.borderColor,
+  });
 
-/// Draws a venetian-blind visualisation exactly matching the design screenshot.
-///
-/// - [level]  0 = blind retracted (no slats visible), 1 = blind fully down
-///            (all slats visible).
-/// - [angle]  0 = slats flat (thin lines), 1 = slats fully closed (thick bars).
-///            The design screenshot uses ~0.70.
+  final double innerRadius;
+  final double borderWidth;
+  final Color fillColor;
+  final Color borderColor;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size.fromRadius(innerRadius + borderWidth);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final double outerR = innerRadius + borderWidth;
+    canvas.drawCircle(center, outerR, Paint()..color = borderColor);
+    canvas.drawCircle(center, innerRadius, Paint()..color = fillColor);
+  }
+}
+
+
 class _BlindSlatsPainter extends CustomPainter {
-  const _BlindSlatsPainter({required this.level, required this.angle});
+  const _BlindSlatsPainter({
+    required this.level,
+    required this.angle,
+  });
 
   final double level;
   final double angle;
 
   static const int _slatCount = 11;
 
-  // Slat fill colour — sky blue matching the design screenshot.
-  static const Color _slatColor = Color(0xFF42B5F5);
-  // Slightly darker shade used for the shadow edge of each slat.
+  static const Color _slatColor = Color(0xFF38A4FE);
   static const Color _slatShadow = Color(0xFF2196F3);
-  // Box border colour.
-  static const Color _borderColor = Color(0xFF42B5F5);
 
   @override
   void paint(Canvas canvas, Size size) {
     final Rect bounds = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    // ── White background ────────────────────────────────────────────────────
     canvas.drawRect(bounds, Paint()..color = Colors.white);
 
-    // ── Clip so slat parallelograms never bleed outside the border ──────────
     canvas.save();
     canvas.clipRect(bounds);
 
+    final double horizontalInset = size.width * 0.015;
+    final double cx = size.width / 2;
+    final double usableW = size.width - (horizontalInset * 2);
+
     final double bandH = size.height / _slatCount;
-    // Slat occupies `angle` fraction of its band (clamped so the gap stays).
-    final double slatH = bandH * angle.clamp(0.12, 0.92);
-    // Horizontal skew that gives the venetian-blind 3-D perspective.
-    // Left edge is `skewPx` lower than the right edge.
-    final double skewPx = bandH * 0.30;
 
-    // How many of the 11 bands contain a visible slat.
-    final int visible = (_slatCount * level.clamp(0.0, 1.0)).round();
+    // gap কমানো হয়েছে
+    final double gap = 0.8;
 
-    final Paint fill = Paint()..style = PaintingStyle.fill;
-    final Paint edge = Paint()
+    final double maxSlatInBand = math.max(2.0, bandH - gap);
+
+    // height বাড়ানো হয়েছে
+    final double slatH = maxSlatInBand * angle.clamp(0.14, 1.25);
+
+    // width slightly wider
+    final double topW = usableW * 1.02;
+
+    final double taperT = 0.74 + 0.16 * angle.clamp(0.0, 1.0);
+
+    final double botW = topW * taperT.clamp(0.66, 0.92);
+
+    final int visible =
+    (_slatCount * level.clamp(0.0, 1.0)).round().clamp(0, _slatCount);
+
+    final Paint fill = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final Paint edgeTop = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
-      ..color = _slatShadow.withOpacity(0.40);
+      ..color = Colors.white.withValues(alpha: 0.40)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint edgeBot = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = _slatShadow.withValues(alpha: 0.46)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint divider = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.6
+      ..color = Colors.white.withValues(alpha: 0.28);
 
     for (int i = 0; i < visible; i++) {
       final double bandTop = i * bandH;
-      // Centre the slat vertically inside its band.
+
       final double top = bandTop + (bandH - slatH) / 2;
       final double bot = top + slatH;
 
-      // Parallelogram: TL & BL are skewPx lower than TR & BR.
-      //   TR(right, top) — TR is the highest point.
-      //   TL(0, top+skew)
-      //   BR(right, bot)
-      //   BL(0, bot+skew)
       final Path slat = Path()
-        ..moveTo(0, top + skewPx)
-        ..lineTo(size.width, top)
-        ..lineTo(size.width, bot)
-        ..lineTo(0, bot + skewPx)
+        ..moveTo(cx - topW / 2, top)
+        ..lineTo(cx + topW / 2, top)
+        ..lineTo(cx + botW / 2, bot)
+        ..lineTo(cx - botW / 2, bot)
         ..close();
 
-      // Solid fill.
       fill.color = _slatColor;
       canvas.drawPath(slat, fill);
 
-      // Subtle darker stripe along the top edge (gives depth / shadow).
-      canvas.drawLine(Offset(0, top + skewPx), Offset(size.width, top), edge);
-
-      // White highlight just below the top edge.
+      // top highlight
       canvas.drawLine(
-        Offset(0, top + skewPx + 2),
-        Offset(size.width, top + 2),
-        Paint()
-          ..color = Colors.white.withOpacity(0.28)
-          ..strokeWidth = 1.2,
+        Offset(cx - topW / 2, top),
+        Offset(cx + topW / 2, top),
+        edgeTop,
       );
+
+      // bottom shadow
+      canvas.drawLine(
+        Offset(cx - botW / 2, bot),
+        Offset(cx + botW / 2, bot),
+        edgeBot,
+      );
+
+      // separator
+      if (i < visible - 1) {
+        canvas.drawLine(
+          Offset(cx - botW / 2, bot + gap / 2),
+          Offset(cx + botW / 2, bot + gap / 2),
+          divider,
+        );
+      }
     }
 
     canvas.restore();
-
-    // ── Border drawn last so it's always fully visible ───────────────────────
-    canvas.drawRect(
-      bounds,
-      Paint()
-        ..color = _borderColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0,
-    );
   }
 
   @override
-  bool shouldRepaint(_BlindSlatsPainter old) =>
-      old.level != level || old.angle != angle;
+  bool shouldRepaint(_BlindSlatsPainter oldDelegate) {
+    return oldDelegate.level != level || oldDelegate.angle != angle;
+  }
 }
+
+
 
 // Drag-handle widget drawn on top of the slats.
 class _BlindHandle extends StatelessWidget {
@@ -3487,19 +3942,21 @@ class _BlindHandle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double triW = 15.w;
+    final double triH = 13.h;
     return Container(
-      width: 40,
-      height: 40,
+      width: 44.w,
+      height: 44.w,
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.18),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withValues(alpha: 0.14),
+        //     blurRadius: 8.r,
+        //     offset: Offset(0, 2.h),
+        //   ),
+        // ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -3508,19 +3965,77 @@ class _BlindHandle extends StatelessWidget {
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onUp,
-            child: const Icon(Icons.keyboard_arrow_up_rounded,
-                size: 18, color: Color(0xFF374151)),
+            child: SizedBox(
+              width: triW,
+              height: triH,
+              child: Image.asset("assets/Polygon_on.png",)
+            ),
           ),
+          SizedBox(height: 5.h),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: onDown,
-            child: const Icon(Icons.keyboard_arrow_down_rounded,
-                size: 18, color: Color(0xFF374151)),
+            child: SizedBox(
+              width: triW,
+              height: triH,
+              child: Image.asset("assets/off_logo.png",)
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+class _TimeAxis extends StatelessWidget {
+  const _TimeAxis(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: 'Inter',
+        fontSize: 10.sp,
+        fontWeight: FontWeight.w400,
+        color: const Color(0xFF6B7280),
+      ),
+    );
+  }
+}
+
+class _SimpleChartPainter extends CustomPainter {
+  const _SimpleChartPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const Color blue = Color(0xFF0088FF);
+
+    final double y = size.height * 0.03;
+    final double startX = size.width * 0.01;
+    final double endX = size.width * 0.98;
+
+    final Paint linePaint = Paint()
+      ..color = blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(Offset(startX, y), Offset(endX, y), linePaint);
+
+    canvas.drawCircle(
+      Offset(endX, y),
+      4.5,
+      Paint()
+        ..color = blue
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -4342,7 +4857,7 @@ class _ChipPill extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(6.r),
+        borderRadius: BorderRadius.circular(22.r),
         border: Border.all(color: border, width: 1.2.w),
       ),
       child: Center(
@@ -4350,10 +4865,9 @@ class _ChipPill extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: 12.sp,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             color: textColor,
             fontFamily: 'Inter',
-            // height: 1.0,
           ),
         ),
       ),
@@ -4381,7 +4895,7 @@ class _ModeButton extends StatelessWidget {
         width: 30.w,
         height: 30.w,
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFE1E1E1) : Colors.transparent,
+          color: active ? const Color(0xFFCBD5E1) : Colors.transparent,
           borderRadius: BorderRadius.circular(26.r),
         ),
         child: Center(
@@ -4395,58 +4909,6 @@ class _ModeButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SimpleChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Background
-    // final bg = Paint()..color = const Color(0xFFDBEBFF);
-    // canvas.drawRect(Offset.zero & size, bg);
-
-    // Screenshot-style: single thick top line + endpoint dot.
-    final blue = const Color(0xFF0088FF);
-
-    final y = size.height * 0.03; // near the top
-    final startX = size.width * 0.01;
-    final endX = size.width * 0.98;
-
-    final linePaint = Paint()
-      ..color = blue
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawLine(Offset(startX, y), Offset(endX, y), linePaint);
-
-    final dotPaint = Paint()
-      ..color = blue
-      ..style = PaintingStyle.fill;
-
-    canvas.drawCircle(Offset(endX, y), 4.5.r, dotPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _TimeAxis extends StatelessWidget {
-  const _TimeAxis(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontFamily: 'Inter',
-        fontSize: 10.sp,
-        fontWeight: FontWeight.w400,
-        color: const Color(0xFF6B7280),
       ),
     );
   }

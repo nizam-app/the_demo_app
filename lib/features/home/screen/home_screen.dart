@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _LightDimmerCard(
                                       title:
-                                          'Bedroom spot light small patio blue light',
+                                          'Light dinning room ',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Bedroom spot light small patio blue light',
+                                            'Light dinning room ',
                                         imageAssetPath:
                                             'assets/Mask group (5).png',
                                         controlButtonCount: 1,
@@ -351,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _BlindCard(
-                                      title: 'Blind Living Room north window',
+                                      title: 'Blind Living Room',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
                                       mode: _blindManual ? 'M' : 'A',
@@ -362,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                        'Blind Living Room north window',
+                                        'Blind Living Room',
                                         imageAssetPath:
                                         'assets/Rectangle 823.png',
                                         controlButtonCount: 1,
