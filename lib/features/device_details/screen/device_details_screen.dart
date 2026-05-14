@@ -11,6 +11,17 @@ import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
+/// Shared **open ring** geometry (bottom gap, grey full track): ventilation,
+/// LED dimmer, and thermostat set-point. 0 % at the left end of the arc, 100 %
+/// at the right; small bottom wedge stays track-only; full progress extends
+/// slightly past the nominal end.
+const double _openRingGapRadians = 52 * math.pi / 180;
+const double _openRingArcStart = math.pi / 2 + _openRingGapRadians / 2;
+const double _openRingArcSweep = 2 * math.pi - _openRingGapRadians;
+const double _openRingProgressEndExtraRadians = 10 * math.pi / 180;
+const double _openRingInteractiveSweep =
+    _openRingArcSweep + _openRingProgressEndExtraRadians;
+
 /// Controls which primary region appears below the hero (stats stay the same).
 enum DeviceDetailsControlMode {
   /// Hero + stats + Off/On row + instruction (Motion Sensor omits Off/On).
@@ -45,8 +56,8 @@ enum DeviceDetailsControlMode {
   /// Awning/roller-blind: image clipped by level % + up/down handle (no slats, no angle).
   awningControl,
 
-  /// Thermostat set-point: full blue→pink gradient ring + draggable thumb,
-  /// "Set Point XX.X°" in centre, current temp & humidity below.
+  /// Thermostat set-point: open ring (grey track + blue→pink progress by %),
+  /// draggable thumb, "Set Point XX.X°" in centre, current temp & humidity below.
   thermostatRing,
 
   /// Presence: Comfort / Auto / Eco / Dynamic / Individual circular modes.
@@ -214,8 +225,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Defaults to Speed 1 to match the design screenshot's initial state.
   int _selectedFanLevel = 1;
 
-  /// Ventilation ring: 0 = min at lower-left (~8 o'clock, same as LED dimmer), 1 = max along the arc.
-  /// Never displayed as 100% in the UI (capped for display); starts at 0.
+  /// Ventilation ring: 0 = left end of the open arc, 1 = right end (bottom stays empty).
   double _ventilationPercent = 0.0;
 
   /// Blind level: 0 = fully open (up), 1 = fully down. Displayed as 0–100%.
@@ -298,7 +308,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final Widget scrollColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.controlMode == DeviceDetailsControlMode.standard) ...[
+        if (widget.controlMode == DeviceDetailsControlMode.standard ||
+            widget.controlMode ==
+                DeviceDetailsControlMode.lightSceneValues ||
+            widget.controlMode == DeviceDetailsControlMode.fanLevel ||
+            widget.controlMode ==
+                DeviceDetailsControlMode.heatingCooling) ...[
           _buildTopHeader(context),
           _buildHero(),
         ] else ...[
@@ -381,13 +396,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildTopHeader(BuildContext context) {
-    if (widget.controlMode == DeviceDetailsControlMode.standard) {
+    if (widget.controlMode == DeviceDetailsControlMode.standard ||
+        widget.controlMode == DeviceDetailsControlMode.lightSceneValues ||
+        widget.controlMode == DeviceDetailsControlMode.fanLevel ||
+        widget.controlMode == DeviceDetailsControlMode.heatingCooling) {
       return _buildBackOnlyHeader(context);
     }
     return _buildDefaultTopHeader(context);
   }
 
-  /// Back chevron only — used when title sits below the hero ([standard] layout).
+  /// Back chevron only — used when title sits below the hero ([standard] / [lightSceneValues] / [fanLevel] / [heatingCooling]).
   Widget _buildBackOnlyHeader(BuildContext context) {
     final double topPad =
         widget.deviceTitle == 'Motion Sensor' ? 0 : 2.h;
@@ -454,7 +472,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Model / device id — under title for [standard], else under top header.
+  /// Model / device id — under title in hero for [standard] / [lightSceneValues] / [fanLevel] / [heatingCooling], else under top header.
   Widget _buildSwcBelowHeader() {
     return Padding(
       padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 10.h),
@@ -548,7 +566,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        if (widget.controlMode == DeviceDetailsControlMode.standard) ...[
+        if (widget.controlMode == DeviceDetailsControlMode.standard ||
+            widget.controlMode ==
+                DeviceDetailsControlMode.lightSceneValues) ...[
           SizedBox(height: 14.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -877,10 +897,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildLedDimmerHeroContent() {
     final double ringSize = 228.w;
     final double stroke = 12.r;
-    // Keep this consistent with `_LedDimmerRingPainter`.
-    // 0% at lower-left (~8 o'clock); sweep still ends just before start (gap).
-    final double startAngle = 3 * math.pi / 4;
-    final double maxSweep = (2 * math.pi) - 0.08;
 
     return Column(
       children: [
@@ -943,7 +959,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
                           final double p = _ledDimmerPercent.clamp(0.0, 1.0);
-                          final double ang = startAngle + (maxSweep * p);
+                          final double ang = _openRingArcStart +
+                              (_openRingInteractiveSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 44.r;
@@ -993,21 +1010,24 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
-    // Keep this consistent with `_LedDimmerRingPainter`:
-    // - 0% starts at lower-left (3*pi/4), matching design
-    // - max sweep stops short of a full circle so 100% doesn't overlap 0%
-    const double startAngle = 3 * math.pi / 4;
-    const double fullTurn = 2 * math.pi;
-    const double maxSweep = fullTurn - 0.08;
 
-    // Normalize angle into [0, 2pi) relative to startAngle.
-    double a = angle - startAngle;
-    a = (a % fullTurn + fullTurn) % fullTurn;
+    const double a0 = _openRingArcStart;
+    const double sweep = _openRingInteractiveSweep;
+    final Offset p = Offset(math.cos(angle), math.sin(angle));
+    double bestT = 0;
+    double bestD = 1e9;
+    for (int i = 0; i <= 40; i++) {
+      final double t = i / 40.0;
+      final double a = a0 + sweep * t;
+      final Offset q = Offset(math.cos(a), math.sin(a));
+      final double dist = (p - q).distance;
+      if (dist < bestD) {
+        bestD = dist;
+        bestT = t;
+      }
+    }
+    double next = bestT.clamp(0.0, 1.0);
 
-    // Convert to percent. Anything inside the "gap" snaps to 100%.
-    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
-
-    // Hysteresis near the start to avoid 100% -> 0% wrap.
     final double prev = _ledDimmerPercent.clamp(0.0, 1.0);
     if (prev > 0.85 && next < 0.15) next = 1.0;
     if (prev < 0.15 && next > 0.85) next = 0.0;
@@ -1015,26 +1035,31 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     setState(() => _ledDimmerPercent = next.clamp(0.0, 1.0));
   }
 
-  /// Percent shown in the center label: never "100" — caps at 99.
   int _ventilationDisplayPercent(double p) {
-    final int v = (p.clamp(0.0, 1.0) * 100).round();
-    return v >= 100 ? 99 : v;
+    return (p.clamp(0.0, 1.0) * 100).round().clamp(0, 100);
   }
 
   void _ventilationUpdateFromLocal(Offset local, Size size) {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
-    // Same geometry as `_VentilationRingPainter` / `_LedDimmerRingPainter`:
-    // 0% at lower-left (3*pi/4).
-    const double startAngle = 3 * math.pi / 4;
-    const double fullTurn = 2 * math.pi;
-    const double maxSweep = fullTurn - 0.08;
 
-    double a = angle - startAngle;
-    a = (a % fullTurn + fullTurn) % fullTurn;
-
-    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
+    const double a0 = _openRingArcStart;
+    const double sweep = _openRingInteractiveSweep;
+    final Offset p = Offset(math.cos(angle), math.sin(angle));
+    double bestT = 0;
+    double bestD = 1e9;
+    for (int i = 0; i <= 40; i++) {
+      final double t = i / 40.0;
+      final double a = a0 + sweep * t;
+      final Offset q = Offset(math.cos(a), math.sin(a));
+      final double dist = (p - q).distance;
+      if (dist < bestD) {
+        bestD = dist;
+        bestT = t;
+      }
+    }
+    double next = bestT.clamp(0.0, 1.0);
 
     final double prev = _ventilationPercent.clamp(0.0, 1.0);
     if (prev > 0.85 && next < 0.15) next = 1.0;
@@ -1058,7 +1083,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Spacer + stats only — device title lives in [_buildTopHeader]; SWC in [_buildSwcBelowHeader].
+  /// Spacer + stats only — for [standard] / [lightSceneValues] / [fanLevel] / [heatingCooling] the title and SWC sit above this in [_buildHero] (or default hero); else title is in [_buildTopHeader] and SWC may precede the hero.
   Widget _buildHeroIdentityStats({String onTimeTop = '12:57'}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -1074,9 +1099,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildVentilationHeroContent() {
     final double ringSize = 228.w;
     final double stroke = 12.r;
-    // Matches [_LedDimmerRingPainter] / LED dimmer: 0% at lower-left.
-    final double startAngle = 3 * math.pi / 4;
-    final double maxSweep = (2 * math.pi) - 0.08;
     final double thumbSize = 38.r;
     const Color thumbBlue = Color(0xFF0088FE);
 
@@ -1135,7 +1157,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
                                 Image.asset(
-                              'assets/images/ventilations.png',
+                              'assets/images/fan 2.png',
                               height: 40.h,
                               width: 40.w,
                               fit: BoxFit.contain,
@@ -1152,7 +1174,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double p =
                               _ventilationPercent.clamp(0.0, 1.0);
                           final double ang =
-                              startAngle + (maxSweep * p);
+                              _openRingArcStart +
+                                  (_openRingInteractiveSweep * p);
                           final Offset thumb = c +
                               Offset(math.cos(ang), math.sin(ang)) * radius;
                           return Positioned(
@@ -1718,18 +1741,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     });
   }
 
-  /// Hero for [DeviceDetailsControlMode.heatingCooling].
-  ///
-  /// Layout (top-to-bottom, matches the design screenshot):
-  /// 1. "Heating & Cooling" title (uses [DeviceDetailsScreen.deviceTitle]).
-  /// 2. The asset image (e.g. `assets/images/heating_cooling.png`).
-  /// 3. A row of three controls:
-  ///      - circular white "dropdown" chevron button (placeholder for a
-  ///        future mode list — kept tappable so the UI matches),
-  ///      - "Heating" pill with steam-waves icon,
-  ///      - "Cooling" pill with snowflake icon.
-  ///    Tapping a pill toggles [_heatingCoolingMode] between 'heating' and
-  ///    'cooling' (selected pill uses its accent color; inactive is white).
+
   Widget _buildHeatingCoolingHeroContent() {
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
@@ -1738,111 +1750,148 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final bool isCooling = _heatingCoolingMode == 'cooling';
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeroIdentityStats(),
-        SizedBox(height: 14.h),
+        SizedBox(
+          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
+        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
-            height: 110.h,
-            width: 110.w,
+            height: 110.h + 10,
+            width: 110.w + 10,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Image.asset(
               'assets/images/heating_cooling.png',
-              height: 110.h,
-              width: 110.w,
+              height: 110.h + 10,
+              width: 110.w + 10,
               fit: BoxFit.contain,
             ),
           ),
         ),
-        SizedBox(height: 18.h),
+        SizedBox(height: 14.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: _buildTitleEditRow(),
+        ),
+        _buildSwcBelowHeader(),
+        SizedBox(height: 10.h),
+        _buildHeroIdentityStats(
+          onTimeTop:
+              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+        ),
+        SizedBox(height: 14.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: pillBg,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 8.r,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/off_logo.png',
-                    height: 13.h,
-                    width: 13.w,
-                    fit: BoxFit.cover,
-                    color: !_isOn ? Colors.white : Colors.black,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {},
+                  child: Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      color: pillBg,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 8.r,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/off_logo.png',
+                      height: 13.h,
+                      width: 13.w,
+                      fit: BoxFit.cover,
+                      color: !_isOn ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
+                SizedBox(width: 10.w),
+                _heatingCoolingPill(
+                  label: 'Heating',
+                  selected: isHeating,
+                  onTap: () =>
+                      setState(() => _heatingCoolingMode = 'heating'),
+                  accentBg: Color(0xFFFE019A),
+                  inactiveBg: pillBg,
+                  border: pillBorder,
+                  leading: Image.asset(
+                    'assets/Heating.png',
+                    height: 22.h,
+                    width: 22.w,
+                    fit: BoxFit.cover,
+                    color: isHeating ? Colors.white : Colors.black,
+                    colorBlendMode: BlendMode.srcIn,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Image.asset(
+                      'assets/hvac.png',
+                      height: 22.h,
+                      width: 22.w,
+                      fit: BoxFit.cover,
+                      color: isHeating ? Colors.white : Colors.black,
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                _heatingCoolingPill(
+                  label: 'Colling',
+                  selected: isCooling,
+                  onTap: () =>
+                      setState(() => _heatingCoolingMode = 'cooling'),
+                  accentBg: Color(0xFF0088FE),
+                  inactiveBg: pillBg,
+                  border: pillBorder,
+                  leading: Image.asset(
+                    'assets/colling.png',
+                    height: 22.h,
+                    width: 22.w,
+                    fit: BoxFit.cover,
+                    color: isCooling ? Colors.white : Colors.black,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 16.h),
+        Padding(
+          padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 22.h,
+                width: 22.w,
+                child: Image.asset(
+                  'assets/images/message_icon.png',
+                  fit: BoxFit.contain,
+                ),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(width: 12.w),
               Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _heatingCoolingPill(
-                        label: 'Heating',
-                        selected: isHeating,
-                        onTap: () =>
-                            setState(() => _heatingCoolingMode = 'heating'),
-                        accentBg: Color(0xFFFE019A),
-                        inactiveBg: pillBg,
-                        border: pillBorder,
-                        leading: Image.asset(
-                          'assets/Heating.png',
-                          height: 22.h,
-                          width: 22.w,
-                          fit: BoxFit.cover,
-                          color: isHeating ? Colors.white : Colors.black,
-                          colorBlendMode: BlendMode.srcIn,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Image.asset(
-                            'assets/hvac.png',
-                            height: 22.h,
-                            width: 22.w,
-                            fit: BoxFit.cover,
-                            color: isHeating ? Colors.white : Colors.black,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      _heatingCoolingPill(
-                        label: 'Colling',
-                        selected: isCooling,
-                        onTap: () =>
-                            setState(() => _heatingCoolingMode = 'cooling'),
-                        accentBg: Color(0xFF0088FE),
-                        inactiveBg: pillBg,
-                        border: pillBorder,
-                        leading: Image.asset(
-                          'assets/colling.png',
-                          height: 22.h,
-                          width: 22.w,
-                          fit: BoxFit.cover,
-                          color: isCooling ? Colors.white : Colors.black,
-                          colorBlendMode: BlendMode.srcIn,
-                        ),
-                      ),
-                    ],
+                child: Text(
+                  'Here we will write instruction how to control and more information about that device',
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14.sp,
+                    height: 1.45,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF6B7280),
                   ),
                 ),
               ),
@@ -1906,19 +1955,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // THERMOSTAT RING HERO
-  // ───────────────────────────────────────────────────────────────────────────
 
-  /// Hero for [DeviceDetailsControlMode.thermostatRing].
-  ///
-  /// Renders a full blue→purple→pink gradient ring whose draggable thumb sets
-  /// the set-point temperature (range 19–35 °C). The arc origin sits at the
-  /// lower-left (~8 o'clock, same as the LED dimmer) so at 0 % the thumb
-  /// starts there and the display reads "19.0°".
   Widget _buildThermostatRingHeroContent() {
-    const double startAngle = 3 * math.pi / 4;
-    const double maxSweep = (2 * math.pi) - 0.08;
     final double ringSize = 300.w;
     final double stroke = 15.r;
 
@@ -1953,11 +1991,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      // Gradient ring track (always full circle)
+                      // Grey full track + rainbow progress along open arc (same geometry as LED / ventilation).
                       IgnorePointer(
                         child: CustomPaint(
                           size: sz,
-                          painter: _ThermostatRingPainter(strokeWidth: stroke),
+                          painter: _ThermostatRingPainter(
+                            strokeWidth: stroke,
+                            percent: _thermostatSetPercent.clamp(0.0, 1.0),
+                          ),
                         ),
                       ),
 
@@ -2061,9 +2102,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double ang =
-                              startAngle +
-                              maxSweep * _thermostatSetPercent.clamp(0.0, 1.0);
+                          final double ang = _openRingArcStart +
+                              _openRingInteractiveSweep *
+                                  _thermostatSetPercent.clamp(0.0, 1.0);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
@@ -2105,18 +2146,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Updates [_thermostatSetPercent] from a pan gesture on the thermostat ring.
+  /// Updates [_thermostatSetPercent] from a pan on the open ring (0 = 19 °C, 1 = 35 °C).
   void _thermostatUpdateFromLocal(Offset local, Size size) {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
     final double angle = math.atan2(d.dy, d.dx);
-    const double startAngle = 3 * math.pi / 4;
-    const double fullTurn = 2 * math.pi;
-    const double maxSweep = fullTurn - 0.08;
 
-    double a = angle - startAngle;
-    a = (a % fullTurn + fullTurn) % fullTurn;
-    double next = a >= maxSweep ? 1.0 : (a / maxSweep);
+    const double a0 = _openRingArcStart;
+    const double sweep = _openRingInteractiveSweep;
+    final Offset p = Offset(math.cos(angle), math.sin(angle));
+    double bestT = 0;
+    double bestD = 1e9;
+    for (int i = 0; i <= 40; i++) {
+      final double t = i / 40.0;
+      final double a = a0 + sweep * t;
+      final Offset q = Offset(math.cos(a), math.sin(a));
+      final double dist = (p - q).distance;
+      if (dist < bestD) {
+        bestD = dist;
+        bestT = t;
+      }
+    }
+    double next = bestT.clamp(0.0, 1.0);
 
     final double prev = _thermostatSetPercent.clamp(0.0, 1.0);
     if (prev > 0.85 && next < 0.15) next = 1.0;
@@ -2127,15 +2178,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   // ───────────────────────────────────────────────────────────────────────────
 
-  /// Hero for [DeviceDetailsControlMode.fanLevel].
-  ///
-  /// Layout (top-to-bottom, matches the design screenshot):
-  /// 1. Identity stats row (title lives in the top header).
-  /// 2. The fan asset rendered at hero size.
-  /// 3. A row of four [_SceneValueOption]-styled buttons:
-  ///      Off, Speed 1, Speed 2, Speed 3.
-  ///    Tapping a button updates [_selectedFanLevel] and the selected pill
-  ///    gets the standard gray-fill + bold-label highlight.
+
   Widget _buildFanLevelHeroContent() {
     final List<({String label, int value})> options =
         <({String label, int value})>[
@@ -2146,9 +2189,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         ];
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeroIdentityStats(),
-        SizedBox(height: 14.h),
+        SizedBox(
+          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
+        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -2163,7 +2208,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 18.h),
+        SizedBox(height: 14.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: _buildTitleEditRow(),
+        ),
+        _buildSwcBelowHeader(),
+        SizedBox(height: 10.h),
+        _buildHeroIdentityStats(
+          onTimeTop:
+              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+        ),
+        SizedBox(height: 14.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Row(
@@ -2188,11 +2244,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Icon shown inside each [_SceneValueOption] of the fan-level row.
-  ///
-  /// - 0 (Off)     -> chevron-down caret (matches the screenshot).
-  /// - 1 (Speed 1) -> small fan asset, tinted dark.
-  /// - 2/3         -> small fan asset, tinted dark, with a tiny "2"/"3" badge.
+
   Widget _fanLevelOptionIcon(int level) {
     const Color iconColor = Color(0xFF111827);
 
@@ -2206,41 +2258,20 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       );
     }
 
-    final Widget fan = Image.asset(
-      'assets/images/fan.png',
+    final String assetPath = switch (level) {
+      1 => 'assets/images/speet1.png',
+      2 => 'assets/images/speet2.2.png',
+      3 => 'assets/images/speet2.png',
+      _ => 'assets/images/speet1.png',
+    };
+
+    return Image.asset(
+      assetPath,
       width: 26.w,
       height: 26.w,
       fit: BoxFit.contain,
-      color: iconColor,
-      colorBlendMode: BlendMode.srcIn,
       errorBuilder: (_, __, ___) =>
           Icon(Icons.toys_rounded, size: 22.sp, color: iconColor),
-    );
-
-    if (level == 1) {
-      return fan;
-    }
-
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        fan,
-        Positioned(
-          right: -2,
-          bottom: -2,
-          child: Text(
-            '$level',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w700,
-              color: iconColor,
-              height: 1.0,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -2525,6 +2556,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       fontWeight: FontWeight.w400,
       color: const Color(0xFF111827),
     );
+
     final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
       fontSize: 16.sp,
@@ -2536,14 +2568,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildHeroIdentityStats(),
+
         SizedBox(height: 12.h),
 
         Text.rich(
-          TextSpan(children: [
-            TextSpan(text: 'Level ', style: labelStyle),
-            TextSpan(text: '$levelPct%', style: valueStyle),
-          ]),
+          TextSpan(
+            children: [
+              TextSpan(text: 'Level ', style: labelStyle),
+              TextSpan(text: '$levelPct%', style: valueStyle),
+            ],
+          ),
         ),
+
         SizedBox(height: 10.h),
 
         Padding(
@@ -2552,8 +2588,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             builder: (context, constraints) {
               final double w = constraints.maxWidth;
               final double slatsBoxH = w * 0.72;
-              /// Lets the handle overlap the bottom slat + card rim like the design.
+
+              final double cardPadding = 10.h;
+              final double handleSize = 58.r;
               final double handlePeek = 18.h;
+
+              final double innerH = slatsBoxH - (cardPadding * 2);
+
+              // Button position will now follow blind level
+              final double handleTop = (
+                  cardPadding + (innerH * _blindLevel) - (handleSize / 2)
+              ).clamp(
+                cardPadding,
+                slatsBoxH - (handleSize / 2),
+              );
+
+              void updateBlindLevelByDrag(DragUpdateDetails d) {
+                setState(() {
+                  _blindLevel = (
+                      _blindLevel + d.delta.dy / (innerH * 1.2)
+                  ).clamp(0.0, 1.0);
+                });
+              }
 
               return SizedBox(
                 width: w,
@@ -2562,6 +2618,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   clipBehavior: Clip.none,
                   alignment: Alignment.topCenter,
                   children: [
+                    // Main blind card
                     Positioned(
                       top: 0,
                       left: 0,
@@ -2584,16 +2641,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(26.r),
                           child: Padding(
-                            padding: EdgeInsets.all(10.h),
+                            padding: EdgeInsets.all(cardPadding),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onVerticalDragUpdate: (d) => setState(() {
-                                _blindLevel = (_blindLevel +
-                                        d.delta.dy / (slatsBoxH * 1.2))
-                                    .clamp(0.0, 1.0);
-                              }),
+                              onVerticalDragUpdate: updateBlindLevelByDrag,
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
                                 alignment: Alignment.center,
@@ -2614,20 +2667,32 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         ),
                       ),
                     ),
-                    Positioned(
+
+                    // Moving handle button
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 120),
+                      curve: Curves.easeOut,
+                      top: handleTop,
                       left: 0,
                       right: 0,
-                      bottom: 0,
                       child: Center(
-                        child: _BlindHandle(
-                          onUp: () => setState(() {
-                            _blindLevel =
-                                (_blindLevel - 0.05).clamp(0.0, 1.0);
-                          }),
-                          onDown: () => setState(() {
-                            _blindLevel =
-                                (_blindLevel + 0.05).clamp(0.0, 1.0);
-                          }),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragUpdate: updateBlindLevelByDrag,
+                          child: SizedBox(
+                            width: handleSize,
+                            height: handleSize,
+                            child: _BlindHandle(
+                              onUp: () => setState(() {
+                                _blindLevel =
+                                    (_blindLevel - 0.05).clamp(0.0, 1.0);
+                              }),
+                              onDown: () => setState(() {
+                                _blindLevel =
+                                    (_blindLevel + 0.05).clamp(0.0, 1.0);
+                              }),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -2637,15 +2702,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             },
           ),
         ),
+
         SizedBox(height: 12.h),
 
         Text.rich(
-          TextSpan(children: [
-            TextSpan(text: 'Angle: ', style: labelStyle),
-            TextSpan(text: '$anglePct%', style: valueStyle),
-          ]),
+          TextSpan(
+            children: [
+              TextSpan(text: 'Angle: ', style: labelStyle),
+              TextSpan(text: '$anglePct%', style: valueStyle),
+            ],
+          ),
         ),
-        //SizedBox(height: 14.h),
 
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -2661,7 +2728,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   excludeFromSemantics: true,
                 ),
               ),
+
               SizedBox(width: 5.w),
+
               Expanded(
                 child: SliderTheme(
                   data: SliderThemeData(
@@ -2675,8 +2744,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       fillColor: Color(0xFF0088FE),
                       borderColor: Colors.white,
                     ),
-                    overlayShape:
-                        RoundSliderOverlayShape(overlayRadius: 22.r),
+                    overlayShape: RoundSliderOverlayShape(
+                      overlayRadius: 22.r,
+                    ),
                     overlayColor: const Color(0x220088FE),
                   ),
                   child: Slider(
@@ -2685,7 +2755,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                 ),
               ),
+
               SizedBox(width: 5.w),
+
               SizedBox(
                 width: 28.w,
                 height: 26.h,
@@ -2700,295 +2772,305 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         ),
       ],
     );
-  }
+  }        
 
-  // ─── Awning / Roller-Blind Control ────────────────────────────────────────
+  // Widget _buildBlindControlHeroContent() {
+  //   final int levelPct = (_blindLevel * 100).round();
+  //   final int anglePct = (_blindAngle * 100).round();
+  //
+  //   final TextStyle labelStyle = TextStyle(
+  //     fontFamily: 'Inter',
+  //     fontSize: 16.sp,
+  //     fontWeight: FontWeight.w400,
+  //     color: const Color(0xFF111827),
+  //   );
+  //   final TextStyle valueStyle = TextStyle(
+  //     fontFamily: 'Inter',
+  //     fontSize: 16.sp,
+  //     fontWeight: FontWeight.w700,
+  //     color: const Color(0xFF111827),
+  //   );
+  //
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.center,
+  //     children: [
+  //       _buildHeroIdentityStats(),
+  //       SizedBox(height: 12.h),
+  //
+  //       Text.rich(
+  //         TextSpan(children: [
+  //           TextSpan(text: 'Level ', style: labelStyle),
+  //           TextSpan(text: '$levelPct%', style: valueStyle),
+  //         ]),
+  //       ),
+  //       SizedBox(height: 10.h),
+  //
+  //       Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: 40.w),
+  //         child: LayoutBuilder(
+  //           builder: (context, constraints) {
+  //             final double w = constraints.maxWidth;
+  //             final double slatsBoxH = w * 0.72;
+  //             /// Lets the handle overlap the bottom slat + card rim like the design.
+  //             final double handlePeek = 18.h;
+  //
+  //             return SizedBox(
+  //               width: w,
+  //               height: slatsBoxH + handlePeek,
+  //               child: Stack(
+  //                 clipBehavior: Clip.none,
+  //                 alignment: Alignment.topCenter,
+  //                 children: [
+  //                   Positioned(
+  //                     top: 0,
+  //                     left: 0,
+  //                     right: 0,
+  //                     height: slatsBoxH,
+  //                     child: DecoratedBox(
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.white,
+  //                         borderRadius: BorderRadius.circular(26.r),
+  //                         border: Border.all(
+  //                           color: const Color(0xFFFFFFFF),
+  //                           width: 1,
+  //                         ),
+  //                         boxShadow: [
+  //                           BoxShadow(
+  //                             color: Colors.black.withValues(alpha: 0.02),
+  //                             blurRadius: 12.r,
+  //                             offset: Offset(0, 3.h),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       child: ClipRRect(
+  //                         borderRadius: BorderRadius.circular(12.r),
+  //                         child: Padding(
+  //                           padding: EdgeInsets.all(10.h),
+  //                           child: GestureDetector(
+  //                             behavior: HitTestBehavior.opaque,
+  //                             onVerticalDragUpdate: (d) => setState(() {
+  //                               _blindLevel = (_blindLevel +
+  //                                       d.delta.dy / (slatsBoxH * 1.2))
+  //                                   .clamp(0.0, 1.0);
+  //                             }),
+  //                             child: Stack(
+  //                               clipBehavior: Clip.hardEdge,
+  //                               alignment: Alignment.center,
+  //                               children: [
+  //                                 Positioned.fill(
+  //                                   child: CustomPaint(
+  //                                     painter: _BlindSlatsPainter(
+  //                                       level: _blindLevel,
+  //                                       angle: _blindAngle,
+  //                                     ),
+  //                                     child: const SizedBox.expand(),
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                   Positioned(
+  //                     left: 0,
+  //                     right: 0,
+  //                     bottom: 0,
+  //                     child: Center(
+  //                       child: _BlindHandle(
+  //                         onUp: () => setState(() {
+  //                           _blindLevel =
+  //                               (_blindLevel - 0.05).clamp(0.0, 1.0);
+  //                         }),
+  //                         onDown: () => setState(() {
+  //                           _blindLevel =
+  //                               (_blindLevel + 0.05).clamp(0.0, 1.0);
+  //                         }),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //       SizedBox(height: 12.h),
+  //
+  //       Text.rich(
+  //         TextSpan(children: [
+  //           TextSpan(text: 'Angle: ', style: labelStyle),
+  //           TextSpan(text: '$anglePct%', style: valueStyle),
+  //         ]),
+  //       ),
+  //       //SizedBox(height: 14.h),
+  //
+  //       Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: 16.w),
+  //         child: Row(
+  //           crossAxisAlignment: CrossAxisAlignment.center,
+  //           children: [
+  //             SizedBox(
+  //               width: 28.w,
+  //               height: 26.h,
+  //               child: Image.asset(
+  //                 'assets/images/light-Menu.png',
+  //                 fit: BoxFit.contain,
+  //                 excludeFromSemantics: true,
+  //               ),
+  //             ),
+  //             SizedBox(width: 5.w),
+  //             Expanded(
+  //               child: SliderTheme(
+  //                 data: SliderThemeData(
+  //                   trackHeight: 4.h,
+  //                   activeTrackColor: const Color(0xFF0088FE),
+  //                   inactiveTrackColor: const Color(0xFFE5E7EB),
+  //                   thumbColor: const Color(0xFF0088FE),
+  //                   thumbShape: const _BlindAngleSliderThumbShape(
+  //                     innerRadius: 10,
+  //                     borderWidth: 4,
+  //                     fillColor: Color(0xFF0088FE),
+  //                     borderColor: Colors.white,
+  //                   ),
+  //                   overlayShape:
+  //                       RoundSliderOverlayShape(overlayRadius: 22.r),
+  //                   overlayColor: const Color(0x220088FE),
+  //                 ),
+  //                 child: Slider(
+  //                   value: _blindAngle.clamp(0.0, 1.0),
+  //                   onChanged: (v) => setState(() => _blindAngle = v),
+  //                 ),
+  //               ),
+  //             ),
+  //             SizedBox(width: 5.w),
+  //             SizedBox(
+  //               width: 28.w,
+  //               height: 26.h,
+  //               child: Image.asset(
+  //                 'assets/images/light-line-menu.png',
+  //                 fit: BoxFit.contain,
+  //                 excludeFromSemantics: true,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
+  
+  Widget _buildAwningControlHeroContent() {
+    final int levelPct = (_blindLevel * 100).round();
 
-//   Widget _buildAwningControlHeroContent() {
-//   final int levelPct = (_blindLevel * 100).round();
+    const TextStyle labelStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: Color(0xFF111827),
+    );
 
-//   const TextStyle labelStyle = TextStyle(
-//     fontFamily: 'Inter',
-//     fontSize: 16,
-//     fontWeight: FontWeight.w400,
-//     color: Color(0xFF111827),
-//   );
+    const TextStyle valueStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      color: Color(0xFF111827),
+    );
 
-//   const TextStyle valueStyle = TextStyle(
-//     fontFamily: 'Inter',
-//     fontSize: 16,
-//     fontWeight: FontWeight.w700,
-//     color: Color(0xFF111827),
-//   );
+    return Column(
+      children: [
+        _buildHeroIdentityStats(),
 
-//   return Column(
-//     children: [
-//       _buildHeroIdentityStats(),
-//       SizedBox(height: 14.h),
+        SizedBox(height: 20.h),
 
-//       Text.rich(
-//         TextSpan(
-//           children: [
-//             TextSpan(text: 'Level ', style: labelStyle),
-//             TextSpan(text: '$levelPct%', style: valueStyle),
-//           ],
-//         ),
-//       ),
-
-//       SizedBox(height: 12.h),
-
-//       Padding(
-//         padding: EdgeInsets.symmetric(horizontal: 40.w),
-//         child: LayoutBuilder(
-//           builder: (context, constraints) {
-//             final double w = constraints.maxWidth;
-//             final double maxH = w * 1.12;
-//             final double visibleH = (maxH * _blindLevel).clamp(2.0, maxH);
-
-//             return SizedBox(
-//               width: w,
-//               height: maxH + 34,
-//               child: GestureDetector(
-//                 behavior: HitTestBehavior.opaque,
-//                 onVerticalDragUpdate: (d) {
-//                   setState(() {
-//                     _blindLevel =
-//                         (_blindLevel + d.delta.dy / (maxH * 1.15))
-//                             .clamp(0.0, 1.0);
-//                   });
-//                 },
-//                 child: Stack(
-//                   clipBehavior: Clip.none,
-//                   alignment: Alignment.topCenter,
-//                   children: [
-//                     Positioned(
-//                       top: 0,
-//                       left: 0,
-//                       right: 0,
-//                       child: Container(
-//                         padding: const EdgeInsets.all(10),
-//                         decoration: BoxDecoration(
-//                           color: Colors.white,
-//                           borderRadius: BorderRadius.circular(22.r),
-//                         ),
-//                         child: ClipRRect(
-//                           borderRadius: BorderRadius.circular(26.r),
-//                           child: SizedBox(
-//                             width: w,
-//                             height: maxH,
-//                             child: Stack(
-//                               children: [
-//                                 Align(
-//                                   alignment: Alignment.topCenter,
-//                                   child: SizedBox(
-//                                     width: w,
-//                                     height: visibleH,
-//                                     child: Image.asset(
-//                                       widget.imageAssetPath,
-//                                       fit: BoxFit.cover,
-//                                       alignment: Alignment.topCenter,
-//                                       errorBuilder: (_, __, ___) {
-//                                         return Container(
-//                                           decoration: const BoxDecoration(
-//                                             gradient: LinearGradient(
-//                                               begin: Alignment.topCenter,
-//                                               end: Alignment.bottomCenter,
-//                                               colors: [
-//                                                 Color(0xFF3FA4F4),
-//                                                 Color(0xFF25CBE8),
-//                                               ],
-//                                             ),
-//                                           ),
-//                                         );
-//                                       },
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-
-//                     Positioned(
-//                       bottom: 0,
-//                       child: Material(
-//                         color: Colors.transparent,
-//                         child: Container(
-//                           width: 52,
-//                           height: 52,
-//                           decoration: BoxDecoration(
-//                             color: Colors.white,
-//                             shape: BoxShape.circle,
-//                             boxShadow: [
-//                               BoxShadow(
-//                                 blurRadius: 8,
-//                                 offset: const Offset(0, 3),
-//                                 color: Colors.black.withOpacity(0.12),
-//                               ),
-//                             ],
-//                           ),
-//                           child: _BlindHandle(
-//                             onUp: () {
-//                               setState(() {
-//                                 _blindLevel =
-//                                     (_blindLevel - 0.05).clamp(0.0, 1.0);
-//                               });
-//                             },
-//                             onDown: () {
-//                               setState(() {
-//                                 _blindLevel =
-//                                     (_blindLevel + 0.05).clamp(0.0, 1.0);
-//                               });
-//                             },
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         ),
-//       ),
-//     ],
-//   );
-// }
-
-
-Widget _buildAwningControlHeroContent() {
-  final int levelPct = (_blindLevel * 100).round();
-
-  const TextStyle labelStyle = TextStyle(
-    fontFamily: 'Inter',
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF111827),
-  );
-
-  const TextStyle valueStyle = TextStyle(
-    fontFamily: 'Inter',
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
-    color: Color(0xFF111827),
-  );
-
-  return Column(
-    children: [
-      _buildHeroIdentityStats(),
-      SizedBox(height: 14.h),
-
-      Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(text: 'Level ', style: labelStyle),
-            TextSpan(text: '$levelPct%', style: valueStyle),
-          ],
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: 'Level ', style: labelStyle),
+              TextSpan(text: '$levelPct%', style: valueStyle),
+            ],
+          ),
         ),
-      ),
 
-      SizedBox(height: 12.h),
+        SizedBox(height: 12.h),
 
-      Padding(
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        child: LayoutBuilder(
+        LayoutBuilder(
           builder: (context, constraints) {
             final double w = constraints.maxWidth;
-            final double maxH = w * 1.12;
-            final double visibleH = (maxH * _blindLevel).clamp(4.0, maxH);
+            final double cardH = w * 0.71;
+
+            final double blueH = (cardH * _blindLevel).clamp(0.0, cardH);
 
             return SizedBox(
-              width: w,
-              height: maxH + 40,
+              width: 305.w,
+              height: cardH,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onVerticalDragUpdate: (d) {
+                onVerticalDragUpdate: (details) {
                   setState(() {
                     _blindLevel =
-                        (_blindLevel + d.delta.dy / (maxH * 1.2))
+                        (_blindLevel + details.delta.dy / cardH)
                             .clamp(0.0, 1.0);
                   });
                 },
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
+                    // White back layer for side rounded effect
+                    Positioned(
+                      top: -8,
+                      left: -8,
+                      right: -8,
+                      height: 325.h,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(34.r),
+
+                        ),
+                      ),
+                    ),
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22.r),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(26.r),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: SizedBox(
-                              width: w,
-                              height: visibleH,
+                      height: cardH,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.r),
+                        child: Stack(
+                          children: [
+                            // Blue / image area
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: blueH,
                               child: Image.asset(
                                 widget.imageAssetPath,
+                                width: w,
+                                height: blueH,
                                 fit: BoxFit.cover,
                                 alignment: Alignment.topCenter,
-                                errorBuilder: (_, __, ___) => Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Color(0xFF3FA4F4),
-                                        Color(0xFF25CBE8),
-                                      ],
+                                errorBuilder: (_, __, ___) {
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Color(0xFF15DFFE),
+                                          Color(0xFF38A4FE),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
 
-                    // moving button
-                    Positioned(
-                      top: visibleH - 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                                color: Colors.black.withOpacity(0.15),
-                              ),
-                            ],
-                          ),
-                          child: _BlindHandle(
-                            onUp: () {
-                              setState(() {
-                                _blindLevel =
-                                    (_blindLevel - 0.05).clamp(0.0, 1.0);
-                              });
-                            },
-                            onDown: () {
-                              setState(() {
-                                _blindLevel =
-                                    (_blindLevel + 0.05).clamp(0.0, 1.0);
-                              });
-                            },
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -2998,10 +3080,10 @@ Widget _buildAwningControlHeroContent() {
             );
           },
         ),
-      ),
-    ],
-  );
-}
+
+      ],
+    );
+  }
 
 
 
@@ -4520,7 +4602,7 @@ class _TunableWhiteThumbShape extends SliderComponentShape {
   }
 }
 
-/// Cyan→green gradient arc track + filled sweep for LED dimmer percent.
+/// Cyan→green gradient on the open ring (same geometry as ventilation; colours unchanged).
 
 class _LedDimmerRingPainter extends CustomPainter {
   _LedDimmerRingPainter({required this.percent, required this.strokeWidth});
@@ -4530,53 +4612,31 @@ class _LedDimmerRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // =========================
-    // CENTER & RADIUS
-    // =========================
     final Offset center = Offset(size.width / 2, size.height / 2);
 
     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
 
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
-    // =========================
-    // START FROM LOWER-LEFT (~8 o'clock); 0% lives here
-    // =========================
-    final double startAngle = 3 * math.pi / 4;
+    const double startAngle = _openRingArcStart;
+    const double arcSweep = _openRingInteractiveSweep;
 
-    // =========================
-    // TRACK
-    // =========================
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(arcRect, startAngle, 2 * math.pi, false, trackPaint);
+    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
 
-    // =========================
-    // PERCENT
-    // =========================
     final double clamped = percent.clamp(0.0, 1.0);
 
-    // ✅ no progress at 0
     if (clamped <= 0.001) {
       return;
     }
 
-    // =========================
-    // PREVENT OVERLAP
-    // =========================
+    final double sweepAngle = arcSweep * clamped;
 
-    // ✅ stop before crossing start point
-    final double maxSweep = (2 * math.pi) - 0.08;
-
-    final double sweepAngle = maxSweep * clamped;
-
-    // =========================
-    // GRADIENT
-    // =========================
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
         Color(0xFF00E52A),
@@ -4588,9 +4648,6 @@ class _LedDimmerRingPainter extends CustomPainter {
       tileMode: TileMode.clamp,
     );
 
-    // =========================
-    // PROGRESS ARC
-    // =========================
     final Paint fgPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
@@ -4632,17 +4689,17 @@ class _ThermostatDottedDividerPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-/// Full blue→purple→pink gradient ring used as the thermostat set-point track.
-///
-/// The gradient always covers the entire circle (no gray track). The draggable
-/// thumb is rendered separately on top; this painter only draws the ring itself.
+/// Grey full ring + blue→purple→pink **progress** on the open arc (same
+/// geometry as LED / ventilation). Gradient colours unchanged; [percent] is
+/// [_thermostatSetPercent] (0 = 19 °C, 1 = 35 °C).
 class _ThermostatRingPainter extends CustomPainter {
-  const _ThermostatRingPainter({required this.strokeWidth});
+  const _ThermostatRingPainter({
+    required this.strokeWidth,
+    required this.percent,
+  });
 
   final double strokeWidth;
-
-  // Arc origin (lower-left, ~8 o'clock) — matches the LED dimmer start angle.
-  static const double _startAngle = 3 * math.pi / 4;
+  final double percent;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -4650,10 +4707,24 @@ class _ThermostatRingPainter extends CustomPainter {
     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
-    // Gradient: blue (cold, arc start at ~8 o'clock) → purple (mid) →
-    //           pink/magenta (hot, arc end just before start).
-    // GradientRotation aligns stop 0 with the arc origin at _startAngle so
-    // the visual colours follow the arc direction naturally.
+    const double startAngle = _openRingArcStart;
+    const double arcSweep = _openRingInteractiveSweep;
+
+    final Paint trackPaint = Paint()
+      ..color = const Color(0xFFE1E1E1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
+
+    final double clamped = percent.clamp(0.0, 1.0);
+    if (clamped <= 0.001) {
+      return;
+    }
+
+    final double sweepAngle = arcSweep * clamped;
+
     const SweepGradient gradient = SweepGradient(
       colors: <Color>[
         Color(0xFF4A9EFF), // blue  (cold — arc origin / left side)
@@ -4663,7 +4734,7 @@ class _ThermostatRingPainter extends CustomPainter {
         Color(0xFF4A9EFF), // return to blue (seamless wrap)
       ],
       stops: <double>[0.0, 0.35, 0.62, 0.88, 1.0],
-      transform: GradientRotation(_startAngle),
+      transform: GradientRotation(startAngle),
     );
 
     final Paint paint = Paint()
@@ -4672,24 +4743,16 @@ class _ThermostatRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..shader = gradient.createShader(arcRect);
 
-    // Draw the full circle, leaving a tiny (~3°) gap at the start so the arc
-    // cap doesn't overlap itself and looks clean.
-    canvas.drawArc(
-      arcRect,
-      _startAngle + 0.04,
-      (2 * math.pi) - 0.08,
-      false,
-      paint,
-    );
+    canvas.drawArc(arcRect, startAngle, sweepAngle, false, paint);
   }
 
   @override
   bool shouldRepaint(covariant _ThermostatRingPainter old) =>
-      old.strokeWidth != strokeWidth;
+      old.strokeWidth != strokeWidth || old.percent != percent;
 }
 
-/// Cyan→blue gradient arc track for ventilation % (matches dashboard mini ring).
-/// 0 % aligns with the LED dimmer / [_LedDimmerRingPainter] origin (lower-left, `3*pi/4`).
+/// Full grey ring + cyan→blue **progress** only on the usable arc (bottom gap
+/// is the same track grey — no gradient / no progress there).
 class _VentilationRingPainter extends CustomPainter {
   _VentilationRingPainter({
     required this.percent,
@@ -4709,7 +4772,8 @@ class _VentilationRingPainter extends CustomPainter {
       radius: midRadius,
     );
 
-    final double startAngle = 3 * math.pi / 4;
+    const double startAngle = _openRingArcStart;
+    const double arcSweep = _openRingInteractiveSweep;
 
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
@@ -4717,21 +4781,15 @@ class _VentilationRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(
-      arcRect,
-      startAngle,
-      2 * math.pi,
-      false,
-      trackPaint,
-    );
+    // Complete circle in track grey so the bottom gap is outlined like the rest.
+    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
 
     final double clamped = percent.clamp(0.0, 1.0);
     if (clamped <= 0.001) {
       return;
     }
 
-    final double maxSweep = (2 * math.pi) - 0.08;
-    final double sweepAngle = maxSweep * clamped;
+    final double sweepAngle = arcSweep * clamped;
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
