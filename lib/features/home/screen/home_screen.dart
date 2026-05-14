@@ -927,13 +927,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'Light Scene child room',
+                deviceName: 'Light Scene',
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'Light Scene child room',
+                  deviceTitle: 'Light Scene',
                   imageAssetPath:
                       'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
                   controlButtonCount: 3,
@@ -944,13 +944,13 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'RGBW light patio entry',
+                deviceName: 'RGBW room abc',
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'RGBW light patio entry',
+                  deviceTitle: 'RGBW room abc',
                   imageAssetPath:
                       'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                   controlButtonCount: 2,
