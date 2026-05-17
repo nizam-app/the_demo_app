@@ -23,7 +23,8 @@ const double _openRingInteractiveSweep =
     _openRingArcSweep + _openRingProgressEndExtraRadians;
 
 /// Controls which primary region appears below the hero (stats stay the same).
-enum DeviceDetailsControlMode {
+enum
+DeviceDetailsControlMode {
   /// Hero + stats + Off/On row + instruction (Motion Sensor omits Off/On).
   standard,
 
@@ -35,6 +36,7 @@ enum DeviceDetailsControlMode {
 
   /// LED dimmer: circular gradient ring + centered % (no Off/On tune row).
   ledDimmer,
+ 
 
   /// Tunable white: temperature disk + intensity slider (no Off/On tune row).
   tunableWhite,
@@ -253,7 +255,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _deviceTabsOrder.length, vsync: this);
+    _tabController = TabController(
+      length: _deviceTabsOrder.length,
+      vsync: this,
+    );
     _tabController.addListener(() => setState(() {}));
   }
 
@@ -292,30 +297,22 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final String titleLc = widget.deviceTitle.toLowerCase();
     final bool disableBodyScroll =
         widget.controlMode == DeviceDetailsControlMode.ventilation ||
-            (widget.controlMode == DeviceDetailsControlMode.thermostatRing &&
-                titleLc == 'living room') ||
-            (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
-                widget.deviceTitle == 'LED Dimmer living room');
+        (widget.controlMode == DeviceDetailsControlMode.thermostatRing &&
+            titleLc == 'living room') ||
+        (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
+            widget.deviceTitle == 'LED Dimmer living room');
 
     final ScrollPhysics scrollPhysics = disableBodyScroll
         ? const NeverScrollableScrollPhysics()
         : scrollNeedsMinHeight
-            ? const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
-              )
-            : const AlwaysScrollableScrollPhysics();
+        ? const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics())
+        : const AlwaysScrollableScrollPhysics();
 
     final Widget scrollColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.controlMode == DeviceDetailsControlMode.standard ||
-            widget.controlMode ==
-                DeviceDetailsControlMode.lightSceneValues ||
-            widget.controlMode == DeviceDetailsControlMode.fanLevel ||
-            widget.controlMode ==
-                DeviceDetailsControlMode.heatingCooling) ...[
-          _buildTopHeader(context),
-          _buildHero(),
+        if (_heroStartsWithTopDeviceImage()) ...[
+          _buildHeroWithImageHeader(context, _buildHero()),
         ] else ...[
           _buildTopHeader(context),
           _buildSwcBelowHeader(),
@@ -332,8 +329,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             widget.controlMode != DeviceDetailsControlMode.fanLevel &&
             widget.controlMode != DeviceDetailsControlMode.ventilation &&
             widget.controlMode != DeviceDetailsControlMode.blindControl &&
-            widget.controlMode !=
-                DeviceDetailsControlMode.awningControl &&
+            widget.controlMode != DeviceDetailsControlMode.awningControl &&
             widget.controlMode != DeviceDetailsControlMode.thermostatRing &&
             widget.controlMode != DeviceDetailsControlMode.presenceModes &&
             widget.controlMode !=
@@ -358,9 +354,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           ],
           _buildStandardDeviceCommentSection(),
         ],
-        _buildTabsRow(),
-        SizedBox(height: scrollNeedsMinHeight ? 4.h : 12.h),
-        _buildTabContent(),
+        _buildTabsWithContent(),
         SizedBox(height: 80.h),
       ],
     );
@@ -395,36 +389,51 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  Widget _buildTopHeader(BuildContext context) {
-    if (widget.controlMode == DeviceDetailsControlMode.standard ||
+  /// Hero layouts that lead with a centered device image ([standard], scene, fan, HVAC).
+  bool _heroStartsWithTopDeviceImage() {
+    return widget.controlMode == DeviceDetailsControlMode.standard ||
         widget.controlMode == DeviceDetailsControlMode.lightSceneValues ||
         widget.controlMode == DeviceDetailsControlMode.fanLevel ||
-        widget.controlMode == DeviceDetailsControlMode.heatingCooling) {
-      return _buildBackOnlyHeader(context);
-    }
+        widget.controlMode == DeviceDetailsControlMode.heatingCooling;
+  }
+
+  Widget _buildTopHeader(BuildContext context) {
     return _buildDefaultTopHeader(context);
   }
 
-  /// Back chevron only — used when title sits below the hero ([standard] / [lightSceneValues] / [fanLevel] / [heatingCooling]).
-  Widget _buildBackOnlyHeader(BuildContext context) {
-    final double topPad =
-        widget.deviceTitle == 'Motion Sensor' ? 0 : 2.h;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, topPad, 14.w, 0),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: GlobalCircleIconBtn(
-          color: const Color(0xFFFFFFFF),
-          child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
-          onTap: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              context.go('/setting-device');
-            }
-          },
+  Widget _buildDeviceDetailsBackButton(BuildContext context) {
+    return GlobalCircleIconBtn(
+      color: const Color(0xFFFFFFFF),
+      child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
+      onTap: () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          context.go('/setting-device');
+        }
+      },
+    );
+  }
+
+  /// Back chevron over the hero so the device image starts at the top (no empty header row).
+  Widget _buildHeroWithImageHeader(BuildContext context, Widget hero) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        hero,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _buildDeviceDetailsBackButton(context),
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -434,8 +443,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double iconSlot = 13.w + 8.w;
-        final double maxTextW =
-            math.max(0.0, constraints.maxWidth - iconSlot);
+        final double maxTextW = math.max(0.0, constraints.maxWidth - iconSlot);
         return Center(
           child: Wrap(
             crossAxisAlignment: WrapCrossAlignment.center,
@@ -495,17 +503,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          GlobalCircleIconBtn(
-            color: const Color(0xFFFFFFFF),
-            child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
-            onTap: () {
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              } else {
-                context.go('/setting-device');
-              }
-            },
-          ),
+          _buildDeviceDetailsBackButton(context),
           Expanded(child: _buildTitleEditRow()),
         ],
       ),
@@ -549,9 +547,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
-        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -578,8 +573,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         ],
         SizedBox(height: 10.h),
         _buildHeroIdentityStats(
-          onTimeTop:
-              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+          onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
       ],
     );
@@ -895,7 +889,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildLedDimmerHeroContent() {
-    final double ringSize = 228.w;
+    final double ringSize = 285.w;
     final double stroke = 12.r;
 
     return Column(
@@ -959,7 +953,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
                           final double p = _ledDimmerPercent.clamp(0.0, 1.0);
-                          final double ang = _openRingArcStart +
+                          final double ang =
+                              _openRingArcStart +
                               (_openRingInteractiveSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
@@ -1097,13 +1092,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Hero for [DeviceDetailsControlMode.ventilation]: cyan→blue ring, large %
   /// + fan asset in the center, single blue thumb (larger than LED dimmer).
   Widget _buildVentilationHeroContent() {
-    final double ringSize = 228.w;
+    final double ringSize = 285.w;
     final double stroke = 12.r;
     final double thumbSize = 38.r;
-    const Color thumbBlue = Color(0xFF0088FE);
+    const Color thumbBlue = Color(0xFF38A4FE);
 
-    final int shownPct =
-        _ventilationDisplayPercent(_ventilationPercent);
+    final int shownPct = _ventilationDisplayPercent(_ventilationPercent);
 
     return Column(
       children: [
@@ -1150,34 +1144,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             ),
                           ),
                           SizedBox(height: 6.h),
+
                           Image.asset(
-                            widget.imageAssetPath,
-                            height: 40.h,
-                            width: 40.w,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Image.asset(
-                              'assets/images/fan 2.png',
-                              height: 40.h,
-                              width: 40.w,
-                              fit: BoxFit.contain,
-                            ),
+                             'assets/images/fan 2.png',
+                            height: 84.h,
+                            width: 84.w,
+                            fit: BoxFit.contain, 
                           ),
                         ],
                       ),
                       Builder(
                         builder: (context) {
-                          final Offset c =
-                              Offset(sz.width / 2, sz.height / 2);
+                          final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double p =
-                              _ventilationPercent.clamp(0.0, 1.0);
+                          final double p = _ventilationPercent.clamp(0.0, 1.0);
                           final double ang =
                               _openRingArcStart +
-                                  (_openRingInteractiveSweep * p);
-                          final Offset thumb = c +
-                              Offset(math.cos(ang), math.sin(ang)) * radius;
+                              (_openRingInteractiveSweep * p);
+                          final Offset thumb =
+                              c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           return Positioned(
                             left: thumb.dx - thumbSize / 2,
                             top: thumb.dy - thumbSize / 2,
@@ -1741,7 +1727,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     });
   }
 
-
   Widget _buildHeatingCoolingHeroContent() {
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
@@ -1752,9 +1737,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
-        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -1777,8 +1759,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         _buildSwcBelowHeader(),
         SizedBox(height: 10.h),
         _buildHeroIdentityStats(
-          onTimeTop:
-              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+          onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
         SizedBox(height: 14.h),
         Padding(
@@ -1822,8 +1803,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 _heatingCoolingPill(
                   label: 'Heating',
                   selected: isHeating,
-                  onTap: () =>
-                      setState(() => _heatingCoolingMode = 'heating'),
+                  onTap: () => setState(() => _heatingCoolingMode = 'heating'),
                   accentBg: Color(0xFFFE019A),
                   inactiveBg: pillBg,
                   border: pillBorder,
@@ -1834,8 +1814,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     fit: BoxFit.cover,
                     color: isHeating ? Colors.white : Colors.black,
                     colorBlendMode: BlendMode.srcIn,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Image.asset(
+                    errorBuilder: (context, error, stackTrace) => Image.asset(
                       'assets/hvac.png',
                       height: 22.h,
                       width: 22.w,
@@ -1849,8 +1828,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 _heatingCoolingPill(
                   label: 'Colling',
                   selected: isCooling,
-                  onTap: () =>
-                      setState(() => _heatingCoolingMode = 'cooling'),
+                  onTap: () => setState(() => _heatingCoolingMode = 'cooling'),
                   accentBg: Color(0xFF0088FE),
                   inactiveBg: pillBg,
                   border: pillBorder,
@@ -1874,8 +1852,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 22.h,
-                width: 22.w,
+                height: 15.h,
+                width: 15.w,
                 child: Image.asset(
                   'assets/images/message_icon.png',
                   fit: BoxFit.contain,
@@ -1888,7 +1866,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   textAlign: TextAlign.start,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     height: 1.45,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
@@ -1954,7 +1932,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       ),
     );
   }
-
 
   Widget _buildThermostatRingHeroContent() {
     final double ringSize = 300.w;
@@ -2102,7 +2079,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double ang = _openRingArcStart +
+                          final double ang =
+                              _openRingArcStart +
                               _openRingInteractiveSweep *
                                   _thermostatSetPercent.clamp(0.0, 1.0);
                           final Offset thumb =
@@ -2178,7 +2156,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   // ───────────────────────────────────────────────────────────────────────────
 
-
   Widget _buildFanLevelHeroContent() {
     final List<({String label, int value})> options =
         <({String label, int value})>[
@@ -2191,9 +2168,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(
-          height: widget.deviceTitle == 'Motion Sensor' ? 0 : 8.h,
-        ),
         Center(
           child: Image.asset(
             widget.imageAssetPath,
@@ -2216,8 +2190,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         _buildSwcBelowHeader(),
         SizedBox(height: 10.h),
         _buildHeroIdentityStats(
-          onTimeTop:
-              widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
+          onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
         SizedBox(height: 14.h),
         Padding(
@@ -2243,7 +2216,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       ],
     );
   }
-
 
   Widget _fanLevelOptionIcon(int level) {
     const Color iconColor = Color(0xFF111827);
@@ -2383,8 +2355,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 22.h,
-              width: 22.w,
+              height: 15.h,
+              width: 15.w,
               child: Image.asset(
                 'assets/images/message_icon.png',
                 fit: BoxFit.contain,
@@ -2397,7 +2369,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 14.sp,
+                  fontSize: 12.sp,
                   height: 1.45,
                   fontWeight: FontWeight.w400,
                   color: noteColor,
@@ -2410,39 +2382,37 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(50.w, 0, 50.w, 8.h),
-      child: Center(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 15.h,
-              width: 15.w,
-              child: Image.asset(
-                'assets/images/message_icon.png',
-                fit: BoxFit.cover,
+      padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+          SizedBox(
+            height: 15.h,
+            width: 15.w,
+            child: Image.asset(
+              'assets/images/message_icon.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              'Don\'t ON this device while you sleeping'
+              'Here we will write comments to user'
+              'how to use and control that device with'
+              'all information that needed!!',
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 12.sp,
+                height: 1.45,
+                fontWeight: FontWeight.w400,
+                color: noteColor,
               ),
             ),
-            SizedBox(width: 12.w),
-            Flexible(
-              child: Text(
-                'Don\'t ON this device while you sleeping\n'
-                'Here we will write comments to user\n'
-                'how to use and control that device with\n'
-                'all information that needed!!',
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 12.sp,
-                  height: 1.45,
-                  fontWeight: FontWeight.w400,
-                  color: noteColor,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -2596,18 +2566,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               final double innerH = slatsBoxH - (cardPadding * 2);
 
               // Button position will now follow blind level
-              final double handleTop = (
-                  cardPadding + (innerH * _blindLevel) - (handleSize / 2)
-              ).clamp(
-                cardPadding,
-                slatsBoxH - (handleSize / 2),
-              );
+              final double handleTop =
+                  (cardPadding + (innerH * _blindLevel) - (handleSize / 2))
+                      .clamp(cardPadding, slatsBoxH - (handleSize / 2));
 
               void updateBlindLevelByDrag(DragUpdateDetails d) {
                 setState(() {
-                  _blindLevel = (
-                      _blindLevel + d.delta.dy / (innerH * 1.2)
-                  ).clamp(0.0, 1.0);
+                  _blindLevel = (_blindLevel + d.delta.dy / (innerH * 1.2))
+                      .clamp(0.0, 1.0);
                 });
               }
 
@@ -2684,12 +2650,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             height: handleSize,
                             child: _BlindHandle(
                               onUp: () => setState(() {
-                                _blindLevel =
-                                    (_blindLevel - 0.05).clamp(0.0, 1.0);
+                                _blindLevel = (_blindLevel - 0.05).clamp(
+                                  0.0,
+                                  1.0,
+                                );
                               }),
                               onDown: () => setState(() {
-                                _blindLevel =
-                                    (_blindLevel + 0.05).clamp(0.0, 1.0);
+                                _blindLevel = (_blindLevel + 0.05).clamp(
+                                  0.0,
+                                  1.0,
+                                );
                               }),
                             ),
                           ),
@@ -2744,9 +2714,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       fillColor: Color(0xFF0088FE),
                       borderColor: Colors.white,
                     ),
-                    overlayShape: RoundSliderOverlayShape(
-                      overlayRadius: 22.r,
-                    ),
+                    overlayShape: RoundSliderOverlayShape(overlayRadius: 22.r),
                     overlayColor: const Color(0x220088FE),
                   ),
                   child: Slider(
@@ -2772,7 +2740,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         ),
       ],
     );
-  }        
+  }
 
   // Widget _buildBlindControlHeroContent() {
   //   final int levelPct = (_blindLevel * 100).round();
@@ -2961,7 +2929,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   //   );
   // }
 
-  
   Widget _buildAwningControlHeroContent() {
     final int levelPct = (_blindLevel * 100).round();
 
@@ -3010,9 +2977,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 behavior: HitTestBehavior.opaque,
                 onVerticalDragUpdate: (details) {
                   setState(() {
-                    _blindLevel =
-                        (_blindLevel + details.delta.dy / cardH)
-                            .clamp(0.0, 1.0);
+                    _blindLevel = (_blindLevel + details.delta.dy / cardH)
+                        .clamp(0.0, 1.0);
                   });
                 },
                 child: Stack(
@@ -3028,7 +2994,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(34.r),
-
                         ),
                       ),
                     ),
@@ -3069,7 +3034,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                 },
                               ),
                             ),
-
                           ],
                         ),
                       ),
@@ -3080,98 +3044,113 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             );
           },
         ),
-
       ],
     );
   }
 
+  /// Tab labels on the page background; underline sits on the white card below.
+  Widget _buildTabsWithContent() {
+    final double stripH = 55.h;
+    final double lineH = 3.h;
+    final double labelTopPad = 10.h;
+    final double indicatorTopPad = stripH - labelTopPad - lineH;
 
-
-  Widget _buildTabsRow() {
-    return Container(
-      // decoration: const BoxDecoration(
-      //   color: Color(0xFFF3F4F6),
-      //   border: Border(
-      //     top: BorderSide(color: Color(0xFFE1E1E1), width: 5),
-      //   ),
-      // ),
-      child: Padding(
-        padding: EdgeInsets.only(left: 4.w, right: 4.w),
-        child: TabBar(
-          controller: _tabController,
-          dividerHeight: 0,
-          dividerColor: Colors.transparent,
-          indicatorSize: TabBarIndicatorSize.label,
-          indicatorPadding: EdgeInsets.zero,
-          tabAlignment: TabAlignment.fill,
-          labelPadding: EdgeInsets.symmetric(horizontal: 5.w),
-          labelStyle: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 13.sp,
-            height: 1.0,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelStyle: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 13.sp,
-            height: 1.0,
-            fontWeight: FontWeight.w500,
-          ),
-          labelColor: const Color(0xFF111827),
-          unselectedLabelColor: const Color(0xFF111827),
-          indicator: UnderlineTabIndicator(
-            borderSide: BorderSide(width: 3.h, color: const Color(0xFF111827)),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(2.r),
-              bottomRight: Radius.circular(2.r),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: stripH,
+            child: TabBar(
+              controller: _tabController,
+              padding: EdgeInsets.zero,
+              dividerHeight: 10,
+              dividerColor: Colors.transparent,
+              tabAlignment: TabAlignment.fill,
+              labelPadding: EdgeInsets.only(top: labelTopPad),
+              indicatorSize: TabBarIndicatorSize.label,
+              indicatorPadding: EdgeInsets.only(top: indicatorTopPad),
+              labelStyle: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13.sp,
+                height: 1.0,
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13.sp,
+                height: 1.0,
+                fontWeight: FontWeight.w500,
+              ),
+              labelColor: const Color(0xFF111827),
+              unselectedLabelColor: const Color(0xFF111827),
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(
+                  width: lineH,
+                  color: const Color(0xFF111827),
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(2.r),
+                  bottomRight: Radius.circular(2.r),
+                ),
+              ),
+              tabs: const [
+                Tab(text: 'Tools'),
+                Tab(text: 'Automation'),
+                Tab(text: 'Chart'),
+                Tab(text: 'Overview'),
+                Tab(text: 'Activity'),
+              ],
             ),
           ),
-          tabs: const [
-            Tab(text: 'Tools'),
-            Tab(text: 'Automation'),
-            Tab(text: 'Chart'),
-            Tab(text: 'Overview'),
-            Tab(text: 'Activity'),
-          ],
-        ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(26.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 10.r,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _buildTabContent(embeddedInTabsSheet: true),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTabContent() {
+  Widget _buildTabContent({bool embeddedInTabsSheet = false}) {
     switch (_tabFromIndex(_tabController.index)) {
       case _DeviceTab.tools:
-        return _buildManageDeviceCard();
+        return _buildManageDeviceCard(embeddedInTabsSheet: embeddedInTabsSheet);
       case _DeviceTab.automation:
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: _automationCard(),
-        );
+        return _automationCard(embeddedInTabsSheet: embeddedInTabsSheet);
       case _DeviceTab.chart:
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: _chartCard(),
-        );
+        return _chartCard(embeddedInTabsSheet: embeddedInTabsSheet);
       case _DeviceTab.overview:
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: deviceOverviewCard(),
-        );
+        return deviceOverviewCard(embeddedInTabsSheet: embeddedInTabsSheet);
       case _DeviceTab.activity:
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w),
-          child: _activityCard(),
-        );
+        return _activityCard(embeddedInTabsSheet: embeddedInTabsSheet);
     }
   }
 
-  Widget _buildManageDeviceCard() {
+  Widget _wrapTabsPanelCard({
+    required bool embeddedInTabsSheet,
+    required Widget child,
+  }) {
+    if (embeddedInTabsSheet) {
+      return child;
+    }
     return Padding(
-      padding: EdgeInsets.only(right: 15.w, left: 15.w),
-      child: Container(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(26.r), bottom: Radius.circular(26.r)),
+          borderRadius: BorderRadius.circular(26.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -3180,40 +3159,48 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 52.h,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Manage your device',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF111827),
-                    ),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildManageDeviceCard({bool embeddedInTabsSheet = false}) {
+    return _wrapTabsPanelCard(
+      embeddedInTabsSheet: embeddedInTabsSheet,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 52.h,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Manage your device',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
                   ),
                 ),
               ),
             ),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
-            _manageRowLabels(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
-            _manageRowAlerts(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
-            _manageRowSafeValue(),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
-            _manageRowManualOverride(),
-          ],
-        ),
+          ),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+          _manageRowLabels(),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+          _manageRowAlerts(),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+          _manageRowSafeValue(),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFE1E1E1)),
+          _manageRowManualOverride(),
+        ],
       ),
     );
   }
+
 
   Widget _manageRowLabels() {
     return Container(
@@ -3419,19 +3406,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  Widget _automationCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+  Widget _automationCard({bool embeddedInTabsSheet = false}) {
+    return _wrapTabsPanelCard(
+      embeddedInTabsSheet: embeddedInTabsSheet,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -3478,19 +3455,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  Widget _chartCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+  Widget _chartCard({bool embeddedInTabsSheet = false}) {
+    return _wrapTabsPanelCard(
+      embeddedInTabsSheet: embeddedInTabsSheet,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -3524,10 +3491,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       height: 120.h,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFFCDE5FF),
-                            Color(0xFFFFFFFF),
-                          ],
+                          colors: [Color(0xFFCDE5FF), Color(0xFFFFFFFF)],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -3572,8 +3536,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             left: 10.w,
                             right: 10.w,
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _TimeAxis('12:00'),
                                 _TimeAxis('14:00'),
@@ -3623,19 +3586,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  Widget _activityCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+  Widget _activityCard({bool embeddedInTabsSheet = false}) {
+    return _wrapTabsPanelCard(
+      embeddedInTabsSheet: embeddedInTabsSheet,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -3895,12 +3848,8 @@ class _BlindAngleSliderThumbShape extends SliderComponentShape {
   }
 }
 
-
 class _BlindSlatsPainter extends CustomPainter {
-  const _BlindSlatsPainter({
-    required this.level,
-    required this.angle,
-  });
+  const _BlindSlatsPainter({required this.level, required this.angle});
 
   final double level;
   final double angle;
@@ -3940,8 +3889,10 @@ class _BlindSlatsPainter extends CustomPainter {
 
     final double botW = topW * taperT.clamp(0.66, 0.92);
 
-    final int visible =
-    (_slatCount * level.clamp(0.0, 1.0)).round().clamp(0, _slatCount);
+    final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
+      0,
+      _slatCount,
+    );
 
     final Paint fill = Paint()
       ..style = PaintingStyle.fill
@@ -4013,8 +3964,6 @@ class _BlindSlatsPainter extends CustomPainter {
   }
 }
 
-
-
 // Drag-handle widget drawn on top of the slats.
 class _BlindHandle extends StatelessWidget {
   const _BlindHandle({this.onUp, this.onDown});
@@ -4050,7 +3999,7 @@ class _BlindHandle extends StatelessWidget {
             child: SizedBox(
               width: triW,
               height: triH,
-              child: Image.asset("assets/Polygon_on.png",)
+              child: Image.asset("assets/Polygon_on.png"),
             ),
           ),
           SizedBox(height: 5.h),
@@ -4060,7 +4009,7 @@ class _BlindHandle extends StatelessWidget {
             child: SizedBox(
               width: triW,
               height: triH,
-              child: Image.asset("assets/off_logo.png",)
+              child: Image.asset("assets/off_logo.png"),
             ),
           ),
         ],
@@ -4122,27 +4071,14 @@ class _SimpleChartPainter extends CustomPainter {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-Widget deviceOverviewCard() {
+Widget deviceOverviewCard({bool embeddedInTabsSheet = false}) {
   const overviewTitle = Color(0xFF111827);
   const overviewValueGreen = Color(0xFF5AB56B);
   const overviewLabel = Color(0xFF6B7280);
 
-  return Container(
-    //height: 203.h,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(26.r),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.07),
-          blurRadius: 18,
-          offset: const Offset(0, 6),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+  final Widget body = Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
         SizedBox(
           height: 55.h,
           child: Padding(
@@ -4248,7 +4184,25 @@ Widget deviceOverviewCard() {
           ),
         ),
       ],
+  );
+
+  if (embeddedInTabsSheet) {
+    return body;
+  }
+
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(26.r),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.07),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+        ),
+      ],
     ),
+    child: body,
   );
 }
 
@@ -4754,10 +4708,7 @@ class _ThermostatRingPainter extends CustomPainter {
 /// Full grey ring + cyan→blue **progress** only on the usable arc (bottom gap
 /// is the same track grey — no gradient / no progress there).
 class _VentilationRingPainter extends CustomPainter {
-  _VentilationRingPainter({
-    required this.percent,
-    required this.strokeWidth,
-  });
+  _VentilationRingPainter({required this.percent, required this.strokeWidth});
 
   final double percent;
   final double strokeWidth;
@@ -4765,12 +4716,8 @@ class _VentilationRingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = Offset(size.width / 2, size.height / 2);
-    final double midRadius =
-        size.shortestSide / 2 - strokeWidth / 2 - 2;
-    final Rect arcRect = Rect.fromCircle(
-      center: center,
-      radius: midRadius,
-    );
+    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
     const double startAngle = _openRingArcStart;
     const double arcSweep = _openRingInteractiveSweep;
@@ -4809,13 +4756,7 @@ class _VentilationRingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..shader = gradient.createShader(arcRect);
 
-    canvas.drawArc(
-      arcRect,
-      startAngle,
-      sweepAngle,
-      false,
-      fgPaint,
-    );
+    canvas.drawArc(arcRect, startAngle, sweepAngle, false, fgPaint);
   }
 
   @override
