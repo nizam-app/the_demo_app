@@ -207,6 +207,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   double _rgbwSaturation = 0.52;
   double _rgbwIntensity = 0.7;
 
+  /// While true, page scroll is disabled so wheel drags are not stolen by [SingleChildScrollView].
+  bool _rgbwWheelDragging = false;
+
   /// LED dimmer ring: 0 = min, 1 = 100%.
   double _ledDimmerPercent = 0.0;
 
@@ -268,6 +271,52 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     super.dispose();
   }
 
+  /// Whether the main hero image should use the grey off-state artwork.
+  bool get _showOffHeroImage {
+    switch (widget.controlMode) {
+      case DeviceDetailsControlMode.heatingCooling:
+        return !_isOn;
+      case DeviceDetailsControlMode.fanLevel:
+        return _selectedFanLevel == 0;
+      case DeviceDetailsControlMode.lightSceneValues:
+        return _selectedSceneIndex == 2;
+      case DeviceDetailsControlMode.standard:
+        return !_isOn;
+      default:
+        return false;
+    }
+  }
+
+  String? get _offHeroImageAssetPath {
+    switch (widget.controlMode) {
+      case DeviceDetailsControlMode.heatingCooling:
+        return 'assets/images/heating&cooling_off.png';
+      case DeviceDetailsControlMode.fanLevel:
+        return 'assets/images/fan_level_off.png';
+      case DeviceDetailsControlMode.lightSceneValues:
+        return 'assets/images/light_scene_off.png';
+      case DeviceDetailsControlMode.standard:
+        final String path = widget.imageAssetPath.toLowerCase();
+        final String title = widget.deviceTitle.toLowerCase();
+        if (path.contains('irrigation') || title.contains('irrigation')) {
+          return 'assets/images/irrigation_of.png';
+        }
+        if (path.contains('bathroom') ||
+            title.contains('bathroom') ||
+            path.contains('mask group (6)')) {
+          return 'assets/images/bathroom_off.png';
+        }
+        return 'assets/images/light_of.png';
+      default:
+        return null;
+    }
+  }
+
+  String get _heroImageAssetPath {
+    if (!_showOffHeroImage) return widget.imageAssetPath;
+    return _offHeroImageAssetPath ?? widget.imageAssetPath;
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
@@ -300,7 +349,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         (widget.controlMode == DeviceDetailsControlMode.thermostatRing &&
             titleLc == 'living room') ||
         (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
-            widget.deviceTitle == 'LED Dimmer living room');
+            widget.deviceTitle == 'LED Dimmer living room') ||
+        (widget.controlMode == DeviceDetailsControlMode.rgbwPicker &&
+            _rgbwWheelDragging);
 
     final ScrollPhysics scrollPhysics = disableBodyScroll
         ? const NeverScrollableScrollPhysics()
@@ -318,7 +369,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           _buildSwcBelowHeader(),
           _buildHero(),
         ],
-        SizedBox(height: isLightSceneValues ? 10.h : 18.h),
+        SizedBox(
+          height: widget.controlMode == DeviceDetailsControlMode.rgbwPicker ||
+                  widget.controlMode == DeviceDetailsControlMode.tunableWhite ||
+                  widget.controlMode == DeviceDetailsControlMode.blindControl ||
+                  widget.controlMode == DeviceDetailsControlMode.awningControl
+              ? 6.h
+              : isLightSceneValues
+              ? 10.h
+              : 18.h,
+        ),
         if (widget.controlMode ==
             DeviceDetailsControlMode.lightSceneValues) ...[
           _buildSceneValuesSection(),
@@ -549,7 +609,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       children: [
         Center(
           child: Image.asset(
-            widget.imageAssetPath,
+            _heroImageAssetPath,
             height: 88.h,
             width: 88.w,
             fit: BoxFit.contain,
@@ -889,8 +949,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildLedDimmerHeroContent() {
-    final double ringSize = 285.w;
-    final double stroke = 12.r;
+    final double ringSize = 290.w;
+    final double stroke = 15.r;
 
     return Column(
       children: [
@@ -942,7 +1002,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 52.sp,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: const Color(0xFF111827),
                           ),
                         ),
@@ -1092,8 +1152,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Hero for [DeviceDetailsControlMode.ventilation]: cyan→blue ring, large %
   /// + fan asset in the center, single blue thumb (larger than LED dimmer).
   Widget _buildVentilationHeroContent() {
-    final double ringSize = 285.w;
-    final double stroke = 12.r;
+    final double ringSize = 290.w;
+    final double stroke = 15.r;
     final double thumbSize = 38.r;
     const Color thumbBlue = Color(0xFF38A4FE);
 
@@ -1137,7 +1197,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             '$shownPct%',
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 44.sp,
+                              fontSize: 52.sp,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF111827),
                               height: 1.05,
@@ -1347,13 +1407,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                         color: Colors.white,
                                         width: ringStroke,
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.12),
-                                          blurRadius: 14.r,
-                                          offset: const Offset(0, 6),
-                                        ),
-                                      ],
                                     ),
                                   ),
                                   SizedBox(height: labelGap),
@@ -1382,7 +1435,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 8.h),
         Text(
           'Temperature',
           style: TextStyle(
@@ -1404,7 +1457,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             height: 1.0,
           ),
         ),
-        SizedBox(height: 12.h),
+        SizedBox(height: 8.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 30.w),
           child: Column(
@@ -1436,8 +1489,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ],
                 ),
               ),
-              SizedBox(height: 10.h),
-
+              SizedBox(height: 6.h),
               Row(
                 children: [
                   Icon(
@@ -1451,6 +1503,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
                         trackHeight: 6.h,
+                        trackShape: const _TunableWhiteIntensityGradientTrackShape(),
                         activeTrackColor: accent,
                         inactiveTrackColor: dialBorder,
                         thumbColor: accent,
@@ -1524,23 +1577,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         .substring(2)
         .toUpperCase();
 
-    final double wheelSize = 260.w;
+    final double wheelSize = 310.w;
 
     return Column(
       children: [
         _buildHeroIdentityStats(),
-        // SizedBox(height: 22.h),
-        // Text(
-        //   'RGBW',
-        //   textAlign: TextAlign.center,
-        //   style: TextStyle(
-        //     fontFamily: 'Inter',
-        //     fontSize: 20.sp,
-        //     fontWeight: FontWeight.w600,
-        //     color: const Color(0xFF111827),
-        //   ),
-        // ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 10.h),
         Center(
           child: SizedBox(
             width: wheelSize,
@@ -1551,12 +1593,21 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   constraints.maxWidth,
                   constraints.maxHeight,
                 );
-                return GestureDetector(
+                return Listener(
                   behavior: HitTestBehavior.opaque,
-                  onPanDown: (d) =>
-                      _rgbwUpdateFromLocal(d.localPosition, layoutSize),
-                  onPanUpdate: (d) =>
-                      _rgbwUpdateFromLocal(d.localPosition, layoutSize),
+                  onPointerDown: (PointerDownEvent e) {
+                    setState(() => _rgbwWheelDragging = true);
+                    _rgbwUpdateFromLocal(e.localPosition, layoutSize);
+                  },
+                  onPointerMove: (PointerMoveEvent e) {
+                    if (_rgbwWheelDragging) {
+                      _rgbwUpdateFromLocal(e.localPosition, layoutSize);
+                    }
+                  },
+                  onPointerUp: (_) =>
+                      setState(() => _rgbwWheelDragging = false),
+                  onPointerCancel: (_) =>
+                      setState(() => _rgbwWheelDragging = false),
                   child: Stack(
                     clipBehavior: Clip.none,
                     alignment: Alignment.center,
@@ -1573,8 +1624,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             layoutSize.width / 2,
                             layoutSize.height / 2,
                           );
-                          final double maxR =
-                              layoutSize.shortestSide / 2 - 10.r;
+                          final double maxR = _rgbwWheelMaxRadius(layoutSize);
                           final double r =
                               maxR * _rgbwSaturation.clamp(0.0, 1.0);
                           final double rad = _rgbwHue * math.pi / 180;
@@ -1614,7 +1664,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 6.h),
         Text(
           hex,
           textAlign: TextAlign.center,
@@ -1625,7 +1675,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             color: const Color(0xFF9CA3AF),
           ),
         ),
-        SizedBox(height: 22.h),
+        SizedBox(height: 10.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 30.w),
           child: Column(
@@ -1712,10 +1762,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
+  double _rgbwWheelMaxRadius(Size size) => size.shortestSide / 2 - 10.r;
+
   void _rgbwUpdateFromLocal(Offset local, Size size) {
     final Offset c = Offset(size.width / 2, size.height / 2);
     final Offset d = local - c;
-    final double maxR = size.shortestSide / 2 - 18.r;
+    final double maxR = _rgbwWheelMaxRadius(size);
     final double dist = d.distance.clamp(0.0, maxR);
     double hueDeg = math.atan2(-d.dy, d.dx) * 180 / math.pi;
     if (hueDeg < 0) {
@@ -1739,7 +1791,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       children: [
         Center(
           child: Image.asset(
-            widget.imageAssetPath,
+            _heroImageAssetPath,
             height: 110.h + 10,
             width: 110.w + 10,
             fit: BoxFit.contain,
@@ -1774,7 +1826,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               children: [
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () {},
+                  onTap: () => setState(() => _isOn = false),
                   child: Container(
                     width: 36.w,
                     height: 36.w,
@@ -1795,7 +1847,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       height: 13.h,
                       width: 13.w,
                       fit: BoxFit.cover,
-                      color: !_isOn ? Colors.white : Colors.black,
+                      color: !_isOn
+                          ? const Color(0xFFD1D5DB)
+                          : Colors.black,
                     ),
                   ),
                 ),
@@ -1803,7 +1857,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 _heatingCoolingPill(
                   label: 'Heating',
                   selected: isHeating,
-                  onTap: () => setState(() => _heatingCoolingMode = 'heating'),
+                  onTap: () => setState(() {
+                    _isOn = true;
+                    _heatingCoolingMode = 'heating';
+                  }),
                   accentBg: Color(0xFFFE019A),
                   inactiveBg: pillBg,
                   border: pillBorder,
@@ -1828,7 +1885,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 _heatingCoolingPill(
                   label: 'Colling',
                   selected: isCooling,
-                  onTap: () => setState(() => _heatingCoolingMode = 'cooling'),
+                  onTap: () => setState(() {
+                    _isOn = true;
+                    _heatingCoolingMode = 'cooling';
+                  }),
                   accentBg: Color(0xFF0088FE),
                   inactiveBg: pillBg,
                   border: pillBorder,
@@ -1846,36 +1906,43 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           ),
         ),
         SizedBox(height: 16.h),
-        Padding(
-          padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 15.h,
-                width: 15.w,
-                child: Image.asset(
-                  'assets/images/message_icon.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  'Here we will write instruction how to control and more information about that device',
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12.sp,
-                    height: 1.45,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF6B7280),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        Center(
+        child: Padding(
+        padding: EdgeInsets.only(left:  85.w, right: 0),
+        child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        SizedBox(
+        height: 15.h,
+        width: 15.w,
+        child: Image.asset(
+        'assets/images/message_icon.png',
+        fit: BoxFit.contain,
         ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+        child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+        'Here we will write instruction how to \n'
+    'control and more information about that\n'
+    'device',
+    textAlign: TextAlign.center,
+    style: TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 12.sp,
+    height: 1.45,
+    fontWeight: FontWeight.w400,
+    color: Color(0xFF6B7280),
+    ),
+    ),
+    ),
+    ),
+    ],
+    ),
+    ),
+    ),
       ],
     );
   }
@@ -2170,7 +2237,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       children: [
         Center(
           child: Image.asset(
-            widget.imageAssetPath,
+            _heroImageAssetPath,
             height: 140.h,
             width: 140.w,
             fit: BoxFit.contain,
@@ -2226,7 +2293,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         height: 13.h,
         width: 13.w,
         fit: BoxFit.cover,
-        color: !_isOn ? Colors.white : Colors.black,
+        color: _selectedFanLevel == 0 ? Colors.white : Colors.black,
       );
     }
 
@@ -2349,12 +2416,52 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     const Color noteColor = Color(0xFF6B7280);
 
     if (widget.deviceTitle == 'Motion Sensor') {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(left:  85.w, right: 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 15.h,
+                width: 15.w,
+                child: Image.asset(
+                  'assets/images/message_icon.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Here we will write instruction how to \n'
+                        'control and more information about that\n'
+                        'device',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.sp,
+                      height: 1.45,
+                      fontWeight: FontWeight.w400,
+                      color: noteColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Center(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding:  EdgeInsets.only(left: 85.w, right: 0),
+            child: SizedBox(
               height: 15.h,
               width: 15.w,
               child: Image.asset(
@@ -2362,11 +2469,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fit: BoxFit.contain,
               ),
             ),
-            SizedBox(width: 12.w),
-            Expanded(
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
               child: Text(
-                'Here we will write instruction how to control and more information about that device',
-                textAlign: TextAlign.start,
+                'Don\'t ON this device while you sleeping\n'
+                'Here we will write comments to user\n'
+                'how to use and control that device with\n'
+                'all information that needed!!',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 12.sp,
@@ -2374,41 +2487,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   fontWeight: FontWeight.w400,
                   color: noteColor,
                 ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(28.w, 0, 28.w, 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          SizedBox(
-            height: 15.h,
-            width: 15.w,
-            child: Image.asset(
-              'assets/images/message_icon.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Text(
-              'Don\'t ON this device while you sleeping'
-              'Here we will write comments to user'
-              'how to use and control that device with'
-              'all information that needed!!',
-              textAlign: TextAlign.start,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12.sp,
-                height: 1.45,
-                fontWeight: FontWeight.w400,
-                color: noteColor,
               ),
             ),
           ),
@@ -2553,14 +2631,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         SizedBox(height: 10.h),
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 40.w),
+          padding: EdgeInsets.only(left: 83.w, right:83.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final double w = constraints.maxWidth;
-              final double slatsBoxH = w * 0.72;
+              final double slatsBoxH = w * 1.0;
 
-              final double cardPadding = 10.h;
-              final double handleSize = 58.r;
+              final double cardPadding = 8.h;
+              final double handleSize = 40.r;
               final double handlePeek = 18.h;
 
               final double innerH = slatsBoxH - (cardPadding * 2);
@@ -2685,13 +2763,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         ),
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          padding: EdgeInsets.symmetric(horizontal: 47.w),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 28.w,
-                height: 26.h,
+                width: 19.w,
+                height: 14.h,
                 child: Image.asset(
                   'assets/images/light-Menu.png',
                   fit: BoxFit.contain,
@@ -2704,14 +2782,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               Expanded(
                 child: SliderTheme(
                   data: SliderThemeData(
-                    trackHeight: 4.h,
-                    activeTrackColor: const Color(0xFF0088FE),
+                    trackHeight: 10.h,
+                    activeTrackColor: const Color(0xFF38A4FE),
                     inactiveTrackColor: const Color(0xFFE5E7EB),
-                    thumbColor: const Color(0xFF0088FE),
+                    thumbColor: const Color(0xFF15DFFE),
                     thumbShape: const _BlindAngleSliderThumbShape(
                       innerRadius: 10,
-                      borderWidth: 4,
-                      fillColor: Color(0xFF0088FE),
+                      borderWidth: 5,
+                      fillColor: Color(0xFF38A4FE),
                       borderColor: Colors.white,
                     ),
                     overlayShape: RoundSliderOverlayShape(overlayRadius: 22.r),
@@ -2727,8 +2805,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               SizedBox(width: 5.w),
 
               SizedBox(
-                width: 28.w,
-                height: 26.h,
+                width: 17.w,
+                height: 30.h,
                 child: Image.asset(
                   'assets/images/light-line-menu.png',
                   fit: BoxFit.contain,
@@ -2932,26 +3010,25 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildAwningControlHeroContent() {
     final int levelPct = (_blindLevel * 100).round();
 
-    const TextStyle labelStyle = TextStyle(
+    final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16,
+      fontSize: 16.sp,
       fontWeight: FontWeight.w400,
-      color: Color(0xFF111827),
+      color: const Color(0xFF111827),
     );
 
-    const TextStyle valueStyle = TextStyle(
+    final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16,
+      fontSize: 16.sp,
       fontWeight: FontWeight.w700,
-      color: Color(0xFF111827),
+      color: const Color(0xFF111827),
     );
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildHeroIdentityStats(),
-
-        SizedBox(height: 20.h),
-
+        SizedBox(height: 12.h),
         Text.rich(
           TextSpan(
             children: [
@@ -2960,89 +3037,159 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ],
           ),
         ),
+        SizedBox(height: 10.h),
+        Padding(
+          padding: EdgeInsets.only(left: 83.w, right: 83.w),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final double w = constraints.maxWidth;
+              final double cardH = w * 1.0;
+              final double cardPadding = 6.h;
+              final double handleSize = 50.r;
+              final double handlePeek = 18.h;
+              final double innerH = cardH - (cardPadding * 2);
+              final double fillH = (innerH * _blindLevel).clamp(0.0, innerH);
+              final double innerCornerR = math.max(0.0, 20.r - cardPadding);
+              final bool fillReachesBottom = fillH >= innerH - 0.5;
 
-        SizedBox(height: 12.h),
+              final double handleTop =
+                  (cardPadding + (innerH * _blindLevel) - (handleSize / 2))
+                      .clamp(cardPadding, cardH - (handleSize / 2));
 
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final double w = constraints.maxWidth;
-            final double cardH = w * 0.71;
+              void updateAwningLevelByDrag(DragUpdateDetails d) {
+                setState(() {
+                  _blindLevel = (_blindLevel + d.delta.dy / (innerH * 1.0))
+                      .clamp(0.0, 1.0);
+                });
+              }
 
-            final double blueH = (cardH * _blindLevel).clamp(0.0, cardH);
-
-            return SizedBox(
-              width: 305.w,
-              height: cardH,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onVerticalDragUpdate: (details) {
-                  setState(() {
-                    _blindLevel = (_blindLevel + details.delta.dy / cardH)
-                        .clamp(0.0, 1.0);
-                  });
-                },
+              return SizedBox(
+                width: w,
+                height: cardH + handlePeek,
                 child: Stack(
                   clipBehavior: Clip.none,
+                  alignment: Alignment.topCenter,
                   children: [
-                    // White back layer for side rounded effect
-                    Positioned(
-                      top: -8,
-                      left: -8,
-                      right: -8,
-                      height: 325.h,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(34.r),
-                        ),
-                      ),
-                    ),
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
                       height: cardH,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30.r),
-                        child: Stack(
-                          children: [
-                            // Blue / image area
-                            Positioned(
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              height: blueH,
-                              child: Image.asset(
-                                widget.imageAssetPath,
-                                width: w,
-                                height: blueH,
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
-                                errorBuilder: (_, __, ___) {
-                                  return Container(
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFF15DFFE),
-                                          Color(0xFF38A4FE),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(26.r),
+                          border: Border.all(
+                            color: const Color(0xFFFFFFFF),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 12.r,
+                              offset: Offset(0, 3.h),
                             ),
                           ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15.r),
+                          child: Padding(
+                            padding: EdgeInsets.all(cardPadding),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(innerCornerR),
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onVerticalDragUpdate: updateAwningLevelByDrag,
+                                child: Stack(
+                                  clipBehavior: Clip.hardEdge,
+                                  children: [
+                                    const Positioned.fill(
+                                      child: ColoredBox(color: Colors.white),
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      height: fillH,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(innerCornerR),
+                                          topRight:
+                                              Radius.circular(innerCornerR),
+                                          bottomLeft: Radius.circular(
+                                            fillReachesBottom ? innerCornerR : 0,
+                                          ),
+                                          bottomRight: Radius.circular(
+                                            fillReachesBottom ? innerCornerR : 0,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          widget.imageAssetPath,
+                                          width: w,
+                                          height: fillH,
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.topCenter,
+                                          errorBuilder: (_, __, ___) {
+                                            return const DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    Color(0xFF38A4FE),
+                                                    Color(0xFF15DFFE),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 120),
+                      curve: Curves.easeOut,
+                      top: handleTop,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onVerticalDragUpdate: updateAwningLevelByDrag,
+                          child: SizedBox(
+                            width: handleSize,
+                            height: handleSize,
+                            child: _BlindHandle(
+                              onUp: () => setState(() {
+                                _blindLevel = (_blindLevel - 0.05).clamp(
+                                  0.0,
+                                  1.0,
+                                );
+                              }),
+                              onDown: () => setState(() {
+                                _blindLevel = (_blindLevel + 0.05).clamp(
+                                  0.0,
+                                  1.0,
+                                );
+                              }),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ],
     );
@@ -3091,8 +3238,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   color: const Color(0xFF111827),
                 ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(2.r),
-                  bottomRight: Radius.circular(2.r),
+                  topLeft: Radius.circular(8.r),
+                  topRight: Radius.circular(8.r),
                 ),
               ),
               tabs: const [
@@ -4350,6 +4497,112 @@ class _SceneValueOption extends StatelessWidget {
   }
 }
 
+/// Pale cyan → accent active track (tunable white intensity).
+class _TunableWhiteIntensityGradientTrackShape extends SliderTrackShape
+    with BaseSliderTrackShape {
+  const _TunableWhiteIntensityGradientTrackShape();
+
+  static const List<Color> _gradientColors = <Color>[
+    Color(0xFFBFF6FF),
+    Color(0xFF00D1FF),
+  ];
+
+  @override
+  bool get isRounded => true;
+
+  static Paint _gradientPaint(Rect bounds, {required bool ltrActive}) {
+    return Paint()
+      ..shader = LinearGradient(
+        begin: ltrActive ? Alignment.centerLeft : Alignment.centerRight,
+        end: ltrActive ? Alignment.centerRight : Alignment.centerLeft,
+        colors: _gradientColors,
+      ).createShader(bounds);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
+    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
+      return;
+    }
+
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    final double trackHeight = sliderTheme.trackHeight!;
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
+    const double additionalActiveTrackHeight = 0;
+    final Radius activeTrackRadius = Radius.circular(
+      (trackRect.height + additionalActiveTrackHeight) / 2,
+    );
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
+
+    final Paint inactivePaint = Paint()
+      ..color = sliderTheme.inactiveTrackColor ?? const Color(0xFFE5E7EB);
+
+    final bool leadingSegmentGradient = isLTR;
+    final bool trailingSegmentGradient = isRTL;
+
+    final bool drawInactiveTrack =
+        thumbCenter.dx < (trackRect.right - (trackHeight / 2));
+    if (drawInactiveTrack) {
+      final RRect trailing = RRect.fromLTRBR(
+        thumbCenter.dx - (trackHeight / 2),
+        isRTL
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        trackRect.right,
+        isRTL
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? trackRadius : activeTrackRadius,
+      );
+      context.canvas.drawRRect(
+        trailing,
+        trailingSegmentGradient
+            ? _gradientPaint(trailing.outerRect, ltrActive: false)
+            : inactivePaint,
+      );
+    }
+    final bool drawActiveTrack =
+        thumbCenter.dx > (trackRect.left + (trackHeight / 2));
+    if (drawActiveTrack) {
+      final RRect leading = RRect.fromLTRBR(
+        trackRect.left,
+        isLTR
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        thumbCenter.dx + (trackHeight / 2),
+        isLTR
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? activeTrackRadius : trackRadius,
+      );
+      context.canvas.drawRRect(
+        leading,
+        leadingSegmentGradient
+            ? _gradientPaint(leading.outerRect, ltrActive: true)
+            : inactivePaint,
+      );
+    }
+  }
+}
+
 /// Light pink → magenta active track; white inactive (matches RGBW intensity spec).
 class _RgbwIntensityGradientTrackShape extends SliderTrackShape
     with BaseSliderTrackShape {
@@ -4630,7 +4883,7 @@ class _ThermostatDottedDividerPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
     const double dotRadius = 1.1;
-    final double cy = size.height / 2;
+   final double cy = size.height / 2;
     double x = dotRadius + 0.5;
     while (x < size.width - dotRadius) {
       canvas.drawCircle(Offset(x, cy), dotRadius, dotPaint);
@@ -4768,6 +5021,15 @@ class _VentilationRingPainter extends CustomPainter {
 
 /// Hue spectrum disk + radial fade toward white (RGBW picker).
 class _RgbHueWheelPainter extends CustomPainter {
+  static final List<Color> _hueColors = List<Color>.generate(
+    361,
+    (int i) => HSVColor.fromAHSV(1, i.toDouble(), 1, 1).toColor(),
+  );
+  static final List<double> _hueStops = List<double>.generate(
+    361,
+    (int i) => i / 360,
+  );
+
   @override
   void paint(Canvas canvas, Size size) {
     final Offset center = Offset(size.width / 2, size.height / 2);
@@ -4775,27 +5037,19 @@ class _RgbHueWheelPainter extends CustomPainter {
     final Rect bounds = Rect.fromCircle(center: center, radius: radius);
 
     final Paint sweep = Paint()
-      ..shader = const SweepGradient(
-        colors: <Color>[
-          Color(0xFFFF0000),
-          Color(0xFFFF00FF),
-          Color(0xFF0000FF),
-          Color(0xFF00FFFF),
-          Color(0xFF00FF00),
-          Color(0xFFFFFF00),
-          Color(0xFFFF0000),
-        ],
-        stops: <double>[0, 0.1666, 0.3333, 0.5, 0.6666, 0.8333, 1],
+      ..shader = SweepGradient(
+        colors: _hueColors,
+        stops: _hueStops,
       ).createShader(bounds);
     canvas.drawCircle(center, radius, sweep);
 
-    final Paint soften = Paint()
-      ..shader = RadialGradient(
-        colors: <Color>[Colors.white, Colors.white.withOpacity(0.0)],
-        stops: const <double>[0.05, 1],
-      ).createShader(bounds)
-      ..blendMode = BlendMode.softLight;
-    canvas.drawCircle(center, radius * 0.98, soften);
+    // White center → transparent edge: saturation increases toward the rim.
+    final Paint radial = Paint()
+      ..shader = const RadialGradient(
+        colors: <Color>[Colors.white, Color(0x00FFFFFF)],
+        stops: <double>[0, 1],
+      ).createShader(bounds);
+    canvas.drawCircle(center, radius, radial);
   }
 
   @override
