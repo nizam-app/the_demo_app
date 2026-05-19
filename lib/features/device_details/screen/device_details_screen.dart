@@ -11,16 +11,44 @@ import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
-/// Shared **open ring** geometry (bottom gap, grey full track): ventilation,
-/// LED dimmer, and thermostat set-point. 0 % at the left end of the arc, 100 %
-/// at the right; small bottom wedge stays track-only; full progress extends
-/// slightly past the nominal end.
+/// **Open ring** geometry (bottom gap): thermostat set-point. LED dimmer and
+/// ventilation use [_fullRingStart] / [_fullRingSweep] for a closed 360° ring.
 const double _openRingGapRadians = 52 * math.pi / 180;
 const double _openRingArcStart = math.pi / 2 + _openRingGapRadians / 2;
 const double _openRingArcSweep = 2 * math.pi - _openRingGapRadians;
 const double _openRingProgressEndExtraRadians = 10 * math.pi / 180;
 const double _openRingInteractiveSweep =
     _openRingArcSweep + _openRingProgressEndExtraRadians;
+
+/// Full 360° ring for LED dimmer & ventilation: same 0 % origin as the open arc,
+/// but 100 % completes the full circle (no bottom gap).
+const double _fullRingStart = _openRingArcStart;
+const double _fullRingSweep = 2 * math.pi;
+
+/// Snap ring value to nearest 1 % step.
+double _snapRingPercentOneStep(double value) =>
+    (value.clamp(0.0, 1.0) * 100).round() / 100.0;
+
+/// Maps a pan position on a full ring to [0, 1] with 1 % steps.
+double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
+  final Offset c = Offset(size.width / 2, size.height / 2);
+  final Offset d = local - c;
+  final double angle = math.atan2(d.dy, d.dx);
+  double t = (angle - _fullRingStart) / _fullRingSweep;
+  if (t < 0) {
+    t += 1;
+  }
+  double next = _snapRingPercentOneStep(t);
+
+  final double prev = prevPercent.clamp(0.0, 1.0);
+  if (prev > 0.85 && next < 0.15) {
+    next = 1.0;
+  }
+  if (prev < 0.15 && next > 0.85) {
+    next = 0.0;
+  }
+  return _snapRingPercentOneStep(next);
+}
 
 /// Controls which primary region appears below the hero (stats stay the same).
 enum
@@ -210,6 +238,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// While true, page scroll is disabled so wheel drags are not stolen by [SingleChildScrollView].
   bool _rgbwWheelDragging = false;
 
+  /// While true, page scroll is disabled on tunable-white temperature disk drags.
+  bool _tunableWhiteDiskDragging = false;
+
   /// LED dimmer ring: 0 = min, 1 = 100%.
   double _ledDimmerPercent = 0.0;
 
@@ -351,7 +382,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
             widget.deviceTitle == 'LED Dimmer living room') ||
         (widget.controlMode == DeviceDetailsControlMode.rgbwPicker &&
-            _rgbwWheelDragging);
+            _rgbwWheelDragging) ||
+        (widget.controlMode == DeviceDetailsControlMode.tunableWhite &&
+            _tunableWhiteDiskDragging);
 
     final ScrollPhysics scrollPhysics = disableBodyScroll
         ? const NeverScrollableScrollPhysics()
@@ -950,7 +983,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   Widget _buildLedDimmerHeroContent() {
     final double ringSize = 290.w;
-    final double stroke = 15.r;
+    final double stroke = 12.r;
 
     return Column(
       children: [
@@ -1014,8 +1047,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               sz.shortestSide / 2 - stroke / 2 - 2;
                           final double p = _ledDimmerPercent.clamp(0.0, 1.0);
                           final double ang =
-                              _openRingArcStart +
-                              (_openRingInteractiveSweep * p);
+                              _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 44.r;
@@ -1062,32 +1094,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   void _ledDimmerUpdateFromLocal(Offset local, Size size) {
-    final Offset c = Offset(size.width / 2, size.height / 2);
-    final Offset d = local - c;
-    final double angle = math.atan2(d.dy, d.dx);
-
-    const double a0 = _openRingArcStart;
-    const double sweep = _openRingInteractiveSweep;
-    final Offset p = Offset(math.cos(angle), math.sin(angle));
-    double bestT = 0;
-    double bestD = 1e9;
-    for (int i = 0; i <= 40; i++) {
-      final double t = i / 40.0;
-      final double a = a0 + sweep * t;
-      final Offset q = Offset(math.cos(a), math.sin(a));
-      final double dist = (p - q).distance;
-      if (dist < bestD) {
-        bestD = dist;
-        bestT = t;
-      }
-    }
-    double next = bestT.clamp(0.0, 1.0);
-
-    final double prev = _ledDimmerPercent.clamp(0.0, 1.0);
-    if (prev > 0.85 && next < 0.15) next = 1.0;
-    if (prev < 0.15 && next > 0.85) next = 0.0;
-
-    setState(() => _ledDimmerPercent = next.clamp(0.0, 1.0));
+    setState(
+      () => _ledDimmerPercent = _fullRingPercentFromLocal(
+        local,
+        size,
+        _ledDimmerPercent,
+      ),
+    );
   }
 
   int _ventilationDisplayPercent(double p) {
@@ -1095,32 +1108,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   void _ventilationUpdateFromLocal(Offset local, Size size) {
-    final Offset c = Offset(size.width / 2, size.height / 2);
-    final Offset d = local - c;
-    final double angle = math.atan2(d.dy, d.dx);
-
-    const double a0 = _openRingArcStart;
-    const double sweep = _openRingInteractiveSweep;
-    final Offset p = Offset(math.cos(angle), math.sin(angle));
-    double bestT = 0;
-    double bestD = 1e9;
-    for (int i = 0; i <= 40; i++) {
-      final double t = i / 40.0;
-      final double a = a0 + sweep * t;
-      final Offset q = Offset(math.cos(a), math.sin(a));
-      final double dist = (p - q).distance;
-      if (dist < bestD) {
-        bestD = dist;
-        bestT = t;
-      }
-    }
-    double next = bestT.clamp(0.0, 1.0);
-
-    final double prev = _ventilationPercent.clamp(0.0, 1.0);
-    if (prev > 0.85 && next < 0.15) next = 1.0;
-    if (prev < 0.15 && next > 0.85) next = 0.0;
-
-    setState(() => _ventilationPercent = next.clamp(0.0, 1.0));
+    setState(
+      () => _ventilationPercent = _fullRingPercentFromLocal(
+        local,
+        size,
+        _ventilationPercent,
+      ),
+    );
   }
 
   /// Three-column stats row (On time / 7 Days / Cycles).
@@ -1153,8 +1147,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// + fan asset in the center, single blue thumb (larger than LED dimmer).
   Widget _buildVentilationHeroContent() {
     final double ringSize = 290.w;
-    final double stroke = 15.r;
-    final double thumbSize = 38.r;
+    final double stroke = 12.r;
+    final double thumbSize = 44.r;
     const Color thumbBlue = Color(0xFF38A4FE);
 
     final int shownPct = _ventilationDisplayPercent(_ventilationPercent);
@@ -1220,8 +1214,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               sz.shortestSide / 2 - stroke / 2 - 2;
                           final double p = _ventilationPercent.clamp(0.0, 1.0);
                           final double ang =
-                              _openRingArcStart +
-                              (_openRingInteractiveSweep * p);
+                              _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           return Positioned(
@@ -1303,12 +1296,21 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   constraints.maxWidth,
                   constraints.maxHeight,
                 );
-                return GestureDetector(
+                return Listener(
                   behavior: HitTestBehavior.opaque,
-                  onPanDown: (d) =>
-                      _tunableWhiteUpdateFromLocal(d.localPosition, sz),
-                  onPanUpdate: (d) =>
-                      _tunableWhiteUpdateFromLocal(d.localPosition, sz),
+                  onPointerDown: (PointerDownEvent e) {
+                    setState(() => _tunableWhiteDiskDragging = true);
+                    _tunableWhiteUpdateFromLocal(e.localPosition, sz);
+                  },
+                  onPointerMove: (PointerMoveEvent e) {
+                    if (_tunableWhiteDiskDragging) {
+                      _tunableWhiteUpdateFromLocal(e.localPosition, sz);
+                    }
+                  },
+                  onPointerUp: (_) =>
+                      setState(() => _tunableWhiteDiskDragging = false),
+                  onPointerCancel: (_) =>
+                      setState(() => _tunableWhiteDiskDragging = false),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -1473,7 +1475,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                   children: [
                     TextSpan(
-                      text: 'Intensity: ',
+                      text: 'Intensity:',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: textPrimary,
@@ -1490,45 +1492,43 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 ),
               ),
               SizedBox(height: 6.h),
-              Row(
-                children: [
-                  Icon(
-                    Icons.wb_sunny_outlined,
-                    size: 16.sp,
-
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 6.h,
-                        trackShape: const _TunableWhiteIntensityGradientTrackShape(),
-                        activeTrackColor: accent,
-                        inactiveTrackColor: dialBorder,
-                        thumbColor: accent,
-                        overlayColor: accent.withOpacity(0.18),
-                        overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 36.r,
+              Padding(
+                padding:  EdgeInsets.only(left: 20.w, right: 20.w),
+                child: Row(
+                  children: [
+                    Image.asset("assets/images/a2b985126ef03e050674ff1db5daca52af4c4e57.png", height: 20.h, width: 20.h,fit: BoxFit.cover,),
+                    //SizedBox(width: 10.w),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 10.h,
+                          trackShape: const _TunableWhiteIntensityGradientTrackShape(),
+                          activeTrackColor: accent,
+                          inactiveTrackColor: dialBorder,
+                          thumbColor: accent,
+                          overlayColor: accent.withOpacity(0.18),
+                          overlayShape: RoundSliderOverlayShape(
+                            overlayRadius: 20.r,
+                          ),
+                          thumbShape: _TunableWhiteThumbShape(
+                            radius: thumbSize / 2,
+                            fillColor: accent,
+                          ),
                         ),
-                        thumbShape: _TunableWhiteThumbShape(
-                          radius: thumbSize / 2,
-                          fillColor: accent,
-                        ),
-                      ),
-                      child: Slider(
-                        value: _tunableWhiteIntensity.clamp(0.0, 1.0),
-                        min: 0,
-                        max: 1,
-                        onChanged: (v) => setState(
-                          () => _tunableWhiteIntensity = v.clamp(0.0, 1.0),
+                        child: Slider(
+                          value: _tunableWhiteIntensity.clamp(0.0, 1.0),
+                          min: 0,
+                          max: 1,
+                          onChanged: (v) => setState(
+                            () => _tunableWhiteIntensity = v.clamp(0.0, 1.0),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Icon(Icons.wb_sunny, size: 26.sp, color: textSecondary),
-                ],
+                    //SizedBox(width: 10.w),
+                    Image.asset("assets/images/a2b985126ef03e050674ff1db5daca52af4c4e57.png", height: 40.h, width: 40.h,fit: BoxFit.cover,),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1709,51 +1709,46 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 ),
               ),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  Icon(
-                    Icons.wb_sunny_outlined,
-                    size: 15.sp,
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 8.h,
-                        trackShape: const _RgbwIntensityGradientTrackShape(),
-                        thumbShape: _RgbwMagentaThumbShape(
-                          enabledOuterRadius: 21.r,
-                          enabledInnerRadius: 16.r,
+              Padding(
+                padding:  EdgeInsets.only(right: 20.w, left: 20.w),
+                child: Row(
+                  children: [
+                    Image.asset("assets/images/a2b985126ef03e050674ff1db5daca52af4c4e57.png", height: 20.h, width: 20.h,fit: BoxFit.cover,),
+
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 10.h,
+                          trackShape: const _RgbwIntensityGradientTrackShape(),
+                          thumbShape: _RgbwMagentaThumbShape(
+                            enabledOuterRadius: 18.r,
+                            enabledInnerRadius: 14.r,
+                          ),
+                          overlayShape: RoundSliderOverlayShape(
+                            overlayRadius: 20.r,
+                          ),
+                          activeTrackColor: const Color(0xFFE91EAC),
+                          inactiveTrackColor: const Color(0xFFFFFFFF),
+                          disabledActiveTrackColor: const Color(0xFFE91EAC),
+                          disabledInactiveTrackColor: const Color(0xFFFFFFFF),
+                          thumbColor: const Color(0xFFE91EAC),
+                          disabledThumbColor: const Color(0xFFE91EAC),
                         ),
-                        overlayShape: RoundSliderOverlayShape(
-                          overlayRadius: 36.r,
+                        child: Slider(
+                          value: _rgbwIntensity.clamp(0.0, 1.0),
+                          min: 0,
+                          max: 1,
+                          activeColor: const Color(0xFFE91EAC),
+                          inactiveColor: const Color(0xFFFFFFFF),
+                          onChanged: (v) =>
+                              setState(() => _rgbwIntensity = v.clamp(0.0, 1.0)),
                         ),
-                        activeTrackColor: const Color(0xFFE91EAC),
-                        inactiveTrackColor: const Color(0xFFFFFFFF),
-                        disabledActiveTrackColor: const Color(0xFFE91EAC),
-                        disabledInactiveTrackColor: const Color(0xFFFFFFFF),
-                        thumbColor: const Color(0xFFE91EAC),
-                        disabledThumbColor: const Color(0xFFE91EAC),
-                      ),
-                      child: Slider(
-                        value: _rgbwIntensity.clamp(0.0, 1.0),
-                        min: 0,
-                        max: 1,
-                        activeColor: const Color(0xFFE91EAC),
-                        inactiveColor: const Color(0xFFFFFFFF),
-                        onChanged: (v) =>
-                            setState(() => _rgbwIntensity = v.clamp(0.0, 1.0)),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Icon(
-                    Icons.wb_sunny,
-                    size: 28.sp,
-                    color: const Color(0xFF6B7280),
-                  ),
-                ],
+
+                    Image.asset("assets/images/a2b985126ef03e050674ff1db5daca52af4c4e57.png", height: 40.h, width: 40.h,fit: BoxFit.cover,),
+                  ],
+                ),
               ),
             ],
           ),
@@ -2315,7 +2310,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildOnOffRow() {
-    const Color offSelectedBg = Color(0xFF6B7280);
+    const Color offSelectedBg = Color(0xFFC7CCD7);
     const Color onSelectedBg = Color(0xFF0088FE);
     const Color inactiveBg = Colors.white;
     const Color inactiveBorder = Color(0xFFE5E7EB);
@@ -2348,7 +2343,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         height: 13.h,
                         width: 13.w,
                         fit: BoxFit.cover,
-                        color: !_isOn ? Colors.white : Colors.black,
+                        color: !_isOn ? Colors.black : Colors.black,
                       ),
                       SizedBox(width: 8.w),
                       Text(
@@ -2357,7 +2352,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: !_isOn ? Colors.white : Colors.black,
+                          color: !_isOn ? Colors.black : Colors.black,
                         ),
                       ),
                     ],
@@ -3044,12 +3039,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             builder: (context, constraints) {
               final double w = constraints.maxWidth;
               final double cardH = w * 1.0;
-              final double cardPadding = 6.h;
-              final double handleSize = 50.r;
+              final double cardPadding = 8.h;
+              final double handleSize = 40.r;
               final double handlePeek = 18.h;
               final double innerH = cardH - (cardPadding * 2);
               final double fillH = (innerH * _blindLevel).clamp(0.0, innerH);
-              final double innerCornerR = math.max(0.0, 20.r - cardPadding);
+              final double innerCornerR = math.max(0.0, 26.r - cardPadding);
               final bool fillReachesBottom = fillH >= innerH - 0.5;
 
               final double handleTop =
@@ -3058,9 +3053,28 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
               void updateAwningLevelByDrag(DragUpdateDetails d) {
                 setState(() {
-                  _blindLevel = (_blindLevel + d.delta.dy / (innerH * 1.0))
+                  _blindLevel = (_blindLevel + d.delta.dy / (innerH * 1.2))
                       .clamp(0.0, 1.0);
                 });
+              }
+
+              Widget awningFill(double height) {
+                return SizedBox(
+                  height: height,
+                  width: double.infinity,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[
+                          Color(0xFF38A4FE),
+                          Color(0xFF15DFFE),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               }
 
               return SizedBox(
@@ -3092,62 +3106,38 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15.r),
+                          borderRadius: BorderRadius.circular(26.r),
                           child: Padding(
                             padding: EdgeInsets.all(cardPadding),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(innerCornerR),
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onVerticalDragUpdate: updateAwningLevelByDrag,
-                                child: Stack(
-                                  clipBehavior: Clip.hardEdge,
-                                  children: [
-                                    const Positioned.fill(
-                                      child: ColoredBox(color: Colors.white),
-                                    ),
-                                    Positioned(
-                                      top: 0,
-                                      left: 0,
-                                      right: 0,
-                                      height: fillH,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(innerCornerR),
-                                          topRight:
-                                              Radius.circular(innerCornerR),
-                                          bottomLeft: Radius.circular(
-                                            fillReachesBottom ? innerCornerR : 0,
-                                          ),
-                                          bottomRight: Radius.circular(
-                                            fillReachesBottom ? innerCornerR : 0,
-                                          ),
-                                        ),
-                                        child: Image.asset(
-                                          widget.imageAssetPath,
-                                          width: w,
-                                          height: fillH,
-                                          fit: BoxFit.cover,
-                                          alignment: Alignment.topCenter,
-                                          errorBuilder: (_, __, ___) {
-                                            return const DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                  colors: [
-                                                    Color(0xFF38A4FE),
-                                                    Color(0xFF15DFFE),
-                                                  ],
-                                                ),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onVerticalDragUpdate: updateAwningLevelByDrag,
+                              child: Stack(
+                                clipBehavior: Clip.hardEdge,
+                                children: [
+                                  const Positioned.fill(
+                                    child: ColoredBox(color: Colors.white),
+                                  ),
+                                  Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: fillH,
+                                    child: ClipRRect(
+                                      borderRadius: fillReachesBottom
+                                          ? BorderRadius.circular(innerCornerR)
+                                          : BorderRadius.only(
+                                              topLeft: Radius.circular(
+                                                innerCornerR,
                                               ),
-                                            );
-                                          },
-                                        ),
-                                      ),
+                                              topRight: Radius.circular(
+                                                innerCornerR,
+                                              ),
+                                            ),
+                                      child: awningFill(fillH),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -3366,8 +3356,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             'Labels',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -3418,8 +3408,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             'Alerts',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -3434,8 +3424,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               '12',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF111827),
               ),
             ),
@@ -3468,8 +3458,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             'Safe Value',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -3478,8 +3468,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             'On',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF111827),
             ),
           ),
@@ -3511,8 +3501,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             'Manual Override',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
               color: const Color(0xFF111827),
             ),
           ),
@@ -3579,8 +3569,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             title: 'Set actions based on value of',
             subtitle: 'Multi-Value Switch',
             image: "assets/set_actions_icon.png",
-            imageheight: 32.h,
-            imagewidth: 32.w,
+            imageheight: 40.h,
+            imagewidth: 40.w,
           ),
           Padding(
             padding: EdgeInsets.only(right: 14.w, left: 48.w),
@@ -3594,8 +3584,24 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             title: 'Temperature hysteresis controller (2)',
             subtitle: 'Multi-Value Switch',
             image: "assets/temperature_icon.png",
-            imageheight: 30.h,
-            imagewidth: 30.w,
+            imageheight: 34.h,
+            imagewidth: 34.w,
+          ),
+
+          Padding(
+            padding: EdgeInsets.only(right: 14.w, left: 48.w),
+            child: const Divider(
+              height: 1,
+              thickness: 1,
+              color: Color(0xFFE1E1E1),
+            ),
+          ),
+
+          _addAutomationRow(  
+            title: 'Add automation',
+            image: "assets/images/add+.png",
+            imageheight: 20.h,
+            imagewidth: 20.w,
           ),
         ],
       ),
@@ -3841,7 +3847,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 15.sp,
+                    fontSize: 16.sp,
                     height: 1.2,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
@@ -3854,7 +3860,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Inter',
-                    fontSize: 13.sp,
+                    fontSize: 14.sp,
                     height: 1.2,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
@@ -3871,6 +3877,69 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             fit: BoxFit.cover,
             color: const Color(0xFF6B7280),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _addAutomationRow({
+    required String title,
+    required String image,
+    Color? iconColor,
+    required double imageheight,
+    required double imagewidth,
+  }) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            height: 39.h,
+          width: 39.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(26.r),
+              color: Color(0xFFF3F4F6)
+            ),
+            child: Center(
+              child: Image.asset(
+                image,
+                height: imageheight,
+                width: imagewidth,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16.sp,
+                    height: 1.2,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+          // SizedBox(width: 8.w),
+          // Image.asset(
+          //   "assets/back_arro.png",
+          //   height: 13.h,
+          //   width: 13.w,
+          //   fit: BoxFit.cover,
+          //   color: const Color(0xFF6B7280),
+          // ),
         ],
       ),
     );
@@ -4364,7 +4433,7 @@ Widget _deviceOverviewGridCell(
   final Color resolvedValueColor = valueColor ?? titleColor;
   final TextStyle valueStyle = TextStyle(
     fontFamily: 'Inter',
-    fontSize: 12.sp,
+    fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     height: 1,
   );
@@ -4418,7 +4487,7 @@ Widget _deviceOverviewGridCell(
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 10.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w400,
             height: 1,
             color: labelColor,
@@ -4825,8 +4894,7 @@ class _LedDimmerRingPainter extends CustomPainter {
 
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
-    const double startAngle = _openRingArcStart;
-    const double arcSweep = _openRingInteractiveSweep;
+    const double startAngle = _fullRingStart;
 
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
@@ -4834,7 +4902,7 @@ class _LedDimmerRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
+    canvas.drawArc(arcRect, 0, _fullRingSweep, false, trackPaint);
 
     final double clamped = percent.clamp(0.0, 1.0);
 
@@ -4842,15 +4910,16 @@ class _LedDimmerRingPainter extends CustomPainter {
       return;
     }
 
-    final double sweepAngle = arcSweep * clamped;
+    final double sweepAngle = clamped >= 0.999
+        ? _fullRingSweep
+        : _fullRingSweep * clamped;
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
-        Color(0xFF00E52A),
         Color(0xFF00D1FF),
         Color(0xFF00E52A),
       ],
-      stops: const <double>[0.0, 0.70, 1.0],
+      stops: const <double>[0.0, 1.0],
       transform: GradientRotation(startAngle),
       tileMode: TileMode.clamp,
     );
@@ -4958,8 +5027,7 @@ class _ThermostatRingPainter extends CustomPainter {
       old.strokeWidth != strokeWidth || old.percent != percent;
 }
 
-/// Full grey ring + cyan→blue **progress** only on the usable arc (bottom gap
-/// is the same track grey — no gradient / no progress there).
+/// Full grey ring + cyan→blue progress on a closed 360° path.
 class _VentilationRingPainter extends CustomPainter {
   _VentilationRingPainter({required this.percent, required this.strokeWidth});
 
@@ -4972,8 +5040,7 @@ class _VentilationRingPainter extends CustomPainter {
     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
-    const double startAngle = _openRingArcStart;
-    const double arcSweep = _openRingInteractiveSweep;
+    const double startAngle = _fullRingStart;
 
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
@@ -4981,24 +5048,23 @@ class _VentilationRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // Complete circle in track grey so the bottom gap is outlined like the rest.
-    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
+    canvas.drawArc(arcRect, 0, _fullRingSweep, false, trackPaint);
 
     final double clamped = percent.clamp(0.0, 1.0);
     if (clamped <= 0.001) {
       return;
     }
 
-    final double sweepAngle = arcSweep * clamped;
+    final double sweepAngle = clamped >= 0.999
+        ? _fullRingSweep
+        : _fullRingSweep * clamped;
 
     final SweepGradient gradient = SweepGradient(
       colors: const <Color>[
-        Color(0xFF15DFFE),
-        Color(0xFF87CEEB),
-        Color(0xFF00BFFF),
+        Color(0xFF38A4FE),
         Color(0xFF15DFFE),
       ],
-      stops: const <double>[0.0, 0.5, 0.75, 1.0],
+      stops: const <double>[0.0, 1.0],
       transform: GradientRotation(startAngle),
       tileMode: TileMode.clamp,
     );
@@ -5110,15 +5176,15 @@ class _ChipPill extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(22.r),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: border, width: 1.2.w),
       ),
       child: Center(
         child: Text(
           text,
           style: TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
             color: textColor,
             fontFamily: 'Inter',
           ),
