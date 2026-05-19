@@ -165,7 +165,58 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        
+                        SizedBox(
+                          height: 63.h,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _CategoryPill(
+                                label: 'Light',
+                                isSelected: _categoryPillIndex == 0,
+                                icon: Icons.lightbulb_outline,
+                                imagePath: 'assets/Mask group (3).png',
+                                onTap: () {
+                                  setState(() => _categoryPillIndex = 0);
+                                  DeviceDetailsScreen.go(
+                                    context,
+                                    deviceTitle: 'Light dinning room',
+                                    imageAssetPath: 'assets/Mask group (5).png',
+                                    controlButtonCount: 3,
+                                  );
+                                },
+                              ),
+                              SizedBox(width: 12.w),
+                              _CategoryPill(
+                                label: 'Shading',
+                                isSelected: _categoryPillIndex == 1,
+                                icon: Icons.blinds_outlined,
+                                imagePath: 'assets/Mask group (2).png',
+                                onTap: () =>
+                                    setState(() => _categoryPillIndex = 1),
+                              ),
+                              SizedBox(width: 12.w),
+                              _CategoryPill(
+                                label: 'HVAC',
+                                isSelected: _categoryPillIndex == 2,
+                                icon: Icons.ac_unit_outlined,
+                                imagePath: 'assets/Mask group (4).png',
+                                onTap: () =>
+                                    setState(() => _categoryPillIndex = 2),
+                              ),
+                              SizedBox(width: 12.w),
+                              _CategoryPill(
+                                label: 'Security',
+                                isSelected: _categoryPillIndex == 3,
+                                icon: Icons.ac_unit_outlined,
+                                imagePath: 'assets/securety.png',
+                                onTap: () =>
+                                    setState(() => _categoryPillIndex = 3),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 18.h),
 
                         const _SectionTitle('Light'),
                         SizedBox(height: 12.h),
@@ -180,8 +231,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _LightDimmerCard(
-                                      title:
-                                          'Bedroom spot light small patio blue light',
+                                      title: 'Light dinning room ',
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
@@ -194,8 +244,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                       ),
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
-                                        deviceTitle:
-                                            'Bedroom spot light small patio blue light',
+                                        deviceTitle: 'Light dinning room ',
                                         imageAssetPath:
                                             'assets/Mask group (5).png',
                                         controlButtonCount: 1,
@@ -216,6 +265,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                       imagePath: 'assets/Mask group (6).png',
                                       minusMarked: _bathroomThermoMark == 1,
                                       plusMarked: _bathroomThermoMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Bathroom heating and boiler thermostat',
+                                        imageAssetPath:
+                                            'assets/Mask group (6).png',
+                                        controlButtonCount: 3,
+                                      ),
                                       onModeTap: () => setState(
                                         () => _bathroomManual = !_bathroomManual,
                                       ),
@@ -248,7 +305,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                   child: SizedBox(
                                     height: 185.h,
                                     child: _BlindCard(
-                                      title: 'Blind Living Room north window',
+                                      title: 'Awning garden 123',
                                       downPercent: _blindNorthDown,
                                       upPercent: _blindNorthUp,
                                       mode: _blindManual ? 'M' : 'A',
@@ -256,6 +313,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                       imagePath: 'assets/Rectangle 823.png',
                                       downMarked: _blindNorthMark == 1,
                                       upMarked: _blindNorthMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle: 'Awning garden 123',
+                                        imageAssetPath:
+                                            'assets/Rectangle 823.png',
+                                        controlButtonCount: 1,
+                                        controlMode: DeviceDetailsControlMode
+                                            .awningControl,
+                                      ),
                                       onModeTap: () => setState(
                                         () => _blindManual = !_blindManual,
                                       ),
@@ -280,11 +346,85 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                                 Expanded(
                                   child: SizedBox(
                                     height: 185.h,
-                                    child: const _ToggleCard(
+                                    child: _ToggleCard(
                                       title:
                                           'Irrigation entry and front home two valve',
                                       isOn: true,
                                       imagePath: 'assets/Mask group (7).png',
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle:
+                                            'Irrigation entry and front home two valve',
+                                        imageAssetPath:
+                                            'assets/Mask group (7).png',
+                                        controlButtonCount: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _BlindCard(
+                                      title: 'Blind Living Room',
+                                      downPercent: _blindNorthDown,
+                                      upPercent: _blindNorthUp,
+                                      mode: _blindManual ? 'M' : 'A',
+                                      modeFilled: _blindManual,
+                                      imagePath: 'assets/Rectangle 823.png',
+                                      downMarked: _blindNorthMark == 1,
+                                      upMarked: _blindNorthMark == 2,
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle: 'Blind Living Room',
+                                        imageAssetPath:
+                                            'assets/Rectangle 823.png',
+                                        controlButtonCount: 1,
+                                        controlMode: DeviceDetailsControlMode
+                                            .blindControl,
+                                      ),
+                                      onModeTap: () => setState(
+                                        () => _blindManual = !_blindManual,
+                                      ),
+                                      onDown: () => _flashMark(
+                                        value: 1,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthDown =
+                                            (_blindNorthDown + 5).clamp(0, 100),
+                                      ),
+                                      onUp: () => _flashMark(
+                                        value: 2,
+                                        getCurrent: () => _blindNorthMark,
+                                        set: (v) => _blindNorthMark = v,
+                                        action: () => _blindNorthUp =
+                                            (_blindNorthUp + 5).clamp(0, 100),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 185.h,
+                                    child: _ToggleCard(
+                                      title: 'Motion Sensor',
+                                      isOn: true,
+                                      imagePath:
+                                          'assets/images/update_sensor.png',
+                                      onNavigate: () => DeviceDetailsScreen.go(
+                                        context,
+                                        deviceTitle: 'Motion Sensor',
+                                        imageAssetPath:
+                                            'assets/images/kitchen.png',
+                                        controlButtonCount: 1,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -315,7 +455,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                         // ✅ Chart card
                         _ChartCard(),
 
-                        SizedBox(height: 60.h),
+                        SizedBox(height: 70.h),
                       ],
                     ),
                   ),
@@ -888,13 +1028,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           children: [
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'Light Scene child room',
+                deviceName: 'Light Scene',
                 status: 'All On',
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'Light Scene child room',
+                  deviceTitle: 'Light Scene',
                   imageAssetPath:
                       'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
                   controlButtonCount: 3,
@@ -905,93 +1045,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             SizedBox(width: 12.w),
             Expanded(
               child: _buildLightingCard(
-                deviceName: 'RGBW light patio entry',
+                deviceName: 'RGBW room abc',
                 status: '100%',
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                 onTap: () => DeviceDetailsScreen.go(
                   context,
-                  deviceTitle: 'RGBW light patio entry',
-                  imageAssetPath:
-                      'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                  controlButtonCount: 2,
-                  controlMode: DeviceDetailsControlMode.rgbwPicker,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildLightingCard(
-                          deviceName: 'LED Dimmer living room',
-                          status: '100%',
-                          iconImage:
-                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                          progressCircle: true,
-                          onTap: () => DeviceDetailsScreen.go(
-                            context,
-                            deviceTitle: 'LED Dimmer living room',
-                            imageAssetPath:
-                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                            controlButtonCount: 1,
-                            controlMode: DeviceDetailsControlMode.ledDimmer,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                    right: 7.w, // ✅ outside, but doesn't shrink the card
-                    top: 7.h,
-                    child: _ModeBadge(
-                      mode: _lightingLedBadge1Manual ? 'M' : 'A',
-                      filled: _lightingLedBadge1Manual,
-                      onTap: () => setState(
-                        () => _lightingLedBadge1Manual =
-                            !_lightingLedBadge1Manual,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        // Second row of cards
-        Row(
-          children: [
-            Expanded(
-              child: _buildLightingCard(
-                deviceName: 'Light Scene child room',
-                status: 'All On',
-                iconImage:
-                    'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                onTap: () => DeviceDetailsScreen.go(
-                  context,
-                  deviceTitle: 'Light Scene child room',
-                  imageAssetPath:
-                      'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-                  controlButtonCount: 3,
-                  controlMode: DeviceDetailsControlMode.lightSceneValues,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildLightingCard(
-                deviceName: 'RGBW light\npatio entry',
-                status: '100%',
-                iconImage:
-                    'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                onTap: () => DeviceDetailsScreen.go(
-                  context,
-                  deviceTitle: 'RGBW light\npatio entry',
+                  deviceTitle: 'RGBW room abc',
                   imageAssetPath:
                       'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                   controlButtonCount: 2,
@@ -1029,6 +1089,86 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     right: 7.w,
                     top: 7.h,
                     child: _ModeBadge(
+                      mode: _lightingLedBadge1Manual ? 'M' : 'A',
+                      filled: _lightingLedBadge1Manual,
+                      onTap: () => setState(
+                        () => _lightingLedBadge1Manual =
+                            !_lightingLedBadge1Manual,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        // Second row of cards
+        Row(
+          children: [
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'Heating & Cooling',
+                status: 'All On',
+                iconImage:
+                    'assets/images/heating_cooling.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Heating & Cooling',
+                  imageAssetPath:
+                      'assets/images/heating_cooling.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.heatingCooling,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'Tunable white light',
+                status: '100%',
+                iconImage:
+                    'assets/white_light.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Tunable white light',
+                  imageAssetPath:
+                      'assets/white_light.png',
+                  controlButtonCount: 1,
+                  controlMode: DeviceDetailsControlMode.tunableWhite,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'Ventilation',
+                          status: '100%',
+                          iconImage:
+                              'assets/images/ventilations.png',
+                          progressCircle: true,
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'Ventilation',
+                            imageAssetPath:
+                                'assets/images/ventilations.png',
+                            controlButtonCount: 1,
+                            controlMode: DeviceDetailsControlMode.ventilation,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 7.w,
+                    top: 7.h,
+                    child: _ModeBadge(
                       mode: _lightingLedBadge2Manual ? 'M' : 'A',
                       filled: _lightingLedBadge2Manual,
                       onTap: () => setState(
@@ -1037,6 +1177,136 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'Fan Level 3',
+                status: 'All On',
+                iconImage:
+                    'assets/images/Fun_level3.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Fan Level 3',
+                  imageAssetPath:
+                      'assets/images/Fun_level3.png',
+                  controlButtonCount: 3,
+                  controlMode: DeviceDetailsControlMode.fanLevel,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildLightingCard(
+                deviceName: 'Presence',
+                status: '100%',
+                iconImage:
+                    'assets/images/comfort.png',
+                onTap: () => DeviceDetailsScreen.go(
+                  context,
+                  deviceTitle: 'Presence',
+                  imageAssetPath:
+                      'assets/images/comfort.png',
+                  controlButtonCount: 2,
+                  controlMode: DeviceDetailsControlMode.presenceModes,
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'Living room',
+                          status: '100%',
+                          iconImage:
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'Living Room',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 1,
+                            controlMode:
+                                DeviceDetailsControlMode.thermostatRing,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 7.w,
+                    top: 7.h,
+                    child: _ModeBadge(
+                      mode: _lightingLedBadge2Manual ? 'M' : 'A',
+                      filled: _lightingLedBadge2Manual,
+                      onTap: () => setState(
+                        () => _lightingLedBadge2Manual =
+                            !_lightingLedBadge2Manual,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLightingCard(
+                          deviceName: 'Multi-Value Switch',
+                          status: '100%',
+                          iconImage:
+                              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                          progressCircle: true,
+                          onTap: () => DeviceDetailsScreen.go(
+                            context,
+                            deviceTitle: 'Multi-Value Switch',
+                            imageAssetPath:
+                                'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+                            controlButtonCount: 12,
+                            controlMode:
+                                DeviceDetailsControlMode.multiValueSwitch,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(),
                 ],
               ),
             ),
@@ -1103,7 +1373,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             status,
             style: TextStyle(
               fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: const Color(0xFF111827),
               fontFamily: "Inter",
             ),
@@ -1788,6 +2058,7 @@ class _ThermostatCard extends StatelessWidget {
     this.plusMarked = false,
     this.imagePath,
     this.onModeTap,
+    this.onNavigate,
   });
 
   final String title;
@@ -1798,69 +2069,83 @@ class _ThermostatCard extends StatelessWidget {
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback? onModeTap;
+  final VoidCallback? onNavigate;
   final bool minusMarked;
   final bool plusMarked;
 
   @override
   Widget build(BuildContext context) {
+    final Widget headerColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        imagePath != null
+            ? Image.asset(
+                imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.thermostat_outlined,
+                size: 44.sp,
+                color: const Color(0xFF0088FE),
+              ),
+        SizedBox(height: 10.h),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF111827),
+                    height: 1.15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (title.contains('\n')) ...[
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    title.split('\n').length > 1 ? title.split('\n')[1] : '',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: const Color(0xFF111827),
+                      height: 1.15,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              imagePath != null
-                  ? Image.asset(
-                      imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.thermostat_outlined,
-                      size: 44.sp,
-                      color: const Color(0xFF0088FE),
-                    ),
-              SizedBox(height: 10.h),
               Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title.split('\n').isNotEmpty
-                            ? title.split('\n')[0]
-                            : title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-    fontWeight: FontWeight.w400,
-                          color: const Color(0xFF111827),
-                          height: 1.15,
+                child: onNavigate != null
+                    ? Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: onNavigate,
+                          borderRadius: BorderRadius.circular(18.r),
+                          child: headerColumn,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (title.contains('\n')) ...[
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          title.split('\n').length > 1
-                              ? title.split('\n')[1]
-                              : '',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF111827),
-                            height: 1.15,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                      )
+                    : headerColumn,
               ),
               SizedBox(height: 10.h),
               Row(
@@ -1926,6 +2211,7 @@ class _BlindCard extends StatelessWidget {
     this.upMarked = false,
     this.imagePath,
     this.onModeTap,
+    this.onNavigate,
   });
 
   final String title;
@@ -1937,11 +2223,24 @@ class _BlindCard extends StatelessWidget {
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onModeTap;
+  final VoidCallback? onNavigate;
   final bool downMarked;
   final bool upMarked;
 
   @override
   Widget build(BuildContext context) {
+    Widget titleInkWell(Widget child) {
+      if (onNavigate == null) return child;
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onNavigate,
+          borderRadius: BorderRadius.circular(18.r),
+          child: child,
+        ),
+      );
+    }
+
     return Stack(
       children: [
         _CardShell(
@@ -1949,24 +2248,33 @@ class _BlindCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (imagePath != null)
-                Image.asset(
-                  imagePath!,
-                  width: 65.w,
-                  height: 65.w,
-                  fit: BoxFit.contain,
+                titleInkWell(
+                  Image.asset(
+                    imagePath!,
+                    width: 65.w,
+                    height: 65.w,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               SizedBox(height: 10.h),
               Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF111827),
-                    height: 1.18,
+                child: titleInkWell(
+                  SizedBox.expand(
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF111827),
+                          height: 1.18,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -2005,7 +2313,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$downPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2021,7 +2329,7 @@ class _BlindCard extends StatelessWidget {
                               Text(
                                 '$upPercent%',
                                 style: TextStyle(
-                                  fontSize: 16.sp,
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111827),
                                 ),
@@ -2072,11 +2380,13 @@ class _ToggleCard extends StatefulWidget {
     required this.title,
     required this.isOn,
     this.imagePath,
+    this.onNavigate,
   });
 
   final String title;
   final bool isOn;
   final String? imagePath;
+  final VoidCallback? onNavigate;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -2103,37 +2413,55 @@ class _ToggleCardState extends State<_ToggleCard> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget headerColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        widget.imagePath != null
+            ? Image.asset(
+                widget.imagePath!,
+                width: 52.w,
+                height: 52.w,
+                fit: BoxFit.contain,
+              )
+            : Icon(
+                Icons.water_drop_outlined,
+                size: 42.sp,
+                color: const Color(0xFF00C2FF),
+              ),
+        SizedBox(height: 17.h),
+        Expanded(
+          child: Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF111827),
+              height: 1.15,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              widget.imagePath != null
-                  ? Image.asset(
-                      widget.imagePath!,
-                      width: 52.w,
-                      height: 52.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(
-                      Icons.water_drop_outlined,
-                      size: 42.sp,
-                      color: const Color(0xFF00C2FF),
-                    ),
-              SizedBox(height: 17.h),
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF111827),
-                    height: 1.15,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: widget.onNavigate != null
+                    ? Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: widget.onNavigate,
+                          borderRadius: BorderRadius.circular(18.r),
+                          child: headerColumn,
+                        ),
+                      )
+                    : headerColumn,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
