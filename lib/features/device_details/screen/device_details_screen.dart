@@ -11,18 +11,8 @@ import 'package:workpleis/features/settings/screen/settings_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
-/// **Open ring** geometry (bottom gap): thermostat set-point. LED dimmer and
-/// ventilation use [_fullRingStart] / [_fullRingSweep] for a closed 360° ring.
-const double _openRingGapRadians = 52 * math.pi / 180;
-const double _openRingArcStart = math.pi / 2 + _openRingGapRadians / 2;
-const double _openRingArcSweep = 2 * math.pi - _openRingGapRadians;
-const double _openRingProgressEndExtraRadians = 10 * math.pi / 180;
-const double _openRingInteractiveSweep =
-    _openRingArcSweep + _openRingProgressEndExtraRadians;
-
-/// Full 360° ring for LED dimmer & ventilation: same 0 % origin as the open arc,
-/// but 100 % completes the full circle (no bottom gap).
-const double _fullRingStart = _openRingArcStart;
+/// Closed 360° ring for thermostat, LED dimmer, and ventilation.
+const double _fullRingStart = math.pi / 2 + (52 * math.pi / 180) / 2;
 const double _fullRingSweep = 2 * math.pi;
 
 /// Snap ring value to nearest 1 % step.
@@ -344,6 +334,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   String get _heroImageAssetPath {
+    if (widget.controlMode == DeviceDetailsControlMode.lightSceneValues) {
+      switch (_selectedSceneIndex.clamp(0, 2)) {
+        case 2:
+          return 'assets/images/light_scene_off.png';
+        case 1:
+          return 'assets/gray_image.png';
+        case 0:
+        default:
+          return widget.imageAssetPath;
+      }
+    }
     if (!_showOffHeroImage) return widget.imageAssetPath;
     return _offHeroImageAssetPath ?? widget.imageAssetPath;
   }
@@ -643,6 +644,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         Center(
           child: Image.asset(
             _heroImageAssetPath,
+            key: widget.controlMode == DeviceDetailsControlMode.lightSceneValues
+                ? ValueKey<int>(_selectedSceneIndex)
+                : null,
             height: 88.h,
             width: 88.w,
             fit: BoxFit.contain,
@@ -705,7 +709,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
-                color: sel ? null : Colors.white,
+
                 border: sel
                     ? null
                     : Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
@@ -1778,8 +1782,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
 
-    final bool isHeating = _heatingCoolingMode == 'heating';
-    final bool isCooling = _heatingCoolingMode == 'cooling';
+    // Pills only show selected while device is on; Off clears both visually.
+    final bool isHeating = _isOn && _heatingCoolingMode == 'heating';
+    final bool isCooling = _isOn && _heatingCoolingMode == 'cooling';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1826,7 +1831,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     width: 36.w,
                     height: 36.w,
                     decoration: BoxDecoration(
-                      color: pillBg,
+                      color: !_isOn
+                          ? const Color(0xFF38A4FE)
+                          : pillBg,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -1842,9 +1849,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       height: 13.h,
                       width: 13.w,
                       fit: BoxFit.cover,
-                      color: !_isOn
-                          ? const Color(0xFFD1D5DB)
-                          : Colors.black,
+                      color: !_isOn ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
@@ -1878,7 +1883,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 ),
                 SizedBox(width: 10.w),
                 _heatingCoolingPill(
-                  label: 'Colling',
+                  label: 'Cooling',
                   selected: isCooling,
                   onTap: () => setState(() {
                     _isOn = true;
@@ -1907,7 +1912,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        SizedBox(
+        Padding(
+        padding: EdgeInsets.only(top: 3.h),
+        child: SizedBox(
         height: 15.h,
         width: 15.w,
         child: Image.asset(
@@ -1915,7 +1922,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         fit: BoxFit.contain,
         ),
         ),
-        SizedBox(width: 12.w),
+        ),
+        //SizedBox(width: 6.w),
         Expanded(
         child: Align(
         alignment: Alignment.centerLeft,
@@ -2030,7 +2038,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      // Grey full track + rainbow progress along open arc (same geometry as LED / ventilation).
+                      // Grey full track + rainbow progress on closed 360° ring.
                       IgnorePointer(
                         child: CustomPaint(
                           size: sz,
@@ -2141,10 +2149,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset c = Offset(sz.width / 2, sz.height / 2);
                           final double radius =
                               sz.shortestSide / 2 - stroke / 2 - 2;
+                          final double p =
+                              _thermostatSetPercent.clamp(0.0, 1.0);
                           final double ang =
-                              _openRingArcStart +
-                              _openRingInteractiveSweep *
-                                  _thermostatSetPercent.clamp(0.0, 1.0);
+                              _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
@@ -2186,34 +2194,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Updates [_thermostatSetPercent] from a pan on the open ring (0 = 19 °C, 1 = 35 °C).
+  /// Updates [_thermostatSetPercent] from a pan on the closed ring (0 = 19 °C, 1 = 35 °C).
   void _thermostatUpdateFromLocal(Offset local, Size size) {
-    final Offset c = Offset(size.width / 2, size.height / 2);
-    final Offset d = local - c;
-    final double angle = math.atan2(d.dy, d.dx);
-
-    const double a0 = _openRingArcStart;
-    const double sweep = _openRingInteractiveSweep;
-    final Offset p = Offset(math.cos(angle), math.sin(angle));
-    double bestT = 0;
-    double bestD = 1e9;
-    for (int i = 0; i <= 40; i++) {
-      final double t = i / 40.0;
-      final double a = a0 + sweep * t;
-      final Offset q = Offset(math.cos(a), math.sin(a));
-      final double dist = (p - q).distance;
-      if (dist < bestD) {
-        bestD = dist;
-        bestT = t;
-      }
-    }
-    double next = bestT.clamp(0.0, 1.0);
-
-    final double prev = _thermostatSetPercent.clamp(0.0, 1.0);
-    if (prev > 0.85 && next < 0.15) next = 1.0;
-    if (prev < 0.15 && next > 0.85) next = 0.0;
-
-    setState(() => _thermostatSetPercent = next.clamp(0.0, 1.0));
+    setState(
+      () => _thermostatSetPercent = _fullRingPercentFromLocal(
+        local,
+        size,
+        _thermostatSetPercent,
+      ),
+    );
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -2261,11 +2250,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: List<Widget>.generate(options.length, (int i) {
               final opt = options[i];
+              final bool sel = _selectedFanLevel == opt.value;
               final option = _SceneValueOption(
                 label: opt.label,
-                selected: _selectedFanLevel == opt.value,
+                selected: sel,
                 child: _fanLevelOptionIcon(opt.value),
                 onTap: () => setState(() => _selectedFanLevel = opt.value),
+                selectedBackgroundOverride:
+                    opt.value == 0 ? (sel ? const Color(0xFF38A4FE) : null) : (sel ? Colors.white : null),
+                selectedBorderOverride:
+                    opt.value == 0 ? (sel ? const Color(0xFF38A4FE) : null) : (sel ? const Color(0xFF38A4FE) : null),
+                selectedBorderWidth: opt.value != 0 && sel ? 2.0 : 1.0,
               );
               if (i == 0) return option;
               return Padding(
@@ -2292,20 +2287,31 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       );
     }
 
-    final String assetPath = switch (level) {
-      1 => 'assets/images/speet1.png',
-      2 => 'assets/images/speet2.2.png',
-      3 => 'assets/images/speet2.png',
-      _ => 'assets/images/speet1.png',
-    };
-
-    return Image.asset(
-      assetPath,
-      width: 26.w,
-      height: 26.w,
-      fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) =>
-          Icon(Icons.toys_rounded, size: 22.sp, color: iconColor),
+    return SizedBox(
+      width: 28.w,
+      height: 28.w,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          //assets/images/Fun_level3.png
+          Image.asset("assets/images/speet1.png", height: 32.h, width: 32.w, fit: BoxFit.cover,),
+          Positioned(
+            right: -1,
+            bottom: -1,
+            child: Text(
+              '$level',
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w800,
+                color: iconColor,
+                height: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2417,15 +2423,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 15.h,
-                width: 15.w,
-                child: Image.asset(
-                  'assets/images/message_icon.png',
-                  fit: BoxFit.contain,
+              Padding(
+                padding: EdgeInsets.only(top: 3.h),
+                child: SizedBox(
+                  height: 15.h,
+                  width: 15.w,
+                  child: Image.asset(
+                    'assets/images/message_icon.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              //SizedBox(width: 12.w),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
@@ -2541,47 +2550,37 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _sceneValueIcon(int sceneSlot) {
-    final String path = widget.imageAssetPath;
+    const String onAsset = 'assets/light_image.png';
+    const String nightAsset = 'assets/gray_image.png';
+    const String offAsset = 'assets/black_image.png';
 
-    // No ClipOval here: the surrounding [_SceneValueOption] already provides the
-    // circular background. Clipping the icon to an oval was slicing the bubble
-    // artwork on every side; we just render the asset at its natural shape.
     switch (sceneSlot) {
       case 0:
         return Image.asset(
-          path,
+          onAsset,
           width: 28.w,
           height: 28.w,
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => Image.asset(
-            'assets/light_image.png',
-            height: 28.h,
+            widget.imageAssetPath,
             width: 28.w,
+            height: 28.w,
             fit: BoxFit.contain,
           ),
         );
       case 1:
-        return Opacity(
-          opacity: 0.42,
-          child: Image.asset(
-            path,
-            width: 28.w,
-            height: 28.w,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Image.asset(
-              'assets/gray_image.png',
-              height: 28.h,
-              width: 28.w,
-              fit: BoxFit.contain,
-            ),
-          ),
+        return Image.asset(
+          nightAsset,
+          width: 28.w,
+          height: 28.w,
+          fit: BoxFit.contain,
         );
       case 2:
       default:
         return Image.asset(
-          'assets/black_image.png',
-          height: 28.h,
+          offAsset,
           width: 28.w,
+          height: 28.w,
           fit: BoxFit.contain,
         );
     }
@@ -2595,14 +2594,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
     final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16.sp,
+      fontSize: 18.sp,
       fontWeight: FontWeight.w400,
       color: const Color(0xFF111827),
     );
 
     final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16.sp,
+      fontSize: 18.sp,
       fontWeight: FontWeight.w700,
       color: const Color(0xFF111827),
     );
@@ -2626,14 +2625,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         SizedBox(height: 10.h),
 
         Padding(
-          padding: EdgeInsets.only(left: 83.w, right:83.w),
+          padding: EdgeInsets.only(left: 85.w, right:85.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final double w = constraints.maxWidth;
               final double slatsBoxH = w * 1.0;
 
-              final double cardPadding = 8.h;
-              final double handleSize = 40.r;
+              final double cardPadding = 12.h;
+              final double handleSize = 38.r;
               final double handlePeek = 18.h;
 
               final double innerH = slatsBoxH - (cardPadding * 2);
@@ -2778,13 +2777,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 child: SliderTheme(
                   data: SliderThemeData(
                     trackHeight: 10.h,
-                    activeTrackColor: const Color(0xFF38A4FE),
-                    inactiveTrackColor: const Color(0xFFE5E7EB),
-                    thumbColor: const Color(0xFF15DFFE),
+                    trackShape: const _BlindAngleGradientTrackShape(),
+                    activeTrackColor: Colors.transparent,
+                    inactiveTrackColor: const Color(0xFFEFFFFF),
+                    thumbColor: Colors.transparent,
                     thumbShape: const _BlindAngleSliderThumbShape(
                       innerRadius: 10,
                       borderWidth: 5,
-                      fillColor: Color(0xFF38A4FE),
                       borderColor: Colors.white,
                     ),
                     overlayShape: RoundSliderOverlayShape(overlayRadius: 22.r),
@@ -3007,14 +3006,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
     final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16.sp,
+      fontSize: 18.sp,
       fontWeight: FontWeight.w400,
       color: const Color(0xFF111827),
     );
 
     final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 16.sp,
+      fontSize: 18.sp,
       fontWeight: FontWeight.w700,
       color: const Color(0xFF111827),
     );
@@ -3310,7 +3309,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           SizedBox(
             height: 52.h,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
+              padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -3318,7 +3317,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF111827),
                   ),
                 ),
@@ -4023,19 +4022,125 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 }
 
-/// Slider thumb with a fixed-[borderWidth] ring around the blue disk (design spec).
+/// Cyan → blue linear gradient on the active segment of the blind angle slider.
+class _BlindAngleGradientTrackShape extends SliderTrackShape
+    with BaseSliderTrackShape {
+  const _BlindAngleGradientTrackShape();
+
+  static const List<Color> _gradientColors = <Color>[
+    Color(0xFF15DFFE),
+    Color(0xFF38A4FE),
+  ];
+
+  @override
+  bool get isRounded => true;
+
+  static Paint _gradientPaint(Rect bounds, {required bool ltrActive}) {
+    return Paint()
+      ..shader = LinearGradient(
+        begin: ltrActive ? Alignment.centerLeft : Alignment.centerRight,
+        end: ltrActive ? Alignment.centerRight : Alignment.centerLeft,
+        colors: _gradientColors,
+      ).createShader(bounds);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
+    if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
+      return;
+    }
+
+    final Rect trackRect = getPreferredRect(
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
+    );
+    final double trackHeight = sliderTheme.trackHeight!;
+    final Radius trackRadius = Radius.circular(trackRect.height / 2);
+    const double additionalActiveTrackHeight = 0;
+    final Radius activeTrackRadius = Radius.circular(
+      (trackRect.height + additionalActiveTrackHeight) / 2,
+    );
+    final bool isLTR = textDirection == TextDirection.ltr;
+    final bool isRTL = textDirection == TextDirection.rtl;
+
+    final Paint inactivePaint = Paint()
+      ..color = sliderTheme.inactiveTrackColor ?? const Color(0xFFE5E7EB);
+
+    final bool leadingSegmentGradient = isLTR;
+    final bool trailingSegmentGradient = isRTL;
+
+    final bool drawInactiveTrack =
+        thumbCenter.dx < (trackRect.right - (trackHeight / 2));
+    if (drawInactiveTrack) {
+      final RRect trailing = RRect.fromLTRBR(
+        thumbCenter.dx - (trackHeight / 2),
+        isRTL
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        trackRect.right,
+        isRTL
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? trackRadius : activeTrackRadius,
+      );
+      context.canvas.drawRRect(
+        trailing,
+        trailingSegmentGradient
+            ? _gradientPaint(trailing.outerRect, ltrActive: false)
+            : inactivePaint,
+      );
+    }
+    final bool drawActiveTrack =
+        thumbCenter.dx > (trackRect.left + (trackHeight / 2));
+    if (drawActiveTrack) {
+      final RRect leading = RRect.fromLTRBR(
+        trackRect.left,
+        isLTR
+            ? trackRect.top - (additionalActiveTrackHeight / 2)
+            : trackRect.top,
+        thumbCenter.dx + (trackHeight / 2),
+        isLTR
+            ? trackRect.bottom + (additionalActiveTrackHeight / 2)
+            : trackRect.bottom,
+        isLTR ? activeTrackRadius : trackRadius,
+      );
+      context.canvas.drawRRect(
+        leading,
+        leadingSegmentGradient
+            ? _gradientPaint(leading.outerRect, ltrActive: true)
+            : inactivePaint,
+      );
+    }
+  }
+}
+
+/// Slider thumb: white ring + solid accent fill.
 class _BlindAngleSliderThumbShape extends SliderComponentShape {
   const _BlindAngleSliderThumbShape({
     required this.innerRadius,
     required this.borderWidth,
-    required this.fillColor,
     required this.borderColor,
   });
 
   final double innerRadius;
   final double borderWidth;
-  final Color fillColor;
   final Color borderColor;
+
+  static const Color _thumbFill = Color(0xFF38A4FE);
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -4060,7 +4165,7 @@ class _BlindAngleSliderThumbShape extends SliderComponentShape {
     final Canvas canvas = context.canvas;
     final double outerR = innerRadius + borderWidth;
     canvas.drawCircle(center, outerR, Paint()..color = borderColor);
-    canvas.drawCircle(center, innerRadius, Paint()..color = fillColor);
+    canvas.drawCircle(center, innerRadius, Paint()..color = _thumbFill);
   }
 }
 
@@ -4101,9 +4206,15 @@ class _BlindSlatsPainter extends CustomPainter {
     // width slightly wider
     final double topW = usableW * 1.02;
 
-    final double taperT = 0.74 + 0.16 * angle.clamp(0.0, 1.0);
+    // Trapezoid when angle is low; blend to nearly rectangular at 100% so sides
+    // stay almost flat instead of stepped zig-zag edges.
+    final double a = angle.clamp(0.0, 1.0);
+    final double baseTaper = 0.74 + 0.16 * a;
+    final double flatBlend = a * a;
+    final double taperT =
+        (baseTaper * (1 - flatBlend) + 1.0 * flatBlend).clamp(0.66, 1.0);
 
-    final double botW = topW * taperT.clamp(0.66, 0.92);
+    final double botW = topW * taperT;
 
     final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
       0,
@@ -4506,15 +4617,32 @@ class _SceneValueOption extends StatelessWidget {
     required this.selected,
     required this.child,
     required this.onTap,
+    this.selectedBackgroundOverride,
+    this.selectedBorderOverride,
+    this.selectedBorderWidth = 1.0,
   });
 
   final String label;
   final bool selected;
   final Widget child;
   final VoidCallback onTap;
+  /// When non-null and [selected], replaces default grey selected fill.
+  final Color? selectedBackgroundOverride;
+  /// When non-null and [selected], replaces default selected border color.
+  final Color? selectedBorderOverride;
+  /// Border width when [selected] (default matches prior 1.0).
+  final double selectedBorderWidth;
 
   @override
   Widget build(BuildContext context) {
+    final Color fillColor = selected
+        ? (selectedBackgroundOverride ?? const Color(0xFFE1E1E1))
+        : Colors.white;
+    final Color borderColor = selected
+        ? (selectedBorderOverride ?? const Color(0xFFD1D5DB))
+        : const Color(0xFFE5E7EB);
+    final double borderW = selected ? selectedBorderWidth : 1.0;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -4527,13 +4655,11 @@ class _SceneValueOption extends StatelessWidget {
               width: 48.w,
               height: 48.h,
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFFE1E1E1) : Colors.white,
+                color: fillColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected
-                      ? const Color(0xFFD1D5DB)
-                      : const Color(0xFFE5E7EB),
-                  width: 1,
+                  color: borderColor,
+                  width: borderW,
                 ),
                 boxShadow: selected
                     ? null
@@ -4965,9 +5091,8 @@ class _ThermostatDottedDividerPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-/// Grey full ring + blue→purple→pink **progress** on the open arc (same
-/// geometry as LED / ventilation). Gradient colours unchanged; [percent] is
-/// [_thermostatSetPercent] (0 = 19 °C, 1 = 35 °C).
+/// Grey full ring + blue→purple→pink progress on a closed 360° path.
+/// [percent] is [_thermostatSetPercent] (0 = 19 °C, 1 = 35 °C).
 class _ThermostatRingPainter extends CustomPainter {
   const _ThermostatRingPainter({
     required this.strokeWidth,
@@ -4983,8 +5108,7 @@ class _ThermostatRingPainter extends CustomPainter {
     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
-    const double startAngle = _openRingArcStart;
-    const double arcSweep = _openRingInteractiveSweep;
+    const double startAngle = _fullRingStart;
 
     final Paint trackPaint = Paint()
       ..color = const Color(0xFFE1E1E1)
@@ -4992,14 +5116,16 @@ class _ThermostatRingPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    canvas.drawArc(arcRect, 0, 2 * math.pi, false, trackPaint);
+    canvas.drawArc(arcRect, 0, _fullRingSweep, false, trackPaint);
 
     final double clamped = percent.clamp(0.0, 1.0);
     if (clamped <= 0.001) {
       return;
     }
 
-    final double sweepAngle = arcSweep * clamped;
+    final double sweepAngle = clamped >= 0.999
+        ? _fullRingSweep
+        : _fullRingSweep * clamped;
 
     const SweepGradient gradient = SweepGradient(
       colors: <Color>[
