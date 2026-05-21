@@ -19,6 +19,91 @@ const double _fullRingSweep = 2 * math.pi;
 double _snapRingPercentOneStep(double value) =>
     (value.clamp(0.0, 1.0) * 100).round() / 100.0;
 
+/// LED dimmer / ventilation: grey inactive arc + gradient progress on a closed ring.
+/// Inactive segment uses butt caps so the progress start can get a clean solid cap
+/// (avoids the soft gradient cut where the full grey track used to sit underneath).
+void _paintGradientFullRing(
+  Canvas canvas,
+  Size size, {
+  required double percent,
+  required double strokeWidth,
+  required List<Color> gradientColors,
+  List<double>? gradientStops,
+}) {
+  final Offset center = Offset(size.width / 2, size.height / 2);
+  final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
+  final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
+  const double startAngle = _fullRingStart;
+
+  final double clamped = percent.clamp(0.0, 1.0);
+  final double sweepAngle = clamped >= 0.999
+      ? _fullRingSweep
+      : _fullRingSweep * clamped;
+
+  if (clamped <= 0.001) {
+    final Paint emptyTrack = Paint()
+      ..color = const Color(0xFFE1E1E1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(arcRect, startAngle, _fullRingSweep, false, emptyTrack);
+    return;
+  }
+
+  final Paint inactivePaint = Paint()
+    ..color = const Color(0xFFE1E1E1)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeWidth
+    ..strokeCap = StrokeCap.butt;
+
+  final double inactiveSweep = _fullRingSweep - sweepAngle;
+  if (inactiveSweep > 0.002) {
+    canvas.drawArc(
+      arcRect,
+      startAngle + sweepAngle,
+      inactiveSweep,
+      false,
+      inactivePaint,
+    );
+  }
+
+  final List<double> stops = gradientStops ??
+      List<double>.generate(
+        gradientColors.length,
+        (int i) => i / (gradientColors.length - 1),
+      );
+
+  final SweepGradient gradient = SweepGradient(
+    center: Alignment.center,
+    startAngle: startAngle,
+    endAngle: startAngle + _fullRingSweep,
+    colors: gradientColors,
+    stops: stops,
+    tileMode: TileMode.clamp,
+  );
+
+  final Paint progressPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeWidth
+    ..strokeCap = StrokeCap.butt
+    ..shader = gradient.createShader(arcRect);
+
+  canvas.drawArc(arcRect, startAngle, sweepAngle, false, progressPaint);
+
+  final Color startColor = gradientColors.first;
+  final Offset arcStart = Offset(
+    center.dx + midRadius * math.cos(startAngle),
+    center.dy + midRadius * math.sin(startAngle),
+  );
+  canvas.drawCircle(
+    arcStart,
+    strokeWidth / 2,
+    Paint()
+      ..color = startColor
+      ..isAntiAlias = true,
+  );
+}
+
 /// Maps a pan position on a full ring to [0, 1] with 1 % steps.
 double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
   final Offset c = Offset(size.width / 2, size.height / 2);
@@ -38,6 +123,153 @@ double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
     next = 0.0;
   }
   return _snapRingPercentOneStep(next);
+}
+
+/// Hollow selector ring (RGBW wheel / tunable-white disk): press glow must differ from the idle blue stroke.
+Widget _hollowRingSelectorThumb({
+  required bool pressed,
+  required double diameter,
+  required double strokeWidth,
+  Color idleStrokeColor = const Color(0xFF6488EA),
+  required Color pressGlowColor,
+}) {
+  const double maxGlowPad = 20;
+  final double outer = diameter + maxGlowPad * 2;
+  return SizedBox(
+    width: outer,
+    height: outer,
+    child: Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.82),
+              boxShadow: [
+                BoxShadow(
+                  color: pressGlowColor.withValues(alpha: 0.62),
+                  blurRadius: 18.r,
+                  spreadRadius: 6.r,
+                ),
+                BoxShadow(
+                  color: pressGlowColor.withValues(alpha: 0.38),
+                  blurRadius: 30.r,
+                  spreadRadius: 10.r,
+                ),
+              ],
+            ),
+          ),
+        Container(
+          width: diameter,
+          height: diameter,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: pressed ? 0.92 : 0.55),
+            border: Border.all(
+              color: pressed ? pressGlowColor : idleStrokeColor,
+              width: pressed ? strokeWidth + 1.5 : strokeWidth,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Ring / dial thumb with a soft white base and a stronger colored halo while pressed.
+Widget _ringControlThumb({
+  required Widget thumb,
+  required bool pressed,
+  required double thumbDiameter,
+  Color? haloColor,
+  double haloPadding = 14,
+}) {
+  final Color glow = haloColor ?? const Color(0xFF38A4FE);
+  final double pad = haloPadding.r;
+  final double whiteBase = thumbDiameter + 10.r;
+  final double outer = thumbDiameter + pad * 2;
+  return SizedBox(
+    width: outer,
+    height: outer,
+    child: Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: whiteBase,
+          height: whiteBase,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 10.r,
+                offset: Offset(0, 3.h),
+              ),
+            ],
+          ),
+        ),
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: glow.withValues(alpha: 0.36),
+              boxShadow: [
+                BoxShadow(
+                  color: glow.withValues(alpha: 0.55),
+                  blurRadius: 20.r,
+                  spreadRadius: 5.r,
+                ),
+                BoxShadow(
+                  color: glow.withValues(alpha: 0.28),
+                  blurRadius: 32.r,
+                  spreadRadius: 8.r,
+                ),
+              ],
+            ),
+          ),
+        thumb,
+      ],
+    ),
+  );
+}
+
+void _paintSoftPressHalo(
+  Canvas canvas,
+  Offset center, {
+  required double innerRadius,
+  required Color color,
+  required double pressT,
+}) {
+  if (pressT <= 0.001) {
+    return;
+  }
+  final double outerR = innerRadius + 22.r;
+  final double midR = innerRadius + 14.r;
+  canvas.drawCircle(
+    center,
+    outerR,
+    Paint()
+      ..color = color.withValues(alpha: 0.22 * pressT)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 14.r),
+  );
+  canvas.drawCircle(
+    center,
+    midR,
+    Paint()..color = color.withValues(alpha: 0.42 * pressT),
+  );
+  canvas.drawCircle(
+    center,
+    innerRadius + 8.r,
+    Paint()..color = Colors.white.withValues(alpha: 0.85 * pressT),
+  );
 }
 
 /// Controls which primary region appears below the hero (stats stay the same).
@@ -231,6 +463,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// While true, page scroll is disabled on tunable-white temperature disk drags.
   bool _tunableWhiteDiskDragging = false;
 
+  bool _ledDimmerRingDragging = false;
+  bool _ventilationRingDragging = false;
+  bool _thermostatRingDragging = false;
+  bool _tunableWhiteSliderDragging = false;
+  bool _rgbwSliderDragging = false;
+
   /// LED dimmer ring: 0 = min, 1 = 100%.
   double _ledDimmerPercent = 0.0;
 
@@ -385,7 +623,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         (widget.controlMode == DeviceDetailsControlMode.rgbwPicker &&
             _rgbwWheelDragging) ||
         (widget.controlMode == DeviceDetailsControlMode.tunableWhite &&
-            _tunableWhiteDiskDragging);
+            (_tunableWhiteDiskDragging || _tunableWhiteSliderDragging)) ||
+        (widget.controlMode == DeviceDetailsControlMode.rgbwPicker &&
+            _rgbwSliderDragging) ||
+        (widget.controlMode == DeviceDetailsControlMode.ledDimmer &&
+            _ledDimmerRingDragging) ||
+        (widget.controlMode == DeviceDetailsControlMode.ventilation &&
+            _ventilationRingDragging) ||
+        (widget.controlMode == DeviceDetailsControlMode.thermostatRing &&
+            _thermostatRingDragging);
 
     final ScrollPhysics scrollPhysics = disableBodyScroll
         ? const NeverScrollableScrollPhysics()
@@ -410,8 +656,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   widget.controlMode == DeviceDetailsControlMode.awningControl
               ? 6.h
               : isLightSceneValues
-              ? 10.h
-              : 18.h,
+              ? 8.h
+              : 10.h,
         ),
         if (widget.controlMode ==
             DeviceDetailsControlMode.lightSceneValues) ...[
@@ -429,7 +675,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             widget.controlMode !=
                 DeviceDetailsControlMode.multiValueSwitch) ...[
           if (widget.deviceTitle == 'Motion Sensor') ...[
-            SizedBox(height: 14.h),
+            SizedBox(height: 8.h),
             Text(
               'Motion Cleared',
               textAlign: TextAlign.center,
@@ -440,11 +686,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 color: const Color(0xFF111827),
               ),
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 8.h),
           ],
           if (widget.deviceTitle != 'Motion Sensor') ...[
             _buildOnOffRow(),
-            SizedBox(height: 28.h),
+            SizedBox(height: 14.h),
           ],
           _buildStandardDeviceCommentSection(),
         ],
@@ -577,7 +823,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Model / device id — under title in hero for [standard] / [lightSceneValues] / [fanLevel] / [heatingCooling], else under top header.
   Widget _buildSwcBelowHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 10.h),
+      padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 4.h),
       child: Text(
         'SWC 1326 39',
         textAlign: TextAlign.center,
@@ -661,14 +907,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         if (widget.controlMode == DeviceDetailsControlMode.standard ||
             widget.controlMode ==
                 DeviceDetailsControlMode.lightSceneValues) ...[
-          SizedBox(height: 14.h),
+          SizedBox(height: 8.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: _buildTitleEditRow(),
           ),
           _buildSwcBelowHeader(),
         ],
-        SizedBox(height: 10.h),
+        SizedBox(height: 4.h),
         _buildHeroIdentityStats(
           onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
@@ -771,7 +1017,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 22.h),
+        SizedBox(height: 14.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: Column(
@@ -955,7 +1201,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 22.h),
+        SizedBox(height: 14.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: Column(
@@ -1003,7 +1249,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         //     color: const Color(0xFF111827),
         //   ),
         // ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Center(
           child: SizedBox(
             width: ringSize,
@@ -1016,10 +1262,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 );
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onPanDown: (d) =>
-                      _ledDimmerUpdateFromLocal(d.localPosition, sz),
+                  onPanDown: (d) {
+                    setState(() => _ledDimmerRingDragging = true);
+                    _ledDimmerUpdateFromLocal(d.localPosition, sz);
+                  },
                   onPanUpdate: (d) =>
                       _ledDimmerUpdateFromLocal(d.localPosition, sz),
+                  onPanEnd: (_) =>
+                      setState(() => _ledDimmerRingDragging = false),
+                  onPanCancel: () =>
+                      setState(() => _ledDimmerRingDragging = false),
                   child: Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
@@ -1055,31 +1307,35 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 44.r;
+                          const double haloPad = 14;
+                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outer / 2,
+                            top: thumb.dy - outer / 2,
                             child: IgnorePointer(
-                              child: Container(
-                                width: thumbSize,
-                                height: thumbSize,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF00E52A),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 5,
-                                    color: Colors.white.withOpacity(0.95),
+                              child: _ringControlThumb(
+                                pressed: _ledDimmerRingDragging,
+                                thumbDiameter: thumbSize,
+                                haloColor: const Color(0xFF00E52A),
+                                haloPadding: haloPad,
+                                thumb: Container(
+                                  width: thumbSize,
+                                  height: thumbSize,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00E52A),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      width: 5,
+                                      color: Colors.white.withOpacity(0.95),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.14),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.white.withOpacity(0.85),
-                                      blurRadius: 10,
-                                    ),
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.14),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
                                 ),
                               ),
                             ),
@@ -1141,7 +1397,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(height: 16.h),
+        SizedBox(height: 6.h),
         _buildHeroStatsRow(onTimeTop: onTimeTop),
       ],
     );
@@ -1160,7 +1416,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Center(
           child: SizedBox(
             width: ringSize,
@@ -1173,10 +1429,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 );
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onPanDown: (d) =>
-                      _ventilationUpdateFromLocal(d.localPosition, sz),
+                  onPanDown: (d) {
+                    setState(() => _ventilationRingDragging = true);
+                    _ventilationUpdateFromLocal(d.localPosition, sz);
+                  },
                   onPanUpdate: (d) =>
                       _ventilationUpdateFromLocal(d.localPosition, sz),
+                  onPanEnd: (_) =>
+                      setState(() => _ventilationRingDragging = false),
+                  onPanCancel: () =>
+                      setState(() => _ventilationRingDragging = false),
                   child: Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
@@ -1221,27 +1483,35 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
+                          const double haloPad = 14;
+                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outer / 2,
+                            top: thumb.dy - outer / 2,
                             child: IgnorePointer(
-                              child: Container(
-                                width: thumbSize,
-                                height: thumbSize,
-                                decoration: BoxDecoration(
-                                  color: thumbBlue,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 3,
-                                    color: Colors.white,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.12),
-                                      blurRadius: 10.r,
-                                      offset: const Offset(0, 4),
+                              child: _ringControlThumb(
+                                pressed: _ventilationRingDragging,
+                                thumbDiameter: thumbSize,
+                                haloColor: thumbBlue,
+                                haloPadding: haloPad,
+                                thumb: Container(
+                                  width: thumbSize,
+                                  height: thumbSize,
+                                  decoration: BoxDecoration(
+                                    color: thumbBlue,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      width: 3,
+                                      color: Colors.white,
                                     ),
-                                  ],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.12),
+                                        blurRadius: 10.r,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -1289,7 +1559,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         //   ),
         // ),
         _buildHeroIdentityStats(),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Center(
           child: SizedBox(
             width: diskSize,
@@ -1388,32 +1658,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         builder: (context) {
                           final double x = _tunableWhiteDotDx * sz.width;
                           final double y = _tunableWhiteDotDy * sz.height;
-                          final double ringSize = 58.r;
-                          final double ringStroke = 7.r;
+                          final double ringSize = 44.r;
+                          final double ringStroke = 4.r;
                           final double labelGap = 6.h;
                           final double labelHeight = 16.h;
+                          const double maxGlowPad = 20;
+                          final double outer = ringSize + maxGlowPad * 2;
                           // Anchor the ring's center on (x, y); place the label
                           // just below the ring.
                           return Positioned(
-                            left: x - ringSize / 2,
-                            top: y - ringSize / 2,
-                            width: ringSize,
-                            height: ringSize + labelGap + labelHeight,
+                            left: x - outer / 2,
+                            top: y - ringSize / 2 - maxGlowPad,
                             child: IgnorePointer(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(
-                                    width: ringSize,
-                                    height: ringSize,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.transparent,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: ringStroke,
-                                      ),
-                                    ),
+                                  _hollowRingSelectorThumb(
+                                    pressed: _tunableWhiteDiskDragging,
+                                    diameter: ringSize,
+                                    strokeWidth: ringStroke,
+                                    pressGlowColor: accent,
                                   ),
                                   SizedBox(height: labelGap),
                                   SizedBox(
@@ -1510,19 +1774,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           activeTrackColor: accent,
                           inactiveTrackColor: dialBorder,
                           thumbColor: accent,
-                          overlayColor: accent.withOpacity(0.18),
+                          overlayColor: accent.withValues(alpha: 0.38),
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 28.r,
                           ),
                           thumbShape: _TunableWhiteThumbShape(
                             radius: thumbSize / 2,
                             fillColor: accent,
+                            dragging: _tunableWhiteSliderDragging,
                           ),
                         ),
                         child: Slider(
                           value: _tunableWhiteIntensity.clamp(0.0, 1.0),
                           min: 0,
                           max: 1,
+                          onChangeStart: (_) => setState(
+                            () => _tunableWhiteSliderDragging = true,
+                          ),
+                          onChangeEnd: (_) => setState(
+                            () => _tunableWhiteSliderDragging = false,
+                          ),
                           onChanged: (v) => setState(
                             () => _tunableWhiteIntensity = v.clamp(0.0, 1.0),
                           ),
@@ -1586,7 +1857,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 10.h),
+        SizedBox(height: 6.h),
         Center(
           child: SizedBox(
             width: wheelSize,
@@ -1634,28 +1905,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double rad = _rgbwHue * math.pi / 180;
                           final Offset thumb =
                               c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
-                          final double thumbD = 38.r;
+                          final double thumbD = 44.r;
+                          const double maxGlowPad = 20;
+                          final double outer = thumbD + maxGlowPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbD / 2,
-                            top: thumb.dy - thumbD / 2,
+                            left: thumb.dx - outer / 2,
+                            top: thumb.dy - outer / 2,
                             child: IgnorePointer(
-                              child: Container(
-                                width: thumbD,
-                                height: thumbD,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 3,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.0),
-                                      blurRadius: 6.r,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
+                              child: _hollowRingSelectorThumb(
+                                pressed: _rgbwWheelDragging,
+                                diameter: thumbD,
+                                strokeWidth: 5,
+                                pressGlowColor: const Color(0xFFE91EAC),
                               ),
                             ),
                           );
@@ -1727,9 +1988,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           thumbShape: _RgbwMagentaThumbShape(
                             enabledOuterRadius: 18.r,
                             enabledInnerRadius: 14.r,
+                            dragging: _rgbwSliderDragging,
                           ),
+                          overlayColor: const Color(0xFFE91EAC).withValues(alpha: 0.38),
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 28.r,
                           ),
                           activeTrackColor: const Color(0xFFE91EAC),
                           inactiveTrackColor: const Color(0xFFFFFFFF),
@@ -1744,6 +2007,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           max: 1,
                           activeColor: const Color(0xFFE91EAC),
                           inactiveColor: const Color(0xFFFFFFFF),
+                          onChangeStart: (_) =>
+                              setState(() => _rgbwSliderDragging = true),
+                          onChangeEnd: (_) =>
+                              setState(() => _rgbwSliderDragging = false),
                           onChanged: (v) =>
                               setState(() => _rgbwIntensity = v.clamp(0.0, 1.0)),
                         ),
@@ -1781,6 +2048,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildHeatingCoolingHeroContent() {
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
+    const Color offSelectedBg = Color(0xFFC7CCD7);
 
     // Pills only show selected while device is on; Off clears both visually.
     final bool isHeating = _isOn && _heatingCoolingMode == 'heating';
@@ -1803,17 +2071,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: _buildTitleEditRow(),
         ),
         _buildSwcBelowHeader(),
-        SizedBox(height: 10.h),
+        SizedBox(height: 4.h),
         _buildHeroIdentityStats(
           onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: FittedBox(
@@ -1831,9 +2099,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     width: 36.w,
                     height: 36.w,
                     decoration: BoxDecoration(
-                      color: !_isOn
-                          ? const Color(0xFF38A4FE)
-                          : pillBg,
+                      color: !_isOn ? offSelectedBg : pillBg,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -1849,7 +2115,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       height: 13.h,
                       width: 13.w,
                       fit: BoxFit.cover,
-                      color: !_isOn ? Colors.white : Colors.black,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -1905,7 +2171,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 10.h),
         Center(
         child: Padding(
         padding: EdgeInsets.only(left:  85.w, right: 0),
@@ -2015,7 +2281,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
 
         // ── Thermostat ring ──────────────────────────────────────────────────
         Center(
@@ -2030,10 +2296,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 );
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onPanDown: (d) =>
-                      _thermostatUpdateFromLocal(d.localPosition, sz),
+                  onPanDown: (d) {
+                    setState(() => _thermostatRingDragging = true);
+                    _thermostatUpdateFromLocal(d.localPosition, sz);
+                  },
                   onPanUpdate: (d) =>
                       _thermostatUpdateFromLocal(d.localPosition, sz),
+                  onPanEnd: (_) =>
+                      setState(() => _thermostatRingDragging = false),
+                  onPanCancel: () =>
+                      setState(() => _thermostatRingDragging = false),
                   child: Stack(
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
@@ -2156,27 +2428,35 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
+                          const double haloPad = 14;
+                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outer / 2,
+                            top: thumb.dy - outer / 2,
                             child: IgnorePointer(
-                              child: Container(
-                                width: thumbSize,
-                                height: thumbSize,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFF007C),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    width: 5,
-                                    color: Colors.white,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.18),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                              child: _ringControlThumb(
+                                pressed: _thermostatRingDragging,
+                                thumbDiameter: thumbSize,
+                                haloColor: const Color(0xFFFF007C),
+                                haloPadding: haloPad,
+                                thumb: Container(
+                                  width: thumbSize,
+                                  height: thumbSize,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF007C),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      width: 5,
+                                      color: Colors.white,
                                     ),
-                                  ],
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.18),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -2233,17 +2513,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             ),
           ),
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: _buildTitleEditRow(),
         ),
         _buildSwcBelowHeader(),
-        SizedBox(height: 10.h),
+        SizedBox(height: 4.h),
         _buildHeroIdentityStats(
           onTimeTop: widget.deviceTitle == 'Motion Sensor' ? '12:45' : '12:57',
         ),
-        SizedBox(height: 14.h),
+        SizedBox(height: 8.h),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Row(
@@ -2256,10 +2536,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 selected: sel,
                 child: _fanLevelOptionIcon(opt.value),
                 onTap: () => setState(() => _selectedFanLevel = opt.value),
-                selectedBackgroundOverride:
-                    opt.value == 0 ? (sel ? const Color(0xFF38A4FE) : null) : (sel ? Colors.white : null),
-                selectedBorderOverride:
-                    opt.value == 0 ? (sel ? const Color(0xFF38A4FE) : null) : (sel ? const Color(0xFF38A4FE) : null),
+                selectedBackgroundOverride: opt.value == 0
+                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    : (sel ? Colors.white : null),
+                selectedBorderOverride: opt.value == 0
+                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    : (sel ? const Color(0xFF38A4FE) : null),
                 selectedBorderWidth: opt.value != 0 && sel ? 2.0 : 1.0,
               );
               if (i == 0) return option;
@@ -2283,7 +2565,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         height: 13.h,
         width: 13.w,
         fit: BoxFit.cover,
-        color: _selectedFanLevel == 0 ? Colors.white : Colors.black,
+        color: Colors.black,
       );
     }
 
@@ -2611,7 +2893,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       children: [
         _buildHeroIdentityStats(),
 
-        SizedBox(height: 12.h),
+        SizedBox(height: 8.h),
 
         Text.rich(
           TextSpan(
@@ -2636,6 +2918,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               final double handlePeek = 18.h;
 
               final double innerH = slatsBoxH - (cardPadding * 2);
+              final double innerCornerR = math.max(0.0, 26.r - cardPadding);
 
               // Button position will now follow blind level
               final double handleTop =
@@ -2690,12 +2973,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                 alignment: Alignment.center,
                                 children: [
                                   Positioned.fill(
-                                    child: CustomPaint(
-                                      painter: _BlindSlatsPainter(
-                                        level: _blindLevel,
-                                        angle: _blindAngle,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(
+                                        innerCornerR,
                                       ),
-                                      child: const SizedBox.expand(),
+                                      child: CustomPaint(
+                                        painter: _BlindSlatsPainter(
+                                          level: _blindLevel,
+                                          angle: _blindAngle,
+                                          cornerRadius: innerCornerR,
+                                        ),
+                                        child: const SizedBox.expand(),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -3022,7 +3311,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildHeroIdentityStats(),
-        SizedBox(height: 12.h),
+        SizedBox(height: 8.h),
         Text.rich(
           TextSpan(
             children: [
@@ -4170,10 +4459,15 @@ class _BlindAngleSliderThumbShape extends SliderComponentShape {
 }
 
 class _BlindSlatsPainter extends CustomPainter {
-  const _BlindSlatsPainter({required this.level, required this.angle});
+  const _BlindSlatsPainter({
+    required this.level,
+    required this.angle,
+    this.cornerRadius = 0,
+  });
 
   final double level;
   final double angle;
+  final double cornerRadius;
 
   static const int _slatCount = 11;
 
@@ -4183,11 +4477,15 @@ class _BlindSlatsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Rect bounds = Rect.fromLTWH(0, 0, size.width, size.height);
+    final RRect clipRrect = RRect.fromRectAndRadius(
+      bounds,
+      Radius.circular(cornerRadius.clamp(0.0, math.min(size.width, size.height) / 2)),
+    );
 
-    canvas.drawRect(bounds, Paint()..color = Colors.white);
+    canvas.drawRRect(clipRrect, Paint()..color = Colors.white);
 
     canvas.save();
-    canvas.clipRect(bounds);
+    canvas.clipRRect(clipRrect);
 
     final double horizontalInset = size.width * 0.015;
     final double cx = size.width / 2;
@@ -4287,7 +4585,9 @@ class _BlindSlatsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BlindSlatsPainter oldDelegate) {
-    return oldDelegate.level != level || oldDelegate.angle != angle;
+    return oldDelegate.level != level ||
+        oldDelegate.angle != angle ||
+        oldDelegate.cornerRadius != cornerRadius;
   }
 }
 
@@ -4911,12 +5211,14 @@ class _RgbwMagentaThumbShape extends SliderComponentShape {
   _RgbwMagentaThumbShape({
     required this.enabledOuterRadius,
     required this.enabledInnerRadius,
+    this.dragging = false,
     this.disabledOuterRadius,
     this.disabledInnerRadius,
   });
 
   final double enabledOuterRadius;
   final double enabledInnerRadius;
+  final bool dragging;
   final double? disabledOuterRadius;
   final double? disabledInnerRadius;
 
@@ -4952,6 +5254,17 @@ class _RgbwMagentaThumbShape extends SliderComponentShape {
       end: enabledInnerRadius,
     ).evaluate(enableAnimation);
     final Canvas canvas = context.canvas;
+    final double pressT = math.max(
+      activationAnimation.value.clamp(0.0, 1.0),
+      dragging ? 1.0 : 0.0,
+    );
+    _paintSoftPressHalo(
+      canvas,
+      center,
+      innerRadius: inner,
+      color: const Color(0xFFE91EAC),
+      pressT: pressT,
+    );
     canvas.drawCircle(center, outer, Paint()..color = Colors.white);
     canvas.drawCircle(center, inner, Paint()..color = const Color(0xFFE91EAC));
   }
@@ -4962,10 +5275,12 @@ class _TunableWhiteThumbShape extends SliderComponentShape {
   const _TunableWhiteThumbShape({
     required this.radius,
     required this.fillColor,
+    this.dragging = false,
   });
 
   final double radius;
   final Color fillColor;
+  final bool dragging;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -4989,6 +5304,17 @@ class _TunableWhiteThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
+    final double pressT = math.max(
+      activationAnimation.value.clamp(0.0, 1.0),
+      dragging ? 1.0 : 0.0,
+    );
+    _paintSoftPressHalo(
+      canvas,
+      center,
+      innerRadius: radius,
+      color: fillColor,
+      pressT: pressT,
+    );
 
     // No Canvas.drawShadow: it can render a cross-shaped artifact on circular
     // thumb paths on some Skia builds. Keep a clean fill + ring only.
@@ -5012,51 +5338,20 @@ class _LedDimmerRingPainter extends CustomPainter {
   final double percent;
   final double strokeWidth;
 
+  static const List<Color> _gradientColors = <Color>[
+    Color(0xFF00D1FF),
+    Color(0xFF00E52A),
+  ];
+
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = Offset(size.width / 2, size.height / 2);
-
-    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
-
-    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
-
-    const double startAngle = _fullRingStart;
-
-    final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE1E1E1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(arcRect, 0, _fullRingSweep, false, trackPaint);
-
-    final double clamped = percent.clamp(0.0, 1.0);
-
-    if (clamped <= 0.001) {
-      return;
-    }
-
-    final double sweepAngle = clamped >= 0.999
-        ? _fullRingSweep
-        : _fullRingSweep * clamped;
-
-    final SweepGradient gradient = SweepGradient(
-      colors: const <Color>[
-        Color(0xFF00D1FF),
-        Color(0xFF00E52A),
-      ],
-      stops: const <double>[0.0, 1.0],
-      transform: GradientRotation(startAngle),
-      tileMode: TileMode.clamp,
+    _paintGradientFullRing(
+      canvas,
+      size,
+      percent: percent,
+      strokeWidth: strokeWidth,
+      gradientColors: _gradientColors,
     );
-
-    final Paint fgPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..shader = gradient.createShader(arcRect);
-
-    canvas.drawArc(arcRect, startAngle, sweepAngle, false, fgPaint);
   }
 
   @override
@@ -5160,48 +5455,20 @@ class _VentilationRingPainter extends CustomPainter {
   final double percent;
   final double strokeWidth;
 
+  static const List<Color> _gradientColors = <Color>[
+    Color(0xFF38A4FE),
+    Color(0xFF15DFFE),
+  ];
+
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
-    final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
-
-    const double startAngle = _fullRingStart;
-
-    final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE1E1E1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(arcRect, 0, _fullRingSweep, false, trackPaint);
-
-    final double clamped = percent.clamp(0.0, 1.0);
-    if (clamped <= 0.001) {
-      return;
-    }
-
-    final double sweepAngle = clamped >= 0.999
-        ? _fullRingSweep
-        : _fullRingSweep * clamped;
-
-    final SweepGradient gradient = SweepGradient(
-      colors: const <Color>[
-        Color(0xFF38A4FE),
-        Color(0xFF15DFFE),
-      ],
-      stops: const <double>[0.0, 1.0],
-      transform: GradientRotation(startAngle),
-      tileMode: TileMode.clamp,
+    _paintGradientFullRing(
+      canvas,
+      size,
+      percent: percent,
+      strokeWidth: strokeWidth,
+      gradientColors: _gradientColors,
     );
-
-    final Paint fgPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..shader = gradient.createShader(arcRect);
-
-    canvas.drawArc(arcRect, startAngle, sweepAngle, false, fgPaint);
   }
 
   @override
