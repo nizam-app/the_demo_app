@@ -553,7 +553,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       case DeviceDetailsControlMode.fanLevel:
         return 'assets/images/fan_level_off.png';
       case DeviceDetailsControlMode.lightSceneValues:
-        return 'assets/images/light_scene_off.png';
+        return 'assets/images/light-scenc_off.png';
       case DeviceDetailsControlMode.standard:
         final String path = widget.imageAssetPath.toLowerCase();
         final String title = widget.deviceTitle.toLowerCase();
@@ -575,7 +575,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     if (widget.controlMode == DeviceDetailsControlMode.lightSceneValues) {
       switch (_selectedSceneIndex.clamp(0, 2)) {
         case 2:
-          return 'assets/images/light_scene_off.png';
+          return 'assets/images/light-scenc_off.png';
         case 1:
           return 'assets/gray_image.png';
         case 0:
