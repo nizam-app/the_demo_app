@@ -1654,6 +1654,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       ),
                       // White hollow ring + "Daylight" label. Sits exactly at
                       // the user's tap point on the disk (clamped to the dial).
+
+                      //new update 
+                      
                       Builder(
                         builder: (context) {
                           final double x = _tunableWhiteDotDx * sz.width;
