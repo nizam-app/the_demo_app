@@ -21,4 +21,6 @@ class ApiConstants {
 
   // Categories
   static const String myCategories = "/categories";
+
+  static const String adminCategories = "/admin/categories";
 }
