@@ -50,45 +50,61 @@ void _paintGradientFullRing(
     return;
   }
 
+  // Close the sweep so 360° rings do not show a hard color seam.
+  final List<Color> ringColors = <Color>[
+    ...gradientColors,
+    gradientColors.first,
+  ];
+  final List<double> stops = gradientStops != null
+      ? <double>[...gradientStops, 1.0]
+      : List<double>.generate(
+          ringColors.length,
+          (int i) => i / (ringColors.length - 1),
+        );
+
+  final SweepGradient gradient = SweepGradient(
+    colors: ringColors,
+    stops: stops,
+    transform: GradientRotation(startAngle),
+    tileMode: TileMode.clamp,
+  );
+
+  final Paint shaderPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = strokeWidth
+    ..shader = gradient.createShader(arcRect);
+
+  if (clamped >= 0.999) {
+    shaderPaint.strokeCap = StrokeCap.round;
+    canvas.drawArc(arcRect, startAngle, _fullRingSweep, false, shaderPaint);
+    return;
+  }
+
+  final double inactiveSweep = _fullRingSweep - sweepAngle;
+
+  // When almost full, skip the tiny grey gap that caused a visible seam.
+  if (inactiveSweep <= 0.015) {
+    shaderPaint.strokeCap = StrokeCap.round;
+    canvas.drawArc(arcRect, startAngle, _fullRingSweep, false, shaderPaint);
+    return;
+  }
+
   final Paint inactivePaint = Paint()
     ..color = const Color(0xFFE1E1E1)
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
     ..strokeCap = StrokeCap.butt;
 
-  final double inactiveSweep = _fullRingSweep - sweepAngle;
-  if (inactiveSweep > 0.002) {
-    canvas.drawArc(
-      arcRect,
-      startAngle + sweepAngle,
-      inactiveSweep,
-      false,
-      inactivePaint,
-    );
-  }
-
-  final List<double> stops = gradientStops ??
-      List<double>.generate(
-        gradientColors.length,
-        (int i) => i / (gradientColors.length - 1),
-      );
-
-  final SweepGradient gradient = SweepGradient(
-    center: Alignment.center,
-    startAngle: startAngle,
-    endAngle: startAngle + _fullRingSweep,
-    colors: gradientColors,
-    stops: stops,
-    tileMode: TileMode.clamp,
+  canvas.drawArc(
+    arcRect,
+    startAngle + sweepAngle,
+    inactiveSweep,
+    false,
+    inactivePaint,
   );
 
-  final Paint progressPaint = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = strokeWidth
-    ..strokeCap = StrokeCap.butt
-    ..shader = gradient.createShader(arcRect);
-
-  canvas.drawArc(arcRect, startAngle, sweepAngle, false, progressPaint);
+  shaderPaint.strokeCap = StrokeCap.butt;
+  canvas.drawArc(arcRect, startAngle, sweepAngle, false, shaderPaint);
 
   final Color startColor = gradientColors.first;
   final Offset arcStart = Offset(
@@ -125,7 +141,7 @@ double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
   return _snapRingPercentOneStep(next);
 }
 
-/// Hollow selector ring (RGBW wheel / tunable-white disk): press glow must differ from the idle blue stroke.
+/// Hollow selector ring (RGBW wheel / tunable-white disk).
 Widget _hollowRingSelectorThumb({
   required bool pressed,
   required double diameter,
@@ -133,54 +149,21 @@ Widget _hollowRingSelectorThumb({
   Color idleStrokeColor = const Color(0xFF6488EA),
   required Color pressGlowColor,
 }) {
-  const double maxGlowPad = 20;
-  final double outer = diameter + maxGlowPad * 2;
-  return SizedBox(
-    width: outer,
-    height: outer,
-    child: Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        if (pressed)
-          Container(
-            width: outer,
-            height: outer,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.82),
-              boxShadow: [
-                BoxShadow(
-                  color: pressGlowColor.withValues(alpha: 0.62),
-                  blurRadius: 18.r,
-                  spreadRadius: 6.r,
-                ),
-                BoxShadow(
-                  color: pressGlowColor.withValues(alpha: 0.38),
-                  blurRadius: 30.r,
-                  spreadRadius: 10.r,
-                ),
-              ],
-            ),
-          ),
-        Container(
-          width: diameter,
-          height: diameter,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: pressed ? 0.92 : 0.55),
-            border: Border.all(
-              color: pressed ? pressGlowColor : idleStrokeColor,
-              width: pressed ? strokeWidth + 1.5 : strokeWidth,
-            ),
-          ),
-        ),
-      ],
+  return Container(
+    width: diameter,
+    height: diameter,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.transparent,
+      border: Border.all(
+        color: pressed ? pressGlowColor : idleStrokeColor,
+        width: strokeWidth,
+      ),
     ),
   );
 }
 
-/// Ring / dial thumb with a soft white base and a stronger colored halo while pressed.
+/// Ring / dial thumb — no outer glow or drop shadow.
 Widget _ringControlThumb({
   required Widget thumb,
   required bool pressed,
@@ -188,87 +171,10 @@ Widget _ringControlThumb({
   Color? haloColor,
   double haloPadding = 14,
 }) {
-  final Color glow = haloColor ?? const Color(0xFF38A4FE);
-  final double pad = haloPadding.r;
-  final double whiteBase = thumbDiameter + 10.r;
-  final double outer = thumbDiameter + pad * 2;
   return SizedBox(
-    width: outer,
-    height: outer,
-    child: Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: whiteBase,
-          height: whiteBase,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 10.r,
-                offset: Offset(0, 3.h),
-              ),
-            ],
-          ),
-        ),
-        if (pressed)
-          Container(
-            width: outer,
-            height: outer,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: glow.withValues(alpha: 0.36),
-              boxShadow: [
-                BoxShadow(
-                  color: glow.withValues(alpha: 0.55),
-                  blurRadius: 20.r,
-                  spreadRadius: 5.r,
-                ),
-                BoxShadow(
-                  color: glow.withValues(alpha: 0.28),
-                  blurRadius: 32.r,
-                  spreadRadius: 8.r,
-                ),
-              ],
-            ),
-          ),
-        thumb,
-      ],
-    ),
-  );
-}
-
-void _paintSoftPressHalo(
-  Canvas canvas,
-  Offset center, {
-  required double innerRadius,
-  required Color color,
-  required double pressT,
-}) {
-  if (pressT <= 0.001) {
-    return;
-  }
-  final double outerR = innerRadius + 22.r;
-  final double midR = innerRadius + 14.r;
-  canvas.drawCircle(
-    center,
-    outerR,
-    Paint()
-      ..color = color.withValues(alpha: 0.22 * pressT)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 14.r),
-  );
-  canvas.drawCircle(
-    center,
-    midR,
-    Paint()..color = color.withValues(alpha: 0.42 * pressT),
-  );
-  canvas.drawCircle(
-    center,
-    innerRadius + 8.r,
-    Paint()..color = Colors.white.withValues(alpha: 0.85 * pressT),
+    width: thumbDiameter,
+    height: thumbDiameter,
+    child: thumb,
   );
 }
 
@@ -1307,17 +1213,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 44.r;
-                          const double haloPad = 14;
-                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - outer / 2,
-                            top: thumb.dy - outer / 2,
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ledDimmerRingDragging,
                                 thumbDiameter: thumbSize,
-                                haloColor: const Color(0xFF00E52A),
-                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1328,13 +1230,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                       width: 5,
                                       color: Colors.white.withOpacity(0.95),
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.14),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
@@ -1483,17 +1378,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
-                          const double haloPad = 14;
-                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - outer / 2,
-                            top: thumb.dy - outer / 2,
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ventilationRingDragging,
                                 thumbDiameter: thumbSize,
-                                haloColor: thumbBlue,
-                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1504,13 +1395,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                       width: 3,
                                       color: Colors.white,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.12),
-                                        blurRadius: 10.r,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
@@ -1665,13 +1549,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double ringStroke = 4.r;
                           final double labelGap = 6.h;
                           final double labelHeight = 16.h;
-                          const double maxGlowPad = 20;
-                          final double outer = ringSize + maxGlowPad * 2;
                           // Anchor the ring's center on (x, y); place the label
                           // just below the ring.
                           return Positioned(
-                            left: x - outer / 2,
-                            top: y - ringSize / 2 - maxGlowPad,
+                            left: x - ringSize / 2,
+                            top: y - ringSize / 2,
                             child: IgnorePointer(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -1777,9 +1659,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           activeTrackColor: accent,
                           inactiveTrackColor: dialBorder,
                           thumbColor: accent,
-                          overlayColor: accent.withValues(alpha: 0.38),
+                          overlayColor: Colors.transparent,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 28.r,
+                            overlayRadius: 20.r,
                           ),
                           thumbShape: _TunableWhiteThumbShape(
                             radius: thumbSize / 2,
@@ -1909,11 +1791,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
                           final double thumbD = 44.r;
-                          const double maxGlowPad = 20;
-                          final double outer = thumbD + maxGlowPad * 2;
                           return Positioned(
-                            left: thumb.dx - outer / 2,
-                            top: thumb.dy - outer / 2,
+                            left: thumb.dx - thumbD / 2,
+                            top: thumb.dy - thumbD / 2,
                             child: IgnorePointer(
                               child: _hollowRingSelectorThumb(
                                 pressed: _rgbwWheelDragging,
@@ -1993,9 +1873,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             enabledInnerRadius: 14.r,
                             dragging: _rgbwSliderDragging,
                           ),
-                          overlayColor: const Color(0xFFE91EAC).withValues(alpha: 0.38),
+                          overlayColor: Colors.transparent,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 28.r,
+                            overlayRadius: 20.r,
                           ),
                           activeTrackColor: const Color(0xFFE91EAC),
                           inactiveTrackColor: const Color(0xFFFFFFFF),
@@ -2431,17 +2311,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
-                          const double haloPad = 14;
-                          final double outer = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - outer / 2,
-                            top: thumb.dy - outer / 2,
+                            left: thumb.dx - thumbSize / 2,
+                            top: thumb.dy - thumbSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _thermostatRingDragging,
                                 thumbDiameter: thumbSize,
-                                haloColor: const Color(0xFFFF007C),
-                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -2452,13 +2328,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                       width: 5,
                                       color: Colors.white,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.18),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
@@ -5257,23 +5126,12 @@ class _RgbwMagentaThumbShape extends SliderComponentShape {
       end: enabledInnerRadius,
     ).evaluate(enableAnimation);
     final Canvas canvas = context.canvas;
-    final double pressT = math.max(
-      activationAnimation.value.clamp(0.0, 1.0),
-      dragging ? 1.0 : 0.0,
-    );
-    _paintSoftPressHalo(
-      canvas,
-      center,
-      innerRadius: inner,
-      color: const Color(0xFFE91EAC),
-      pressT: pressT,
-    );
     canvas.drawCircle(center, outer, Paint()..color = Colors.white);
     canvas.drawCircle(center, inner, Paint()..color = const Color(0xFFE91EAC));
   }
 }
 
-/// Filled thumb with a soft white circular shadow (tunable white intensity).
+/// Filled thumb (tunable white intensity).
 class _TunableWhiteThumbShape extends SliderComponentShape {
   const _TunableWhiteThumbShape({
     required this.radius,
@@ -5307,17 +5165,6 @@ class _TunableWhiteThumbShape extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-    final double pressT = math.max(
-      activationAnimation.value.clamp(0.0, 1.0),
-      dragging ? 1.0 : 0.0,
-    );
-    _paintSoftPressHalo(
-      canvas,
-      center,
-      innerRadius: radius,
-      color: fillColor,
-      pressT: pressT,
-    );
 
     // No Canvas.drawShadow: it can render a cross-shaped artifact on circular
     // thumb paths on some Skia builds. Keep a clean fill + ring only.
@@ -5487,10 +5334,6 @@ class _RgbHueWheelPainter extends CustomPainter {
     361,
     (int i) => HSVColor.fromAHSV(1, i.toDouble(), 1, 1).toColor(),
   );
-  static final List<double> _hueStops = List<double>.generate(
-    361,
-    (int i) => i / 360,
-  );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -5500,8 +5343,12 @@ class _RgbHueWheelPainter extends CustomPainter {
 
     final Paint sweep = Paint()
       ..shader = SweepGradient(
-        colors: _hueColors,
-        stops: _hueStops,
+        colors: <Color>[..._hueColors.sublist(0, 360), _hueColors[0]],
+        stops: <double>[
+          ...List<double>.generate(360, (int i) => i / 360),
+          1.0,
+        ],
+        tileMode: TileMode.clamp,
       ).createShader(bounds);
     canvas.drawCircle(center, radius, sweep);
 
