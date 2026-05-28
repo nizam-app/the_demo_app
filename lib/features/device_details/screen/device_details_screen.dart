@@ -1423,8 +1423,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final double t = _tunableWhiteTempT.clamp(0.0, 1.0);
     final int kelvin = (warmK + (coolK - warmK) * t).round();
 
-    final Color dialBorder = const Color(0xFFE5E7EB);
-    final Color dialShadow = Colors.black.withOpacity(0.08);
+    final double dialBorderWidth = 6.w;
     final Color textPrimary = const Color(0xFF111827);
     final Color textSecondary = const Color(0xFF6B7280);
     final Color accent = const Color(0xFF00D1FF);
@@ -1473,50 +1472,51 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
+                        child: Container(
+                          width: sz.width,
+                          height: sz.height,
+                          padding: EdgeInsets.all(dialBorderWidth),
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: dialShadow,
-                            //     blurRadius: 24.r,
-                            //     offset: const Offset(0, 12),
-                            //   ),
-                            // ],
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: <Color>[
+                                Color(0xFFFEE481),
+                                Color(0xFFFFFFFF),
+                                Color(0xFF93E1E3),
+                              ],
+                              stops: <double>[0.0, 0.55, 1.0],
+                            ),
                           ),
                           child: ClipOval(
                             child: Stack(
+                              fit: StackFit.expand,
                               children: [
-                                Container(
-                                  width: sz.width,
-                                  height: sz.height,
-                                  decoration: const BoxDecoration(
+                                const DecoratedBox(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: <Color>[
-                                        Color(0xFFFFF1BF),
-                                        Color(0xFFFFFBF0),
-                                        Color(0xFFF2FDFF),
-                                        Color(0xFFBFF6FF),
+                                        Color(0xFFFEE481),
+                                        Color(0xFFFFFFFF),
+                                        Color(0xFF93E1E3),
                                       ],
-                                      stops: <double>[0.0, 0.38, 0.72, 1.0],
+                                      stops: <double>[0.0, 0.48, 1.0],
                                     ),
                                   ),
                                 ),
-                                // Soft vignette for depth.
-                                Positioned.fill(
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          Colors.white.withOpacity(0.0),
-                                          Colors.black.withOpacity(0.06),
-                                        ],
-                                        stops: const [0.65, 1.0],
-                                      ),
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.0),
+                                        Colors.black.withValues(alpha: 0.06),
+                                      ],
+                                      stops: const <double>[0.65, 1.0],
                                     ),
                                   ),
                                 ),
@@ -1525,32 +1525,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           ),
                         ),
                       ),
-                      // Outer stroke to match modern dial look.
-                      IgnorePointer(
-                        child: Container(
-                          width: sz.width,
-                          height: sz.height,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: dialBorder, width: 2),
-                          ),
-                        ),
-                      ),
-                      // White hollow ring + "Daylight" label. Sits exactly at
-                      // the user's tap point on the disk (clamped to the dial).
-
-                      //new update 
-                      
+                      // Selector + "Daylight" label at the user's tap point.
                       Builder(
                         builder: (context) {
                           final double x = _tunableWhiteDotDx * sz.width;
                           final double y = _tunableWhiteDotDy * sz.height;
-                          final double ringSize = 44.r;
-                          final double ringStroke = 4.r;
-                          final double labelGap = 6.h;
+                          final double ringSize = 40.r;
+                          final double labelGap = 8.h;
                           final double labelHeight = 16.h;
-                          // Anchor the ring's center on (x, y); place the label
-                          // just below the ring.
+                          // Anchor ring center on (x, y); label sits below with Figma gap.
                           return Positioned(
                             left: x - ringSize / 2,
                             top: y - ringSize / 2,
@@ -1558,11 +1541,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _hollowRingSelectorThumb(
-                                    pressed: _tunableWhiteDiskDragging,
-                                    diameter: ringSize,
-                                    strokeWidth: ringStroke,
-                                    pressGlowColor: accent,
+                                  Container(
+                                    width: ringSize,
+                                    height: ringSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                        color: const Color(0xFF9CA3AF),
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   SizedBox(height: labelGap),
                                   SizedBox(
@@ -1657,7 +1646,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           trackHeight: 10.h,
                           trackShape: const _TunableWhiteIntensityGradientTrackShape(),
                           activeTrackColor: accent,
-                          inactiveTrackColor: dialBorder,
+                          inactiveTrackColor: const Color(0xFFE5E7EB),
                           thumbColor: accent,
                           overlayColor: Colors.transparent,
                           overlayShape: RoundSliderOverlayShape(
@@ -1773,9 +1762,42 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: CustomPaint(
-                          size: layoutSize,
-                          painter: _RgbHueWheelPainter(),
+                        child: Container(
+                          width: layoutSize.width,
+                          height: layoutSize.height,
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: SweepGradient(
+                              transform: const GradientRotation(-math.pi / 2),
+                              colors: <Color>[
+                                Color(0xFFBEEEDD), // top-left mint
+                                Color(0xFFF8F3A8), // top yellow
+                                Color(0xFFF8C8A0), // right-top orange
+                                Color(0xFFF6AFC8), // right-bottom pink
+                                Color(0xFFD2B6F1), // bottom purple
+                                Color(0xFF9FBEF2), // bottom-left blue
+                                Color(0xFF9EDFE9), // left cyan
+                                Color(0xFFBEEEDD), // close loop
+                              ],
+                              stops: <double>[
+                                0.00,
+                                0.16,
+                                0.30,
+                                0.48,
+                                0.64,
+                                0.79,
+                                0.92,
+                                1.00,
+                              ],
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: CustomPaint(
+                              size: layoutSize,
+                              painter: _RgbHueWheelPainter(),
+                            ),
+                          ),
                         ),
                       ),
                       Builder(
@@ -1799,7 +1821,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                 pressed: _rgbwWheelDragging,
                                 diameter: thumbD,
                                 strokeWidth: 5,
-                                pressGlowColor: const Color(0xFFE91EAC),
+                                idleStrokeColor: Colors.white,
+                                pressGlowColor: Colors.white,
                               ),
                             ),
                           );
@@ -5189,8 +5212,12 @@ class _LedDimmerRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF00D1FF),
     Color(0xFF00E52A),
+    Color(0xFF00D1FF),
+  ];
+  static const List<double> _gradientStops = <double>[
+    0.0,
+    0.52,
   ];
 
   @override
@@ -5201,6 +5228,7 @@ class _LedDimmerRingPainter extends CustomPainter {
       percent: percent,
       strokeWidth: strokeWidth,
       gradientColors: _gradientColors,
+      gradientStops: _gradientStops,
     );
   }
 
@@ -5306,8 +5334,12 @@ class _VentilationRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF38A4FE),
-    Color(0xFF15DFFE),
+    Color(0xFF3F92F6),
+    Color(0xFF24D7FF),
+  ];
+  static const List<double> _gradientStops = <double>[
+    0.0,
+    0.42,
   ];
 
   @override
@@ -5318,6 +5350,7 @@ class _VentilationRingPainter extends CustomPainter {
       percent: percent,
       strokeWidth: strokeWidth,
       gradientColors: _gradientColors,
+      gradientStops: _gradientStops,
     );
   }
 
