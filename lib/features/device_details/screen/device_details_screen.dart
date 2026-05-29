@@ -5212,12 +5212,13 @@ class _LedDimmerRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF00E52A),
-    Color(0xFF00D1FF),
+    Color(0xFF00D1FF), 
+    Color(0xFF00E52A), 
+    
   ];
   static const List<double> _gradientStops = <double>[
     0.0,
-    0.52,
+    0.80,
   ];
 
   @override
@@ -5334,12 +5335,13 @@ class _VentilationRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF3F92F6),
-    Color(0xFF24D7FF),
+    Color(0xFF15DFFE),
+    Color(0xFF38A4FE), 
+    
   ];
   static const List<double> _gradientStops = <double>[
     0.0,
-    0.42,
+    0.80,
   ];
 
   @override
