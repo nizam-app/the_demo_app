@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/features/device_details/screen/device_details_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
@@ -1303,7 +1304,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onTap!();
+              },
         borderRadius: radius,
         child: card,
       ),
@@ -1524,7 +1530,12 @@ class _CategoryPill extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: onTap,
+      onTap: onTap == null
+          ? null
+          : () {
+              uiTapHaptic();
+              onTap!();
+            },
       borderRadius: radius,
       child: isSelected
           ? pillBody(
@@ -1593,7 +1604,10 @@ class _SectionTitle extends StatelessWidget {
         ),
         
         GestureDetector(
-          onTap: () => HomeScreen.showEditAddSectionSheet(context),
+          onTap: () {
+            uiTapHaptic();
+            HomeScreen.showEditAddSectionSheet(context);
+          },
           child: 
             Row(
               children: [
@@ -1676,7 +1690,12 @@ class _ModeBadge extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onTap!();
+              },
         splashColor: _softGrey,
         highlightColor: const Color(0xFFE5E7EB),
         child: badge,
@@ -1737,6 +1756,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
+        uiTapHaptic();
         widget.onTap!();
         _setPressed(false);
       },
@@ -1836,7 +1856,10 @@ class _LightDimmerCard extends StatelessWidget {
                 Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: onNavigate,
+                    onTap: () {
+                      uiTapHaptic();
+                      onNavigate!();
+                    },
                     borderRadius: BorderRadius.circular(18.r),
                     child: top,
                   ),
@@ -1974,7 +1997,11 @@ class _DimmerPill extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onTapDown: (d) {
+        uiTapHaptic();
+        applyDx(d.localPosition.dx);
+      },
+      onHorizontalDragStart: (_) => uiTapHaptic(),
       onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
       child: pill,
     );
@@ -2080,7 +2107,10 @@ class _ThermostatCard extends StatelessWidget {
                     ? Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: onNavigate,
+                          onTap: () {
+                            uiTapHaptic();
+                            onNavigate!();
+                          },
                           borderRadius: BorderRadius.circular(18.r),
                           child: headerColumn,
                         ),
@@ -2174,7 +2204,10 @@ class _BlindCard extends StatelessWidget {
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onNavigate,
+          onTap: () {
+            uiTapHaptic();
+            onNavigate!();
+          },
           borderRadius: BorderRadius.circular(18.r),
           child: child,
         ),
@@ -2396,7 +2429,10 @@ class _ToggleCardState extends State<_ToggleCard> {
                     ? Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: widget.onNavigate,
+                          onTap: () {
+                            uiTapHaptic();
+                            widget.onNavigate!();
+                          },
                           borderRadius: BorderRadius.circular(18.r),
                           child: headerColumn,
                         ),
@@ -2419,7 +2455,10 @@ class _ToggleCardState extends State<_ToggleCard> {
                     width: 60.w,
                     child: CupertinoSwitch(
                       value: _on,
-                      onChanged: (v) => setState(() => _on = v),
+                      onChanged: (v) {
+                        uiTapHaptic();
+                        setState(() => _on = v);
+                      },
                       activeColor: const Color(0xFF0088FE),
                     ),
                   ),
