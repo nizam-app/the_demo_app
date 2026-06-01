@@ -1380,6 +1380,7 @@ class _Header extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: _PressableCircleSurface(
               side: 44.w,
+              enableHaptic: false,
               onTap: onMenuTap,
               child: Image.asset(
                 'assets/Group 35 (1).png',
@@ -1417,6 +1418,7 @@ class _Header extends StatelessWidget {
               children: [
                 _PressableCircleSurface(
                   side: 32.w,
+                  enableHaptic: false,
                   onTap: onEditTap,
                   child: Image.asset(
                     'assets/image 89.png',
@@ -1428,6 +1430,7 @@ class _Header extends StatelessWidget {
                 SizedBox(width: 13.w),
                 _PressableCircleSurface(
                   side: 32.w,
+                  enableHaptic: false,
                   onTap: () => HomeScreen.showAddSectionSheet(context),
                   child: Icon(
                     Icons.add_rounded,
@@ -1604,10 +1607,7 @@ class _SectionTitle extends StatelessWidget {
         ),
         
         GestureDetector(
-          onTap: () {
-            uiTapHaptic();
-            HomeScreen.showEditAddSectionSheet(context);
-          },
+          onTap: () => HomeScreen.showEditAddSectionSheet(context),
           child: 
             Row(
               children: [
@@ -1712,6 +1712,7 @@ class _PressableCircleSurface extends StatefulWidget {
     required this.child,
     this.onTap,
     this.marked = false,
+    this.enableHaptic = true,
   });
 
   final double side;
@@ -1719,6 +1720,7 @@ class _PressableCircleSurface extends StatefulWidget {
   final VoidCallback? onTap;
   /// When true, fill stays gray (last-used / "marked" control).
   final bool marked;
+  final bool enableHaptic;
 
   static const Color _pressedFill = Color(0xFFE5E7EB);
 
@@ -1756,7 +1758,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
-        uiTapHaptic();
+        if (widget.enableHaptic) uiTapHaptic();
         widget.onTap!();
         _setPressed(false);
       },

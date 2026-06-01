@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
@@ -141,6 +142,9 @@ double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
   return _snapRingPercentOneStep(next);
 }
 
+/// Flat circular press halo (matches blind angle slider overlay, no shadow).
+const Color _controlPressHaloColor = Color(0x220088FE);
+
 /// Hollow selector ring (RGBW wheel / tunable-white disk).
 Widget _hollowRingSelectorThumb({
   required bool pressed,
@@ -148,22 +152,42 @@ Widget _hollowRingSelectorThumb({
   required double strokeWidth,
   Color idleStrokeColor = const Color(0xFF6488EA),
   required Color pressGlowColor,
+  double pressHaloPadding = 14,
 }) {
-  return Container(
-    width: diameter,
-    height: diameter,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: Colors.transparent,
-      border: Border.all(
-        color: pressed ? pressGlowColor : idleStrokeColor,
-        width: strokeWidth,
-      ),
+  final double outer = diameter + pressHaloPadding * 2;
+  return SizedBox(
+    width: outer,
+    height: outer,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: _controlPressHaloColor,
+            ),
+          ),
+        Container(
+          width: diameter,
+          height: diameter,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.transparent,
+            border: Border.all(
+              color: pressed ? pressGlowColor : idleStrokeColor,
+              width: strokeWidth,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
 
-/// Ring / dial thumb — no outer glow or drop shadow.
+/// Ring / dial thumb with flat press halo only (no drop shadow).
 Widget _ringControlThumb({
   required Widget thumb,
   required bool pressed,
@@ -171,10 +195,30 @@ Widget _ringControlThumb({
   Color? haloColor,
   double haloPadding = 14,
 }) {
+  final Color halo = haloColor ?? _controlPressHaloColor;
+  final double outer = thumbDiameter + haloPadding * 2;
   return SizedBox(
-    width: thumbDiameter,
-    height: thumbDiameter,
-    child: thumb,
+    width: outer,
+    height: outer,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: halo,
+            ),
+          ),
+        SizedBox(
+          width: thumbDiameter,
+          height: thumbDiameter,
+          child: thumb,
+        ),
+      ],
+    ),
   );
 }
 
@@ -843,7 +887,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       final bool sel = _selectedPresenceModeIndex == index;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _selectedPresenceModeIndex = index),
+        onTap: () {
+          uiTapHaptic();
+          setState(() => _selectedPresenceModeIndex = index);
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1024,7 +1071,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _selectedMultiValueSwitchIndex = index),
+        onTap: () {
+          uiTapHaptic();
+          setState(() => _selectedMultiValueSwitchIndex = index);
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1169,6 +1219,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _ledDimmerRingDragging = true);
                     _ledDimmerUpdateFromLocal(d.localPosition, sz);
                   },
@@ -1212,14 +1263,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
-                          final double thumbSize = 44.r;
+                          final double thumbSize = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ledDimmerRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1325,6 +1379,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _ventilationRingDragging = true);
                     _ventilationUpdateFromLocal(d.localPosition, sz);
                   },
@@ -1378,13 +1433,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
+                          final double haloPad = 8.r;
+                          final double thumbSize =38.r;
+                         final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ventilationRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1456,6 +1515,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return Listener(
                   behavior: HitTestBehavior.opaque,
                   onPointerDown: (PointerDownEvent e) {
+                    uiTapHaptic();
                     setState(() => _tunableWhiteDiskDragging = true);
                     _tunableWhiteUpdateFromLocal(e.localPosition, sz);
                   },
@@ -1648,9 +1708,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           activeTrackColor: accent,
                           inactiveTrackColor: const Color(0xFFE5E7EB),
                           thumbColor: accent,
-                          overlayColor: Colors.transparent,
+                          overlayColor: _controlPressHaloColor,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 22.r,
                           ),
                           thumbShape: _TunableWhiteThumbShape(
                             radius: thumbSize / 2,
@@ -1662,9 +1722,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           value: _tunableWhiteIntensity.clamp(0.0, 1.0),
                           min: 0,
                           max: 1,
-                          onChangeStart: (_) => setState(
-                            () => _tunableWhiteSliderDragging = true,
-                          ),
+                          onChangeStart: (_) {
+                            uiTapHaptic();
+                            setState(() => _tunableWhiteSliderDragging = true);
+                          },
                           onChangeEnd: (_) => setState(
                             () => _tunableWhiteSliderDragging = false,
                           ),
@@ -1745,6 +1806,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return Listener(
                   behavior: HitTestBehavior.opaque,
                   onPointerDown: (PointerDownEvent e) {
+                    uiTapHaptic();
                     setState(() => _rgbwWheelDragging = true);
                     _rgbwUpdateFromLocal(e.localPosition, layoutSize);
                   },
@@ -1812,15 +1874,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double rad = _rgbwHue * math.pi / 180;
                           final Offset thumb =
                               c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
-                          final double thumbD = 44.r;
+                          final double thumbD = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerD = thumbD + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbD / 2,
-                            top: thumb.dy - thumbD / 2,
+                            left: thumb.dx - outerD / 2,
+                            top: thumb.dy - outerD / 2,
                             child: IgnorePointer(
                               child: _hollowRingSelectorThumb(
                                 pressed: _rgbwWheelDragging,
                                 diameter: thumbD,
                                 strokeWidth: 5,
+                                pressHaloPadding: haloPad,
                                 idleStrokeColor: Colors.white,
                                 pressGlowColor: Colors.white,
                               ),
@@ -1896,9 +1961,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             enabledInnerRadius: 14.r,
                             dragging: _rgbwSliderDragging,
                           ),
-                          overlayColor: Colors.transparent,
+                          overlayColor: _controlPressHaloColor,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 22.r,
                           ),
                           activeTrackColor: const Color(0xFFE91EAC),
                           inactiveTrackColor: const Color(0xFFFFFFFF),
@@ -1913,8 +1978,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           max: 1,
                           activeColor: const Color(0xFFE91EAC),
                           inactiveColor: const Color(0xFFFFFFFF),
-                          onChangeStart: (_) =>
-                              setState(() => _rgbwSliderDragging = true),
+                          onChangeStart: (_) {
+                            uiTapHaptic();
+                            setState(() => _rgbwSliderDragging = true);
+                          },
                           onChangeEnd: (_) =>
                               setState(() => _rgbwSliderDragging = false),
                           onChanged: (v) =>
@@ -2000,7 +2067,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               children: [
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _isOn = false),
+                  onTap: () {
+                    uiTapHaptic();
+                    setState(() => _isOn = false);
+                  },
                   child: Container(
                     width: 36.w,
                     height: 36.w,
@@ -2134,7 +2204,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final Color foreground = selected ? Colors.white : Colors.black;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       child: Container(
         height: 36.h,
         padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -2203,6 +2276,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _thermostatRingDragging = true);
                     _thermostatUpdateFromLocal(d.localPosition, sz);
                   },
@@ -2334,13 +2408,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _thermostatRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -2505,7 +2582,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _isOn = false),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _isOn = false);
+              },
               child: Container(
                 height: 39.h,
                 width: 78.w,
@@ -2547,7 +2627,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           SizedBox(width: 14.w),
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _isOn = true),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _isOn = true);
+              },
               child: Container(
                 height: 39.h,
                 width: 78.w,
@@ -2862,6 +2945,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             padding: EdgeInsets.all(cardPadding),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
+                              onVerticalDragStart: (_) => uiTapHaptic(),
                               onVerticalDragUpdate: updateBlindLevelByDrag,
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
@@ -2900,6 +2984,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       child: Center(
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
+                          onVerticalDragStart: (_) => uiTapHaptic(),
                           onVerticalDragUpdate: updateBlindLevelByDrag,
                           child: SizedBox(
                             width: handleSize,
@@ -2975,6 +3060,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                   child: Slider(
                     value: _blindAngle.clamp(0.0, 1.0),
+                    onChangeStart: (_) => uiTapHaptic(),
                     onChanged: (v) => setState(() => _blindAngle = v),
                   ),
                 ),
@@ -3294,6 +3380,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             padding: EdgeInsets.all(cardPadding),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
+                              onVerticalDragStart: (_) => uiTapHaptic(),
                               onVerticalDragUpdate: updateAwningLevelByDrag,
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
@@ -3336,6 +3423,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       child: Center(
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
+                          onVerticalDragStart: (_) => uiTapHaptic(),
                           onVerticalDragUpdate: updateAwningLevelByDrag,
                           child: SizedBox(
                             width: handleSize,
@@ -4517,7 +4605,12 @@ class _BlindHandle extends StatelessWidget {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: onUp,
+            onTap: onUp == null
+                ? null
+                : () {
+                    uiTapHaptic();
+                    onUp!();
+                  },
             child: SizedBox(
               width: triW,
               height: triH,
@@ -4527,7 +4620,12 @@ class _BlindHandle extends StatelessWidget {
           SizedBox(height: 5.h),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: onDown,
+            onTap: onDown == null
+                ? null
+                : () {
+                    uiTapHaptic();
+                    onDown!();
+                  },
             child: SizedBox(
               width: triW,
               height: triH,
@@ -4839,7 +4937,10 @@ class _SceneValueOption extends StatelessWidget {
     final double borderW = selected ? selectedBorderWidth : 1.0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 84.w,
@@ -5486,7 +5587,10 @@ class _ModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       child: Container(
         padding: EdgeInsets.all(2.w),
         width: 30.w,

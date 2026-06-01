@@ -1463,10 +1463,7 @@ class _Header extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: InkWell(
-              onTap: () {
-                uiTapHaptic();
-                onMenuTap();
-              },
+              onTap: onMenuTap,
               borderRadius: BorderRadius.circular(12.r),
               child: SizedBox(
                 width: 44.w,
@@ -1511,10 +1508,7 @@ class _Header extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 InkWell(
-                  onTap: () {
-                    uiTapHaptic();
-                    onEditTap();
-                  },
+                  onTap: onEditTap,
                   borderRadius: BorderRadius.circular(999),
                   child: Container(
                     width: 32.w,
@@ -1535,10 +1529,7 @@ class _Header extends StatelessWidget {
                 ),
                 SizedBox(width: 13.w),
                 InkWell(
-                  onTap: () {
-                    uiTapHaptic();
-                    Zone_Category_Screen.showAddSectionSheet(context);
-                  },
+                  onTap: () => Zone_Category_Screen.showAddSectionSheet(context),
                   borderRadius: BorderRadius.circular(999),
                   child: Container(
                     width: 32.w,
@@ -1715,10 +1706,7 @@ class _SectionTitle extends StatelessWidget {
         ),
 
         GestureDetector(
-          onTap: () {
-            uiTapHaptic();
-            Zone_Category_Screen.showEditAddSectionSheet(context);
-          },
+          onTap: () => Zone_Category_Screen.showEditAddSectionSheet(context),
           child:
           Row(
             children: [

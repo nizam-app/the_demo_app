@@ -730,7 +730,6 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                   height: 16.h,
                                 ),
                                 onTap: () {
-                                  uiTapHaptic();
                                   if (!widget.showBottomNav) {
                                     final shell = CustomBottomNavBar.of(context);
                                     if (shell != null) {
@@ -1164,10 +1163,7 @@ class _CircleIconButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: () {
-          uiTapHaptic();
-          onTap();
-        },
+        onTap: onTap,
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
