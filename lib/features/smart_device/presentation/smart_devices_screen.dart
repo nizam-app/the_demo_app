@@ -183,10 +183,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   width: 16.w,
                   height: 16.h,
                 ),
-                onTap: () {
-                  uiTapHaptic();
-                  Navigator.maybePop(context);
-                },
+                onTap: () => Navigator.maybePop(context),
                 color: Color(0xFFF3F4F6),
               ),
               Row(
@@ -195,10 +192,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        uiTapHaptic();
-                        showEditSmartDeviceSheet(context);
-                      },
+                      onTap: () => showEditSmartDeviceSheet(context),
                       customBorder: const CircleBorder(),
                       splashColor: const Color(0xFFE5E7EB),
                       highlightColor: const Color(0xFFE5E7EB),
@@ -221,10 +215,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        uiTapHaptic();
-                        showAddSmartDeviceBottomSheet(context);
-                      },
+                      onTap: () => showAddSmartDeviceBottomSheet(context),
                       customBorder: const CircleBorder(),
                       splashColor: Colors.white24,
                       highlightColor: Colors.white10,

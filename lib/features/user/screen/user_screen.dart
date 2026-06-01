@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/utils/ui_tap_haptic.dart';
 import '../../../core/widget/global_back_button.dart';
 import '../widget/userAdd_popup.dart';
 import '../widget/user_edit.dart';
@@ -530,6 +531,7 @@ class _UserRowState extends State<_UserRow> {
                 InkWell(
                   borderRadius: BorderRadius.circular(26.r),
                   onTap: () {
+                    uiTapHaptic();
                     setState(() {
                       _isActive = !_isActive;
                     });
