@@ -571,16 +571,19 @@ class _StatusChip extends StatelessWidget {
         color: isActive ? UsersScreen._activeBlue : UsersScreen._inactiveChipBg,
         borderRadius: BorderRadius.circular(26.r),
       ),
-      child: Transform.translate(
-       offset: Offset(0, -2.h),
-        child: Text(
-          isActive ? 'Active' : 'Inactive',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: isActive ? Colors.white : UsersScreen._textDark,
-          ),
+      child: Text(
+        isActive ? 'Active' : 'Inactive',
+        textAlign: TextAlign.center,
+        textHeightBehavior: const TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        ),
+        style: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+          height: 1.0,
+          color: isActive ? Colors.white : UsersScreen._textDark,
         ),
       ),
     );

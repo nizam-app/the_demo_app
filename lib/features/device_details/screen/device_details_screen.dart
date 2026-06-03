@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
+import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
@@ -458,6 +459,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Multi-value switch grid: selected tile index 0 … 11 (displayed as 1 … 12).
   int _selectedMultiValueSwitchIndex = 0;
 
+  bool _suppressDashboardSync = false;
+
   static const List<String> _sceneLabels = <String>[
     'All On',
     'Night',
@@ -472,6 +475,113 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       vsync: this,
     );
     _tabController.addListener(() => setState(() {}));
+    _loadDashboardSnapshot(
+      DeviceDashboardSync.instance.snapshotFor(widget.deviceTitle),
+    );
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    if (!_suppressDashboardSync) {
+      _publishDashboardSnapshot();
+    }
+  }
+
+  void _publishDashboardSnapshot() {
+    DeviceDashboardSync.instance.update(
+      widget.deviceTitle,
+      _buildDashboardSnapshot(),
+    );
+  }
+
+  DeviceControlSnapshot _buildDashboardSnapshot() {
+    final DeviceControlSnapshot prev =
+        DeviceDashboardSync.instance.snapshotFor(widget.deviceTitle);
+
+    int blindDown = prev.blindDownPercent;
+    int blindUp = prev.blindUpPercent;
+    if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
+      blindDown = ((1 - _blindLevel) * 100).round();
+      blindUp = (_blindLevel * 100).round();
+    } else if (widget.controlMode == DeviceDetailsControlMode.blindControl) {
+      blindDown = (_blindLevel * 100).round();
+      blindUp = (_blindAngle * 100).round();
+    }
+
+    double dimmer = prev.dimmerPercent;
+    if (widget.controlMode == DeviceDetailsControlMode.ledDimmer) {
+      dimmer = _ledDimmerPercent;
+    } else if (widget.controlMode == DeviceDetailsControlMode.standard) {
+      dimmer = _isOn ? prev.dimmerPercent : 0.0;
+    } else if (widget.controlMode == DeviceDetailsControlMode.tunableWhite) {
+      dimmer = _tunableWhiteIntensity;
+    } else if (widget.controlMode == DeviceDetailsControlMode.rgbwPicker) {
+      dimmer = _rgbwIntensity;
+    }
+
+    final double thermostatC = widget.controlMode ==
+            DeviceDetailsControlMode.thermostatRing
+        ? 19.0 + _thermostatSetPercent.clamp(0.0, 1.0) * 16.0
+        : prev.thermostatCelsius;
+
+    return DeviceControlSnapshot(
+      isOn: _resolveDashboardIsOn(),
+      dimmerPercent: dimmer,
+      thermostatCelsius: thermostatC,
+      blindDownPercent: blindDown,
+      blindUpPercent: blindUp,
+      ledDimmerPercent: _ledDimmerPercent,
+      ventilationPercent: _ventilationPercent,
+      rgbwHue: _rgbwHue,
+      rgbwSaturation: _rgbwSaturation,
+      rgbwIntensity: _rgbwIntensity,
+      sceneIndex: _selectedSceneIndex,
+      fanLevel: _selectedFanLevel,
+      heatingCoolingMode: _heatingCoolingMode,
+      tunableWhiteIntensity: _tunableWhiteIntensity,
+      presenceModeIndex: _selectedPresenceModeIndex,
+      thermostatRingPercent: _thermostatSetPercent,
+      multiValueSwitchIndex: _selectedMultiValueSwitchIndex,
+    );
+  }
+
+  bool _resolveDashboardIsOn() {
+    switch (widget.controlMode) {
+      case DeviceDetailsControlMode.fanLevel:
+        return _selectedFanLevel > 0;
+      case DeviceDetailsControlMode.lightSceneValues:
+        return _selectedSceneIndex != 2;
+      case DeviceDetailsControlMode.heatingCooling:
+        return _isOn;
+      case DeviceDetailsControlMode.standard:
+        return _isOn;
+      default:
+        return true;
+    }
+  }
+
+  void _loadDashboardSnapshot(DeviceControlSnapshot snap) {
+    _isOn = snap.isOn;
+    _ledDimmerPercent = snap.ledDimmerPercent;
+    _ventilationPercent = snap.ventilationPercent;
+    _rgbwHue = snap.rgbwHue;
+    _rgbwSaturation = snap.rgbwSaturation;
+    _rgbwIntensity = snap.rgbwIntensity;
+    _selectedSceneIndex = snap.sceneIndex;
+    _selectedFanLevel = snap.fanLevel;
+    _heatingCoolingMode = snap.heatingCoolingMode;
+    _tunableWhiteIntensity = snap.tunableWhiteIntensity;
+    _selectedPresenceModeIndex = snap.presenceModeIndex;
+    _thermostatSetPercent = snap.thermostatRingPercent;
+    _selectedMultiValueSwitchIndex = snap.multiValueSwitchIndex;
+
+    if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
+      _blindLevel = snap.blindUpPercent / 100.0;
+    } else if (widget.controlMode == DeviceDetailsControlMode.blindControl) {
+      _blindLevel = snap.blindDownPercent / 100.0;
+      _blindAngle = snap.blindUpPercent / 100.0;
+    }
   }
 
   @override
@@ -727,46 +837,42 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Device title + edit icon (shared by header row and standard hero below image).
+  /// Device title + edit icon inline after the last line of text.
   Widget _buildTitleEditRow() {
     const Color textPrimary = Color(0xFF111827);
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double iconSlot = 13.w + 8.w;
-        final double maxTextW = math.max(0.0, constraints.maxWidth - iconSlot);
-        return Center(
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            alignment: WrapAlignment.center,
-            spacing: 8.w,
-            runSpacing: 4.h,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxTextW),
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 23.sp,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
-                    height: 1.25,
-                  ),
+    final double iconW = 13.w;
+    final double gap = 8.w;
+    final TextStyle titleStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 23.sp,
+      fontWeight: FontWeight.w700,
+      color: textPrimary,
+      height: 1.25,
+    );
+
+    return Center(
+      child: Text.rich(
+        textAlign: TextAlign.center,
+        TextSpan(
+          style: titleStyle,
+          children: [
+            TextSpan(text: widget.deviceTitle),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: EdgeInsets.only(left: gap),
+                child: Image.asset(
+                  'assets/Group 63.png',
+                  height: 13.h,
+                  width: iconW,
+                  fit: BoxFit.contain,
+                  color: textPrimary,
                 ),
               ),
-              Image.asset(
-                'assets/Group 63.png',
-                height: 13.h,
-                width: 13.w,
-                fit: BoxFit.cover,
-                color: textPrimary,
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -2677,10 +2783,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     const Color noteColor = Color(0xFF6B7280);
 
     if (widget.deviceTitle == 'Motion Sensor') {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(left:  85.w, right: 0),
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Center(
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -2694,22 +2801,19 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                 ),
               ),
-              //SizedBox(width: 12.w),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Here we will write instruction how to \n'
-                        'control and more information about that\n'
-                        'device',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12.sp,
-                      height: 1.45,
-                      fontWeight: FontWeight.w400,
-                      color: noteColor,
-                    ),
+              SizedBox(width: 12.w),
+              Flexible(
+                child: Text(
+                  'Here we will write instruction how to \n'
+                  'control and more information about that\n'
+                  'device',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.sp,
+                    height: 1.45,
+                    fontWeight: FontWeight.w400,
+                    color: noteColor,
                   ),
                 ),
               ),
@@ -2719,25 +2823,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       );
     }
 
-    return Center(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding:  EdgeInsets.only(left: 85.w, right: 0),
-            child: SizedBox(
-              height: 15.h,
-              width: 15.w,
-              child: Image.asset(
-                'assets/images/message_icon.png',
-                fit: BoxFit.contain,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 32.w),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 3.h),
+              child: SizedBox(
+                height: 15.h,
+                width: 15.w,
+                child: Image.asset(
+                  'assets/images/message_icon.png',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
+            SizedBox(width: 12.w),
+            Flexible(
               child: Text(
                 'Don\'t ON this device while you sleeping\n'
                 'Here we will write comments to user\n'
@@ -2753,8 +2858,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -5592,22 +5697,26 @@ class _ModeButton extends StatelessWidget {
         onTap();
       },
       child: Container(
-        padding: EdgeInsets.all(2.w),
         width: 30.w,
-        height: 30.w,
+        height: 30.h,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? const Color(0xFFCBD5E1) : Colors.transparent,
           borderRadius: BorderRadius.circular(26.r),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: active ? const Color(0xFF111827) : const Color(0xFF6B7280),
-            ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          textHeightBehavior: const TextHeightBehavior(
+            applyHeightToFirstAscent: false,
+            applyHeightToLastDescent: false,
+          ),
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            height: 1.0,
+            color: active ? const Color(0xFF111827) : const Color(0xFF6B7280),
           ),
         ),
       ),

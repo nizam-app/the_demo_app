@@ -10,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
+import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
 import 'package:workpleis/features/device_details/screen/device_details_screen.dart';
 
 import '../../devices/screen/devices_screen.dart';
@@ -65,8 +66,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double _bedroomDimmer = 0.72;
   double _bathroomThermostat = 24.6;
-  int _blindNorthDown = 0;
-  int _blindNorthUp = 72;
+  int _awningDown = 0;
+  int _awningUp = 72;
+  int _blindRoomDown = 0;
+  int _blindRoomUp = 72;
   final List<int> _shadeDown = [100, 100, 100];
   final List<int> _shadeUp = [50, 50, 50];
   /// Shading list rows: manual (M) vs auto (A), matches prior static modes.
@@ -85,10 +88,100 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// 0 = neither circle "marked"; 1 = minus/down; 2 = plus/up (gray when marked).
   int _bathroomThermoMark = 0;
-  int _blindNorthMark = 0;
+  int _awningMark = 0;
+  int _blindRoomMark = 0;
   final List<int> _shadeStepMark = [0, 0, 0];
   int _favThermoMMark = 0;
   int _favThermoAMark = 0;
+
+  bool _irrigationOn = true;
+  bool _motionSensorOn = true;
+
+  late final VoidCallback _dashboardSyncListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _pullFromDashboardSync();
+    _dashboardSyncListener = () {
+      if (mounted) _pullFromDashboardSync();
+    };
+    DeviceDashboardSync.instance.addListener(_dashboardSyncListener);
+  }
+
+  @override
+  void dispose() {
+    DeviceDashboardSync.instance.removeListener(_dashboardSyncListener);
+    super.dispose();
+  }
+
+  void _pullFromDashboardSync() {
+    final DeviceDashboardSync sync = DeviceDashboardSync.instance;
+    setState(() {
+      final DeviceControlSnapshot light =
+          sync.snapshotFor('Light dinning room');
+      _bedroomDimmer =
+          light.isOn ? light.dimmerPercent.clamp(0.0, 1.0) : 0.0;
+
+      final DeviceControlSnapshot bath =
+          sync.snapshotFor('Bathroom heating thermostat');
+      _bathroomThermostat = bath.thermostatCelsius;
+      _irrigationOn = sync.snapshotFor('Irrigation entry').isOn;
+      _motionSensorOn = sync.snapshotFor('Motion Sensor').isOn;
+
+      final DeviceControlSnapshot awning =
+          sync.snapshotFor('Awning garden 123');
+      _awningDown = awning.blindDownPercent;
+      _awningUp = awning.blindUpPercent;
+
+      final DeviceControlSnapshot blind =
+          sync.snapshotFor('Blind Living Room');
+      _blindRoomDown = blind.blindDownPercent;
+      _blindRoomUp = blind.blindUpPercent;
+    });
+  }
+
+  void _pushDashboardFor(String deviceTitle) {
+    final DeviceControlSnapshot prev =
+        DeviceDashboardSync.instance.snapshotFor(deviceTitle);
+    DeviceControlSnapshot next = prev;
+
+    switch (DeviceDashboardSync.keyFor(deviceTitle)) {
+      case 'light dinning room':
+        next = prev.copyWith(
+          dimmerPercent: _bedroomDimmer.clamp(0.0, 1.0),
+          isOn: _bedroomDimmer > 0.001,
+        );
+        break;
+      case 'bathroom heating thermostat':
+        next = prev.copyWith(thermostatCelsius: _bathroomThermostat);
+        break;
+      case 'irrigation entry':
+        next = prev.copyWith(isOn: _irrigationOn);
+        break;
+      case 'motion sensor':
+        next = prev.copyWith(isOn: _motionSensorOn);
+        break;
+      case 'awning garden 123':
+        next = prev.copyWith(
+          blindDownPercent: _awningDown,
+          blindUpPercent: _awningUp,
+        );
+        break;
+      case 'blind living room':
+        next = prev.copyWith(
+          blindDownPercent: _blindRoomDown,
+          blindUpPercent: _blindRoomUp,
+        );
+        break;
+      default:
+        return;
+    }
+    DeviceDashboardSync.instance.update(deviceTitle, next);
+  }
+
+  DeviceControlSnapshot _snap(String title) =>
+      DeviceDashboardSync.instance.snapshotFor(title);
 
   void _flashMark({
     required int value,
@@ -215,9 +308,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onModeTap: () => setState(
                                         () => _bedroomManual = !_bedroomManual,
                                       ),
-                                      onPercentChanged: (v) => setState(
-                                        () => _bedroomDimmer = v.clamp(0, 72),
-                                      ),
+                                      onPercentChanged: (v) {
+                                        setState(
+                                          () => _bedroomDimmer =
+                                              v.clamp(0.0, 1.0),
+                                        );
+                                        _pushDashboardFor('Light dinning room');
+                                      },
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
@@ -235,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _ThermostatCard(
                                       title:
-                                          'Bathroom heating and boiler thermostat',
+                                          'Bathroom heating thermostat',
                                       value: _bathroomThermostat,
                                       mode: _bathroomManual ? 'M' : 'A',
                                       modeFilled: _bathroomManual,
@@ -245,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Bathroom heating and boiler thermostat',
+                                            'Bathroom heating thermostat',
                                         imageAssetPath:
                                             'assets/Mask group (6).png',
                                         controlButtonCount: 3,
@@ -257,17 +354,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                         value: 1,
                                         getCurrent: () => _bathroomThermoMark,
                                         set: (v) => _bathroomThermoMark = v,
-                                        action: () => _bathroomThermostat =
-                                            (_bathroomThermostat - 0.5)
-                                                .clamp(10.0, 35.0),
+                                        action: () {
+                                          _bathroomThermostat =
+                                              (_bathroomThermostat - 0.5)
+                                                  .clamp(10.0, 35.0);
+                                          _pushDashboardFor(
+                                            'Bathroom heating thermostat',
+                                          );
+                                        },
                                       ),
                                       onPlus: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _bathroomThermoMark,
                                         set: (v) => _bathroomThermoMark = v,
-                                        action: () => _bathroomThermostat =
-                                            (_bathroomThermostat + 0.5)
-                                                .clamp(10.0, 35.0),
+                                        action: () {
+                                          _bathroomThermostat =
+                                              (_bathroomThermostat + 0.5)
+                                                  .clamp(10.0, 35.0);
+                                          _pushDashboardFor(
+                                            'Bathroom heating thermostat',
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
@@ -283,13 +390,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _BlindCard(
                                       title: 'Awning garden 123',
-                                      downPercent: _blindNorthDown,
-                                      upPercent: _blindNorthUp,
+                                      downPercent: _awningDown,
+                                      upPercent: _awningUp,
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
+                                      previewLevel: _awningUp / 100.0,
                                       imagePath: 'assets/Rectangle 823.png',
-                                      downMarked: _blindNorthMark == 1,
-                                      upMarked: _blindNorthMark == 2,
+                                      downMarked: _awningMark == 1,
+                                      upMarked: _awningMark == 2,
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
@@ -305,17 +413,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       onDown: () => _flashMark(
                                         value: 1,
-                                        getCurrent: () => _blindNorthMark,
-                                        set: (v) => _blindNorthMark = v,
-                                        action: () => _blindNorthDown =
-                                            (_blindNorthDown + 5).clamp(0, 100),
+                                        getCurrent: () => _awningMark,
+                                        set: (v) => _awningMark = v,
+                                        action: () {
+                                          _awningDown =
+                                              (_awningDown + 5).clamp(0, 100);
+                                          _pushDashboardFor('Awning garden 123');
+                                        },
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
-                                        getCurrent: () => _blindNorthMark,
-                                        set: (v) => _blindNorthMark = v,
-                                        action: () => _blindNorthUp =
-                                            (_blindNorthUp + 5).clamp(0, 100),
+                                        getCurrent: () => _awningMark,
+                                        set: (v) => _awningMark = v,
+                                        action: () {
+                                          _awningUp =
+                                              (_awningUp + 5).clamp(0, 100);
+                                          _pushDashboardFor('Awning garden 123');
+                                        },
                                       ),
                                     ),
                                   ),
@@ -326,13 +440,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _ToggleCard(
                                       title:
-                                          'Irrigation entry and front home two valve',
-                                      isOn: true,
+                                          'Irrigation entry ',
+                                      isOn: _irrigationOn,
                                       imagePath: 'assets/Mask group (7).png',
+                                      imagePathOff:
+                                          'assets/images/irrigation_of.png',
+                                      onIsOnChanged: (v) {
+                                        setState(() => _irrigationOn = v);
+                                        _pushDashboardFor('Irrigation entry');
+                                      },
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
-                                            'Irrigation entry and front home two valve',
+                                            'Irrigation entry ',
                                         imageAssetPath:
                                             'assets/Mask group (7).png',
                                         controlButtonCount: 1,
@@ -353,13 +473,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _BlindCard(
                                       title: 'Blind Living Room',
-                                      downPercent: _blindNorthDown,
-                                      upPercent: _blindNorthUp,
+                                      downPercent: _blindRoomDown,
+                                      upPercent: _blindRoomUp,
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
+                                      previewLevel: _blindRoomDown / 100.0,
                                       imagePath: 'assets/Rectangle 823.png',
-                                      downMarked: _blindNorthMark == 1,
-                                      upMarked: _blindNorthMark == 2,
+                                      downMarked: _blindRoomMark == 1,
+                                      upMarked: _blindRoomMark == 2,
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
@@ -375,17 +496,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       onDown: () => _flashMark(
                                         value: 1,
-                                        getCurrent: () => _blindNorthMark,
-                                        set: (v) => _blindNorthMark = v,
-                                        action: () => _blindNorthDown =
-                                            (_blindNorthDown + 5).clamp(0, 100),
+                                        getCurrent: () => _blindRoomMark,
+                                        set: (v) => _blindRoomMark = v,
+                                        action: () {
+                                          _blindRoomDown =
+                                              (_blindRoomDown + 5).clamp(0, 100);
+                                          _pushDashboardFor('Blind Living Room');
+                                        },
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
-                                        getCurrent: () => _blindNorthMark,
-                                        set: (v) => _blindNorthMark = v,
-                                        action: () => _blindNorthUp =
-                                            (_blindNorthUp + 5).clamp(0, 100),
+                                        getCurrent: () => _blindRoomMark,
+                                        set: (v) => _blindRoomMark = v,
+                                        action: () {
+                                          _blindRoomUp =
+                                              (_blindRoomUp + 5).clamp(0, 100);
+                                          _pushDashboardFor('Blind Living Room');
+                                        },
                                       ),
                                     ),
                                   ),
@@ -397,8 +524,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: _ToggleCard(
                                       title:
                                       'Motion Sensor',
-                                      isOn: true,
+                                      isOn: _motionSensorOn,
                                       imagePath: 'assets/images/update_sensor.png',
+                                      imagePathOff: 'assets/images/light_of.png',
+                                      onIsOnChanged: (v) {
+                                        setState(() => _motionSensorOn = v);
+                                        _pushDashboardFor('Motion Sensor');
+                                      },
                                       onNavigate: () => DeviceDetailsScreen.go(
                                         context,
                                         deviceTitle:
@@ -921,6 +1053,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightingSectionCards() {
+    final DeviceControlSnapshot scene = _snap('Light Scene');
+    final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
+    final DeviceControlSnapshot led = _snap('LED Dimmer living room');
+    final DeviceControlSnapshot hvac = _snap('Heating & Cooling');
+    final DeviceControlSnapshot tunable = _snap('Tunable white light');
+    final DeviceControlSnapshot vent = _snap('Ventilation');
+    final DeviceControlSnapshot fan = _snap('Fan Level 3');
+    final DeviceControlSnapshot presence = _snap('Presence');
+    final DeviceControlSnapshot living = _snap('Living Room');
+
     return Column(
       children: [
         // First row of cards
@@ -929,7 +1071,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'Light Scene',
-                status: 'All On',
+                status: scene.sceneLabel,
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -946,7 +1088,12 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'RGBW room abc',
-                status: '100%',
+                status: '${(rgbw.rgbwIntensity * 100).round()}%',
+                iconWidget: DashboardRgbwIcon(
+                  hue: rgbw.rgbwHue,
+                  saturation: rgbw.rgbwSaturation,
+                  intensity: rgbw.rgbwIntensity,
+                ),
                 iconImage:
                     'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -969,10 +1116,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _buildLightingCard(
                           deviceName: 'LED Dimmer living room',
-                          status: '100%',
+                          status:
+                              '${(led.ledDimmerPercent * 100).round()}%',
+                          iconWidget: DashboardRingProgressIcon(
+                            percent: led.ledDimmerPercent,
+                            ringStyle: DashboardRingStyle.led,
+                          ),
                           iconImage:
                               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                          progressCircle: true,
                           onTap: () => DeviceDetailsScreen.go(
                             context,
                             deviceTitle: 'LED Dimmer living room',
@@ -1009,7 +1160,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'Heating & Cooling',
-                status: 'All On',
+                status: hvac.heatingCoolingStatusLabel,
                 iconImage:
                     'assets/images/heating_cooling.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -1026,7 +1177,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'Tunable white light',
-                status: '100%',
+                status:
+                    '${(tunable.tunableWhiteIntensity * 100).round()}%',
                 iconImage:
                     'assets/white_light.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -1049,10 +1201,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _buildLightingCard(
                           deviceName: 'Ventilation',
-                          status: '100%',
+                          status:
+                              '${(vent.ventilationPercent * 100).round()}%',
+                          iconWidget: DashboardRingProgressIcon(
+                            percent: vent.ventilationPercent,
+                            ringStyle: DashboardRingStyle.ventilation,
+                          ),
                           iconImage:
                               'assets/images/ventilations.png',
-                          progressCircle: true,
                 onTap: () => DeviceDetailsScreen.go(
                           context,
                           deviceTitle: 'Ventilation',
@@ -1088,7 +1244,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'Fan Level 3',
-                status: 'All On',
+                status: fan.fanStatusLabel,
                 iconImage:
                 'assets/images/Fun_level3.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -1105,7 +1261,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: _buildLightingCard(
                 deviceName: 'Presence',
-                status: '100%',
+                status: presence.presenceLabel,
                 iconImage:
                 'assets/images/comfort.png',
                 onTap: () => DeviceDetailsScreen.go(
@@ -1128,10 +1284,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _buildLightingCard(
                           deviceName: 'Living room',
-                          status: '100%',
+                          status:
+                              '${living.thermostatRingCelsius.toStringAsFixed(1)}° c',
+                          iconWidget: DashboardRingProgressIcon(
+                            percent: living.thermostatRingPercent,
+                            ringStyle: DashboardRingStyle.ventilation,
+                          ),
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                          progressCircle: true,
                           onTap: () => DeviceDetailsScreen.go(
                             context,
                             deviceTitle: 'Living Room',
@@ -1177,10 +1337,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _buildLightingCard(
                           deviceName: 'Multi-Value Switch',
-                          status: '100%',
+                          status:
+                              '${_snap('Multi-Value Switch').multiValueSwitchIndex + 1}',
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
-                          progressCircle: true,
+                          iconWidget: DashboardMultiValueSwitchIcon(
+                            selectedIndex: _snap('Multi-Value Switch')
+                                .multiValueSwitchIndex,
+                          ),
                           onTap: () => DeviceDetailsScreen.go(
                             context,
                             deviceTitle: 'Multi-Value Switch',
@@ -1239,10 +1403,25 @@ class _HomeScreenState extends State<HomeScreen> {
     required String deviceName,
     required String status,
     required String iconImage,
-    bool progressCircle = false,
+    Widget? iconWidget,
     VoidCallback? onTap,
   }) {
     final radius = BorderRadius.circular(26.r);
+    final Widget iconArea = iconWidget ??
+        Image.asset(
+          iconImage,
+          width: 52.w,
+          height: 52.h,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Container(
+            width: 52.w,
+            height: 52.h,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
     final card = Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1254,23 +1433,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Top icon area
-          progressCircle
-              ? _lightingProgress100()
-              : Image.asset(
-                  iconImage,
-                  width: 52.w,
-                  height: 52.h,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 52.w,
-                    height: 52.h,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                ),
+          iconArea,
           SizedBox(height: 8.h),
           // Device name
           Flexible(
@@ -2182,6 +2345,7 @@ class _BlindCard extends StatelessWidget {
     this.downMarked = false,
     this.upMarked = false,
     this.imagePath,
+    this.previewLevel,
     this.onModeTap,
     this.onNavigate,
   });
@@ -2192,6 +2356,7 @@ class _BlindCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final String? imagePath;
+  final double? previewLevel;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onModeTap;
@@ -2222,7 +2387,11 @@ class _BlindCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (imagePath != null)
+              if (previewLevel != null)
+                titleInkWell(
+                  DashboardBlindLevelIcon(level: previewLevel!),
+                )
+              else if (imagePath != null)
                 titleInkWell(
                   Image.asset(
                     imagePath!,
@@ -2355,13 +2524,17 @@ class _ToggleCard extends StatefulWidget {
     required this.title,
     required this.isOn,
     this.imagePath,
+    this.imagePathOff,
     this.onNavigate,
+    this.onIsOnChanged,
   });
 
   final String title;
   final bool isOn;
   final String? imagePath;
+  final String? imagePathOff;
   final VoidCallback? onNavigate;
+  final ValueChanged<bool>? onIsOnChanged;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -2386,14 +2559,21 @@ class _ToggleCardState extends State<_ToggleCard> {
     }
   }
 
+  String? get _heroImagePath {
+    if (!_on && widget.imagePathOff != null) {
+      return widget.imagePathOff;
+    }
+    return widget.imagePath;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget headerColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widget.imagePath != null
+        _heroImagePath != null
             ? Image.asset(
-                widget.imagePath!,
+                _heroImagePath!,
                 width: 52.w,
                 height: 52.w,
                 fit: BoxFit.contain,
@@ -2460,6 +2640,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                       onChanged: (v) {
                         uiTapHaptic();
                         setState(() => _on = v);
+                        widget.onIsOnChanged?.call(v);
                       },
                       activeColor: const Color(0xFF0088FE),
                     ),
