@@ -83,6 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _blindManual = true;
   bool _lightingLedBadge1Manual = false;
   bool _lightingLedBadge2Manual = true;
+  bool _ventilationManual = true;
+  bool _livingRoomManual = true;
   bool _favThermoMManual = true;
   bool _favThermoAManual = false;
 
@@ -289,7 +291,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(height: 12.h),
 
                         // ✅ Light section 2x2 (same spacing as prior GridView)
-                        Column(
+                        Builder(
+                          builder: (context) {
+                            final DeviceControlSnapshot diningLight =
+                                _snap('Light dinning room');
+                            final DeviceControlSnapshot bathroomHeat =
+                                _snap('Bathroom heating thermostat');
+                            return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
@@ -304,7 +312,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       percent: _bedroomDimmer,
                                       mode: _bedroomManual ? 'M' : 'A',
                                       modeFilled: _bedroomManual,
+                                      isOn: diningLight.isOn,
                                       imagePath: 'assets/Mask group (5).png',
+                                      imagePathOff:
+                                          'assets/images/light_of.png',
                                       onModeTap: () => setState(
                                         () => _bedroomManual = !_bedroomManual,
                                       ),
@@ -336,7 +347,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       value: _bathroomThermostat,
                                       mode: _bathroomManual ? 'M' : 'A',
                                       modeFilled: _bathroomManual,
+                                      isOn: bathroomHeat.isOn,
                                       imagePath: 'assets/Mask group (6).png',
+                                      imagePathOff:
+                                          'assets/images/bathroom_off.png',
                                       minusMarked: _bathroomThermoMark == 1,
                                       plusMarked: _bathroomThermoMark == 2,
                                       onNavigate: () => DeviceDetailsScreen.go(
@@ -526,7 +540,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       'Motion Sensor',
                                       isOn: _motionSensorOn,
                                       imagePath: 'assets/images/update_sensor.png',
-                                      imagePathOff: 'assets/images/light_of.png',
+                                      imagePathOff:
+                                          'assets/images/motion_sensor_off.png',
                                       onIsOnChanged: (v) {
                                         setState(() => _motionSensorOn = v);
                                         _pushDashboardFor('Motion Sensor');
@@ -536,7 +551,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         deviceTitle:
                                         'Motion Sensor',
                                         imageAssetPath:
-                                        'assets/images/kitchen.png',
+                                        'assets/images/update_sensor.png',
                                         controlButtonCount: 1,
                                       ),
                                     ),
@@ -546,6 +561,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             
                           ],
+                            );
+                          },
                         ),
 
                         SizedBox(height: 18.h),
@@ -1074,6 +1091,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: scene.sceneLabel,
                 iconImage:
                     'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+                iconWidget: DashboardLightSceneIcon(
+                  sceneIndex: scene.sceneIndex,
+                ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Light Scene',
@@ -1163,6 +1183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: hvac.heatingCoolingStatusLabel,
                 iconImage:
                     'assets/images/heating_cooling.png',
+                iconWidget: DashboardHeatingCoolingIcon(
+                  isOn: hvac.isOn,
+                ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Heating & Cooling',
@@ -1203,9 +1226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           deviceName: 'Ventilation',
                           status:
                               '${(vent.ventilationPercent * 100).round()}%',
-                          iconWidget: DashboardRingProgressIcon(
+                          iconWidget: DashboardVentilationIcon(
                             percent: vent.ventilationPercent,
-                            ringStyle: DashboardRingStyle.ventilation,
                           ),
                           iconImage:
                               'assets/images/ventilations.png',
@@ -1225,11 +1247,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     right: 7.w,
                     top: 7.h,
                     child: _ModeBadge(
-                      mode: _lightingLedBadge2Manual ? 'M' : 'A',
-                      filled: _lightingLedBadge2Manual,
+                      mode: _ventilationManual ? 'M' : 'A',
+                      filled: _ventilationManual,
                       onTap: () => setState(
-                        () => _lightingLedBadge2Manual =
-                            !_lightingLedBadge2Manual,
+                        () => _ventilationManual = !_ventilationManual,
                       ),
                     ),
                   ),
@@ -1247,6 +1268,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: fan.fanStatusLabel,
                 iconImage:
                 'assets/images/Fun_level3.png',
+                iconWidget: DashboardFanLevelIcon(
+                  level: fan.fanLevel,
+                ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Fan Level 3',
@@ -1264,6 +1288,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 status: presence.presenceLabel,
                 iconImage:
                 'assets/images/comfort.png',
+                iconWidget: DashboardPresenceModeIcon(
+                  modeIndex: presence.presenceModeIndex,
+                ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Presence',
@@ -1286,9 +1313,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           deviceName: 'Living room',
                           status:
                               '${living.thermostatRingCelsius.toStringAsFixed(1)}° c',
-                          iconWidget: DashboardRingProgressIcon(
+                          iconWidget: DashboardThermostatRingIcon(
                             percent: living.thermostatRingPercent,
-                            ringStyle: DashboardRingStyle.ventilation,
+                            currentTempCelsius: living.thermostatCelsius,
                           ),
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -1308,11 +1335,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     right: 7.w,
                     top: 7.h,
                     child: _ModeBadge(
-                      mode: _lightingLedBadge2Manual ? 'M' : 'A',
-                      filled: _lightingLedBadge2Manual,
+                      mode: _livingRoomManual ? 'M' : 'A',
+                      filled: _livingRoomManual,
                       onTap: () => setState(
-                            () => _lightingLedBadge2Manual =
-                        !_lightingLedBadge2Manual,
+                        () => _livingRoomManual = !_livingRoomManual,
                       ),
                     ),
                   ),
@@ -1337,8 +1363,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _buildLightingCard(
                           deviceName: 'Multi-Value Switch',
-                          status:
-                              '${_snap('Multi-Value Switch').multiValueSwitchIndex + 1}',
+                          status: _snap('Multi-Value Switch')
+                              .multiValueSwitchCaption,
                           iconImage:
                           'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
                           iconWidget: DashboardMultiValueSwitchIcon(
@@ -1964,7 +1990,9 @@ class _LightDimmerCard extends StatelessWidget {
     required this.percent,
     required this.mode,
     required this.modeFilled,
+    this.isOn = true,
     this.imagePath,
+    this.imagePathOff,
     this.onPercentChanged,
     this.onNavigate,
     this.onModeTap,
@@ -1974,19 +2002,28 @@ class _LightDimmerCard extends StatelessWidget {
   final double percent;
   final String mode;
   final bool modeFilled;
+  final bool isOn;
   final String? imagePath;
+  final String? imagePathOff;
   final ValueChanged<double>? onPercentChanged;
   final VoidCallback? onNavigate;
   final VoidCallback? onModeTap;
+
+  String? get _displayImagePath {
+    if (!isOn && imagePathOff != null) {
+      return imagePathOff;
+    }
+    return imagePath;
+  }
 
   @override
   Widget build(BuildContext context) {
     final top = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        imagePath != null
+        _displayImagePath != null
             ? Image.asset(
-                imagePath!,
+                _displayImagePath!,
                 width: 52.w,
                 height: 52.w,
                 fit: BoxFit.contain,
@@ -2184,9 +2221,11 @@ class _ThermostatCard extends StatelessWidget {
     required this.modeFilled,
     required this.onMinus,
     required this.onPlus,
+    this.isOn = true,
     this.minusMarked = false,
     this.plusMarked = false,
     this.imagePath,
+    this.imagePathOff,
     this.onModeTap,
     this.onNavigate,
   });
@@ -2195,7 +2234,9 @@ class _ThermostatCard extends StatelessWidget {
   final double value;
   final String mode;
   final bool modeFilled;
+  final bool isOn;
   final String? imagePath;
+  final String? imagePathOff;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback? onModeTap;
@@ -2203,15 +2244,21 @@ class _ThermostatCard extends StatelessWidget {
   final bool minusMarked;
   final bool plusMarked;
 
+  String? get _displayImagePath {
+    if (!isOn && imagePathOff != null) {
+      return imagePathOff;
+    }
+    return imagePath;
+  }
 
   @override
   Widget build(BuildContext context) {
     final Widget headerColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        imagePath != null
+        _displayImagePath != null
             ? Image.asset(
-                imagePath!,
+                _displayImagePath!,
                 width: 52.w,
                 height: 52.w,
                 fit: BoxFit.contain,

@@ -625,6 +625,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             path.contains('mask group (6)')) {
           return 'assets/images/bathroom_off.png';
         }
+        if (title.contains('motion sensor')) {
+          return 'assets/images/motion_sensor_off.png';
+        }
         return 'assets/images/light_of.png';
       default:
         return null;
@@ -632,6 +635,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   String get _heroImageAssetPath {
+    if (widget.deviceTitle == 'Motion Sensor' && !_isOn) {
+      return 'assets/images/motion_sensor_off.png';
+    }
     if (widget.controlMode == DeviceDetailsControlMode.lightSceneValues) {
       switch (_selectedSceneIndex.clamp(0, 2)) {
         case 2:
