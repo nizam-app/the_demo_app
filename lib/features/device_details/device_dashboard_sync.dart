@@ -20,6 +20,8 @@ class DeviceControlSnapshot {
     this.fanLevel = 1,
     this.heatingCoolingMode = 'heating',
     this.tunableWhiteIntensity = 0.7,
+    this.tunableWhiteDotDx = 0.5,
+    this.tunableWhiteDotDy = 0.5,
     this.presenceModeIndex = 0,
     this.thermostatRingPercent = 0.0,
     this.multiValueSwitchIndex = 0,
@@ -39,6 +41,8 @@ class DeviceControlSnapshot {
   final int fanLevel;
   final String heatingCoolingMode;
   final double tunableWhiteIntensity;
+  final double tunableWhiteDotDx;
+  final double tunableWhiteDotDy;
   final int presenceModeIndex;
   final double thermostatRingPercent;
   final int multiValueSwitchIndex;
@@ -72,6 +76,8 @@ class DeviceControlSnapshot {
     int? fanLevel,
     String? heatingCoolingMode,
     double? tunableWhiteIntensity,
+    double? tunableWhiteDotDx,
+    double? tunableWhiteDotDy,
     int? presenceModeIndex,
     double? thermostatRingPercent,
     int? multiValueSwitchIndex,
@@ -91,6 +97,8 @@ class DeviceControlSnapshot {
       fanLevel: fanLevel ?? this.fanLevel,
       heatingCoolingMode: heatingCoolingMode ?? this.heatingCoolingMode,
       tunableWhiteIntensity: tunableWhiteIntensity ?? this.tunableWhiteIntensity,
+      tunableWhiteDotDx: tunableWhiteDotDx ?? this.tunableWhiteDotDx,
+      tunableWhiteDotDy: tunableWhiteDotDy ?? this.tunableWhiteDotDy,
       presenceModeIndex: presenceModeIndex ?? this.presenceModeIndex,
       thermostatRingPercent: thermostatRingPercent ?? this.thermostatRingPercent,
       multiValueSwitchIndex:
@@ -187,6 +195,10 @@ class DeviceDashboardSync extends ChangeNotifier {
 const double _dashRingStart = math.pi / 2 + (52 * math.pi / 180) / 2;
 const double _dashRingSweep = 2 * math.pi;
 
+/// Progress ring stroke on dashboard LED / ventilation / thermostat cards.
+const double _dashProgressRingStroke = 6;
+const double _dashProgressRingInnerInset = 12;
+
 void _paintDashGradientRing(
   Canvas canvas,
   Size size, {
@@ -265,7 +277,7 @@ class _DashLedRingPainter extends CustomPainter {
       canvas,
       size,
       percent: percent,
-      strokeWidth: 4,
+      strokeWidth: _dashProgressRingStroke,
       gradientColors: const <Color>[Color(0xFF00D1FF), Color(0xFF00E52A)],
       gradientStops: const <double>[0.0, 0.8],
     );
@@ -287,7 +299,7 @@ class _DashVentilationRingPainter extends CustomPainter {
       canvas,
       size,
       percent: percent,
-      strokeWidth: 4,
+      strokeWidth: _dashProgressRingStroke,
       gradientColors: const <Color>[Color(0xFF3F92F6), Color(0xFF24D7FF)],
       gradientStops: const <double>[0.0, 0.42],
     );
@@ -326,8 +338,8 @@ class DashboardRingProgressIcon extends StatelessWidget {
                 : _DashLedRingPainter(percent: percent),
           ),
           Container(
-            width: side - 10,
-            height: side - 10,
+            width: side - _dashProgressRingInnerInset,
+            height: side - _dashProgressRingInnerInset,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white,
@@ -359,7 +371,7 @@ class _DashThermostatRingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const double strokeWidth = 4;
+    const double strokeWidth = _dashProgressRingStroke;
     final Offset center = Offset(size.width / 2, size.height / 2);
     final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 1;
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
@@ -405,39 +417,7 @@ class _DashThermostatRingPainter extends CustomPainter {
       old.percent != percent;
 }
 
-Offset _dashRingThumbCenter(Size size, double percent, double strokeWidth) {
-  final Offset center = Offset(size.width / 2, size.height / 2);
-  final double radius = size.shortestSide / 2 - strokeWidth / 2 - 2;
-  final double ang = _dashRingStart + _dashRingSweep * percent.clamp(0.0, 1.0);
-  return center + Offset(math.cos(ang), math.sin(ang)) * radius;
-}
-
-/// Dotted divider inside dashboard thermostat ring (matches details hero).
-class _DashThermostatDottedDividerPainter extends CustomPainter {
-  const _DashThermostatDottedDividerPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint dotPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    const double dotRadius = 0.8;
-    final double cy = size.height / 2;
-    double x = dotRadius + 0.5;
-    while (x < size.width - dotRadius) {
-      canvas.drawCircle(Offset(x, cy), dotRadius, dotPaint);
-      x += dotRadius * 2 + 2.5;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashThermostatDottedDividerPainter old) =>
-      old.color != color;
-}
-
-/// Ventilation ring with % + fan (matches details hero centre).
+/// Ventilation dashboard ring (same layout as LED [DashboardRingProgressIcon]).
 class DashboardVentilationIcon extends StatelessWidget {
   const DashboardVentilationIcon({super.key, required this.percent});
 
@@ -445,68 +425,14 @@ class DashboardVentilationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int pct = (percent.clamp(0.0, 1.0) * 100).round();
-    final double side = 52.w;
-    const double stroke = 4;
-    final Size size = Size(side, side);
-    final Offset thumb = _dashRingThumbCenter(size, percent, stroke);
-    const double thumbD = 7;
-
-    return SizedBox(
-      width: side,
-      height: side,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: size,
-            painter: _DashVentilationRingPainter(percent: percent),
-          ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '$pct%',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 9.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-                    height: 1.05,
-                  ),
-                ),
-                Image.asset(
-                  'assets/images/fan 2.png',
-                  height: 11.w,
-                  width: 11.w,
-                  fit: BoxFit.contain,
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: thumb.dx - thumbD / 2,
-            top: thumb.dy - thumbD / 2,
-            child: Container(
-              width: thumbD,
-              height: thumbD,
-              decoration: BoxDecoration(
-                color: const Color(0xFF38A4FE),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return DashboardRingProgressIcon(
+      percent: percent,
+      ringStyle: DashboardRingStyle.ventilation,
     );
   }
 }
 
-/// Thermostat ring with set-point text (matches details Living Room hero).
+/// Living room thermostat ring (same layout as LED [DashboardRingProgressIcon]).
 class DashboardThermostatRingIcon extends StatelessWidget {
   const DashboardThermostatRingIcon({
     super.key,
@@ -524,122 +450,33 @@ class DashboardThermostatRingIcon extends StatelessWidget {
     final double setTemp = 19.0 + percent.clamp(0.0, 1.0) * 16.0;
     final int tempInt = setTemp.floor();
     final int tempFrac = ((setTemp - tempInt) * 10).round();
-    final double side = 52.w;
-    const double stroke = 4;
-    final Size size = Size(side, side);
-    final Offset thumb = _dashRingThumbCenter(size, percent, stroke);
-    const double thumbD = 7;
+    const double side = 52;
 
     return SizedBox(
       width: side,
       height: side,
       child: Stack(
-        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
           CustomPaint(
-            size: size,
+            size: Size.square(side),
             painter: _DashThermostatRingPainter(percent: percent),
           ),
-          SizedBox(
-            width: side - 10,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Set Point',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 4.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '$tempInt',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 8.5.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111827),
-                          ),
-                        ),
-                        TextSpan(
-                          text: '.$tempFrac°',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 5.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF111827),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  CustomPaint(
-                    size: Size(22.w, 1.5),
-                    painter: const _DashThermostatDottedDividerPainter(
-                      color: Color(0xFFD1D5DB),
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/low-temperature 1.png',
-                        height: 4.5.h,
-                        width: 2.5.w,
-                        fit: BoxFit.cover,
-                      ),
-                      SizedBox(width: 0.5.w),
-                      Text(
-                        '${currentTempCelsius.toStringAsFixed(1)}°',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 3.5.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                      SizedBox(width: 1.w),
-                      Image.asset(
-                        'assets/hot-prsend.png',
-                        height: 4.5.h,
-                        width: 4.5.w,
-                        fit: BoxFit.cover,
-                      ),
-                      SizedBox(width: 0.5.w),
-                      Text(
-                        '$humidityPercent%',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 3.5.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          Container(
+            width: side - _dashProgressRingInnerInset,
+            height: side - _dashProgressRingInnerInset,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
             ),
-          ),
-          Positioned(
-            left: thumb.dx - thumbD / 2,
-            top: thumb.dy - thumbD / 2,
-            child: Container(
-              width: thumbD,
-              height: thumbD,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF007C),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5),
+            alignment: Alignment.center,
+            child: Text(
+              '$tempInt.$tempFrac°',
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF111827),
               ),
             ),
           ),
@@ -683,6 +520,109 @@ class _DashRgbHueWheelPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Tunable white color-temperature disk (matches details hero + grey selector ring).
+class DashboardTunableWhiteIcon extends StatelessWidget {
+  const DashboardTunableWhiteIcon({
+    super.key,
+    required this.dotDx,
+    required this.dotDy,
+  });
+
+  final double dotDx;
+  final double dotDy;
+
+  static const List<Color> _diskColors = <Color>[
+    Color(0xFFFEE481),
+    Color(0xFFFFFFFF),
+    Color(0xFF93E1E3),
+  ];
+
+  static const List<double> _diskStopsOuter = <double>[0.0, 0.55, 1.0];
+  static const List<double> _diskStopsInner = <double>[0.0, 0.48, 1.0];
+
+  @override
+  Widget build(BuildContext context) {
+    final double side = 52.w;
+    const double heroDisk = 280;
+    final double scale = side / heroDisk;
+    final double dialBorderWidth = 6 * scale;
+    final double ringSize = 40 * scale;
+    final double ringBorder = 2 * scale;
+    final double x = dotDx.clamp(0.0, 1.0) * side;
+    final double y = dotDy.clamp(0.0, 1.0) * side;
+
+    return SizedBox(
+      width: side,
+      height: side,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: side,
+            height: side,
+            padding: EdgeInsets.all(dialBorderWidth),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: _diskColors,
+                stops: _diskStopsOuter,
+              ),
+            ),
+            child: ClipOval(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: _diskColors,
+                        stops: _diskStopsInner,
+                      ),
+                    ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          Colors.white.withValues(alpha: 0.0),
+                          Colors.black.withValues(alpha: 0.06),
+                        ],
+                        stops: const <double>[0.65, 1.0],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: x - ringSize / 2,
+            top: y - ringSize / 2,
+            child: Container(
+              width: ringSize,
+              height: ringSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.transparent,
+                border: Border.all(
+                  color: const Color(0xFF9CA3AF),
+                  width: ringBorder,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// RGBW color wheel preview (matches details hero wheel + hollow selector).
@@ -1028,22 +968,31 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   }
 }
 
-/// Awning / blind level preview (blue fill from bottom).
-class DashboardBlindLevelIcon extends StatelessWidget {
-  const DashboardBlindLevelIcon({super.key, required this.level});
+/// Awning level preview (blue gradient fill from top — matches details hero).
+class DashboardAwningLevelIcon extends StatelessWidget {
+  const DashboardAwningLevelIcon({super.key, required this.level});
 
-  /// 0 = open, 1 = fully closed/down.
+  /// 0 = empty (0%), 1 = full (100%).
   final double level;
+
+  static const LinearGradient _awningGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[Color(0xFF38A4FE), Color(0xFF15DFFE)],
+  );
 
   @override
   Widget build(BuildContext context) {
     final double p = level.clamp(0.0, 1.0);
+    final double side = 52.w;
+    final double radius = 12.r;
+
     return Container(
-      width: 52,
-      height: 52,
+      width: side,
+      height: side,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       clipBehavior: Clip.antiAlias,
@@ -1057,17 +1006,182 @@ class DashboardBlindLevelIcon extends StatelessWidget {
               heightFactor: p,
               widthFactor: 1,
               child: const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[Color(0xFF38A4FE), Color(0xFF2196F3)],
-                  ),
-                ),
+                decoration: BoxDecoration(gradient: _awningGradient),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Venetian slats preview (matches details [_BlindSlatsPainter]).
+class DashboardBlindSlatsPainter extends CustomPainter {
+  const DashboardBlindSlatsPainter({
+    required this.level,
+    required this.angle,
+    this.cornerRadius = 0,
+  });
+
+  final double level;
+  final double angle;
+  final double cornerRadius;
+
+  static const int _slatCount = 11;
+  static const Color _slatColor = Color(0xFF38A4FE);
+  static const Color _slatShadow = Color(0xFF2196F3);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect bounds = Rect.fromLTWH(0, 0, size.width, size.height);
+    final RRect clipRrect = RRect.fromRectAndRadius(
+      bounds,
+      Radius.circular(
+        cornerRadius.clamp(0.0, math.min(size.width, size.height) / 2),
+      ),
+    );
+
+    canvas.drawRRect(clipRrect, Paint()..color = Colors.white);
+
+    canvas.save();
+    canvas.clipRRect(clipRrect);
+
+    final double horizontalInset = size.width * 0.015;
+    final double cx = size.width / 2;
+    final double usableW = size.width - (horizontalInset * 2);
+    final double bandH = size.height / _slatCount;
+    const double gap = 0.8;
+    final double maxSlatInBand = math.max(2.0, bandH - gap);
+    final double slatH = maxSlatInBand * angle.clamp(0.14, 1.25);
+    final double topW = usableW * 1.02;
+    final double a = angle.clamp(0.0, 1.0);
+    final double baseTaper = 0.74 + 0.16 * a;
+    final double flatBlend = a * a;
+    final double taperT =
+        (baseTaper * (1 - flatBlend) + 1.0 * flatBlend).clamp(0.66, 1.0);
+    final double botW = topW * taperT;
+    final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
+      0,
+      _slatCount,
+    );
+
+    final Paint fill = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final Paint edgeTop = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = Colors.white.withValues(alpha: 0.40)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint edgeBot = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = _slatShadow.withValues(alpha: 0.46)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint divider = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.6
+      ..color = Colors.white.withValues(alpha: 0.28);
+
+    for (int i = 0; i < visible; i++) {
+      final double bandTop = i * bandH;
+      final double top = bandTop + (bandH - slatH) / 2;
+      final double bot = top + slatH;
+
+      final Path slat = Path()
+        ..moveTo(cx - topW / 2, top)
+        ..lineTo(cx + topW / 2, top)
+        ..lineTo(cx + botW / 2, bot)
+        ..lineTo(cx - botW / 2, bot)
+        ..close();
+
+      fill.color = _slatColor;
+      canvas.drawPath(slat, fill);
+
+      canvas.drawLine(
+        Offset(cx - topW / 2, top),
+        Offset(cx + topW / 2, top),
+        edgeTop,
+      );
+
+      canvas.drawLine(
+        Offset(cx - botW / 2, bot),
+        Offset(cx + botW / 2, bot),
+        edgeBot,
+      );
+
+      if (i < visible - 1) {
+        canvas.drawLine(
+          Offset(cx - botW / 2, bot + gap / 2),
+          Offset(cx + botW / 2, bot + gap / 2),
+          divider,
+        );
+      }
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant DashboardBlindSlatsPainter old) =>
+      old.level != level ||
+      old.angle != angle ||
+      old.cornerRadius != cornerRadius;
+}
+
+/// Blind Living Room slat stack (level + angle — matches details hero).
+class DashboardBlindSlatsIcon extends StatelessWidget {
+  const DashboardBlindSlatsIcon({
+    super.key,
+    required this.level,
+    required this.angle,
+  });
+
+  final double level;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    final double side = 52.w;
+    final double pad = 3.w;
+    final double outerR = 12.r;
+    final double innerR = math.max(0.0, outerR - pad);
+
+    return Container(
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(outerR),
+        border: Border.all(color: const Color(0xFFFFFFFF), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(outerR),
+        child: Padding(
+          padding: EdgeInsets.all(pad),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(innerR),
+            child: CustomPaint(
+              painter: DashboardBlindSlatsPainter(
+                level: level.clamp(0.0, 1.0),
+                angle: angle.clamp(0.0, 1.0),
+                cornerRadius: innerR,
+              ),
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
       ),
     );
   }

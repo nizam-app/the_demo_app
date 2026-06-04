@@ -540,6 +540,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       fanLevel: _selectedFanLevel,
       heatingCoolingMode: _heatingCoolingMode,
       tunableWhiteIntensity: _tunableWhiteIntensity,
+      tunableWhiteDotDx: _tunableWhiteDotDx,
+      tunableWhiteDotDy: _tunableWhiteDotDy,
       presenceModeIndex: _selectedPresenceModeIndex,
       thermostatRingPercent: _thermostatSetPercent,
       multiValueSwitchIndex: _selectedMultiValueSwitchIndex,
@@ -572,6 +574,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     _selectedFanLevel = snap.fanLevel;
     _heatingCoolingMode = snap.heatingCoolingMode;
     _tunableWhiteIntensity = snap.tunableWhiteIntensity;
+    _tunableWhiteDotDx = snap.tunableWhiteDotDx;
+    _tunableWhiteDotDy = snap.tunableWhiteDotDy;
     _selectedPresenceModeIndex = snap.presenceModeIndex;
     _thermostatSetPercent = snap.thermostatRingPercent;
     _selectedMultiValueSwitchIndex = snap.multiValueSwitchIndex;
