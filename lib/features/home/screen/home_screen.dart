@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 'awning garden 123':
         next = prev.copyWith(
-          blindDownPercent: _awningDown,
+          blindDownPercent: 100 - _awningUp,
           blindUpPercent: _awningUp,
         );
         break;
@@ -406,9 +406,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title: 'Awning garden 123',
                                       downPercent: _awningDown,
                                       upPercent: _awningUp,
+                                      levelPercent: _awningUp,
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
                                       previewLevel: _awningUp / 100.0,
+                                      useAwningPreview: true,
                                       imagePath: 'assets/Rectangle 823.png',
                                       downMarked: _awningMark == 1,
                                       upMarked: _awningMark == 2,
@@ -430,8 +432,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
                                         action: () {
-                                          _awningDown =
-                                              (_awningDown + 5).clamp(0, 100);
+                                          _awningUp =
+                                              (_awningUp - 5).clamp(0, 100);
+                                          _awningDown = 100 - _awningUp;
                                           _pushDashboardFor('Awning garden 123');
                                         },
                                       ),
@@ -442,6 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         action: () {
                                           _awningUp =
                                               (_awningUp + 5).clamp(0, 100);
+                                          _awningDown = 100 - _awningUp;
                                           _pushDashboardFor('Awning garden 123');
                                         },
                                       ),
@@ -492,6 +496,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
                                       previewLevel: _blindRoomDown / 100.0,
+                                      blindAngle: _blindRoomUp / 100.0,
+                                      useBlindSlatsPreview: true,
                                       imagePath: 'assets/Rectangle 823.png',
                                       downMarked: _blindRoomMark == 1,
                                       upMarked: _blindRoomMark == 2,
@@ -1084,6 +1090,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // First row of cards
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _buildLightingCard(
@@ -1176,6 +1183,7 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(height: 12.h),
         // Second row of cards
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _buildLightingCard(
@@ -1204,6 +1212,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     '${(tunable.tunableWhiteIntensity * 100).round()}%',
                 iconImage:
                     'assets/white_light.png',
+                iconWidget: DashboardTunableWhiteIcon(
+                  dotDx: tunable.tunableWhiteDotDx,
+                  dotDy: tunable.tunableWhiteDotDy,
+                ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
                   deviceTitle: 'Tunable white light',
@@ -1261,6 +1273,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         SizedBox(height: 12.h),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _buildLightingCard(
@@ -1351,6 +1364,7 @@ class _HomeScreenState extends State<HomeScreen> {
       SizedBox(height:12.h),  
 
        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           
             
@@ -1448,45 +1462,68 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         );
-    final card = Container(
+    // Sum child heights with .h so card size matches content (avoids .w padding overflow).
+    final double cardHeight =
+        12.h + 52.h + 8.h + 38.h + 8.h + 20.h + 12.h;
+    final card = SizedBox(
+      height: cardHeight,
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: radius,
-      ),
-      padding: EdgeInsets.all(12.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          iconArea,
-          SizedBox(height: 8.h),
-          // Device name
-          Flexible(
-            child: Text(
-              deviceName,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF111827),
-                height: 1.15,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: radius,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 52.h,
+              width: double.infinity,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: iconArea,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          SizedBox(height: 8.h),
-          // Status
-          Text(
-            status,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF111827),
-              fontFamily: "Inter",
+            SizedBox(height: 8.h),
+            SizedBox(
+              height: 38.h,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  deviceName,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF111827),
+                    height: 1.15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 8.h),
+            SizedBox(
+              height: 20.h,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
+                    height: 1.0,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
     if (onTap == null) return card;
@@ -2393,6 +2430,10 @@ class _BlindCard extends StatelessWidget {
     this.upMarked = false,
     this.imagePath,
     this.previewLevel,
+    this.levelPercent,
+    this.useAwningPreview = false,
+    this.blindAngle,
+    this.useBlindSlatsPreview = false,
     this.onModeTap,
     this.onNavigate,
   });
@@ -2404,6 +2445,11 @@ class _BlindCard extends StatelessWidget {
   final bool modeFilled;
   final String? imagePath;
   final double? previewLevel;
+  /// When set, shows one level % between down/up (awning: 0↓ … 100↑).
+  final int? levelPercent;
+  final bool useAwningPreview;
+  final double? blindAngle;
+  final bool useBlindSlatsPreview;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onModeTap;
@@ -2436,7 +2482,17 @@ class _BlindCard extends StatelessWidget {
             children: [
               if (previewLevel != null)
                 titleInkWell(
-                  DashboardBlindLevelIcon(level: previewLevel!),
+                  useBlindSlatsPreview
+                      ? DashboardBlindSlatsIcon(
+                          level: previewLevel!,
+                          angle: blindAngle ?? 1.0,
+                        )
+                      : useAwningPreview
+                          ? DashboardAwningLevelIcon(level: previewLevel!)
+                          : DashboardBlindSlatsIcon(
+                              level: previewLevel!,
+                              angle: 1.0,
+                            ),
                 )
               else if (imagePath != null)
                 titleInkWell(
@@ -2493,39 +2549,50 @@ class _BlindCard extends StatelessWidget {
                                 ),
                                 size: 35,
                               ),
-                              SizedBox(width: 5.w),
-                              Image.asset(
-                                'assets/Group 32.jpg',
-                                width: 10.w,
-                                height: 17.h,
-                                fit: BoxFit.contain,
-                              ),
-                              SizedBox(width: 2.w),
-                              Text(
-                                '$downPercent%',
-                                style: TextStyle(
-                                  fontSize:18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF111827),
+                              SizedBox(width: 8.w),
+                              if (levelPercent != null) ...[
+                                Text(
+                                  '$levelPercent%',
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF111827),
+                                  ),
                                 ),
-                              ),
-                             SizedBox(width: 5.w),
-                              Image.asset(
-                                'assets/Vector 4.jpg',
-                                width: 8.w,
-                                height: 17.h,
-                                fit: BoxFit.contain,
-                              ),
-                              SizedBox(width: 2.w),
-                              Text(
-                                '$upPercent%',
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF111827),
+                              ] else ...[
+                                Image.asset(
+                                  'assets/Group 32.jpg',
+                                  width: 10.w,
+                                  height: 17.h,
+                                  fit: BoxFit.contain,
                                 ),
-                              ),
-                              SizedBox(width: 5.w),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  '$downPercent%',
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF111827),
+                                  ),
+                                ),
+                                SizedBox(width: 5.w),
+                                Image.asset(
+                                  'assets/Vector 4.jpg',
+                                  width: 8.w,
+                                  height: 17.h,
+                                  fit: BoxFit.contain,
+                                ),
+                                SizedBox(width: 2.w),
+                                Text(
+                                  '$upPercent%',
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF111827),
+                                  ),
+                                ),
+                              ],
+                              SizedBox(width: 8.w),
                               _CircleBtn(
                                 marked: upMarked,
                                 onTap: onUp,
