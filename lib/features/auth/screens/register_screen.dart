@@ -1,8 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
+import 'package:workpleis/features/auth/data/amin_api.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
 
 class JoinAicanScreen extends StatefulWidget {
@@ -63,6 +69,120 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   final _confirmF = FocusNode();
 
   bool _agree = false;
+  bool _isLoading = false;
+
+  Future<void> _handleRegister() async {
+    final String name = _nameC.text.trim();
+    final String email = _emailC.text.trim();
+    final String password = _passC.text;
+    final String confirmPassword = _confirmC.text;
+
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
+    if (!_agree) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept Terms and Conditions & Privacy policy'),
+        ),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      final Uri uri =
+          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.register}');
+      final String body = jsonEncode(<String, String>{
+        'name': name,
+        'email': email,
+        'password': password,
+      });
+      final http.Response response = await _postRegister(uri, body);
+
+      if (!mounted) return;
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_registerSuccessMessage(response.body))),
+        );
+        context.go(LoginScreen.routeName);
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_registerErrorMessage(response.body))),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration failed. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<http.Response> _postRegister(Uri uri, String body) async {
+    final HttpClient httpClient = HttpClient()
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) =>
+              host == 'api.aican.co.il';
+    final IOClient client = IOClient(httpClient);
+    try {
+      return await client.post(
+        uri,
+        headers: const {'Content-Type': 'application/json'},
+        body: body,
+      );
+    } finally {
+      client.close();
+    }
+  }
+
+  String _registerApiMessage(String body) {
+    try {
+      final dynamic decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        final dynamic message = decoded['message'] ?? decoded['error'];
+        if (message is List) {
+          return message.map((dynamic e) => e.toString()).join('\n');
+        }
+        if (message != null) return message.toString();
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  String _registerSuccessMessage(String body) {
+    final String message = _registerApiMessage(body);
+    if (message.isNotEmpty) return message;
+    return 'Account created successfully';
+  }
+
+  String _registerErrorMessage(String body) {
+    final String message = _registerApiMessage(body);
+    if (message.isNotEmpty) return message;
+    return 'Registration failed';
+  }
 
   @override
   void initState() {
@@ -348,32 +468,42 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
                     // ✅ Create via email button (blue -> purple)
                     GestureDetector(
-                      onTap: () {
-                        // TODO: sign up action
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        height: 54.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(26.r),
-                          gradient: const LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color(0xFF0088FE),
-                              Color(0xFFEB0FFE),
-                            ],
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Create via email',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              fontFamily: 'Inter',
+                      onTap: _isLoading ? null : _handleRegister,
+                      child: Opacity(
+                        opacity: _isLoading ? 0.7 : 1,
+                        child: Container(
+                          width: double.infinity,
+                          height: 54.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(26.r),
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                Color(0xFF0088FE),
+                                Color(0xFFEB0FFE),
+                              ],
                             ),
+                          ),
+                          child: Center(
+                            child: _isLoading
+                                ? SizedBox(
+                                    width: 22.w,
+                                    height: 22.w,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    'Create via email',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
                           ),
                         ),
                       ),

@@ -10,15 +10,28 @@ const _danger = Color(0xFFFE019A);
 const _blue = Color(0xFF007AFF);
 
 class EditAddSectionSheet extends StatefulWidget {
-  const EditAddSectionSheet({super.key});
+  const EditAddSectionSheet({
+    super.key,
+    this.initialSize = 'S',
+    this.onSizeChanged,
+  });
+
+  final String initialSize;
+  final ValueChanged<String>? onSizeChanged;
 
   @override
   State<EditAddSectionSheet> createState() => _EditAddSectionSheetState();
 }
 
 class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
-  String _selectedSize = 'S';
+  late String _selectedSize;
   bool _sliderWidget = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedSize = widget.initialSize;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +190,10 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     title: 'Widget size',
                     trailing: _SizeSegment(
                       value: _selectedSize,
-                      onChanged: (v) => setState(() => _selectedSize = v),
+                      onChanged: (v) => setState(() {
+                        _selectedSize = v;
+                        widget.onSizeChanged?.call(v);
+                      }),
                       imageWidth: 22.w, // custom image width
                       imageHeight: 22.h, // custom image height
                     ),
