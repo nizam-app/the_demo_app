@@ -1,7 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
+import 'package:workpleis/features/auth/data/amin_api.dart';
 import 'package:workpleis/features/auth/screens/forget_screen.dart';
 import 'package:workpleis/features/auth/screens/register_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
@@ -58,6 +65,93 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  bool _isLoading = false;
+
+  Future<void> _handleLogin() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter email and password')),
+      );
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      final Uri uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.login}');
+      final String body = jsonEncode(<String, String>{
+        'email': email,
+        'password': password,
+      });
+      final http.Response response = await _postLogin(uri, body);
+
+      if (!mounted) return;
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? token = data['access_token'] as String?;
+
+        if (token == null || token.isEmpty) {
+          throw Exception('No access token received');
+        }
+
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('email', email);
+
+        if (!mounted) return;
+        context.go(HomeScreen.routeName);
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_loginErrorMessage(response.body))),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<http.Response> _postLogin(Uri uri, String body) async {
+    final HttpClient httpClient = HttpClient()
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) =>
+              host == 'api.aican.co.il';
+    final IOClient client = IOClient(httpClient);
+    try {
+      return await client.post(
+        uri,
+        headers: const {'Content-Type': 'application/json'},
+        body: body,
+      );
+    } finally {
+      client.close();
+    }
+  }
+
+  String _loginErrorMessage(String body) {
+    try {
+      final dynamic decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        final dynamic message = decoded['message'] ?? decoded['error'];
+        if (message is List) {
+          return message.map((dynamic e) => e.toString()).join('\n');
+        }
+        if (message != null) return message.toString();
+      }
+    } catch (_) {}
+    return 'Invalid email or password';
+  }
 
   @override
   void initState() {
@@ -224,29 +318,39 @@ Widget _pillField({
 
                 // Login button with gradient
                 GestureDetector(
-                  onTap: () {
-                    context.go(HomeScreen.routeName);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    height: 54.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26.r),
-                      gradient: const LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          fontFamily: 'Inter',
+                  onTap: _isLoading ? null : _handleLogin,
+                  child: Opacity(
+                    opacity: _isLoading ? 0.7 : 1,
+                    child: Container(
+                      width: double.infinity,
+                      height: 54.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(26.r),
+                        gradient: const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFF0088FE), Color(0xFF00D1FF)],
                         ),
+                      ),
+                      child: Center(
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 22.w,
+                                height: 22.w,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
                       ),
                     ),
                   ),
