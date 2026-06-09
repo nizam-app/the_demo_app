@@ -68,8 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double _bathroomThermostat = 24.6;
   int _awningDown = 0;
   int _awningUp = 72;
-  int _blindRoomDown = 0;
-  int _blindRoomUp = 72;
+  /// Blind Living Room: left stat = level, right stat = angle (sync blindDown/blindUp).
+  int _blindRoomLevel = 0;
+  int _blindRoomAngle = 72;
   final List<int> _shadeDown = [100, 100, 100];
   final List<int> _shadeUp = [50, 50, 50];
   /// Shading list rows: manual (M) vs auto (A), matches prior static modes.
@@ -142,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final DeviceControlSnapshot blind =
           sync.snapshotFor('Blind Living Room');
-      _blindRoomDown = blind.blindDownPercent;
-      _blindRoomUp = blind.blindUpPercent;
+      _blindRoomLevel = blind.blindDownPercent;
+      _blindRoomAngle = blind.blindUpPercent;
     });
   }
 
@@ -176,8 +177,8 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 'blind living room':
         next = prev.copyWith(
-          blindDownPercent: _blindRoomDown,
-          blindUpPercent: _blindRoomUp,
+          blindDownPercent: _blindRoomLevel,
+          blindUpPercent: _blindRoomAngle,
         );
         break;
       default:
@@ -217,6 +218,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  /// Blind Living Room dashboard: short press adjusts angle (right), long press sets level (left).
+  void _blindLivingRoomAdjustAngle(int delta) {
+    _blindRoomAngle = (_blindRoomAngle + delta).clamp(0, 100);
+    _pushDashboardFor('Blind Living Room');
+  }
+
+  void _blindLivingRoomSetLevel(int percent) {
+    _blindRoomLevel = percent.clamp(0, 100);
+    _pushDashboardFor('Blind Living Room');
   }
 
   void _flashMark({
@@ -545,12 +557,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 185.h,
                                     child: _BlindCard(
                                       title: 'Blind Living Room',
-                                      downPercent: _blindRoomDown,
-                                      upPercent: _blindRoomUp,
+                                      downPercent: _blindRoomLevel,
+                                      upPercent: _blindRoomAngle,
                                       mode: _blindManual ? 'M' : 'A',
                                       modeFilled: _blindManual,
-                                      previewLevel: _blindRoomDown / 100.0,
-                                      blindAngle: _blindRoomUp / 100.0,
+                                      previewLevel: _blindRoomLevel / 100.0,
+                                      blindAngle: _blindRoomAngle / 100.0,
                                       useBlindSlatsPreview: true,
                                       imagePath: 'assets/Rectangle 823.png',
                                       downMarked: _blindRoomMark == 1,
@@ -572,39 +584,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                         value: 1,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
-                                        action: () {
-                                          _blindRoomUp =
-                                              (_blindRoomUp - 10).clamp(0, 100);
-                                          _pushDashboardFor('Blind Living Room');
-                                        },
+                                        action: () =>
+                                            _blindLivingRoomAdjustAngle(-10),
                                       ),
                                       onDownLong: () => _flashMark(
                                         value: 1,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
-                                        action: () {
-                                          _blindRoomDown = 0;
-                                          _pushDashboardFor('Blind Living Room');
-                                        },
+                                        action: () =>
+                                            _blindLivingRoomSetLevel(0),
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
-                                        action: () {
-                                          _blindRoomUp =
-                                              (_blindRoomUp + 10).clamp(0, 100);
-                                          _pushDashboardFor('Blind Living Room');
-                                        },
+                                        action: () =>
+                                            _blindLivingRoomAdjustAngle(10),
                                       ),
                                       onUpLong: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
-                                        action: () {
-                                          _blindRoomDown = 100;
-                                          _pushDashboardFor('Blind Living Room');
-                                        },
+                                        action: () =>
+                                            _blindLivingRoomSetLevel(100),
                                       ),
                                     ),
                                   ),
