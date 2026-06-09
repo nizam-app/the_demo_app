@@ -105,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Map<String, int> _lightingStepMark = <String, int>{};
 
   late final VoidCallback _dashboardSyncListener;
+  bool _suppressDashboardSyncPull = false;
 
   @override
   void initState() {
@@ -123,6 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _pullFromDashboardSync() {
+    if (_suppressDashboardSyncPull) return;
     final DeviceDashboardSync sync = DeviceDashboardSync.instance;
     setState(() {
       final DeviceControlSnapshot light =
@@ -184,7 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return;
     }
+    _suppressDashboardSyncPull = true;
     DeviceDashboardSync.instance.update(deviceTitle, next);
+    _suppressDashboardSyncPull = false;
   }
 
   DeviceControlSnapshot _snap(String title) =>
@@ -220,7 +224,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Blind Living Room dashboard: short press adjusts angle (right), long press sets level (left).
+  /// Blind Living Room: ↓ → angle; ↑ → level (each button only touches its value).
+  void _blindLivingRoomAdjustLevel(int delta) {
+    _blindRoomLevel = (_blindRoomLevel + delta).clamp(0, 100);
+    _pushDashboardFor('Blind Living Room');
+  }
+
   void _blindLivingRoomAdjustAngle(int delta) {
     _blindRoomAngle = (_blindRoomAngle + delta).clamp(0, 100);
     _pushDashboardFor('Blind Living Room');
@@ -231,6 +240,24 @@ class _HomeScreenState extends State<HomeScreen> {
     _pushDashboardFor('Blind Living Room');
   }
 
+  void _blindLivingRoomSetAngle(int percent) {
+    _blindRoomAngle = percent.clamp(0, 100);
+    _pushDashboardFor('Blind Living Room');
+  }
+
+  /// Awning dashboard: up extends (level↑), down retracts (level↓); long = 100% / 0%.
+  void _awningAdjustLevel(int delta) {
+    _awningUp = (_awningUp + delta).clamp(0, 100);
+    _awningDown = 100 - _awningUp;
+    _pushDashboardFor('Awning garden 123');
+  }
+
+  void _awningSetLevel(int percent) {
+    _awningUp = percent.clamp(0, 100);
+    _awningDown = 100 - _awningUp;
+    _pushDashboardFor('Awning garden 123');
+  }
+
   void _flashMark({
     required int value,
     required int Function() getCurrent,
@@ -238,10 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? action,
     Duration duration = const Duration(milliseconds: 1200),
   }) {
-    setState(() {
-      set(value);
-      action?.call();
-    });
+    setState(() => set(value));
+    action?.call();
+    if (action != null && mounted) {
+      setState(() {});
+    }
     Future.delayed(duration, () {
       if (!mounted) return;
       if (getCurrent() == value) {
@@ -477,43 +505,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                         value: 1,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () {
-                                          _awningUp =
-                                              (_awningUp - 10).clamp(0, 100);
-                                          _awningDown = 100 - _awningUp;
-                                          _pushDashboardFor('Awning garden 123');
-                                        },
+                                        action: () => _awningAdjustLevel(-10),
                                       ),
                                       onDownLong: () => _flashMark(
                                         value: 1,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () {
-                                          _awningUp = 0;
-                                          _awningDown = 100;
-                                          _pushDashboardFor('Awning garden 123');
-                                        },
+                                        action: () => _awningSetLevel(0),
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () {
-                                          _awningUp =
-                                              (_awningUp + 10).clamp(0, 100);
-                                          _awningDown = 100 - _awningUp;
-                                          _pushDashboardFor('Awning garden 123');
-                                        },
+                                        action: () => _awningAdjustLevel(10),
                                       ),
                                       onUpLong: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () {
-                                          _awningUp = 0;
-                                          _awningDown = 100;
-                                          _pushDashboardFor('Awning garden 123');
-                                        },
+                                        action: () => _awningSetLevel(100),
                                       ),
                                     ),
                                   ),
@@ -592,14 +602,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomSetLevel(0),
+                                            _blindLivingRoomSetAngle(100),
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomAdjustAngle(10),
+                                            _blindLivingRoomAdjustLevel(10),
                                       ),
                                       onUpLong: () => _flashMark(
                                         value: 2,
@@ -608,6 +618,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         action: () =>
                                             _blindLivingRoomSetLevel(100),
                                       ),
+                                      compactControlButtons: true,
                                     ),
                                   ),
                                 ),
@@ -1275,6 +1286,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 iconWidget: DashboardTunableWhiteIcon(
                   dotDx: tunable.tunableWhiteDotDx,
                   dotDy: tunable.tunableWhiteDotDy,
+                  intensity: tunable.tunableWhiteIntensity,
                 ),
                 onTap: () => DeviceDetailsScreen.go(
                   context,
@@ -1709,6 +1721,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: DashboardTunableWhiteIcon(
             dotDx: tunable.tunableWhiteDotDx,
             dotDy: tunable.tunableWhiteDotDy,
+            intensity: tunable.tunableWhiteIntensity,
           ),
           deviceName: 'Tunable white light',
           statusText: '${(tunable.tunableWhiteIntensity * 100).round()}%',
@@ -2398,6 +2411,7 @@ class _PressableCircleSurface extends StatefulWidget {
     this.onLongPress,
     this.marked = false,
     this.enableHaptic = true,
+    this.idleTransparent = false,
   });
 
   final double side;
@@ -2407,6 +2421,8 @@ class _PressableCircleSurface extends StatefulWidget {
   /// When true, fill stays gray (last-used / "marked" control).
   final bool marked;
   final bool enableHaptic;
+  /// No white disk at rest — only show fill while pressed or marked.
+  final bool idleTransparent;
 
   static const Color _pressedFill = Color(0xFFE5E7EB);
 
@@ -2417,6 +2433,7 @@ class _PressableCircleSurface extends StatefulWidget {
 
 class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
   bool _pressed = false;
+  bool _longPressHandled = false;
 
   void _setPressed(bool v) {
     if (_pressed != v) setState(() => _pressed = v);
@@ -2424,10 +2441,12 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
 
   @override
   Widget build(BuildContext context) {
-    final fill = (widget.marked || _pressed)
+    final Color fill = (widget.marked || _pressed)
         ? _PressableCircleSurface._pressedFill
-        : Colors.white;
-    final circle = Container(
+        : widget.idleTransparent
+            ? Colors.transparent
+            : Colors.white;
+    final Widget circle = Container(
       width: widget.side,
       height: widget.side,
       decoration: BoxDecoration(
@@ -2440,12 +2459,20 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
     if (widget.onTap == null && widget.onLongPress == null) return circle;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _setPressed(true),
+      onTapDown: (_) {
+        _longPressHandled = false;
+        _setPressed(true);
+      },
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: widget.onTap == null
           ? null
           : () {
+              if (_longPressHandled) {
+                _longPressHandled = false;
+                _setPressed(false);
+                return;
+              }
               if (widget.enableHaptic) uiTapHaptic();
               widget.onTap!();
               _setPressed(false);
@@ -2453,6 +2480,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       onLongPress: widget.onLongPress == null
           ? null
           : () {
+              _longPressHandled = true;
               if (widget.enableHaptic) uiTapHaptic();
               widget.onLongPress!();
               _setPressed(false);
@@ -2469,6 +2497,7 @@ class _CircleBtn extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.marked = false,
+    this.idleTransparent = false,
   });
 
   final Widget child;
@@ -2476,15 +2505,17 @@ class _CircleBtn extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool marked;
+  final bool idleTransparent;
 
   @override
   Widget build(BuildContext context) {
-    final s = (size ?? 32).w;
+    final double side = (size ?? 32).w;
     return _PressableCircleSurface(
-      side: s,
+      side: side,
       onTap: onTap,
       onLongPress: onLongPress,
       marked: marked,
+      idleTransparent: idleTransparent,
       child: child,
     );
   }
@@ -2519,7 +2550,7 @@ class _LightDimmerCard extends StatelessWidget {
   final VoidCallback? onModeTap;
 
   String? get _displayImagePath {
-    if (!isOn && imagePathOff != null) {
+    if ((!isOn || percent <= 0.001) && imagePathOff != null) {
       return imagePathOff;
     }
     return imagePath;
@@ -2540,7 +2571,9 @@ class _LightDimmerCard extends StatelessWidget {
             : Icon(
                 Icons.lightbulb_outline,
                 size: 52.sp,
-                color: const Color(0xFF15DFFE),
+                color: percent <= 0.001
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF15DFFE),
               ),
         SizedBox(height: 10.h),
         Text(
@@ -2908,6 +2941,7 @@ class _BlindCard extends StatelessWidget {
     this.useAwningPreview = false,
     this.blindAngle,
     this.useBlindSlatsPreview = false,
+    this.compactControlButtons = false,
     this.onModeTap,
     this.onNavigate,
   });
@@ -2924,6 +2958,7 @@ class _BlindCard extends StatelessWidget {
   final bool useAwningPreview;
   final double? blindAngle;
   final bool useBlindSlatsPreview;
+  final bool compactControlButtons;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onDownLong;
@@ -3004,34 +3039,38 @@ class _BlindCard extends StatelessWidget {
               Flexible(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
+                    final double controlSize = compactControlButtons ? 40 : 35;
+                    final double iconSize = compactControlButtons ? 14.sp : 13.sp;
                     final Widget downBtn = _CircleBtn(
                       marked: downMarked,
                       onTap: onDown,
                       onLongPress: onDownLong,
+                      size: controlSize,
+                      idleTransparent: compactControlButtons,
                       child: Image.asset(
                         'assets/Mask group (17).png',
-                        width: 13.sp,
-                        height: 13.sp,
+                        width: iconSize,
+                        height: iconSize,
                         fit: BoxFit.contain,
                         color: const Color(0xFF6B7280),
                       ),
-                      size: 35,
                     );
                     final Widget upBtn = _CircleBtn(
                       marked: upMarked,
                       onTap: onUp,
                       onLongPress: onUpLong,
+                      size: controlSize,
+                      idleTransparent: compactControlButtons,
                       child: Transform.rotate(
                         angle: math.pi,
                         child: Image.asset(
                           'assets/Mask group (17).png',
-                          width: 13.sp,
-                          height: 13.sp,
+                          width: iconSize,
+                          height: iconSize,
                           fit: BoxFit.contain,
                           color: const Color(0xFF6B7280),
                         ),
                       ),
-                      size: 35,
                     );
 
                     if (levelPercent != null) {
@@ -3117,32 +3156,24 @@ class _BlindCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           downBtn,
-                          SizedBox(width: 4.w),
                           Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
+                            child: Center(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: levelStat(),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    levelStat(),
+                                    SizedBox(
+                                      width: compactControlButtons ? 8.w : 10.w,
+                                    ),
+                                    angleStat(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: angleStat(),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Padding(
-                            padding: EdgeInsets.only(right: 2.w),
-                            child: upBtn,
-                          ),
+                          upBtn,
                         ],
                       ),
                     );
