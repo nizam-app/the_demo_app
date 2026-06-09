@@ -192,6 +192,38 @@ class DeviceDashboardSync extends ChangeNotifier {
 
 // —— Mini ring icons for dashboard cards (match details-screen rings) ——
 
+/// Bubble Gray — inner circle fill on dashboard ring / switch tiles.
+const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
+
+/// Mandatory off-state palette (irrigation / light-scene off grey — no white, no color).
+const Color _dashboardOffGreyFill = Color(0xFFE5E7EB);
+const Color _dashboardOffGreyBorder = Color(0xFFD1D5DB);
+const Color _dashboardOffGreyText = Color(0xFF9CA3AF);
+
+bool _dashboardIsOffPercent(double value) => value.clamp(0.0, 1.0) <= 0.001;
+
+/// Grey placeholder when a dashboard tile is 0% / Off.
+class DashboardOffGreyIcon extends StatelessWidget {
+  const DashboardOffGreyIcon({super.key, this.circular = false});
+
+  final bool circular;
+
+  @override
+  Widget build(BuildContext context) {
+    final double side = 52.w;
+    return Container(
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+        color: _dashboardOffGreyFill,
+        shape: circular ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: circular ? null : BorderRadius.circular(12.r),
+        border: Border.all(color: _dashboardOffGreyBorder),
+      ),
+    );
+  }
+}
+
 const double _dashRingStart = math.pi / 2 + (52 * math.pi / 180) / 2;
 const double _dashRingSweep = 2 * math.pi;
 
@@ -323,8 +355,10 @@ class DashboardRingProgressIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int pct = (percent.clamp(0.0, 1.0) * 100).round();
+    final double clamped = percent.clamp(0.0, 1.0);
+    final int pct = (clamped * 100).round();
     final double side = 52;
+    final bool isOff = _dashboardIsOffPercent(clamped);
     return SizedBox(
       width: side,
       height: side,
@@ -334,24 +368,26 @@ class DashboardRingProgressIcon extends StatelessWidget {
           CustomPaint(
             size: Size.square(side),
             painter: ringStyle == DashboardRingStyle.ventilation
-                ? _DashVentilationRingPainter(percent: percent)
-                : _DashLedRingPainter(percent: percent),
+                ? _DashVentilationRingPainter(percent: clamped)
+                : _DashLedRingPainter(percent: clamped),
           ),
           Container(
             width: side - _dashProgressRingInnerInset,
             height: side - _dashProgressRingInnerInset,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
             child: Text(
               '$pct%',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF111827),
+                color: isOff
+                    ? _dashboardOffGreyText
+                    : const Color(0xFF111827),
               ),
             ),
           ),
@@ -467,7 +503,7 @@ class DashboardThermostatRingIcon extends StatelessWidget {
             height: side - _dashProgressRingInnerInset,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
             child: Text(
@@ -528,10 +564,12 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
     super.key,
     required this.dotDx,
     required this.dotDy,
+    this.intensity = 1.0,
   });
 
   final double dotDx;
   final double dotDy;
+  final double intensity;
 
   static const List<Color> _diskColors = <Color>[
     Color(0xFFFEE481),
@@ -544,6 +582,10 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_dashboardIsOffPercent(intensity)) {
+      return const DashboardOffGreyIcon(circular: true);
+    }
+
     final double side = 52.w;
     const double heroDisk = 280;
     final double scale = side / heroDisk;
@@ -662,6 +704,10 @@ class DashboardRgbwIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_dashboardIsOffPercent(intensity)) {
+      return const DashboardOffGreyIcon(circular: true);
+    }
+
     final double side = 52.w;
     final Size layoutSize = Size(side, side);
     final Offset center = Offset(side / 2, side / 2);
@@ -931,7 +977,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
       padding: EdgeInsets.all(3.w),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: _dashboardBubbleGray,
           borderRadius: BorderRadius.circular(26.r),
         ),
         child: SizedBox(
@@ -984,6 +1030,10 @@ class DashboardAwningLevelIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double p = level.clamp(0.0, 1.0);
+    if (_dashboardIsOffPercent(p)) {
+      return const DashboardOffGreyIcon();
+    }
+
     final double side = 52.w;
     final double radius = 12.r;
 
@@ -991,15 +1041,15 @@ class DashboardAwningLevelIcon extends StatelessWidget {
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _dashboardOffGreyFill,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: _dashboardOffGreyBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: Colors.white),
+          const ColoredBox(color: _dashboardOffGreyFill),
           Align(
             alignment: Alignment.topCenter,
             child: FractionallySizedBox(
@@ -1042,24 +1092,21 @@ class DashboardBlindSlatsPainter extends CustomPainter {
       ),
     );
 
-    canvas.drawRRect(clipRrect, Paint()..color = Colors.white);
+    canvas.drawRRect(clipRrect, Paint()..color = _dashboardOffGreyFill);
 
     canvas.save();
     canvas.clipRRect(clipRrect);
 
-    final double horizontalInset = size.width * 0.015;
     final double cx = size.width / 2;
-    final double usableW = size.width - (horizontalInset * 2);
+    final double usableW = size.width;
     final double bandH = size.height / _slatCount;
-    const double gap = 0.8;
+    const double gap = 0.5;
     final double maxSlatInBand = math.max(2.0, bandH - gap);
-    final double slatH = maxSlatInBand * angle.clamp(0.14, 1.25);
-    final double topW = usableW * 1.02;
     final double a = angle.clamp(0.0, 1.0);
-    final double baseTaper = 0.74 + 0.16 * a;
-    final double flatBlend = a * a;
-    final double taperT =
-        (baseTaper * (1 - flatBlend) + 1.0 * flatBlend).clamp(0.66, 1.0);
+    // Thicker slats at low angle; full band height when open — avoids side/vertical gaps.
+    final double slatH = maxSlatInBand * (0.72 + 0.28 * a);
+    final double topW = usableW;
+    final double taperT = (0.94 + 0.06 * a).clamp(0.94, 1.0);
     final double botW = topW * taperT;
     final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
       0,
@@ -1146,6 +1193,11 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double clampedLevel = level.clamp(0.0, 1.0);
+    if (_dashboardIsOffPercent(clampedLevel)) {
+      return const DashboardOffGreyIcon();
+    }
+
     final double side = 52.w;
     final double pad = 3.w;
     final double outerR = 12.r;
@@ -1155,9 +1207,9 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _dashboardOffGreyFill,
         borderRadius: BorderRadius.circular(outerR),
-        border: Border.all(color: const Color(0xFFFFFFFF), width: 1),
+        border: Border.all(color: _dashboardOffGreyBorder, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
