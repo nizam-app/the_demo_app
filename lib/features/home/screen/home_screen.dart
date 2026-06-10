@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Blind Living Room: ↓ → angle; ↑ → level (each button only touches its value).
+  /// Blind Living Room: ↓ → level (+10 / long 0%); ↑ → angle (−10 / long 100%).
   void _blindLivingRoomAdjustLevel(int delta) {
     _blindRoomLevel = (_blindRoomLevel + delta).clamp(0, 100);
     _pushDashboardFor('Blind Living Room');
@@ -245,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _pushDashboardFor('Blind Living Room');
   }
 
-  /// Awning dashboard: up extends (level↑), down retracts (level↓); long = 100% / 0%.
+  /// Awning dashboard: ↓ extends (level↑), ↑ retracts (level↓); long = 100% / 0%.
   void _awningAdjustLevel(int delta) {
     _awningUp = (_awningUp + delta).clamp(0, 100);
     _awningDown = 100 - _awningUp;
@@ -505,25 +505,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                         value: 1,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () => _awningAdjustLevel(-10),
+                                        action: () => _awningAdjustLevel(10),
                                       ),
                                       onDownLong: () => _flashMark(
                                         value: 1,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () => _awningSetLevel(0),
+                                        action: () => _awningSetLevel(100),
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () => _awningAdjustLevel(10),
+                                        action: () => _awningAdjustLevel(-10),
                                       ),
                                       onUpLong: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _awningMark,
                                         set: (v) => _awningMark = v,
-                                        action: () => _awningSetLevel(100),
+                                        action: () => _awningSetLevel(0),
                                       ),
                                     ),
                                   ),
@@ -595,30 +595,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomAdjustAngle(-10),
+                                            _blindLivingRoomAdjustLevel(10),
                                       ),
                                       onDownLong: () => _flashMark(
                                         value: 1,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomSetAngle(100),
+                                            _blindLivingRoomSetLevel(0),
                                       ),
                                       onUp: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomAdjustLevel(10),
+                                            _blindLivingRoomAdjustAngle(-10),
                                       ),
                                       onUpLong: () => _flashMark(
                                         value: 2,
                                         getCurrent: () => _blindRoomMark,
                                         set: (v) => _blindRoomMark = v,
                                         action: () =>
-                                            _blindLivingRoomSetLevel(100),
+                                            _blindLivingRoomSetAngle(100),
                                       ),
-                                      compactControlButtons: true,
                                     ),
                                   ),
                                 ),
@@ -2669,19 +2668,20 @@ class _DimmerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
+    final bool isOff = p <= 0;
 
     // Bigger button width
     final w = 133.w;
     final h = 35.h;
     final radius = 24.r;
 
-    //final textValue = '${(p * 100).round()}%';
+    const Color offGreyFill = Color(0xFFE5E7EB);
 
     final pill = Container(
       width: w,
       height: h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isOff ? offGreyFill : Colors.white,
         borderRadius: BorderRadius.circular(radius),
         boxShadow: const [],
       ),
@@ -2690,27 +2690,26 @@ class _DimmerPill extends StatelessWidget {
         child: Stack(
           children: [
             /// Right gray dim area
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: FractionallySizedBox(
-                  widthFactor: (1 - p),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE1E1E1),
-
-                      /// Fix right corner radius
-                      borderRadius: BorderRadius.horizontal(
-                        right: Radius.circular(radius),
-                        left: Radius.circular(
-                          (1 - p) >= 0.98 ? radius : 0,
+            if (!isOff)
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FractionallySizedBox(
+                    widthFactor: (1 - p),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE1E1E1),
+                        borderRadius: BorderRadius.horizontal(
+                          right: Radius.circular(radius),
+                          left: Radius.circular(
+                            (1 - p) >= 0.98 ? radius : 0,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
 
             /// Sun Icon
             Positioned(
@@ -2721,8 +2720,8 @@ class _DimmerPill extends StatelessWidget {
                 child: Icon(
                   Icons.wb_sunny_outlined,
                   size: 18.sp,
-                  color: p <= 0
-                      ? const Color(0xFF6B7280)
+                  color: isOff
+                      ? const Color(0xFF111827)
                       : const Color(0xFFFAB300),
                 ),
               ),
@@ -3046,7 +3045,7 @@ class _BlindCard extends StatelessWidget {
                       onTap: onDown,
                       onLongPress: onDownLong,
                       size: controlSize,
-                      idleTransparent: compactControlButtons,
+                      idleTransparent: false,
                       child: Image.asset(
                         'assets/Mask group (17).png',
                         width: iconSize,
@@ -3060,7 +3059,7 @@ class _BlindCard extends StatelessWidget {
                       onTap: onUp,
                       onLongPress: onUpLong,
                       size: controlSize,
-                      idleTransparent: compactControlButtons,
+                      idleTransparent: false,
                       child: Transform.rotate(
                         angle: math.pi,
                         child: Image.asset(
