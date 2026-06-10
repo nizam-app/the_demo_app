@@ -71,6 +71,25 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   bool _agree = false;
   bool _isLoading = false;
 
+  static const Color _snackBackground = Color(0xFFF3F4F6);
+  static const Color _snackText = Color(0xFF111827);
+
+  void _showRegisterSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: _snackBackground,
+        behavior: SnackBarBehavior.floating,
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: _snackText,
+            fontFamily: 'Inter',
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleRegister() async {
     final String name = _nameC.text.trim();
     final String email = _emailC.text.trim();
@@ -81,24 +100,18 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
         email.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      _showRegisterSnackBar('Please fill in all fields');
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      _showRegisterSnackBar('Passwords do not match');
       return;
     }
 
     if (!_agree) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept Terms and Conditions & Privacy policy'),
-        ),
+      _showRegisterSnackBar(
+        'Please accept Terms and Conditions & Privacy policy',
       );
       return;
     }
@@ -119,23 +132,15 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       if (!mounted) return;
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_registerSuccessMessage(response.body))),
-        );
+        _showRegisterSnackBar(_registerSuccessMessage(response.body));
         context.go(LoginScreen.routeName);
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_registerErrorMessage(response.body))),
-      );
+      _showRegisterSnackBar(_registerErrorMessage(response.body));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration failed. Please try again.'),
-        ),
-      );
+      _showRegisterSnackBar('Registration failed. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
