@@ -132,8 +132,11 @@ class DeviceControlSnapshot {
     }
   }
 
-  String get presenceLabel => presenceLabels[
-      presenceModeIndex.clamp(0, presenceLabels.length - 1)];
+  String get presenceLabel {
+    if (!isOn) return 'Off';
+    return presenceLabels[
+        presenceModeIndex.clamp(0, presenceLabels.length - 1)];
+  }
 
   static const List<String> presenceModeAssetPaths = <String>[
     'assets/images/comfort.png',
@@ -162,8 +165,11 @@ class DeviceControlSnapshot {
     'On Alarm',
   ];
 
-  String get multiValueSwitchCaption => multiValueSwitchRowLabels[
-      multiValueSwitchIndex % multiValueSwitchRowLabels.length];
+  String get multiValueSwitchCaption {
+    if (!isOn) return 'Off';
+    return multiValueSwitchRowLabels[
+        multiValueSwitchIndex % multiValueSwitchRowLabels.length];
+  }
 
   double get thermostatRingCelsius =>
       19.0 + thermostatRingPercent.clamp(0.0, 1.0) * 16.0;
@@ -889,9 +895,11 @@ class DashboardPresenceModeIcon extends StatelessWidget {
   const DashboardPresenceModeIcon({
     super.key,
     required this.modeIndex,
+    this.isOn = true,
   });
 
   final int modeIndex;
+  final bool isOn;
 
   static const LinearGradient _selectedRingGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -909,6 +917,35 @@ class DashboardPresenceModeIcon extends StatelessWidget {
     final String asset = DeviceControlSnapshot.presenceModeAssetPaths[
         modeIndex.clamp(0, DeviceControlSnapshot.presenceModeAssetPaths.length - 1)];
 
+    final Widget baseImage = Image.asset(
+      asset,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+    );
+    final Widget modeImage = isOn
+        ? baseImage
+        : ColorFiltered(
+            colorFilter: const ColorFilter.mode(
+              _dashboardOffGreyText,
+              BlendMode.srcIn,
+            ),
+            child: baseImage,
+          );
+
+    if (!isOn) {
+      return Container(
+        width: side,
+        height: side,
+        decoration: BoxDecoration(
+          color: _dashboardOffGreyFill,
+          shape: BoxShape.circle,
+          border: Border.all(color: _dashboardOffGreyBorder),
+        ),
+        padding: EdgeInsets.all(innerInset + ringInset),
+        child: modeImage,
+      );
+    }
+
     return Container(
       width: side,
       height: side,
@@ -917,7 +954,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         gradient: _selectedRingGradient,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.10),
+            color: Colors.black.withValues(alpha: 0.10),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -927,14 +964,10 @@ class DashboardPresenceModeIcon extends StatelessWidget {
       child: ClipOval(
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
-          color: Colors.white,
+          color: _dashboardOffGreyFill,
           child: Padding(
             padding: EdgeInsets.all(innerInset),
-            child: Image.asset(
-              asset,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            ),
+            child: modeImage,
           ),
         ),
       ),
@@ -947,9 +980,11 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   const DashboardMultiValueSwitchIcon({
     super.key,
     required this.selectedIndex,
+    this.isOn = true,
   });
 
   final int selectedIndex;
+  final bool isOn;
 
   static const LinearGradient selectedBorderGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -960,54 +995,74 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int displayed = selectedIndex + 1;
+    final Color textColor =
+        isOn ? const Color(0xFF111827) : _dashboardOffGreyText;
+    final Color checkColor =
+        isOn ? const Color(0xFF22C55E) : _dashboardOffGreyText;
 
-    return Container(
-      width: double.infinity,
+    final Widget tile = DecoratedBox(
       decoration: BoxDecoration(
-        gradient: selectedBorderGradient,
-        borderRadius: BorderRadius.circular(26.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: _dashboardOffGreyFill,
+        borderRadius: BorderRadius.circular(18.r),
+        border: isOn ? null : Border.all(color: _dashboardOffGreyBorder),
       ),
-      padding: EdgeInsets.all(3.w),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _dashboardBubbleGray,
-          borderRadius: BorderRadius.circular(26.r),
-        ),
-        child: SizedBox(
-          height: 48.h,
-          width: double.infinity,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Center(
-                child: Text(
-                  '$displayed',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111827),
-                  ),
+      child: SizedBox(
+        height: 28.h,
+        width: 65.w,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Center(
+              child: Text(
+                '$displayed',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
                 ),
               ),
-              Positioned(
-                top: 8.h,
-                right: 5.w,
-                child: Icon(
-                  Icons.check_circle,
-                  size: 30.sp,
-                  color: const Color(0xFF22C55E),
-                ),
+            ),
+            Positioned(
+              top: 3.5.h,
+              right: 2.5.w,
+              child: Icon(
+                Icons.check_circle,
+                size: 16.sp,
+                color: checkColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!isOn) {
+      return SizedBox(
+        width: 52.w,
+        height: 52.h,
+        child: Center(child: tile),
+      );
+    }
+
+    return SizedBox(
+      width: 52.w,
+      height: 52.h,
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: selectedBorderGradient,
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
+          padding: EdgeInsets.all(2.5.w),
+          child: tile,
         ),
       ),
     );
