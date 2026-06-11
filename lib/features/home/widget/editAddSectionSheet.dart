@@ -14,10 +14,32 @@ class EditAddSectionSheet extends StatefulWidget {
     super.key,
     this.initialSize = 'S',
     this.onSizeChanged,
+    this.sectionRenameLabel,
+    this.onRenameTap,
+    this.onAddDeviceTap,
+    this.onMoveUp,
+    this.onMoveDown,
+    this.canMoveUp = true,
+    this.canMoveDown = true,
+    this.onRemove,
+    this.initialHorizontalScroll,
+    this.onHorizontalScrollChanged,
+    this.showWidgetSize = true,
   });
 
   final String initialSize;
   final ValueChanged<String>? onSizeChanged;
+  final String? sectionRenameLabel;
+  final VoidCallback? onRenameTap;
+  final VoidCallback? onAddDeviceTap;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
+  final bool canMoveUp;
+  final bool canMoveDown;
+  final VoidCallback? onRemove;
+  final bool? initialHorizontalScroll;
+  final ValueChanged<bool>? onHorizontalScrollChanged;
+  final bool showWidgetSize;
 
   @override
   State<EditAddSectionSheet> createState() => _EditAddSectionSheetState();
@@ -31,6 +53,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
   void initState() {
     super.initState();
     _selectedSize = widget.initialSize;
+    _sliderWidget = widget.initialHorizontalScroll ?? _sliderWidget;
   }
 
   @override
@@ -122,12 +145,13 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   _SimpleRow(
                     imagePath: 'assets/images/rename.png',
                     title: 'Rename',
-                    trailingText: 'Light',
+                    trailingText: widget.sectionRenameLabel ?? 'Light',
                     iconPath: 'assets/images/edit_image.png',
                     imageWidth: 26.w,
                     imageHeight: 26.h,
                     iconHeight: 13.h,
                     iconWidth: 14.w,
+                    onTap: widget.onRenameTap,
                   ),
                   
                   _SimpleRow(
@@ -135,6 +159,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     title: 'Add device',
                     imageWidth: 23.w,
                     imageHeight: 23.h,
+                    onTap: widget.onAddDeviceTap,
                   ),
 
                   
@@ -158,6 +183,8 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     title: 'Move up',
                     imageWidth: 22.w,
                     imageHeight: 22.h,
+                    onTap: widget.canMoveUp ? widget.onMoveUp : null,
+                    enabled: widget.canMoveUp,
                   ),
 
                   _SimpleRow(
@@ -165,6 +192,8 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     imagePath: 'assets/images/move_down.png',
                     imageWidth: 22.w,
                     imageHeight: 26.h,
+                    onTap: widget.canMoveDown ? widget.onMoveDown : null,
+                    enabled: widget.canMoveDown,
                   ),
 
                   
@@ -179,60 +208,69 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       width: 60.w,
                       child: CupertinoSwitch(
                         value: _sliderWidget,
-                        onChanged: (v) => setState(() => _sliderWidget = v),
+                        onChanged: (v) {
+                          setState(() => _sliderWidget = v);
+                          widget.onHorizontalScrollChanged?.call(v);
+                        },
                         activeColor: _blue,
                       ),
                     ),
                   ),
 
-                  _RowItem(
-                    imagePath: 'assets/images/widget_size.png',
-                    title: 'Widget size',
-                    trailing: _SizeSegment(
-                      value: _selectedSize,
-                      onChanged: (v) => setState(() {
-                        _selectedSize = v;
-                        widget.onSizeChanged?.call(v);
-                      }),
-                      imageWidth: 22.w, // custom image width
-                      imageHeight: 22.h, // custom image height
+                  if (widget.showWidgetSize)
+                    _RowItem(
+                      imagePath: 'assets/images/widget_size.png',
+                      title: 'Widget size',
+                      trailing: _SizeSegment(
+                        value: _selectedSize,
+                        onChanged: (v) => setState(() {
+                          _selectedSize = v;
+                          widget.onSizeChanged?.call(v);
+                        }),
+                        imageWidth: 22.w,
+                        imageHeight: 22.h,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 13.h,
-                  )
+                  if (widget.showWidgetSize)
+                    SizedBox(
+                      height: 13.h,
+                    )
                 ],
               ),
             ), 
 
             SizedBox(height: 10.h),
             /// REMOVE
-            Container(
-              width: double.infinity,
-              height: 49.h,
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(26.r),
-              ),
-              child: Row(
-                children: [
-                  Image.asset(
-                    'assets/images/cross.png',
-                    width: 26.w,
-                    height: 26.h,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Remove',
-                    style: TextStyle(
-                      color: _danger,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 16.sp,
-                      fontFamily: 'Inter',
+            GestureDetector(
+              onTap: widget.onRemove,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: double.infinity,
+                height: 49.h,
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(26.r),
+                ),
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/images/cross.png',
+                      width: 26.w,
+                      height: 26.h,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Remove',
+                      style: TextStyle(
+                        color: _danger,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16.sp,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
          
@@ -340,9 +378,12 @@ class _SimpleRow extends StatelessWidget {
     this.imageHeight = 20,
     this.iconWidth = 14,
     this.iconHeight = 14,
-
-    
+    this.onTap,
+    this.enabled = true,
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
+
+  final VoidCallback? onTap;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -355,49 +396,56 @@ class _SimpleRow extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Container(
-      height: 55.h,
-      child: Padding(
-        padding: EdgeInsets.only(left: 12.w, right: 17.w,),
-        child: Row(
-          children: [
-            leading,
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Inter',
-                  color: _textPrimary,
-                ),
-              ),
-            ),
-            if (trailingText != null)
-              Row(
-                children: [
-                  Text(
-                    trailingText!,
+    final Color titleColor = enabled ? _textPrimary : _textSecondary;
+
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      behavior: HitTestBehavior.opaque,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.45,
+        child: Container(
+          height: 55.h,
+          child: Padding(
+            padding: EdgeInsets.only(left: 12.w, right: 17.w),
+            child: Row(
+              children: [
+                leading,
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    title,
                     style: TextStyle(
-                      color: _textSecondary,
-                      fontSize: 14.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
+                      color: titleColor,
                     ),
-
-
                   ),
-                  SizedBox(width: 5.w,),
-                  Image.asset(
-                    iconPath!,
-                    width: iconWidth.w,
-                    height: iconHeight.h,
-                    fit: BoxFit.contain,
-                  )
-                ],
-              ),
-          ],
+                ),
+                if (trailingText != null)
+                  Row(
+                    children: [
+                      Text(
+                        trailingText!,
+                        style: TextStyle(
+                          color: _textSecondary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      SizedBox(width: 5.w),
+                      Image.asset(
+                        iconPath!,
+                        width: iconWidth.w,
+                        height: iconHeight.h,
+                        fit: BoxFit.contain,
+                      )
+                    ],
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );

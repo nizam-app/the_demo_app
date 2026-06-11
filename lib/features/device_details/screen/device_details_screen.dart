@@ -558,6 +558,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         return _isOn;
       case DeviceDetailsControlMode.standard:
         return _isOn;
+      case DeviceDetailsControlMode.presenceModes:
+        return _isOn;
       default:
         return true;
     }
@@ -991,7 +993,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Hero for [DeviceDetailsControlMode.presenceModes]: five selectable modes.
   Widget _buildPresenceModesHeroContent() {
     const Color textPrimary = Color(0xFF111827);
-    const Color labelMuted = Color(0xFF111827);
+    const Color offGreyFill = Color(0xFFE5E7EB);
+    const Color offGreyIcon = Color(0xFF9CA3AF);
     final double circleDm = 86.w;
     final double ringInset = 3.8.w;
 
@@ -1001,11 +1004,32 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       required Widget iconChild,
     }) {
       final bool sel = _selectedPresenceModeIndex == index;
+      final bool showRing = sel && _isOn;
+      final bool showOffGrey = sel && !_isOn;
+      final Widget displayIcon = showOffGrey
+          ? ColorFiltered(
+              colorFilter: const ColorFilter.mode(
+                offGreyIcon,
+                BlendMode.srcIn,
+              ),
+              child: iconChild,
+            )
+          : iconChild;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           uiTapHaptic();
-          setState(() => _selectedPresenceModeIndex = index);
+          setState(() {
+            _selectedPresenceModeIndex = index;
+            _isOn = true;
+          });
+        },
+        onLongPress: () {
+          uiTapHaptic();
+          setState(() {
+            _selectedPresenceModeIndex = index;
+            _isOn = false;
+          });
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1017,30 +1041,32 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               height: circleDm,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: sel
+                gradient: showRing
                     ? const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
-
-                border: sel
+                color: showOffGrey ? offGreyFill : null,
+                border: showRing
                     ? null
                     : Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(sel ? 0.10 : 0.05),
-                    blurRadius: sel ? 10 : 6,
+                    color: Colors.black.withOpacity(showRing ? 0.10 : 0.05),
+                    blurRadius: showRing ? 10 : 6,
                     offset: const Offset(0, 3),
                   ),
                 ],
               ),
-              padding: sel ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
+              padding: showRing ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
               child: ClipOval(
                 clipBehavior: Clip.antiAlias,
                 child: ColoredBox(
-                  color: const Color(0xFFFFFFFF),
+                  color: showOffGrey
+                      ? offGreyFill
+                      : const Color(0xFFFFFFFF),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final double inset = 10.w;
@@ -1058,7 +1084,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             child: FittedBox(
                               fit: BoxFit.contain,
                               alignment: Alignment.center,
-                              child: iconChild,
+                              child: displayIcon,
                             ),
                           ),
                         ),
@@ -1075,7 +1101,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fontFamily: 'Inter',
                 fontSize: 14.sp,
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                color: sel ? textPrimary : textPrimary,
+                color: showOffGrey ? offGreyIcon : textPrimary,
               ),
             ),
           ],
