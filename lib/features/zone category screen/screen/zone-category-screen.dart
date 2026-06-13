@@ -3244,7 +3244,7 @@ class _BlindCard extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                 ),
-              SizedBox(height: 10.h),
+              SizedBox(height: 17.h),
               Expanded(
                 child: titleInkWell(
                   SizedBox.expand(

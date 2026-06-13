@@ -790,6 +790,24 @@ class DashboardLightSceneIcon extends StatelessWidget {
       onAssetPath: onAssetPath,
     );
 
+    if (clamped == 2) {
+      return Container(
+        width: side,
+        height: side,
+        decoration: BoxDecoration(
+          color: _dashboardOffGreyFill,
+          shape: BoxShape.circle,
+          border: Border.all(color: _dashboardOffGreyBorder),
+        ),
+        padding: EdgeInsets.all(10.w),
+        child: Image.asset(
+          asset,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
+        ),
+      );
+    }
+
     return Image.asset(
       asset,
       width: side,
@@ -941,8 +959,20 @@ class DashboardPresenceModeIcon extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(color: _dashboardOffGreyBorder),
         ),
-        padding: EdgeInsets.all(innerInset + ringInset),
-        child: modeImage,
+        padding: EdgeInsets.all(12.w),
+        child: Center(
+          child: SizedBox(
+            width: side * 0.56,
+            height: side * 0.56,
+            child: ColorFiltered(
+              colorFilter: const ColorFilter.mode(
+                _dashboardOffGreyText,
+                BlendMode.srcIn,
+              ),
+              child: baseImage,
+            ),
+          ),
+        ),
       );
     }
 
@@ -1041,7 +1071,14 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
       return SizedBox(
         width: 52.w,
         height: 52.h,
-        child: Center(child: tile),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: _dashboardOffGreyFill,
+            shape: BoxShape.circle,
+            border: Border.all(color: _dashboardOffGreyBorder),
+          ),
+          child: Center(child: tile),
+        ),
       );
     }
 

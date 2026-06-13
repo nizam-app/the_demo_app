@@ -1006,15 +1006,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       final bool sel = _selectedPresenceModeIndex == index;
       final bool showRing = sel && _isOn;
       final bool showOffGrey = sel && !_isOn;
-      final Widget displayIcon = showOffGrey
-          ? ColorFiltered(
-              colorFilter: const ColorFilter.mode(
-                offGreyIcon,
-                BlendMode.srcIn,
-              ),
-              child: iconChild,
-            )
-          : iconChild;
+      const Color offGreyBorder = Color(0xFFD1D5DB);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -1051,7 +1043,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 color: showOffGrey ? offGreyFill : null,
                 border: showRing
                     ? null
-                    : Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                    : Border.all(
+                        color: showOffGrey
+                            ? offGreyBorder
+                            : const Color(0xFFE5E7EB),
+                        width: 1.5,
+                      ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(showRing ? 0.10 : 0.05),
@@ -1067,30 +1064,45 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   color: showOffGrey
                       ? offGreyFill
                       : const Color(0xFFFFFFFF),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final double inset = 10.w;
-                      final double rawSide = math.min(
-                        constraints.maxWidth,
-                        constraints.maxHeight,
-                      );
-                      final double side = math.max(0.0, rawSide - inset * 2);
-                      return Padding(
-                        padding: EdgeInsets.all(inset),
-                        child: Center(
+                  child: showOffGrey
+                      ? Center(
                           child: SizedBox(
-                            width: side,
-                            height: side,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              alignment: Alignment.center,
-                              child: displayIcon,
+                            width: circleDm * 0.52,
+                            height: circleDm * 0.52,
+                            child: ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                offGreyIcon,
+                                BlendMode.srcIn,
+                              ),
+                              child: iconChild,
                             ),
                           ),
+                        )
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double inset = 10.w;
+                            final double rawSide = math.min(
+                              constraints.maxWidth,
+                              constraints.maxHeight,
+                            );
+                            final double side =
+                                math.max(0.0, rawSide - inset * 2);
+                            return Padding(
+                              padding: EdgeInsets.all(inset),
+                              child: Center(
+                                child: SizedBox(
+                                  width: side,
+                                  height: side,
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    alignment: Alignment.center,
+                                    child: iconChild,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ),
@@ -2953,7 +2965,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _sceneValueIcon(int sceneSlot) {
     const String onAsset = 'assets/light_image.png';
     const String nightAsset = 'assets/gray_image.png';
-    const String offAsset = 'assets/black_image.png';
+    const String offAsset = 'assets/images/light-scenc_off.png';
 
     switch (sceneSlot) {
       case 0:
@@ -5070,7 +5082,7 @@ class _SceneValueOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color fillColor = selected
-        ? (selectedBackgroundOverride ?? const Color(0xFFE1E1E1))
+        ? (selectedBackgroundOverride ?? const Color(0xFFE5E7EB))
         : Colors.white;
     final Color borderColor = selected
         ? (selectedBorderOverride ?? const Color(0xFFD1D5DB))
