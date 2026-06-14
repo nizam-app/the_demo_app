@@ -294,6 +294,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _googleIdTokenSetupMessage() {
+    if (!ApiConstants.hasGoogleServerClientId) {
+      return 'Google ID token missing. Add a Web OAuth client ID in '
+          'amin_api.dart (googleServerClientId) and GIDServerClientID in '
+          'ios/Runner/Info.plist — same Google Cloud project as the iOS client.';
+    }
     return 'Google ID token missing. Set googleServerClientId in amin_api.dart '
         'and GIDServerClientID in ios/Runner/Info.plist.';
   }
@@ -526,7 +531,7 @@ class _LoginScreenState extends State<LoginScreen> {
         clientId: ApiConstants.googleClientId,
         serverClientId: ApiConstants.hasGoogleServerClientId
             ? ApiConstants.googleServerClientId
-            : null,
+            : ApiConstants.googleClientId,
       );
       _authDebugLog(
         'GoogleSignIn initialized',

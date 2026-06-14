@@ -10,9 +10,11 @@ class ApiConstants {
 
   /// iOS OAuth client ID (OAuth 2.0 Client ID → iOS, bundle: il.co.aican.flutter).
   /// Also set the same value as `GIDClientID` in ios/Runner/Info.plist.
-  static const String googleClientId = '';
+  static const String googleClientId =
+      '578188168094-3f392vu8bil02tpls9o8vlafukn05sn1.apps.googleusercontent.com';
 
   /// Web OAuth client ID — required for Google `idToken` sent to the backend.
+  /// Create in the same Google Cloud project (OAuth 2.0 → Web application).
   /// Also set the same value as `GIDServerClientID` in ios/Runner/Info.plist.
   static const String googleServerClientId = '';
 

@@ -198,13 +198,13 @@ class DeviceDashboardSync extends ChangeNotifier {
 
 // —— Mini ring icons for dashboard cards (match details-screen rings) ——
 
-/// Bubble Gray — inner circle fill on dashboard ring / switch tiles.
+/// Bubble Gray — inner circle fill on dashboard ring / switch tiles (active/on).
 const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
 
-/// Mandatory off-state palette (irrigation / light-scene off grey — no white, no color).
-const Color _dashboardOffGreyFill = Color(0xFFE5E7EB);
-const Color _dashboardOffGreyBorder = Color(0xFFD1D5DB);
-const Color _dashboardOffGreyText = Color(0xFF9CA3AF);
+/// Off-state palette — shared with device details hero tiles (Presence off, etc.).
+const Color kDeviceOffGreyFill = Color(0xFFE5E7EB);
+const Color kDeviceOffGreyBorder = Color(0xFFD1D5DB);
+const Color kDeviceOffGreyIcon = Color(0xFFE1E1E1);
 
 bool _dashboardIsOffPercent(double value) => value.clamp(0.0, 1.0) <= 0.001;
 
@@ -221,10 +221,10 @@ class DashboardOffGreyIcon extends StatelessWidget {
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: _dashboardOffGreyFill,
+        color: kDeviceOffGreyFill,
         shape: circular ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: circular ? null : BorderRadius.circular(12.r),
-        border: Border.all(color: _dashboardOffGreyBorder),
+        border: Border.all(color: kDeviceOffGreyBorder),
       ),
     );
   }
@@ -244,6 +244,7 @@ void _paintDashGradientRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
+  Color trackColor = const Color(0xFFE1E1E1),
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 1;
@@ -256,7 +257,7 @@ void _paintDashGradientRing(
 
   if (clamped <= 0.001) {
     final Paint emptyTrack = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -294,7 +295,7 @@ void _paintDashGradientRing(
   }
 
   final Paint trackPaint = Paint()
-    ..color = const Color(0xFFE1E1E1)
+    ..color = trackColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
     ..strokeCap = StrokeCap.butt;
@@ -392,7 +393,7 @@ class DashboardRingProgressIcon extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: isOff
-                    ? _dashboardOffGreyText
+                    ? kDeviceOffGreyIcon
                     : const Color(0xFF111827),
               ),
             ),
@@ -795,9 +796,9 @@ class DashboardLightSceneIcon extends StatelessWidget {
         width: side,
         height: side,
         decoration: BoxDecoration(
-          color: _dashboardOffGreyFill,
+          color: kDeviceOffGreyFill,
           shape: BoxShape.circle,
-          border: Border.all(color: _dashboardOffGreyBorder),
+          border: Border.all(color: kDeviceOffGreyBorder),
         ),
         padding: EdgeInsets.all(10.w),
         child: Image.asset(
@@ -944,7 +945,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         ? baseImage
         : ColorFiltered(
             colorFilter: const ColorFilter.mode(
-              _dashboardOffGreyText,
+              kDeviceOffGreyIcon,
               BlendMode.srcIn,
             ),
             child: baseImage,
@@ -955,9 +956,9 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         width: side,
         height: side,
         decoration: BoxDecoration(
-          color: _dashboardOffGreyFill,
+          color: kDeviceOffGreyFill,
           shape: BoxShape.circle,
-          border: Border.all(color: _dashboardOffGreyBorder),
+          border: Border.all(color: kDeviceOffGreyBorder),
         ),
         padding: EdgeInsets.all(12.w),
         child: Center(
@@ -966,7 +967,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
             height: side * 0.56,
             child: ColorFiltered(
               colorFilter: const ColorFilter.mode(
-                _dashboardOffGreyText,
+                kDeviceOffGreyIcon,
                 BlendMode.srcIn,
               ),
               child: baseImage,
@@ -994,7 +995,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
       child: ClipOval(
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
-          color: _dashboardOffGreyFill,
+          color: Colors.white,
           child: Padding(
             padding: EdgeInsets.all(innerInset),
             child: modeImage,
@@ -1026,15 +1027,15 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final int displayed = selectedIndex + 1;
     final Color textColor =
-        isOn ? const Color(0xFF111827) : _dashboardOffGreyText;
+        isOn ? const Color(0xFF111827) : kDeviceOffGreyIcon;
     final Color checkColor =
-        isOn ? const Color(0xFF22C55E) : _dashboardOffGreyText;
+        isOn ? const Color(0xFF22C55E) : kDeviceOffGreyIcon;
 
     final Widget tile = DecoratedBox(
       decoration: BoxDecoration(
-        color: _dashboardOffGreyFill,
+        color: kDeviceOffGreyFill,
         borderRadius: BorderRadius.circular(18.r),
-        border: isOn ? null : Border.all(color: _dashboardOffGreyBorder),
+        border: isOn ? null : Border.all(color: kDeviceOffGreyBorder),
       ),
       child: SizedBox(
         height: 28.h,
@@ -1071,14 +1072,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
       return SizedBox(
         width: 52.w,
         height: 52.h,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: _dashboardOffGreyFill,
-            shape: BoxShape.circle,
-            border: Border.all(color: _dashboardOffGreyBorder),
-          ),
-          child: Center(child: tile),
-        ),
+        child: Center(child: tile),
       );
     }
 
@@ -1133,15 +1127,15 @@ class DashboardAwningLevelIcon extends StatelessWidget {
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: _dashboardOffGreyFill,
+        color: kDeviceOffGreyFill,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: _dashboardOffGreyBorder),
+        border: Border.all(color: kDeviceOffGreyBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const ColoredBox(color: _dashboardOffGreyFill),
+          const ColoredBox(color: kDeviceOffGreyFill),
           Align(
             alignment: Alignment.topCenter,
             child: FractionallySizedBox(
@@ -1184,7 +1178,7 @@ class DashboardBlindSlatsPainter extends CustomPainter {
       ),
     );
 
-    canvas.drawRRect(clipRrect, Paint()..color = _dashboardOffGreyFill);
+    canvas.drawRRect(clipRrect, Paint()..color = kDeviceOffGreyFill);
 
     canvas.save();
     canvas.clipRRect(clipRrect);
@@ -1299,9 +1293,9 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: _dashboardOffGreyFill,
+        color: kDeviceOffGreyFill,
         borderRadius: BorderRadius.circular(outerR),
-        border: Border.all(color: _dashboardOffGreyBorder, width: 1),
+        border: Border.all(color: kDeviceOffGreyBorder, width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
