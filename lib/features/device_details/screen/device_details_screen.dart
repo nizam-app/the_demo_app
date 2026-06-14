@@ -31,6 +31,7 @@ void _paintGradientFullRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
+  Color trackColor = const Color(0xFFE1E1E1),
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
@@ -44,7 +45,7 @@ void _paintGradientFullRing(
 
   if (clamped <= 0.001) {
     final Paint emptyTrack = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -92,7 +93,7 @@ void _paintGradientFullRing(
   }
 
   final Paint inactivePaint = Paint()
-    ..color = const Color(0xFFE1E1E1)
+    ..color = trackColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
     ..strokeCap = StrokeCap.butt;
@@ -560,6 +561,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         return _isOn;
       case DeviceDetailsControlMode.presenceModes:
         return _isOn;
+      case DeviceDetailsControlMode.multiValueSwitch:
+        return _isOn;
       default:
         return true;
     }
@@ -993,8 +996,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Hero for [DeviceDetailsControlMode.presenceModes]: five selectable modes.
   Widget _buildPresenceModesHeroContent() {
     const Color textPrimary = Color(0xFF111827);
-    const Color offGreyFill = Color(0xFFE5E7EB);
-    const Color offGreyIcon = Color(0xFF9CA3AF);
     final double circleDm = 86.w;
     final double ringInset = 3.8.w;
 
@@ -1006,7 +1007,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       final bool sel = _selectedPresenceModeIndex == index;
       final bool showRing = sel && _isOn;
       final bool showOffGrey = sel && !_isOn;
-      const Color offGreyBorder = Color(0xFFD1D5DB);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
@@ -1040,13 +1040,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
-                color: showOffGrey ? offGreyFill : null,
+                color: showOffGrey ? kDeviceOffGreyFill : null,
                 border: showRing
                     ? null
                     : Border.all(
                         color: showOffGrey
-                            ? offGreyBorder
-                            : const Color(0xFFE5E7EB),
+                            ? kDeviceOffGreyBorder
+                            : const Color(0xFFE1E1E1),
                         width: 1.5,
                       ),
                 boxShadow: [
@@ -1062,7 +1062,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 clipBehavior: Clip.antiAlias,
                 child: ColoredBox(
                   color: showOffGrey
-                      ? offGreyFill
+                      ? kDeviceOffGreyFill
                       : const Color(0xFFFFFFFF),
                   child: showOffGrey
                       ? Center(
@@ -1071,7 +1071,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             height: circleDm * 0.52,
                             child: ColorFiltered(
                               colorFilter: const ColorFilter.mode(
-                                offGreyIcon,
+                                kDeviceOffGreyIcon,
                                 BlendMode.srcIn,
                               ),
                               child: iconChild,
@@ -1113,7 +1113,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fontFamily: 'Inter',
                 fontSize: 14.sp,
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                color: showOffGrey ? offGreyIcon : textPrimary,
+                color: showOffGrey ? kDeviceOffGreyIcon : textPrimary,
               ),
             ),
           ],
@@ -1217,9 +1217,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     Widget valueTile(int index) {
       final int displayed = index + 1;
       final bool sel = _selectedMultiValueSwitchIndex == index;
+      final bool showSelected = sel && _isOn;
+      final bool showOffGrey = sel && !_isOn;
       final String caption = rowLabels[index % 3];
       final double radiusOuter = 26.r;
-      final double radiusInner = sel
+      final double radiusInner = showSelected
           ? (radiusOuter - 3.w).clamp(12.r, radiusOuter)
           : radiusOuter;
 
@@ -1227,7 +1229,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         behavior: HitTestBehavior.opaque,
         onTap: () {
           uiTapHaptic();
-          setState(() => _selectedMultiValueSwitchIndex = index);
+          setState(() {
+            _selectedMultiValueSwitchIndex = index;
+            _isOn = true;
+          });
+        },
+        onLongPress: () {
+          if (!sel) return;
+          uiTapHaptic();
+          setState(() => _isOn = false);
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1236,25 +1246,37 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                gradient: sel ? selectedBorderGradient : null,
-                color: sel ? null : Colors.white,
+                gradient: showSelected ? selectedBorderGradient : null,
+                color: showOffGrey
+                    ? kDeviceOffGreyFill
+                    : (showSelected ? null : Colors.white),
                 borderRadius: BorderRadius.circular(26.r),
-                border: sel
+                border: showSelected
                     ? null
-                    : Border.all(color: const Color(0xFFFFFFFF), width: 1),
+                    : Border.all(
+                        color: showOffGrey
+                            ? kDeviceOffGreyBorder
+                            : const Color(0xFFFFFFFF),
+                        width: showOffGrey ? 1.5 : 1,
+                      ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(sel ? 0.08 : 0.04),
-                    blurRadius: sel ? 10 : 5,
+                    color: Colors.black.withOpacity(
+                      showSelected ? 0.08 : (showOffGrey ? 0.05 : 0.04),
+                    ),
+                    blurRadius: showSelected ? 10 : 5,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              padding: sel ? EdgeInsets.all(3.w) : EdgeInsets.zero,
+              padding: showSelected ? EdgeInsets.all(3.w) : EdgeInsets.zero,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26.r),
+                  color: showOffGrey ? kDeviceOffGreyFill : Colors.white,
+                  borderRadius: BorderRadius.circular(radiusInner),
+                  border: showOffGrey
+                      ? Border.all(color: kDeviceOffGreyBorder)
+                      : null,
                 ),
                 child: SizedBox(
                   height: 48.h,
@@ -1269,7 +1291,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             fontFamily: 'Inter',
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w700,
-                            color: sel ? textPrimary : textPrimary,
+                            color: showOffGrey
+                                ? kDeviceOffGreyIcon
+                                : textPrimary,
                           ),
                         ),
                       ),
@@ -1280,7 +1304,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           child: Icon(
                             Icons.check_circle,
                             size: 30.sp,
-                            color: const Color(0xFF22C55E),
+                            color: showOffGrey
+                                ? kDeviceOffGreyIcon
+                                : const Color(0xFF22C55E),
                           ),
                         ),
                     ],
@@ -1298,7 +1324,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fontFamily: 'Inter',
                 fontSize: 12.sp,
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                color: sel ? textPrimary : textPrimary,
+                color: showOffGrey ? kDeviceOffGreyIcon : textPrimary,
                 height: 1.15,
               ),
             ),
