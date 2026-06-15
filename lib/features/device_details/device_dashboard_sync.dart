@@ -206,7 +206,42 @@ const Color kDeviceOffGreyFill = Color(0xFFE5E7EB);
 const Color kDeviceOffGreyBorder = Color(0xFFD1D5DB);
 const Color kDeviceOffGreyIcon = Color(0xFFE1E1E1);
 
+/// Artwork tint matching fan_level_off.png on dashboard (Fan Level 3 off).
+const Color kDashboardFanOffIconColor = kDeviceOffGreyBorder;
+
 bool _dashboardIsOffPercent(double value) => value.clamp(0.0, 1.0) <= 0.001;
+
+/// Standard Lighting dashboard icon size (matches [DashboardRgbwIcon] wheel).
+double get kDashboardLightingIconSide => 52.w;
+
+/// Fits any dashboard lighting icon into the standard RGB-sized slot.
+Widget dashboardLightingIconFrame(Widget child) {
+  return SizedBox(
+    width: kDashboardLightingIconSide,
+    height: kDashboardLightingIconSide,
+    child: child,
+  );
+}
+
+/// Unified dashboard off icon — grey fill, border, optional inner artwork.
+Widget _dashboardMutedCircleIcon({
+  Widget? child,
+  double padding = 10,
+}) {
+  final double side = kDashboardLightingIconSide;
+  return Container(
+    width: side,
+    height: side,
+    decoration: BoxDecoration(
+      color: kDeviceOffGreyFill,
+      shape: BoxShape.circle,
+      border: Border.all(color: kDeviceOffGreyBorder),
+    ),
+    padding: child == null ? null : EdgeInsets.all(padding.w),
+    alignment: Alignment.center,
+    child: child,
+  );
+}
 
 /// Grey placeholder when a dashboard tile is 0% / Off.
 class DashboardOffGreyIcon extends StatelessWidget {
@@ -216,14 +251,16 @@ class DashboardOffGreyIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double side = 52.w;
+    if (circular) {
+      return _dashboardMutedCircleIcon();
+    }
+    final double side = kDashboardLightingIconSide;
     return Container(
       width: side,
       height: side,
       decoration: BoxDecoration(
         color: kDeviceOffGreyFill,
-        shape: circular ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: circular ? null : BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: kDeviceOffGreyBorder),
       ),
     );
@@ -364,8 +401,7 @@ class DashboardRingProgressIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final double clamped = percent.clamp(0.0, 1.0);
     final int pct = (clamped * 100).round();
-    final double side = 52;
-    final bool isOff = _dashboardIsOffPercent(clamped);
+    final double side = kDashboardLightingIconSide;
     return SizedBox(
       width: side,
       height: side,
@@ -390,11 +426,9 @@ class DashboardRingProgressIcon extends StatelessWidget {
               '$pct%',
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: isOff
-                    ? kDeviceOffGreyIcon
-                    : const Color(0xFF111827),
+                color: const Color(0xFF111827),
               ),
             ),
           ),
@@ -493,7 +527,7 @@ class DashboardThermostatRingIcon extends StatelessWidget {
     final double setTemp = 19.0 + percent.clamp(0.0, 1.0) * 16.0;
     final int tempInt = setTemp.floor();
     final int tempFrac = ((setTemp - tempInt) * 10).round();
-    const double side = 52;
+    final double side = kDashboardLightingIconSide;
 
     return SizedBox(
       width: side,
@@ -515,11 +549,11 @@ class DashboardThermostatRingIcon extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '$tempInt.$tempFrac°',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF111827),
+                color: const Color(0xFF111827),
               ),
             ),
           ),
@@ -593,7 +627,7 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
       return const DashboardOffGreyIcon(circular: true);
     }
 
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     const double heroDisk = 280;
     final double scale = side / heroDisk;
     final double dialBorderWidth = 6 * scale;
@@ -715,7 +749,7 @@ class DashboardRgbwIcon extends StatelessWidget {
       return const DashboardOffGreyIcon(circular: true);
     }
 
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final Size layoutSize = Size(side, side);
     final Offset center = Offset(side / 2, side / 2);
     final double maxR = layoutSize.shortestSide / 2 - (10 * side / 310);
@@ -784,7 +818,7 @@ class DashboardLightSceneIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final int clamped = sceneIndex.clamp(0, 2);
     final String asset = DeviceControlSnapshot.lightSceneHeroAssetForIndex(
       clamped,
@@ -792,19 +826,17 @@ class DashboardLightSceneIcon extends StatelessWidget {
     );
 
     if (clamped == 2) {
-      return Container(
+      return Image.asset(
+        asset,
         width: side,
         height: side,
-        decoration: BoxDecoration(
-          color: kDeviceOffGreyFill,
-          shape: BoxShape.circle,
-          border: Border.all(color: kDeviceOffGreyBorder),
-        ),
-        padding: EdgeInsets.all(10.w),
-        child: Image.asset(
-          asset,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (_, __, ___) => Image.asset(
+          'assets/light-scenc_off.png',
+          width: side,
+          height: side,
           fit: BoxFit.contain,
-          filterQuality: FilterQuality.medium,
         ),
       );
     }
@@ -850,13 +882,13 @@ class DashboardHeatingCoolingIcon extends StatelessWidget {
         : 'assets/images/heating&cooling_off.png';
     return Image.asset(
       asset,
-      width: 52.w,
-      height: 52.w,
+      width: kDashboardLightingIconSide,
+      height: kDashboardLightingIconSide,
       fit: BoxFit.contain,
       errorBuilder: (_, __, ___) => Image.asset(
         'assets/images/heating_cooling.png',
-        width: 52.w,
-        height: 52.w,
+        width: kDashboardLightingIconSide,
+        height: kDashboardLightingIconSide,
         fit: BoxFit.contain,
       ),
     );
@@ -876,7 +908,7 @@ class DashboardFanLevelIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final int clamped = level.clamp(0, 3);
 
     if (clamped == 0) {
@@ -929,7 +961,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double detailsCircle = 86;
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final double scale = side / detailsCircle;
     final double ringInset = 3.8 * scale;
     final double innerInset = 10 * scale;
@@ -952,27 +984,21 @@ class DashboardPresenceModeIcon extends StatelessWidget {
           );
 
     if (!isOn) {
-      return Container(
+      return Image.asset(
+        asset,
         width: side,
         height: side,
-        decoration: BoxDecoration(
-          color: kDeviceOffGreyFill,
-          shape: BoxShape.circle,
-          border: Border.all(color: kDeviceOffGreyBorder),
-        ),
-        padding: EdgeInsets.all(12.w),
-        child: Center(
-          child: SizedBox(
-            width: side * 0.56,
-            height: side * 0.56,
-            child: ColorFiltered(
-              colorFilter: const ColorFilter.mode(
-                kDeviceOffGreyIcon,
-                BlendMode.srcIn,
-              ),
-              child: baseImage,
-            ),
-          ),
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+        color: kDashboardFanOffIconColor,
+        colorBlendMode: BlendMode.srcIn,
+        errorBuilder: (_, __, ___) => Image.asset(
+          'assets/images/comfort.png',
+          width: side,
+          height: side,
+          fit: BoxFit.contain,
+          color: kDashboardFanOffIconColor,
+          colorBlendMode: BlendMode.srcIn,
         ),
       );
     }
@@ -1026,10 +1052,12 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int displayed = selectedIndex + 1;
-    final Color textColor =
-        isOn ? const Color(0xFF111827) : kDeviceOffGreyIcon;
+    final Color textColor = const Color(0xFF111827);
     final Color checkColor =
-        isOn ? const Color(0xFF22C55E) : kDeviceOffGreyIcon;
+        isOn ? const Color(0xFF22C55E) : const Color(0xFF9CA3AF);
+    final double side = kDashboardLightingIconSide;
+    final double tileW = side * 46 / 52;
+    final double tileH = side * 26 / 52;
 
     final Widget tile = DecoratedBox(
       decoration: BoxDecoration(
@@ -1038,8 +1066,8 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
         border: isOn ? null : Border.all(color: kDeviceOffGreyBorder),
       ),
       child: SizedBox(
-        height: 28.h,
-        width: 65.w,
+        height: tileH,
+        width: tileW,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -1070,15 +1098,15 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
 
     if (!isOn) {
       return SizedBox(
-        width: 52.w,
-        height: 52.h,
+        width: side,
+        height: side,
         child: Center(child: tile),
       );
     }
 
     return SizedBox(
-      width: 52.w,
-      height: 52.h,
+      width: side,
+      height: side,
       child: Center(
         child: Container(
           decoration: BoxDecoration(
@@ -1120,7 +1148,7 @@ class DashboardAwningLevelIcon extends StatelessWidget {
       return const DashboardOffGreyIcon();
     }
 
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final double radius = 12.r;
 
     return Container(
@@ -1284,7 +1312,7 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
       return const DashboardOffGreyIcon();
     }
 
-    final double side = 52.w;
+    final double side = kDashboardLightingIconSide;
     final double pad = 3.w;
     final double outerR = 12.r;
     final double innerR = math.max(0.0, outerR - pad);

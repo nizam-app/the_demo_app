@@ -273,26 +273,34 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     setState(() => _setDeviceOrderFor(section, order));
   }
 
+  void _removeDeviceById(
+    _DashboardEditSection section,
+    String deviceId, {
+    VoidCallback? onEmpty,
+  }) {
+    final List<String> order = List<String>.from(_deviceOrderFor(section));
+    final int index = order.indexOf(deviceId);
+    if (index < 0) return;
+    order.removeAt(index);
+    _removedDevicesFor(section).add(deviceId);
+    setState(() {
+      _setDeviceOrderFor(section, order);
+      if (order.isEmpty) {
+        _selectedEditDeviceId = null;
+        onEmpty?.call();
+      } else if (_selectedEditDeviceId == deviceId) {
+        _selectedEditDeviceId = order[math.min(index, order.length - 1)];
+      }
+    });
+  }
+
   void _removeSelectedDevice(
     _DashboardEditSection section,
     VoidCallback? onEmpty,
   ) {
     final String? id = _selectedEditDeviceId;
     if (id == null) return;
-    final List<String> order = List<String>.from(_deviceOrderFor(section));
-    final int index = order.indexOf(id);
-    if (index < 0) return;
-    order.removeAt(index);
-    _removedDevicesFor(section).add(id);
-    setState(() {
-      _setDeviceOrderFor(section, order);
-      if (order.isEmpty) {
-        _selectedEditDeviceId = null;
-        onEmpty?.call();
-      } else {
-        _selectedEditDeviceId = order[math.min(index, order.length - 1)];
-      }
-    });
+    _removeDeviceById(section, id, onEmpty: onEmpty);
   }
 
   void _restoreRemovedDevice(_DashboardEditSection section) {
@@ -340,6 +348,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     });
   }
 
+  void _closeDashboardSectionEdit() {
+    if (!mounted) return;
+    setState(() {
+      _editingSection = null;
+      _selectedEditDeviceId = null;
+    });
+  }
+
   void _openDashboardSectionEdit(
     BuildContext context,
     _DashboardEditSection section,
@@ -354,63 +370,44 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         _selectedEditDeviceId = order.isNotEmpty ? order.first : null;
       }
     });
+  }
 
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      barrierColor: Colors.black.withOpacity(0.25),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: StatefulBuilder(
-          builder: (context, sheetSetState) {
-            void refreshSheet() => sheetSetState(() {});
-            return EditAddSectionSheet(
-              sectionRenameLabel: _sectionRenameLabel(section),
-              onRenameTap: () => _renameDashboardSection(section),
-              onAddDeviceTap: () {
-                _restoreRemovedDevice(section);
-                refreshSheet();
-              },
-              onMoveUp: () {
-                _moveSelectedDevice(section, -1);
-                refreshSheet();
-              },
-              onMoveDown: () {
-                _moveSelectedDevice(section, 1);
-                refreshSheet();
-              },
-              canMoveUp: _canMoveSelectedDevice(section, -1),
-              canMoveDown: _canMoveSelectedDevice(section, 1),
-              onRemove: () {
-                _removeSelectedDevice(
-                  section,
-                  () => Navigator.of(ctx).pop(),
-                );
-                refreshSheet();
-              },
-              initialHorizontalScroll: section == _DashboardEditSection.light
-                  ? _lightHorizontalScroll
-                  : _lightingHorizontalScroll,
-              onHorizontalScrollChanged: (v) => setState(() {
-                if (section == _DashboardEditSection.light) {
-                  _lightHorizontalScroll = v;
-                } else {
-                  _lightingHorizontalScroll = v;
-                }
-              }),
-              showWidgetSize: section == _DashboardEditSection.lighting,
-              initialSize: _lightingWidgetSize,
-              onSizeChanged: (v) => setState(() => _lightingWidgetSize = v),
-            );
-          },
+  Widget _buildDashboardEditOverlay() {
+    final _DashboardEditSection? section = _editingSection;
+    if (section == null) return const SizedBox.shrink();
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: EditAddSectionSheet(
+        onClose: _closeDashboardSectionEdit,
+        sectionRenameLabel: _sectionRenameLabel(section),
+        onRenameTap: () => _renameDashboardSection(section),
+        onAddDeviceTap: () => _restoreRemovedDevice(section),
+        onMoveUp: () => _moveSelectedDevice(section, -1),
+        onMoveDown: () => _moveSelectedDevice(section, 1),
+        canMoveUp: _canMoveSelectedDevice(section, -1),
+        canMoveDown: _canMoveSelectedDevice(section, 1),
+        onRemove: () => _removeSelectedDevice(
+          section,
+          _closeDashboardSectionEdit,
         ),
+        initialHorizontalScroll: section == _DashboardEditSection.light
+            ? _lightHorizontalScroll
+            : _lightingHorizontalScroll,
+        onHorizontalScrollChanged: (v) => setState(() {
+          if (section == _DashboardEditSection.light) {
+            _lightHorizontalScroll = v;
+          } else {
+            _lightingHorizontalScroll = v;
+          }
+        }),
+        showWidgetSize: section == _DashboardEditSection.lighting,
+        initialSize: _lightingWidgetSize,
+        onSizeChanged: (v) => setState(() => _lightingWidgetSize = v),
       ),
-    ).whenComplete(() {
-      if (mounted) {
-        setState(() => _editingSection = null);
-      }
-    });
+    );
   }
 
   void _showLightSectionEdit(BuildContext context) =>
@@ -426,21 +423,47 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   }) {
     if (_editingSection != section) return child;
     final bool selected = _selectedEditDeviceId == deviceId;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedEditDeviceId = deviceId),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26.r),
-          border: Border.all(
-            color: selected
-                ? const Color(0xFF00E5FF)
-                : Colors.transparent,
-            width: 2,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _selectedEditDeviceId = deviceId),
+          child: child,
+        ),
+        if (selected)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(
+                    color: const Color(0xFF00E5FF),
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        Positioned(
+          top: 4.h,
+          right: 4.w,
+          child: GestureDetector(
+            onTap: () => _removeDeviceById(
+              section,
+              deviceId,
+              onEmpty: _closeDashboardSectionEdit,
+            ),
+            behavior: HitTestBehavior.opaque,
+            child: Image.asset(
+              'assets/images/cross.png',
+              width: 28.w,
+              height: 28.h,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
-        child: child,
-      ),
+      ],
     );
   }
 
@@ -533,6 +556,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
+    final double editSheetInset = _editingSection != null ? 360.h : 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -554,7 +578,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     16.w,
                     scrollTopPadding,
                     16.w,
-                    24.h,
+                    24.h + editSheetInset,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: Column(
@@ -653,6 +677,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ],
             ),
+            if (_editingSection != null) _buildDashboardEditOverlay(),
             Positioned(
               top: 0,
               left: 0,
@@ -1053,19 +1078,29 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
     if (_lightHorizontalScroll) {
       return SizedBox(
-        height: 185.h,
+        height: _editingSection == _DashboardEditSection.light ? 200.h : 185.h,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           itemCount: ids.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
               width: 168.w,
-              child: _wrapDashboardEditTarget(
-                section: _DashboardEditSection.light,
-                deviceId: id,
-                child: _buildLightDeviceCard(id),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: _editingSection == _DashboardEditSection.light ? 8.h : 0,
+                  right: _editingSection == _DashboardEditSection.light ? 8.w : 0,
+                ),
+                child: _wrapDashboardEditTarget(
+                  section: _DashboardEditSection.light,
+                  deviceId: id,
+                  child: _buildLightDeviceCard(id),
+                ),
               ),
             );
           },
@@ -1388,20 +1423,34 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         (MediaQuery.sizeOf(context).width - 32.w - 24.w) / 3;
 
     if (_lightingHorizontalScroll) {
+      final double cardHeight = _lightingSmallCardHeight(compact: true);
+      final double listHeight = cardHeight +
+          (_editingSection == _DashboardEditSection.lighting ? 8.h : 0);
       return SizedBox(
-        height: 210.h,
+        height: listHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
           itemCount: ids.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
               width: cardWidth,
-              child: _wrapDashboardEditTarget(
-                section: _DashboardEditSection.lighting,
-                deviceId: id,
-                child: _buildLightingSmallCardById(id),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: _editingSection == _DashboardEditSection.lighting ? 8.h : 0,
+                  right:
+                      _editingSection == _DashboardEditSection.lighting ? 8.w : 0,
+                ),
+                child: _wrapDashboardEditTarget(
+                  section: _DashboardEditSection.lighting,
+                  deviceId: id,
+                  child: _buildLightingSmallCardById(id),
+                ),
               ),
             );
           },
@@ -2103,7 +2152,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     uiTapHaptic();
                     onNavigate();
                   },
-            child: SizedBox(width: 70.w, height: 70.w, child: icon),
+            child: dashboardLightingIconFrame(icon),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -2165,6 +2214,25 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     );
   }
 
+  double _lightingSmallCardHeight({bool compact = false}) {
+    if (compact) {
+      return 8.h +
+          kDashboardLightingIconSide +
+          6.h +
+          30.h +
+          6.h +
+          18.h +
+          8.h;
+    }
+    return 12.h +
+        kDashboardLightingIconSide +
+        8.h +
+        38.h +
+        8.h +
+        20.h +
+        12.h;
+  }
+
   Widget _buildLightingCard({
     required String deviceName,
     required String status,
@@ -2173,25 +2241,30 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     VoidCallback? onTap,
   }) {
     // Small widget: icon + name + status only (tap opens details; no controls).
+    final bool compact = _lightingHorizontalScroll;
+    final double vPad = compact ? 8.h : 12.h;
+    final double gap = compact ? 6.h : 8.h;
+    final double titleH = compact ? 30.h : 38.h;
+    final double statusH = compact ? 18.h : 20.h;
     final radius = BorderRadius.circular(26.r);
-    final Widget iconArea = iconWidget ??
-        Image.asset(
-          iconImage,
-          width: 52.w,
-          height: 52.h,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 52.w,
-            height: 52.h,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(8.r),
+    final Widget iconArea = dashboardLightingIconFrame(
+      iconWidget ??
+          Image.asset(
+            iconImage,
+            width: kDashboardLightingIconSide,
+            height: kDashboardLightingIconSide,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: kDashboardLightingIconSide,
+              height: kDashboardLightingIconSide,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
           ),
-        );
-    // Sum child heights with .h so card size matches content (avoids .w padding overflow).
-    final double cardHeight =
-        12.h + 52.h + 8.h + 38.h + 8.h + 20.h + 12.h;
+    );
+    final double cardHeight = _lightingSmallCardHeight(compact: compact);
     final card = SizedBox(
       height: cardHeight,
       width: double.infinity,
@@ -2200,21 +2273,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           color: const Color(0xFFF3F4F6),
           borderRadius: radius,
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: vPad),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 52.h,
+              height: kDashboardLightingIconSide,
               width: double.infinity,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: iconArea,
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: gap),
             SizedBox(
-              height: 38.h,
+              height: titleH,
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
@@ -2230,9 +2303,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: gap),
             SizedBox(
-              height: 20.h,
+              height: statusH,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -2904,79 +2977,85 @@ class _DimmerPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
     final bool isOff = p <= 0;
-
-    final w = 133.w;
     final h = 35.h;
     final radius = 24.r;
 
     const Color offGreyFill = Color(0xFFE5E7EB);
 
-    final pill = Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(
-        color: isOff ? offGreyFill : Colors.white,
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: const [],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: Stack(
-          children: [
-            if (!isOff)
-              Positioned.fill(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: FractionallySizedBox(
-                    widthFactor: (1 - p),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE1E1E1),
-                        borderRadius: BorderRadius.horizontal(
-                          right: Radius.circular(radius),
-                          left: Radius.circular(
-                            (1 - p) >= 0.98 ? radius : 0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double w = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : 133.w;
+
+        final Widget pill = Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: isOff ? offGreyFill : Colors.white,
+            borderRadius: BorderRadius.circular(radius),
+            boxShadow: const [],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Stack(
+              children: [
+                if (!isOff)
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FractionallySizedBox(
+                        widthFactor: (1 - p),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE1E1E1),
+                            borderRadius: BorderRadius.horizontal(
+                              right: Radius.circular(radius),
+                              left: Radius.circular(
+                                (1 - p) >= 0.98 ? radius : 0,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
+                Positioned(
+                  left: 12.w,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Icon(
+                      Icons.wb_sunny_outlined,
+                      size: 18.sp,
+                      color: isOff
+                          ? const Color(0xFF111827)
+                          : const Color(0xFFFAB300),
+                    ),
+                  ),
                 ),
-              ),
-            Positioned(
-              left: 12.w,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Icon(
-                  Icons.wb_sunny_outlined,
-                  size: 18.sp,
-                  color: isOff
-                      ? const Color(0xFF111827)
-                      : const Color(0xFFFAB300),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
 
-    if (onChanged == null) return pill;
+        if (onChanged == null) return pill;
 
-    void applyDx(double dx) {
-      onChanged!((dx / w).clamp(0.0, 1.0));
-    }
+        void applyDx(double dx) {
+          onChanged!((dx / w).clamp(0.0, 1.0));
+        }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (d) {
-        uiTapHaptic();
-        applyDx(d.localPosition.dx);
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (d) {
+            uiTapHaptic();
+            applyDx(d.localPosition.dx);
+          },
+          onHorizontalDragStart: (_) => uiTapHaptic(),
+          onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
+          child: pill,
+        );
       },
-      onHorizontalDragStart: (_) => uiTapHaptic(),
-      onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
-      child: pill,
     );
   }
 }
@@ -3099,38 +3178,48 @@ class _ThermostatCard extends StatelessWidget {
                     : headerColumn,
               ),
               SizedBox(height: 10.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _CircleBtn(
-                    size: 35,
-                    marked: minusMarked,
-                    onTap: onMinus,
-                    child: Icon(
-                      Icons.remove,
-                      size: 23.sp,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                  Text(
-                    '${value.toStringAsFixed(1)}° c',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
-                    ),
-                  ),
-                  _CircleBtn(
-                    size: 35,
-                    marked: plusMarked,
-                    onTap: onPlus,
-                    child: Icon(
-                      Icons.add,
-                      size: 23.sp,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool compact = constraints.maxWidth < 120;
+                  final double btnSize = compact ? 30 : 35;
+                  return Row(
+                    children: [
+                      _CircleBtn(
+                        size: btnSize,
+                        marked: minusMarked,
+                        onTap: onMinus,
+                        child: Icon(
+                          Icons.remove,
+                          size: compact ? 20.sp : 23.sp,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          '${value.toStringAsFixed(1)}° c',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                      ),
+                      _CircleBtn(
+                        size: btnSize,
+                        marked: plusMarked,
+                        onTap: onPlus,
+                        child: Icon(
+                          Icons.add,
+                          size: compact ? 20.sp : 23.sp,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -3537,6 +3626,8 @@ class _ToggleCardState extends State<_ToggleCard> {
                 children: [
                   Text(
                     _on ? 'On' : 'Off',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
