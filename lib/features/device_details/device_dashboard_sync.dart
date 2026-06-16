@@ -203,8 +203,8 @@ const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
 
 /// Off-state palette — shared with device details hero tiles (Presence off, etc.).
 const Color kDeviceOffGreyFill = Color(0xFFE5E7EB);
-const Color kDeviceOffGreyBorder = Color(0xFFD1D5DB);
-const Color kDeviceOffGreyIcon = Color(0xFFE1E1E1);
+const Color kDeviceOffGreyBorder = Color(0xFF6B7280);
+const Color kDeviceOffGreyIcon = Color(0xFF6B7280);
 
 /// Artwork tint matching fan_level_off.png on dashboard (Fan Level 3 off).
 const Color kDashboardFanOffIconColor = kDeviceOffGreyBorder;
@@ -271,8 +271,30 @@ const double _dashRingStart = math.pi / 2 + (52 * math.pi / 180) / 2;
 const double _dashRingSweep = 2 * math.pi;
 
 /// Progress ring stroke on dashboard LED / ventilation / thermostat cards.
-const double _dashProgressRingStroke = 6;
-const double _dashProgressRingInnerInset = 12;
+const double _dashProgressRingStroke = 4;
+const double _dashProgressRingInnerInset = 10;
+
+TextStyle _dashboardRingInnerTextStyle({double fontSize = 12}) {
+  return TextStyle(
+    fontFamily: 'Inter',
+    fontSize: fontSize.sp,
+    fontWeight: FontWeight.w500,
+    color: const Color(0xFF111827),
+    height: 1.0,
+  );
+}
+
+Widget _dashboardRingInnerLabel(String text, {double fontSize = 12}) {
+  return FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(
+      text,
+      maxLines: 1,
+      textAlign: TextAlign.center,
+      style: _dashboardRingInnerTextStyle(fontSize: fontSize),
+    ),
+  );
+}
 
 void _paintDashGradientRing(
   Canvas canvas,
@@ -281,7 +303,7 @@ void _paintDashGradientRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
-  Color trackColor = const Color(0xFFE1E1E1),
+  Color trackColor = kDeviceOffGreyIcon,
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 1;
@@ -422,15 +444,7 @@ class DashboardRingProgressIcon extends StatelessWidget {
               color: _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
-            child: Text(
-              '$pct%',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
-              ),
-            ),
+            child: _dashboardRingInnerLabel('$pct%'),
           ),
         ],
       ),
@@ -454,7 +468,7 @@ class _DashThermostatRingPainter extends CustomPainter {
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
     final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = kDeviceOffGreyIcon
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -547,14 +561,9 @@ class DashboardThermostatRingIcon extends StatelessWidget {
               color: _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
-            child: Text(
+            child: _dashboardRingInnerLabel(
               '$tempInt.$tempFrac°',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111827),
-              ),
+              fontSize: 11,
             ),
           ),
         ],

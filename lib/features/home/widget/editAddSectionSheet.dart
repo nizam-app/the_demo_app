@@ -1,3 +1,5 @@
+import 'dart:io' show File;
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
@@ -17,6 +19,8 @@ class EditAddSectionSheet extends StatefulWidget {
     this.sectionRenameLabel,
     this.onRenameTap,
     this.onAddDeviceTap,
+    this.onHeaderBackgroundTap,
+    this.headerBackgroundImagePath,
     this.onMoveUp,
     this.onMoveDown,
     this.canMoveUp = true,
@@ -33,6 +37,8 @@ class EditAddSectionSheet extends StatefulWidget {
   final String? sectionRenameLabel;
   final VoidCallback? onRenameTap;
   final VoidCallback? onAddDeviceTap;
+  final VoidCallback? onHeaderBackgroundTap;
+  final String? headerBackgroundImagePath;
   final VoidCallback? onMoveUp;
   final VoidCallback? onMoveDown;
   final bool canMoveUp;
@@ -184,7 +190,10 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                     title: 'Header background',
                     imageHeight: 26.h,
                     imageWidth: 26.w,
-                    trailing: Image.asset("assets/images/header_image.png", height: 39.h, width: 39.w,fit: BoxFit.cover,),
+                    onTap: widget.onHeaderBackgroundTap,
+                    trailing: _headerBackgroundPreview(
+                      widget.headerBackgroundImagePath,
+                    ),
                   ),
                   _SimpleRow(
                     imagePath: 'assets/images/move_up.png',
@@ -291,6 +300,26 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
   }
 }
 
+Widget _headerBackgroundPreview(String? imagePath) {
+  if (imagePath != null && imagePath.isNotEmpty) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6.r),
+      child: Image.file(
+        File(imagePath),
+        height: 39.h,
+        width: 39.w,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+  return Image.asset(
+    'assets/images/header_image.png',
+    height: 39.h,
+    width: 39.w,
+    fit: BoxFit.cover,
+  );
+}
+
 /// CARD CONTAINER
 class _Card extends StatelessWidget {
   final Widget child;
@@ -324,7 +353,10 @@ class _RowItem extends StatelessWidget {
     required this.trailing,
     this.imageWidth = 20,
     this.imageHeight = 20,
+    this.onTap,
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -337,7 +369,10 @@ class _RowItem extends StatelessWidget {
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
       height: 55.h,
       child: Padding(
         padding: EdgeInsets.only(left: 12.w, right: 14.w),
@@ -360,6 +395,7 @@ class _RowItem extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
