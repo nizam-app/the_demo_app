@@ -1219,6 +1219,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       final bool sel = _selectedMultiValueSwitchIndex == index;
       final bool showSelected = sel && _isOn;
       final bool showOffGrey = sel && !_isOn;
+      final Color checkColor =
+          showOffGrey ? const Color(0xFF9CA3AF) : const Color(0xFF22C55E);
       final String caption = rowLabels[index % 3];
       final double radiusOuter = 26.r;
       final double radiusInner = showSelected
@@ -1272,7 +1274,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               padding: showSelected ? EdgeInsets.all(3.w) : EdgeInsets.zero,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: showOffGrey ? kDeviceOffGreyFill : Colors.white,
+                  color: sel ? kDeviceOffGreyFill : Colors.white,
                   borderRadius: BorderRadius.circular(radiusInner),
                   border: showOffGrey
                       ? Border.all(color: kDeviceOffGreyBorder)
@@ -1291,9 +1293,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             fontFamily: 'Inter',
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w700,
-                            color: showOffGrey
-                                ? kDeviceOffGreyIcon
-                                : textPrimary,
+                            color: textPrimary,
                           ),
                         ),
                       ),
@@ -1304,9 +1304,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           child: Icon(
                             Icons.check_circle,
                             size: 30.sp,
-                            color: showOffGrey
-                                ? kDeviceOffGreyIcon
-                                : const Color(0xFF22C55E),
+                            color: checkColor,
                           ),
                         ),
                     ],

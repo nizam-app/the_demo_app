@@ -81,5 +81,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow access to your photo library to set a section header background.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow camera access to take a section header background photo.</string>
 </dict>
 </plist>

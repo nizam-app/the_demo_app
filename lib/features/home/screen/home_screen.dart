@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
@@ -20,6 +21,7 @@ import '../../notifications/screen/notifications_screen.dart';
 import '../../profile/screen/profile_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 import '../widget/Add_section.dart';
+import '../widget/add_dashboard_device_sheet.dart';
 import '../widget/editAddSectionSheet.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -61,6 +63,9 @@ class HomeScreen extends StatefulWidget {
 
 enum _DashboardEditSection { light, lighting }
 
+/// Scrollable dashboard blocks below the category pills (reorderable via Edit sheet).
+enum _DashboardBlock { light, lighting, favorites, shading, chart }
+
 class _HomeScreenState extends State<HomeScreen> {
   /// Dashboard category pills (0 Light … 3 Security).
   int _homeCategoryIndex = 0;
@@ -83,11 +88,20 @@ class _HomeScreenState extends State<HomeScreen> {
   /// A/M mode badges (tap to toggle auto vs manual) — dashboard + lighting.
   bool _bedroomManual = false;
   bool _bathroomManual = true;
+  bool _awningManual = true;
   bool _blindManual = true;
+  bool _irrigationManual = false;
+  bool _motionSensorManual = false;
+  bool _lightSceneManual = false;
+  bool _rgbwManual = false;
   bool _lightingLedBadge1Manual = false;
-  bool _lightingLedBadge2Manual = true;
+  bool _heatingCoolingManual = false;
+  bool _tunableWhiteManual = false;
   bool _ventilationManual = true;
+  bool _fanLevelManual = false;
+  bool _presenceManual = false;
   bool _livingRoomManual = true;
+  bool _multiValueSwitchManual = false;
   bool _favThermoMManual = true;
   bool _favThermoAManual = false;
 
@@ -128,6 +142,11 @@ class _HomeScreenState extends State<HomeScreen> {
     'multi_value_switch',
   ];
 
+  static const List<String> _kAllDashboardDeviceOrder = <String>[
+    ..._kDefaultLightDeviceOrder,
+    ..._kDefaultLightingDeviceOrder,
+  ];
+
   List<String> _lightDeviceOrder =
       List<String>.from(_kDefaultLightDeviceOrder);
   List<String> _lightingDeviceOrder =
@@ -136,10 +155,23 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> _lightingRemovedDevices = <String>[];
 
   String _lightSectionTitle = 'Light';
+  String? _lightSectionHeaderImagePath;
+  String? _lightingSectionHeaderImagePath;
   bool _lightHorizontalScroll = false;
   bool _lightingHorizontalScroll = false;
   _DashboardEditSection? _editingSection;
   String? _selectedEditDeviceId;
+  bool _showSectionEditButtons = false;
+  String? _dashboardDraggingDeviceId;
+  List<_DashboardBlock> _dashboardBlockOrder = const <_DashboardBlock>[
+    _DashboardBlock.light,
+    _DashboardBlock.lighting,
+    _DashboardBlock.favorites,
+    _DashboardBlock.shading,
+    _DashboardBlock.chart,
+  ];
+  final GlobalKey<CustomBottomNavBarState> _shellNavKey =
+      GlobalKey<CustomBottomNavBarState>();
 
   late final VoidCallback _dashboardSyncListener;
   bool _suppressDashboardSyncPull = false;
@@ -154,8 +186,13 @@ class _HomeScreenState extends State<HomeScreen> {
     DeviceDashboardSync.instance.addListener(_dashboardSyncListener);
   }
 
+  void _setShellBottomBarVisible(bool visible) {
+    _shellNavKey.currentState?.setBottomBarVisible(visible);
+  }
+
   @override
   void dispose() {
+    _setShellBottomBarVisible(true);
     DeviceDashboardSync.instance.removeListener(_dashboardSyncListener);
     super.dispose();
   }
@@ -268,25 +305,123 @@ class _HomeScreenState extends State<HomeScreen> {
           ? _lightSectionTitle
           : 'Lighting';
 
-  bool _canMoveSelectedDevice(_DashboardEditSection section, int delta) {
-    final String? id = _selectedEditDeviceId;
-    if (id == null) return false;
-    final List<String> order = _deviceOrderFor(section);
-    final int index = order.indexOf(id);
-    if (index < 0) return false;
-    final int target = index + delta;
-    return target >= 0 && target < order.length;
+  String? _sectionHeaderImagePath(_DashboardEditSection section) =>
+      section == _DashboardEditSection.light
+          ? _lightSectionHeaderImagePath
+          : _lightingSectionHeaderImagePath;
+
+  void _setSectionHeaderImagePath(
+    _DashboardEditSection section,
+    String path,
+  ) {
+    if (section == _DashboardEditSection.light) {
+      _lightSectionHeaderImagePath = path;
+    } else {
+      _lightingSectionHeaderImagePath = path;
+    }
   }
 
-  void _moveSelectedDevice(_DashboardEditSection section, int delta) {
-    final String? id = _selectedEditDeviceId;
-    if (id == null || !_canMoveSelectedDevice(section, delta)) return;
-    final List<String> order = List<String>.from(_deviceOrderFor(section));
-    final int index = order.indexOf(id);
+  Future<void> _pickSectionHeaderImage(_DashboardEditSection section) async {
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: Material(
+                  color: Colors.white,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.photo_library_outlined),
+                        title: Text(
+                          'Choose from gallery',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        onTap: () =>
+                            Navigator.of(ctx).pop(ImageSource.gallery),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.photo_camera_outlined),
+                        title: Text(
+                          'Take a photo',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        onTap: () =>
+                            Navigator.of(ctx).pop(ImageSource.camera),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (source == null || !mounted) return;
+
+    final XFile? file = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1920,
+    );
+    if (file == null || !mounted) return;
+
+    setState(() => _setSectionHeaderImagePath(section, file.path));
+  }
+
+  _DashboardBlock _blockForEditSection(_DashboardEditSection section) =>
+      section == _DashboardEditSection.light
+          ? _DashboardBlock.light
+          : _DashboardBlock.lighting;
+
+  bool _canMoveDashboardSection(_DashboardEditSection section, int delta) {
+    final _DashboardBlock block = _blockForEditSection(section);
+    final int index = _dashboardBlockOrder.indexOf(block);
+    if (index < 0) return false;
+    final int target = index + delta;
+    return target >= 0 && target < _dashboardBlockOrder.length;
+  }
+
+  void _moveDashboardSection(_DashboardEditSection section, int delta) {
+    if (!_canMoveDashboardSection(section, delta)) return;
+    final _DashboardBlock block = _blockForEditSection(section);
+    final List<_DashboardBlock> order =
+        List<_DashboardBlock>.from(_dashboardBlockOrder);
+    final int index = order.indexOf(block);
     final int target = index + delta;
     order[index] = order[target];
-    order[target] = id;
-    setState(() => _setDeviceOrderFor(section, order));
+    order[target] = block;
+    setState(() => _dashboardBlockOrder = order);
+  }
+
+  void _removeDashboardSection(_DashboardEditSection section) {
+    final _DashboardBlock block = _blockForEditSection(section);
+    setState(() {
+      _dashboardBlockOrder = _dashboardBlockOrder
+          .where((_DashboardBlock item) => item != block)
+          .toList(growable: false);
+      _editingSection = null;
+      _selectedEditDeviceId = null;
+    });
+    _setShellBottomBarVisible(true);
   }
 
   void _removeDeviceById(
@@ -319,15 +454,160 @@ class _HomeScreenState extends State<HomeScreen> {
     _removeDeviceById(section, id, onEmpty: onEmpty);
   }
 
-  void _restoreRemovedDevice(_DashboardEditSection section) {
-    final List<String> removed = _removedDevicesFor(section);
-    if (removed.isEmpty) return;
-    final String id = removed.removeLast();
+  DashboardAddDeviceOption _dashboardAddDeviceOption(String deviceId) {
+    switch (deviceId) {
+      case 'light_dining':
+        return const DashboardAddDeviceOption(
+          id: 'light_dining',
+          title: 'Light dinning room',
+          imagePath: 'assets/Mask group (5).png',
+        );
+      case 'bathroom_heat':
+        return const DashboardAddDeviceOption(
+          id: 'bathroom_heat',
+          title: 'Bathroom heating thermostat',
+          imagePath: 'assets/Mask group (6).png',
+        );
+      case 'awning':
+        return const DashboardAddDeviceOption(
+          id: 'awning',
+          title: 'Awning garden 123',
+          imagePath: 'assets/Rectangle 823.png',
+        );
+      case 'irrigation':
+        return const DashboardAddDeviceOption(
+          id: 'irrigation',
+          title: 'Irrigation entry',
+          imagePath: 'assets/Mask group (7).png',
+        );
+      case 'blind_living':
+        return const DashboardAddDeviceOption(
+          id: 'blind_living',
+          title: 'Blind Living Room',
+          imagePath: 'assets/Rectangle 823.png',
+        );
+      case 'motion':
+        return const DashboardAddDeviceOption(
+          id: 'motion',
+          title: 'Motion Sensor',
+          imagePath: 'assets/images/update_sensor.png',
+        );
+      case 'light_scene':
+        return const DashboardAddDeviceOption(
+          id: 'light_scene',
+          title: 'Light Scene',
+          imagePath:
+              'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+        );
+      case 'rgbw':
+        return const DashboardAddDeviceOption(
+          id: 'rgbw',
+          title: 'RGBW room abc',
+          imagePath:
+              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+        );
+      case 'led_dimmer':
+        return const DashboardAddDeviceOption(
+          id: 'led_dimmer',
+          title: 'LED Dimmer living room',
+          imagePath:
+              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+        );
+      case 'heating_cooling':
+        return const DashboardAddDeviceOption(
+          id: 'heating_cooling',
+          title: 'Heating & Cooling',
+          imagePath: 'assets/images/heating_cooling.png',
+        );
+      case 'tunable_white':
+        return const DashboardAddDeviceOption(
+          id: 'tunable_white',
+          title: 'Tunable white light',
+          imagePath: 'assets/white_light.png',
+        );
+      case 'ventilation':
+        return const DashboardAddDeviceOption(
+          id: 'ventilation',
+          title: 'Ventilation',
+          imagePath: 'assets/images/ventilations.png',
+        );
+      case 'fan_level_3':
+        return const DashboardAddDeviceOption(
+          id: 'fan_level_3',
+          title: 'Fan Level 3',
+          imagePath: 'assets/images/Fun_level3.png',
+        );
+      case 'presence':
+        return const DashboardAddDeviceOption(
+          id: 'presence',
+          title: 'Presence',
+          imagePath: 'assets/images/comfort.png',
+        );
+      case 'living_room':
+        return const DashboardAddDeviceOption(
+          id: 'living_room',
+          title: 'Living room',
+          imagePath:
+              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+        );
+      case 'multi_value_switch':
+        return const DashboardAddDeviceOption(
+          id: 'multi_value_switch',
+          title: 'Multi-Value Switch',
+          imagePath:
+              'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+        );
+      default:
+        return DashboardAddDeviceOption(
+          id: deviceId,
+          title: deviceId,
+          imagePath: 'assets/images/sensor.png',
+        );
+    }
+  }
+
+  List<DashboardAddDeviceOption> _dashboardDeviceCatalog() {
+    return <DashboardAddDeviceOption>[
+      for (final String id in _kAllDashboardDeviceOrder)
+        _dashboardAddDeviceOption(id),
+    ];
+  }
+
+  Set<String> _disabledDeviceIdsForAddPicker(_DashboardEditSection section) {
+    final Set<String> disabled = _deviceOrderFor(section).toSet();
+    final Set<String> sectionPool =
+        (section == _DashboardEditSection.light
+                ? _kDefaultLightDeviceOrder
+                : _kDefaultLightingDeviceOrder)
+            .toSet();
+    for (final String id in _kAllDashboardDeviceOrder) {
+      if (!sectionPool.contains(id)) disabled.add(id);
+    }
+    return disabled;
+  }
+
+  Future<void> _openAddDashboardDevicePicker(
+    _DashboardEditSection section,
+  ) async {
+    final List<DashboardAddDeviceOption> catalog = _dashboardDeviceCatalog();
+    final Set<String> disabled = _disabledDeviceIdsForAddPicker(section);
+
+    final List<String>? picked = await showAddDashboardDeviceSheet(
+      context,
+      devices: catalog,
+      disabledDeviceIds: disabled,
+    );
+    if (!mounted || picked == null || picked.isEmpty) return;
+
     setState(() {
       final List<String> order = List<String>.from(_deviceOrderFor(section));
-      order.add(id);
+      final List<String> removed = _removedDevicesFor(section);
+      for (final String id in picked) {
+        removed.remove(id);
+        if (!order.contains(id)) order.add(id);
+      }
       _setDeviceOrderFor(section, order);
-      _selectedEditDeviceId = id;
+      _selectedEditDeviceId = picked.last;
     });
   }
 
@@ -337,24 +617,126 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     final String? next = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename section'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Section name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+      barrierColor: Colors.black.withOpacity(0.35),
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.r),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Save'),
+          insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 18.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 28.w, height: 28.w),
+                    Expanded(
+                      child: Text(
+                        'Rename section',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.of(ctx).pop(),
+                      child: Container(
+                        width: 28.w,
+                        height: 28.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 17.sp,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14.h),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontFamily: 'Inter',
+                    color: const Color(0xFF111827),
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Section name',
+                    hintStyle: TextStyle(
+                      color: const Color(0xFF9CA3AF),
+                      fontSize: 16.sp,
+                      fontFamily: 'Inter',
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 18.w,
+                      vertical: 11.h,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF3F4F6),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF0088FE),
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 14.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        final String val = controller.text.trim();
+                        if (val.isNotEmpty) Navigator.of(ctx).pop(val);
+                      },
+                      child: Container(
+                        height: 36.h,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0088FE),
+                          borderRadius: BorderRadius.circular(18.r),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Confirm',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
     if (!mounted || next == null || next.isEmpty) return;
     setState(() {
@@ -366,16 +748,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _closeDashboardSectionEdit() {
     if (!mounted) return;
+    _setShellBottomBarVisible(true);
     setState(() {
       _editingSection = null;
       _selectedEditDeviceId = null;
     });
   }
 
+  void _toggleDashboardEditMode() {
+    setState(() {
+      _showSectionEditButtons = !_showSectionEditButtons;
+      if (!_showSectionEditButtons) {
+        _editingSection = null;
+        _selectedEditDeviceId = null;
+        _dashboardDraggingDeviceId = null;
+        _setShellBottomBarVisible(true);
+      }
+    });
+  }
+
+  void _reorderDeviceInSection(
+    _DashboardEditSection section,
+    String draggedId,
+    String targetId,
+  ) {
+    if (draggedId == targetId) return;
+    final List<String> order = List<String>.from(_deviceOrderFor(section));
+    final int fromIndex = order.indexOf(draggedId);
+    final int toIndex = order.indexOf(targetId);
+    if (fromIndex < 0 || toIndex < 0) return;
+    order.removeAt(fromIndex);
+    order.insert(toIndex, draggedId);
+    setState(() {
+      _setDeviceOrderFor(section, order);
+      _selectedEditDeviceId = draggedId;
+    });
+  }
+
+  double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    if (section == _DashboardEditSection.light) {
+      if (_lightHorizontalScroll) return 168.w;
+      return (screenWidth - 32.w - 12.w) / 2;
+    }
+    if (_lightingUsesLargeWidgets) return screenWidth - 32.w;
+    return (screenWidth - 32.w - 24.w) / 3;
+  }
+
+  double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
+    if (section == _DashboardEditSection.light) {
+      return _editingSection == _DashboardEditSection.light ? 200.h : 185.h;
+    }
+    if (_lightingUsesLargeWidgets) return 90.h;
+    return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
+  }
+
   void _openDashboardSectionEdit(
     BuildContext context,
     _DashboardEditSection section,
   ) {
+    _setShellBottomBarVisible(false);
     final List<String> order = _deviceOrderFor(section);
     setState(() {
       _editingSection = section;
@@ -396,19 +828,20 @@ class _HomeScreenState extends State<HomeScreen> {
       left: 0,
       right: 0,
       bottom: 0,
-      child: EditAddSectionSheet(
+      child: SafeArea(
+        top: false,
+        child: EditAddSectionSheet(
         onClose: _closeDashboardSectionEdit,
         sectionRenameLabel: _sectionRenameLabel(section),
         onRenameTap: () => _renameDashboardSection(section),
-        onAddDeviceTap: () => _restoreRemovedDevice(section),
-        onMoveUp: () => _moveSelectedDevice(section, -1),
-        onMoveDown: () => _moveSelectedDevice(section, 1),
-        canMoveUp: _canMoveSelectedDevice(section, -1),
-        canMoveDown: _canMoveSelectedDevice(section, 1),
-        onRemove: () => _removeSelectedDevice(
-          section,
-          _closeDashboardSectionEdit,
-        ),
+        onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
+        onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
+        headerBackgroundImagePath: _sectionHeaderImagePath(section),
+        onMoveUp: () => _moveDashboardSection(section, -1),
+        onMoveDown: () => _moveDashboardSection(section, 1),
+        canMoveUp: _canMoveDashboardSection(section, -1),
+        canMoveDown: _canMoveDashboardSection(section, 1),
+        onRemove: () => _removeDashboardSection(section),
         initialHorizontalScroll: section == _DashboardEditSection.light
             ? _lightHorizontalScroll
             : _lightingHorizontalScroll,
@@ -422,6 +855,7 @@ class _HomeScreenState extends State<HomeScreen> {
         showWidgetSize: section == _DashboardEditSection.lighting,
         initialSize: _lightingWidgetSize,
         onSizeChanged: (v) => setState(() => _lightingWidgetSize = v),
+        ),
       ),
     );
   }
@@ -432,6 +866,84 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showLightingSectionEdit(BuildContext context) =>
       _openDashboardSectionEdit(context, _DashboardEditSection.lighting);
 
+  List<Widget> _buildOrderedDashboardBlocks(BuildContext context) {
+    final List<Widget> children = <Widget>[];
+    for (int i = 0; i < _dashboardBlockOrder.length; i++) {
+      if (i > 0) {
+        children.add(SizedBox(height: 18.h));
+      }
+      children.addAll(_widgetsForDashboardBlock(context, _dashboardBlockOrder[i]));
+    }
+    children.add(SizedBox(height: 70.h));
+    return children;
+  }
+
+  List<Widget> _widgetsForDashboardBlock(
+    BuildContext context,
+    _DashboardBlock block,
+  ) {
+    switch (block) {
+      case _DashboardBlock.light:
+        return <Widget>[
+          _SectionTitle(
+            _lightSectionTitle,
+            showEditButton: _showSectionEditButtons,
+            onEditTap: () => _showLightSectionEdit(context),
+          ),
+          SizedBox(height: 12.h),
+          _buildLightSectionDevices(),
+        ];
+      case _DashboardBlock.lighting:
+        return <Widget>[
+          _SectionTitle(
+            'Lighting',
+            showEditButton: _showSectionEditButtons,
+            onEditTap: () => _showLightingSectionEdit(context),
+          ),
+          SizedBox(height: 12.h),
+          _buildLightingSectionCards(),
+        ];
+      case _DashboardBlock.favorites:
+        return <Widget>[_buildFavoritesSection()];
+      case _DashboardBlock.shading:
+        return <Widget>[_buildShadingSection()];
+      case _DashboardBlock.chart:
+        return <Widget>[
+          const _SectionTitle('Chart Section'),
+          SizedBox(height: 12.h),
+          _ChartCard(),
+        ];
+    }
+  }
+
+  Widget _wrapDashboardDeviceCell({
+    required _DashboardEditSection section,
+    required String deviceId,
+    required Widget child,
+  }) {
+    Widget cell = _wrapDashboardEditTarget(
+      section: section,
+      deviceId: deviceId,
+      child: child,
+    );
+    if (!_showSectionEditButtons) return cell;
+
+    return _DashboardShakeWrapper(
+      shaking: _dashboardDraggingDeviceId != deviceId,
+      child: _DashboardDraggableReorderSlot(
+        deviceId: deviceId,
+        feedbackWidth: _dashboardDragFeedbackWidth(section),
+        feedbackHeight: _dashboardDragFeedbackHeight(section),
+        onDragStarted: () =>
+            setState(() => _dashboardDraggingDeviceId = deviceId),
+        onDragEnded: () => setState(() => _dashboardDraggingDeviceId = null),
+        onReorder: (String draggedId) =>
+            _reorderDeviceInSection(section, draggedId, deviceId),
+        child: cell,
+      ),
+    );
+  }
+
   Widget _wrapDashboardEditTarget({
     required _DashboardEditSection section,
     required String deviceId,
@@ -439,47 +951,51 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     if (_editingSection != section) return child;
     final bool selected = _selectedEditDeviceId == deviceId;
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        GestureDetector(
-          onTap: () => setState(() => _selectedEditDeviceId = deviceId),
-          child: child,
-        ),
-        if (selected)
-          Positioned.fill(
-            child: IgnorePointer(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(26.r),
-                  border: Border.all(
-                    color: const Color(0xFF00E5FF),
-                    width: 2,
+    // Reserve outer space so the remove chip can sit on the card corner (Figma).
+    return Padding(
+      padding: EdgeInsets.only(top: 10.h, right: 10.w),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          GestureDetector(
+            onTap: () => setState(() => _selectedEditDeviceId = deviceId),
+            child: child,
+          ),
+          if (selected)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26.r),
+                    border: Border.all(
+                      color: const Color(0xFF00E5FF),
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        Positioned(
-          top: 4.h,
-          right: 4.w,
-          child: GestureDetector(
-            onTap: () => _removeDeviceById(
-              section,
-              deviceId,
-              onEmpty: _closeDashboardSectionEdit,
+          Positioned(
+            top: -6.h,
+            right: -6.w,
+            child: GestureDetector(
+              onTap: () => _removeDeviceById(
+                section,
+                deviceId,
+                onEmpty: _closeDashboardSectionEdit,
+              ),
+              behavior: HitTestBehavior.opaque,
+              child: Image.asset(
+                'assets/images/cross.png',
+                width: 26.w,
+                height: 26.w,
+                fit: BoxFit.contain,
+              ),
             ),
-            behavior: HitTestBehavior.opaque,
-            child: Image.asset(
-              'assets/images/cross.png',
-              width: 28.w,
-              height: 28.h,
-              fit: BoxFit.contain,
-            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -621,40 +1137,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         SizedBox(height: 18.h),
 
-                        _SectionTitle(
-                          _lightSectionTitle,
-                          onEditTap: () => _showLightSectionEdit(context),
-                        ),
-                        SizedBox(height: 12.h),
-
-                        _buildLightSectionDevices(),
-
-                        SizedBox(height: 18.h),
-
-                        _SectionTitle(
-                          'Lighting',
-                          onEditTap: () => _showLightingSectionEdit(context),
-                        ),
-                        SizedBox(height: 12.h),
-
-                        _buildLightingSectionCards(),
-
-                        SizedBox(height: 18.h),
-
-                        _buildFavoritesSection(),
-                        SizedBox(height: 18.h),
-
-                        _buildShadingSection(),
-
-                        SizedBox(height: 18.h),
-
-                        const _SectionTitle('Chart Section'),
-                        SizedBox(height: 12.h),
-
-                        // ✅ Chart card
-                        _ChartCard(),
-
-                        SizedBox(height: 70.h),
+                        ..._buildOrderedDashboardBlocks(context),
                       ],
                     ),
                   ),
@@ -691,7 +1174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onMenuTap: () {
                           ctx.push(MenuScreen.routeName);
                         },
-                        onEditTap: () => _showLightSectionEdit(ctx),
+                        onEditTap: _toggleDashboardEditMode,
                       ),
                     ),
                   ),
@@ -708,6 +1191,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomBottomNavBar(
+      key: _shellNavKey,
       initialIndex: 2,
       translucentBottomBar: true,
       bottomBarBackgroundOpacity: 0,
@@ -759,6 +1243,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required int rowIndex,
     required String deviceName,
   }) {
+    final bool manual = _shadeManual[rowIndex];
     final downPercent = _shadeDown[rowIndex];
     final upPercent = _shadeUp[rowIndex];
     return Container(
@@ -801,6 +1286,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Row(
                   children: [
+                    _ModeBadge(
+                      mode: manual ? 'M' : 'A',
+                      filled: manual,
+                      onTap: () => setState(
+                        () => _shadeManual[rowIndex] = !manual,
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
                     Image.asset(
                       'assets/Group 32.jpg', // down icon
                       width: 12.w,
@@ -839,6 +1332,61 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+
+          SizedBox(width: 10.w),
+
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: 6.h,
+                right: 10.w,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _CircleBtn(
+                    size: 35,
+                    marked: _shadeStepMark[rowIndex] == 1,
+                    onTap: () => _flashMark(
+                      value: 1,
+                      getCurrent: () => _shadeStepMark[rowIndex],
+                      set: (v) => _shadeStepMark[rowIndex] = v,
+                      action: () => _shadeDown[rowIndex] =
+                          (_shadeDown[rowIndex] - 5).clamp(0, 100),
+                    ),
+                    child: Image.asset(
+                      'assets/Mask group (17).png',
+                      width: 13.w,
+                      height: 13.h,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  SizedBox(width: 17.w),
+                  _CircleBtn(
+                    size: 35,
+                    marked: _shadeStepMark[rowIndex] == 2,
+                    onTap: () => _flashMark(
+                      value: 2,
+                      getCurrent: () => _shadeStepMark[rowIndex],
+                      set: (v) => _shadeStepMark[rowIndex] = v,
+                      action: () => _shadeUp[rowIndex] =
+                          (_shadeUp[rowIndex] + 5).clamp(0, 100),
+                    ),
+                    child: Transform.rotate(
+                      angle: math.pi,
+                      child: Image.asset(
+                        'assets/Mask group (17).png',
+                        width: 13.w,
+                        height: 13.h,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -857,7 +1405,30 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(child: _buildCameraCard()), // ✅ equal
             SizedBox(width: 12.w),
             Expanded(
-              child: _buildThermostatCard(value: _favThermostatM),
+              child: _buildThermostatCard(
+                mode: _favThermoMManual ? 'M' : 'A',
+                filled: _favThermoMManual,
+                value: _favThermostatM,
+                minusMarked: _favThermoMMark == 1,
+                plusMarked: _favThermoMMark == 2,
+                onModeTap: () => setState(
+                  () => _favThermoMManual = !_favThermoMManual,
+                ),
+                onMinus: () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _favThermoMMark,
+                  set: (v) => _favThermoMMark = v,
+                  action: () => _favThermostatM =
+                      (_favThermostatM - 0.5).clamp(10.0, 35.0),
+                ),
+                onPlus: () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _favThermoMMark,
+                  set: (v) => _favThermoMMark = v,
+                  action: () => _favThermostatM =
+                      (_favThermostatM + 0.5).clamp(10.0, 35.0),
+                ),
+              ),
             ),
           ],
         ),
@@ -870,7 +1441,30 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(child: _buildCameraCard()),
             SizedBox(width: 12.w),
             Expanded(
-              child: _buildThermostatCard(value: _favThermostatA),
+              child: _buildThermostatCard(
+                mode: _favThermoAManual ? 'M' : 'A',
+                filled: _favThermoAManual,
+                value: _favThermostatA,
+                minusMarked: _favThermoAMark == 1,
+                plusMarked: _favThermoAMark == 2,
+                onModeTap: () => setState(
+                  () => _favThermoAManual = !_favThermoAManual,
+                ),
+                onMinus: () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _favThermoAMark,
+                  set: (v) => _favThermoAMark = v,
+                  action: () => _favThermostatA =
+                      (_favThermostatA - 0.5).clamp(10.0, 35.0),
+                ),
+                onPlus: () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _favThermoAMark,
+                  set: (v) => _favThermoAMark = v,
+                  action: () => _favThermostatA =
+                      (_favThermostatA + 0.5).clamp(10.0, 35.0),
+                ),
+              ),
             ),
           ],
         ),
@@ -925,49 +1519,96 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildThermostatCard({required double value}) {
-    return Container(
-      height: 144.h,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            'assets/IMG_0274 1.png',
-            width: 34.w,
-            height: 34.w,
-            fit: BoxFit.contain,
+  Widget _buildThermostatCard({
+    required String mode,
+    required bool filled,
+    required double value,
+    bool minusMarked = false,
+    bool plusMarked = false,
+    VoidCallback? onModeTap,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+  }) {
+    return Stack(
+      children: [
+        Container(
+          height: 144.h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(26.r),
           ),
-          SizedBox(height: 8.h),
-          Text(
-            'Bedroom Thermostat parents room',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF111827),
-              height: 1.12,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              '${value.toStringAsFixed(1)}°c',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF111827),
+          padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 14.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(
+                'assets/IMG_0274 1.png',
+                width: 34.w,
+                height: 34.w,
+                fit: BoxFit.contain,
               ),
-            ),
+              SizedBox(height: 8.h),
+              Text(
+                'Bedroom Thermostat parents room',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF111827),
+                  height: 1.12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  _CircleBtn(
+                    marked: minusMarked,
+                    onTap: onMinus,
+                    size: 35,
+                    child: Icon(
+                      Icons.remove,
+                      size: 20.sp,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        '${value.toStringAsFixed(1)}°c',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                    ),
+                  ),
+                  _CircleBtn(
+                    marked: plusMarked,
+                    onTap: onPlus,
+                    size: 35,
+                    child: Icon(
+                      Icons.add,
+                      size: 20.sp,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(
+            mode: mode,
+            filled: filled,
+            onTap: onModeTap,
+          ),
+        ),
+      ],
     );
   }
 
@@ -992,16 +1633,10 @@ class _HomeScreenState extends State<HomeScreen> {
             final String id = ids[index];
             return SizedBox(
               width: 168.w,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: _editingSection == _DashboardEditSection.light ? 8.h : 0,
-                  right: _editingSection == _DashboardEditSection.light ? 8.w : 0,
-                ),
-                child: _wrapDashboardEditTarget(
-                  section: _DashboardEditSection.light,
-                  deviceId: id,
-                  child: _buildLightDeviceCard(id),
-                ),
+              child: _wrapDashboardDeviceCell(
+                section: _DashboardEditSection.light,
+                deviceId: id,
+                child: _buildLightDeviceCard(id),
               ),
             );
           },
@@ -1017,7 +1652,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _wrapDashboardEditTarget(
+              child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.light,
                 deviceId: ids[i],
                 child: _buildLightDeviceCard(ids[i]),
@@ -1026,7 +1661,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (i + 1 < ids.length) ...[
               SizedBox(width: 12.w),
               Expanded(
-                child: _wrapDashboardEditTarget(
+                child: _wrapDashboardDeviceCell(
                   section: _DashboardEditSection.light,
                   deviceId: ids[i + 1],
                   child: _buildLightDeviceCard(ids[i + 1]),
@@ -1042,7 +1677,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightDeviceCard(String deviceId) {
-    final bool editing = _editingSection == _DashboardEditSection.light;
+    final bool editing = _editingSection == _DashboardEditSection.light ||
+        _showSectionEditButtons;
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
     final DeviceControlSnapshot bathroomHeat =
         _snap('Bathroom heating thermostat');
@@ -1056,7 +1692,6 @@ class _HomeScreenState extends State<HomeScreen> {
             percent: _bedroomDimmer,
             mode: _bedroomManual ? 'M' : 'A',
             modeFilled: _bedroomManual,
-            showModeBadge: false,
             isOn: diningLight.isOn,
             imagePath: 'assets/Mask group (5).png',
             imagePathOff: 'assets/images/light_of.png',
@@ -1087,7 +1722,6 @@ class _HomeScreenState extends State<HomeScreen> {
             value: _bathroomThermostat,
             mode: _bathroomManual ? 'M' : 'A',
             modeFilled: _bathroomManual,
-            showModeBadge: false,
             isOn: bathroomHeat.isOn,
             imagePath: 'assets/Mask group (6).png',
             imagePathOff: 'assets/images/bathroom_off.png',
@@ -1138,9 +1772,8 @@ class _HomeScreenState extends State<HomeScreen> {
             downPercent: _awningDown,
             upPercent: _awningUp,
             levelPercent: _awningUp,
-            mode: _blindManual ? 'M' : 'A',
-            modeFilled: _blindManual,
-            showModeBadge: false,
+            mode: _awningManual ? 'M' : 'A',
+            modeFilled: _awningManual,
             previewLevel: _awningUp / 100.0,
             useAwningPreview: true,
             imagePath: 'assets/Rectangle 823.png',
@@ -1157,7 +1790,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
             onModeTap: editing
                 ? null
-                : () => setState(() => _blindManual = !_blindManual),
+                : () => setState(() => _awningManual = !_awningManual),
             onDown: editing
                 ? () {}
                 : () => _flashMark(
@@ -1197,7 +1830,11 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 185.h,
           child: _ToggleCard(
             title: 'Irrigation entry ',
-            showModeBadge: false,
+            mode: _irrigationManual ? 'M' : 'A',
+            modeFilled: _irrigationManual,
+            onModeTap: editing
+                ? null
+                : () => setState(() => _irrigationManual = !_irrigationManual),
             isOn: _irrigationOn,
             imagePath: 'assets/Mask group (7).png',
             imagePathOff: 'assets/images/irrigation_of.png',
@@ -1226,7 +1863,6 @@ class _HomeScreenState extends State<HomeScreen> {
             upPercent: _blindRoomAngle,
             mode: _blindManual ? 'M' : 'A',
             modeFilled: _blindManual,
-            showModeBadge: false,
             previewLevel: _blindRoomLevel / 100.0,
             blindAngle: _blindRoomAngle / 100.0,
             useBlindSlatsPreview: true,
@@ -1284,7 +1920,11 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 185.h,
           child: _ToggleCard(
             title: 'Motion Sensor',
-            showModeBadge: false,
+            mode: _motionSensorManual ? 'M' : 'A',
+            modeFilled: _motionSensorManual,
+            onModeTap: editing
+                ? null
+                : () => setState(() => _motionSensorManual = !_motionSensorManual),
             isOn: _motionSensorOn,
             imagePath: 'assets/images/update_sensor.png',
             imagePathOff: 'assets/images/motion_sensor_off.png',
@@ -1326,7 +1966,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_lightingHorizontalScroll) {
       final double cardHeight = _lightingSmallCardHeight(compact: true);
       final double listHeight = cardHeight +
-          (_editingSection == _DashboardEditSection.lighting ? 8.h : 0);
+          (_editingSection == _DashboardEditSection.lighting ? 10.h : 0);
       return SizedBox(
         height: listHeight,
         child: ListView.separated(
@@ -1341,17 +1981,10 @@ class _HomeScreenState extends State<HomeScreen> {
             final String id = ids[index];
             return SizedBox(
               width: cardWidth,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: _editingSection == _DashboardEditSection.lighting ? 8.h : 0,
-                  right:
-                      _editingSection == _DashboardEditSection.lighting ? 8.w : 0,
-                ),
-                child: _wrapDashboardEditTarget(
-                  section: _DashboardEditSection.lighting,
-                  deviceId: id,
-                  child: _buildLightingSmallCardById(id),
-                ),
+              child: _wrapDashboardDeviceCell(
+                section: _DashboardEditSection.lighting,
+                deviceId: id,
+                child: _buildLightingSmallCardById(id),
               ),
             );
           },
@@ -1370,7 +2003,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (col > 0) SizedBox(width: 12.w),
               Expanded(
                 child: i + col < ids.length
-                    ? _wrapDashboardEditTarget(
+                    ? _wrapDashboardDeviceCell(
                         section: _DashboardEditSection.lighting,
                         deviceId: ids[i + col],
                         child: _buildLightingSmallCardById(ids[i + col]),
@@ -1386,7 +2019,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightingSmallCardById(String deviceId) {
-    final bool editing = _editingSection == _DashboardEditSection.lighting;
+    final bool editing = _editingSection == _DashboardEditSection.lighting ||
+        _showSectionEditButtons;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -1405,6 +2039,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Light Scene',
           status: scene.sceneLabel,
+          mode: _lightSceneManual ? 'M' : 'A',
+          modeFilled: _lightSceneManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _lightSceneManual = !_lightSceneManual),
           iconImage:
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
@@ -1421,6 +2060,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'RGBW room abc',
           status: '${(rgbw.rgbwIntensity * 100).round()}%',
+          mode: _rgbwManual ? 'M' : 'A',
+          modeFilled: _rgbwManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _rgbwManual = !_rgbwManual),
           iconWidget: DashboardRgbwIcon(
             hue: rgbw.rgbwHue,
             saturation: rgbw.rgbwSaturation,
@@ -1441,6 +2085,13 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'LED Dimmer living room',
           status: '${(led.ledDimmerPercent * 100).round()}%',
+          mode: _lightingLedBadge1Manual ? 'M' : 'A',
+          modeFilled: _lightingLedBadge1Manual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                    () => _lightingLedBadge1Manual = !_lightingLedBadge1Manual,
+                  ),
           iconWidget: DashboardRingProgressIcon(
             percent: led.ledDimmerPercent,
             ringStyle: DashboardRingStyle.led,
@@ -1460,6 +2111,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Heating & Cooling',
           status: hvac.heatingCoolingStatusLabel,
+          mode: _heatingCoolingManual ? 'M' : 'A',
+          modeFilled: _heatingCoolingManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _heatingCoolingManual = !_heatingCoolingManual),
           iconImage: 'assets/images/heating_cooling.png',
           iconWidget: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
           onTap: detailsTap(() => DeviceDetailsScreen.go(
@@ -1474,6 +2130,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Tunable white light',
           status: '${(tunable.tunableWhiteIntensity * 100).round()}%',
+          mode: _tunableWhiteManual ? 'M' : 'A',
+          modeFilled: _tunableWhiteManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _tunableWhiteManual = !_tunableWhiteManual),
           iconImage: 'assets/white_light.png',
           iconWidget: DashboardTunableWhiteIcon(
             dotDx: tunable.tunableWhiteDotDx,
@@ -1492,6 +2153,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Ventilation',
           status: '${(vent.ventilationPercent * 100).round()}%',
+          mode: _ventilationManual ? 'M' : 'A',
+          modeFilled: _ventilationManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _ventilationManual = !_ventilationManual),
           iconWidget: DashboardVentilationIcon(percent: vent.ventilationPercent),
           iconImage: 'assets/images/ventilations.png',
           onTap: detailsTap(() => DeviceDetailsScreen.go(
@@ -1506,6 +2172,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Fan Level 3',
           status: fan.fanStatusLabel,
+          mode: _fanLevelManual ? 'M' : 'A',
+          modeFilled: _fanLevelManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _fanLevelManual = !_fanLevelManual),
           iconImage: 'assets/images/Fun_level3.png',
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
           onTap: detailsTap(() => DeviceDetailsScreen.go(
@@ -1520,6 +2191,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Presence',
           status: presence.presenceLabel,
+          mode: _presenceManual ? 'M' : 'A',
+          modeFilled: _presenceManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _presenceManual = !_presenceManual),
           iconImage: 'assets/images/comfort.png',
           iconWidget: DashboardPresenceModeIcon(
             modeIndex: presence.presenceModeIndex,
@@ -1537,6 +2213,11 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Living room',
           status: '${living.thermostatRingCelsius.toStringAsFixed(1)}° c',
+          mode: _livingRoomManual ? 'M' : 'A',
+          modeFilled: _livingRoomManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _livingRoomManual = !_livingRoomManual),
           iconWidget: DashboardThermostatRingIcon(
             percent: living.thermostatRingPercent,
             currentTempCelsius: living.thermostatCelsius,
@@ -1556,6 +2237,12 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildLightingCard(
           deviceName: 'Multi-Value Switch',
           status: multi.multiValueSwitchCaption,
+          mode: _multiValueSwitchManual ? 'M' : 'A',
+          modeFilled: _multiValueSwitchManual,
+          onModeTap: editing
+              ? null
+              : () =>
+                  setState(() => _multiValueSwitchManual = !_multiValueSwitchManual),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           iconWidget: DashboardMultiValueSwitchIcon(
@@ -1582,7 +2269,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> children = <Widget>[];
     for (int i = 0; i < ids.length; i++) {
-      final Widget row = _wrapDashboardEditTarget(
+      final Widget row = _wrapDashboardDeviceCell(
         section: _DashboardEditSection.lighting,
         deviceId: ids[i],
         child: _buildLightingLargeRowById(ids[i]),
@@ -1600,7 +2287,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightingLargeRowById(String deviceId) {
-    final bool editing = _editingSection == _DashboardEditSection.lighting;
+    final bool editing = _editingSection == _DashboardEditSection.lighting ||
+        _showSectionEditButtons;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -1620,6 +2308,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
           deviceName: 'Light Scene',
           statusText: scene.sceneLabel,
+          mode: _lightSceneManual ? 'M' : 'A',
+          modeFilled: _lightSceneManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _lightSceneManual = !_lightSceneManual),
           controls: _buildLightingStepButtons(
             markKey: 'scene',
             onDown: () => _patchSnap(
@@ -1649,6 +2342,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           deviceName: 'RGBW room abc',
           statusText: '${(rgbw.rgbwIntensity * 100).round()}%',
+          mode: _rgbwManual ? 'M' : 'A',
+          modeFilled: _rgbwManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _rgbwManual = !_rgbwManual),
           controls: _buildLightingStepButtons(
             markKey: 'rgbw',
             onDown: () => _patchSnap(
@@ -1717,6 +2415,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
           deviceName: 'Heating & Cooling',
           statusText: hvac.heatingCoolingStatusLabel,
+          mode: _heatingCoolingManual ? 'M' : 'A',
+          modeFilled: _heatingCoolingManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _heatingCoolingManual = !_heatingCoolingManual),
           controls: _buildLightingStepButtons(
             markKey: 'hvac',
             onDown: () => _patchSnap(
@@ -1745,6 +2448,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           deviceName: 'Tunable white light',
           statusText: '${(tunable.tunableWhiteIntensity * 100).round()}%',
+          mode: _tunableWhiteManual ? 'M' : 'A',
+          modeFilled: _tunableWhiteManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _tunableWhiteManual = !_tunableWhiteManual),
           controls: _buildLightingStepButtons(
             markKey: 'tunable',
             onDown: () => _patchSnap(
@@ -1810,6 +2518,11 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: DashboardFanLevelIcon(level: fan.fanLevel),
           deviceName: 'Fan Level 3',
           statusText: fan.fanStatusLabel,
+          mode: _fanLevelManual ? 'M' : 'A',
+          modeFilled: _fanLevelManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _fanLevelManual = !_fanLevelManual),
           controls: _buildLightingStepButtons(
             markKey: 'fan',
             onDown: () => _patchSnap(
@@ -1837,6 +2550,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           deviceName: 'Presence',
           statusText: presence.presenceLabel,
+          mode: _presenceManual ? 'M' : 'A',
+          modeFilled: _presenceManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _presenceManual = !_presenceManual),
           controls: _buildLightingStepButtons(
             markKey: 'presence',
             onDown: () => _patchSnap(
@@ -1917,6 +2635,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           deviceName: 'Multi-Value Switch',
           statusText: multi.multiValueSwitchCaption,
+          mode: _multiValueSwitchManual ? 'M' : 'A',
+          modeFilled: _multiValueSwitchManual,
+          onModeTap: editing
+              ? null
+              : () =>
+                  setState(() => _multiValueSwitchManual = !_multiValueSwitchManual),
           controls: _buildLightingStepButtons(
             markKey: 'multi',
             onDown: () => _patchSnap(
@@ -2031,8 +2755,8 @@ class _HomeScreenState extends State<HomeScreen> {
     required String deviceName,
     required String statusText,
     required Widget controls,
-    String? mode,
-    bool modeFilled = false,
+    required String mode,
+    required bool modeFilled,
     VoidCallback? onModeTap,
     VoidCallback? onNavigate,
   }) {
@@ -2083,14 +2807,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(height: 8.h),
                 Row(
                   children: [
-                    if (mode != null) ...[
-                      _ModeBadge(
-                        mode: mode,
-                        filled: modeFilled,
-                        onTap: onModeTap,
-                      ),
-                      SizedBox(width: 10.w),
-                    ],
+                    _ModeBadge(
+                      mode: mode,
+                      filled: modeFilled,
+                      onTap: onModeTap,
+                    ),
+                    SizedBox(width: 10.w),
                     Flexible(
                       child: Text(
                         statusText,
@@ -2138,8 +2860,11 @@ class _HomeScreenState extends State<HomeScreen> {
     required String deviceName,
     required String status,
     required String iconImage,
+    required String mode,
+    required bool modeFilled,
     Widget? iconWidget,
     VoidCallback? onTap,
+    VoidCallback? onModeTap,
   }) {
     // Small widget: icon + name + status only (tap opens details; no controls).
     final bool compact = _lightingHorizontalScroll;
@@ -2166,7 +2891,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
     );
     final double cardHeight = _lightingSmallCardHeight(compact: compact);
-    final card = SizedBox(
+    final Widget cardBody = SizedBox(
       height: cardHeight,
       width: double.infinity,
       child: Container(
@@ -2226,6 +2951,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+    final Widget card = Stack(
+      children: [
+        cardBody,
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(
+            mode: mode,
+            filled: modeFilled,
+            onTap: onModeTap,
+          ),
+        ),
+      ],
     );
     if (onTap == null) return card;
     return Material(
@@ -2514,10 +3253,15 @@ class _CategoryPill extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.title, {this.onEditTap});
+  const _SectionTitle(
+    this.title, {
+    this.onEditTap,
+    this.showEditButton = false,
+  });
 
   final String title;
   final VoidCallback? onEditTap;
+  final bool showEditButton;
 
   @override
   Widget build(BuildContext context) {
@@ -2533,26 +3277,168 @@ class _SectionTitle extends StatelessWidget {
             fontFamily: 'Inter',
           ),
         ),
-        
-        GestureDetector(
-          onTap: onEditTap ?? () => HomeScreen.showEditAddSectionSheet(context),
-          child: 
-            Row(
+        if (showEditButton && onEditTap != null)
+          GestureDetector(
+            onTap: onEditTap,
+            child: Row(
               children: [
-                Text("Edit", style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16.sp, fontFamily: "Inter", color: Color(0xFf0088FE)),),
-                SizedBox(width: 5.w,), 
+                Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16.sp,
+                    fontFamily: 'Inter',
+                    color: const Color(0xFF0088FE),
+                  ),
+                ),
+                SizedBox(width: 5.w),
                 Image.asset(
-                  "assets/images/back_arro.png",
+                  'assets/images/back_arro.png',
                   height: 11.h,
                   width: 11.w,
                   fit: BoxFit.contain,
-                  color: Color(0xFf0088FE),
+                  color: const Color(0xFF0088FE),
                 ),
               ],
             ),
-          
-        ),
+          ),
       ],
+    );
+  }
+}
+
+class _DashboardShakeWrapper extends StatefulWidget {
+  const _DashboardShakeWrapper({
+    required this.shaking,
+    required this.child,
+  });
+
+  final bool shaking;
+  final Widget child;
+
+  @override
+  State<_DashboardShakeWrapper> createState() => _DashboardShakeWrapperState();
+}
+
+class _DashboardShakeWrapperState extends State<_DashboardShakeWrapper>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 140),
+    );
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _DashboardShakeWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncAnimation();
+  }
+
+  void _syncAnimation() {
+    if (widget.shaking) {
+      if (!_controller.isAnimating) {
+        _controller.repeat(reverse: true);
+      }
+    } else {
+      _controller
+        ..stop()
+        ..value = 0.5;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.shaking) return widget.child;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        final double wave = math.sin(_controller.value * math.pi * 2);
+        return Transform.rotate(
+          angle: wave * 0.018,
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+class _DashboardDraggableReorderSlot extends StatelessWidget {
+  const _DashboardDraggableReorderSlot({
+    required this.deviceId,
+    required this.child,
+    required this.feedbackWidth,
+    required this.feedbackHeight,
+    required this.onDragStarted,
+    required this.onDragEnded,
+    required this.onReorder,
+  });
+
+  final String deviceId;
+  final Widget child;
+  final double feedbackWidth;
+  final double feedbackHeight;
+  final VoidCallback onDragStarted;
+  final VoidCallback onDragEnded;
+  final ValueChanged<String> onReorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (DragTargetDetails<String> details) =>
+          details.data != deviceId,
+      onAcceptWithDetails: (DragTargetDetails<String> details) =>
+          onReorder(details.data),
+      builder: (context, candidateData, rejectedData) {
+        final bool isHovering = candidateData.isNotEmpty;
+        return LongPressDraggable<String>(
+          data: deviceId,
+          delay: const Duration(milliseconds: 250),
+          onDragStarted: onDragStarted,
+          onDragEnd: (_) => onDragEnded(),
+          feedback: Material(
+            color: Colors.transparent,
+            elevation: 10,
+            shadowColor: Colors.black26,
+            borderRadius: BorderRadius.circular(26.r),
+            child: SizedBox(
+              width: feedbackWidth,
+              height: feedbackHeight,
+              child: child,
+            ),
+          ),
+          childWhenDragging: Opacity(
+            opacity: 0.28,
+            child: child,
+          ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            decoration: isHovering
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(26.r),
+                    border: Border.all(
+                      color: const Color(0xFF0088FE),
+                      width: 2,
+                    ),
+                  )
+                : null,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -3452,20 +4338,24 @@ class _ToggleCard extends StatefulWidget {
   const _ToggleCard({
     required this.title,
     required this.isOn,
+    required this.mode,
+    required this.modeFilled,
     this.imagePath,
     this.imagePathOff,
     this.onNavigate,
     this.onIsOnChanged,
-    this.showModeBadge = true,
+    this.onModeTap,
   });
 
   final String title;
   final bool isOn;
+  final String mode;
+  final bool modeFilled;
   final String? imagePath;
   final String? imagePathOff;
   final VoidCallback? onNavigate;
   final ValueChanged<bool>? onIsOnChanged;
-  final bool showModeBadge;
+  final VoidCallback? onModeTap;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -3473,13 +4363,11 @@ class _ToggleCard extends StatefulWidget {
 
 class _ToggleCardState extends State<_ToggleCard> {
   late bool _on;
-  late bool _manualMode;
 
   @override
   void initState() {
     super.initState();
     _on = widget.isOn;
-    _manualMode = false;
   }
 
   @override
@@ -3583,16 +4471,15 @@ class _ToggleCardState extends State<_ToggleCard> {
             ],
           ),
         ),
-        if (widget.showModeBadge)
-          Positioned(
-            right: 12.w,
-            top: 12.w,
-            child: _ModeBadge(
-              mode: _manualMode ? 'M' : 'A',
-              filled: _manualMode,
-              onTap: () => setState(() => _manualMode = !_manualMode),
-            ),
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(
+            mode: widget.mode,
+            filled: widget.modeFilled,
+            onTap: widget.onModeTap,
           ),
+        ),
       ],
     );
   }
