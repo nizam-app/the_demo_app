@@ -25,6 +25,7 @@ class EditAddSectionSheet extends StatefulWidget {
     this.initialHorizontalScroll,
     this.onHorizontalScrollChanged,
     this.showWidgetSize = true,
+    this.onClose,
   });
 
   final String initialSize;
@@ -40,6 +41,7 @@ class EditAddSectionSheet extends StatefulWidget {
   final bool? initialHorizontalScroll;
   final ValueChanged<bool>? onHorizontalScrollChanged;
   final bool showWidgetSize;
+  final VoidCallback? onClose;
 
   @override
   State<EditAddSectionSheet> createState() => _EditAddSectionSheetState();
@@ -113,7 +115,13 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        if (widget.onClose != null) {
+                          widget.onClose!();
+                        } else {
+                          Navigator.of(context).pop();
+                        }
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       icon: Icon(
