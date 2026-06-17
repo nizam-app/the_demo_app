@@ -762,7 +762,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
-      return _editingSection == _DashboardEditSection.light ? 200.h : 185.h;
+      return 185.h;
     }
     if (_lightingUsesLargeWidgets) return 90.h;
     return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
@@ -916,50 +916,47 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   }) {
     if (_editingSection != section) return child;
     final bool selected = _selectedEditDeviceId == deviceId;
-    return Padding(
-      padding: EdgeInsets.only(top: 10.h, right: 10.w),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          GestureDetector(
-            onTap: () => setState(() => _selectedEditDeviceId = deviceId),
-            child: child,
-          ),
-          if (selected)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(26.r),
-                    border: Border.all(
-                      color: const Color(0xFF00E5FF),
-                      width: 2,
-                    ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _selectedEditDeviceId = deviceId),
+          child: child,
+        ),
+        if (selected)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26.r),
+                  border: Border.all(
+                    color: const Color(0xFF00E5FF),
+                    width: 2,
                   ),
                 ),
               ),
             ),
-          Positioned(
-            top: -6.h,
-            right: -6.w,
-            child: GestureDetector(
-              onTap: () => _removeDeviceById(
-                section,
-                deviceId,
-                onEmpty: _closeDashboardSectionEdit,
-              ),
-              behavior: HitTestBehavior.opaque,
-              child: Image.asset(
-                'assets/images/cross.png',
-                width: 26.w,
-                height: 26.w,
-                fit: BoxFit.contain,
-              ),
+          ),
+        Positioned(
+          top: -6.h,
+          right: -6.w,
+          child: GestureDetector(
+            onTap: () => _removeDeviceById(
+              section,
+              deviceId,
+              onEmpty: _closeDashboardSectionEdit,
+            ),
+            behavior: HitTestBehavior.opaque,
+            child: Image.asset(
+              'assets/images/cross.png',
+              width: 26.w,
+              height: 26.w,
+              fit: BoxFit.contain,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1543,7 +1540,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
     if (_lightHorizontalScroll) {
       return SizedBox(
-        height: _editingSection == _DashboardEditSection.light ? 200.h : 185.h,
+        height: 185.h,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
@@ -1884,8 +1881,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
     if (_lightingHorizontalScroll) {
       final double cardHeight = _lightingSmallCardHeight(compact: true);
-      final double listHeight = cardHeight +
-          (_editingSection == _DashboardEditSection.lighting ? 8.h : 0);
+      final double listHeight = cardHeight;
       return SizedBox(
         height: listHeight,
         child: ListView.separated(
@@ -1900,17 +1896,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             final String id = ids[index];
             return SizedBox(
               width: cardWidth,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: _editingSection == _DashboardEditSection.lighting ? 8.h : 0,
-                  right:
-                      _editingSection == _DashboardEditSection.lighting ? 8.w : 0,
-                ),
-                child: _wrapDashboardDeviceCell(
-                  section: _DashboardEditSection.lighting,
-                  deviceId: id,
-                  child: _buildLightingSmallCardById(id),
-                ),
+              child: _wrapDashboardDeviceCell(
+                section: _DashboardEditSection.lighting,
+                deviceId: id,
+                child: _buildLightingSmallCardById(id),
               ),
             );
           },

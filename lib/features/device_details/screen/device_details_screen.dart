@@ -31,7 +31,7 @@ void _paintGradientFullRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
-  Color trackColor = const Color(0xFFE1E1E1),
+  Color trackColor = kDeviceOffGreyFill,
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
@@ -1040,13 +1040,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
-                color: showOffGrey ? kDeviceOffGreyFill : null,
                 border: showRing
                     ? null
                     : Border.all(
-                        color: showOffGrey
-                            ? kDeviceOffGreyBorder
-                            : const Color(0xFFE1E1E1),
+                        color: const Color(0xFFE1E1E1),
                         width: 1.5,
                       ),
                 boxShadow: [
@@ -1061,48 +1058,41 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               child: ClipOval(
                 clipBehavior: Clip.antiAlias,
                 child: ColoredBox(
-                  color: showOffGrey
-                      ? kDeviceOffGreyFill
-                      : const Color(0xFFFFFFFF),
-                  child: showOffGrey
-                      ? Center(
-                          child: SizedBox(
-                            width: circleDm * 0.52,
-                            height: circleDm * 0.52,
-                            child: ColorFiltered(
+                  color: const Color(0xFFFFFFFF),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final double inset = 10.w;
+                      final double rawSide = math.min(
+                        constraints.maxWidth,
+                        constraints.maxHeight,
+                      );
+                      final double side =
+                          math.max(0.0, rawSide - inset * 2);
+                      final Widget icon = showOffGrey
+                          ? ColorFiltered(
                               colorFilter: const ColorFilter.mode(
                                 kDeviceOffGreyIcon,
                                 BlendMode.srcIn,
                               ),
                               child: iconChild,
+                            )
+                          : iconChild;
+                      return Padding(
+                        padding: EdgeInsets.all(inset),
+                        child: Center(
+                          child: SizedBox(
+                            width: side,
+                            height: side,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              alignment: Alignment.center,
+                              child: icon,
                             ),
                           ),
-                        )
-                      : LayoutBuilder(
-                          builder: (context, constraints) {
-                            final double inset = 10.w;
-                            final double rawSide = math.min(
-                              constraints.maxWidth,
-                              constraints.maxHeight,
-                            );
-                            final double side =
-                                math.max(0.0, rawSide - inset * 2);
-                            return Padding(
-                              padding: EdgeInsets.all(inset),
-                              child: Center(
-                                child: SizedBox(
-                                  width: side,
-                                  height: side,
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    alignment: Alignment.center,
-                                    child: iconChild,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
                         ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -1220,10 +1210,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       final bool showSelected = sel && _isOn;
       final bool showOffGrey = sel && !_isOn;
       final Color checkColor =
-          showOffGrey ? const Color(0xFF9CA3AF) : const Color(0xFF22C55E);
+          showOffGrey ? kDeviceOffGreyIcon : const Color(0xFF22C55E);
       final String caption = rowLabels[index % 3];
       final double radiusOuter = 26.r;
-      final double radiusInner = showSelected
+      final double radiusInner = sel
           ? (radiusOuter - 3.w).clamp(12.r, radiusOuter)
           : radiusOuter;
 
@@ -1249,36 +1239,30 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
                 gradient: showSelected ? selectedBorderGradient : null,
-                color: showOffGrey
-                    ? kDeviceOffGreyFill
-                    : (showSelected ? null : Colors.white),
                 borderRadius: BorderRadius.circular(26.r),
                 border: showSelected
                     ? null
                     : Border.all(
-                        color: showOffGrey
-                            ? kDeviceOffGreyBorder
+                        color: sel
+                            ? const Color(0xFFE1E1E1)
                             : const Color(0xFFFFFFFF),
-                        width: showOffGrey ? 1.5 : 1,
+                        width: sel ? 1.5 : 1,
                       ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(
-                      showSelected ? 0.08 : (showOffGrey ? 0.05 : 0.04),
+                      showSelected ? 0.08 : (sel ? 0.05 : 0.04),
                     ),
                     blurRadius: showSelected ? 10 : 5,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              padding: showSelected ? EdgeInsets.all(3.w) : EdgeInsets.zero,
+              padding: sel ? EdgeInsets.all(3.w) : EdgeInsets.zero,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: sel ? kDeviceOffGreyFill : Colors.white,
                   borderRadius: BorderRadius.circular(radiusInner),
-                  border: showOffGrey
-                      ? Border.all(color: kDeviceOffGreyBorder)
-                      : null,
                 ),
                 child: SizedBox(
                   height: 48.h,
@@ -1786,7 +1770,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                                       shape: BoxShape.circle,
                                       color: Colors.transparent,
                                       border: Border.all(
-                                        color: const Color(0xFF9CA3AF),
+                                        color: kDeviceOffGreyBorder,
                                         width: 2,
                                       ),
                                     ),
@@ -2199,7 +2183,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildHeatingCoolingHeroContent() {
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
-    const Color offSelectedBg = Color(0xFFC7CCD7);
+    const Color offSelectedBg = kDeviceOffGreyFill;
 
     // Pills only show selected while device is on; Off clears both visually.
     final bool isHeating = _isOn && _heatingCoolingMode == 'heating';
@@ -2687,10 +2671,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 child: _fanLevelOptionIcon(opt.value),
                 onTap: () => setState(() => _selectedFanLevel = opt.value),
                 selectedBackgroundOverride: opt.value == 0
-                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    ? (sel ? kDeviceOffGreyFill : null)
                     : (sel ? Colors.white : null),
                 selectedBorderOverride: opt.value == 0
-                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    ? (sel ? kDeviceOffGreyFill : null)
                     : (sel ? const Color(0xFF38A4FE) : null),
                 selectedBorderWidth: opt.value != 0 && sel ? 2.0 : 1.0,
               );
@@ -2748,7 +2732,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildOnOffRow() {
-    const Color offSelectedBg = Color(0xFFC7CCD7);
+    const Color offSelectedBg = kDeviceOffGreyFill;
     const Color onSelectedBg = Color(0xFF0088FE);
     const Color inactiveBg = Colors.white;
     const Color inactiveBorder = Color(0xFFE5E7EB);
@@ -2973,6 +2957,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 selected: _selectedSceneIndex == i,
                 child: _sceneValueIcon(i),
                 onTap: () => setState(() => _selectedSceneIndex = i),
+                selectedBackgroundOverride:
+                    i == 2 ? kDeviceOffGreyFill : null,
+                selectedBorderOverride: i == 2 ? kDeviceOffGreyFill : null,
               );
               if (i == 0) return option;
               return Padding(
@@ -5563,7 +5550,7 @@ class _ThermostatRingPainter extends CustomPainter {
     const double startAngle = _fullRingStart;
 
     final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = kDeviceOffGreyFill
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
