@@ -202,12 +202,13 @@ class DeviceDashboardSync extends ChangeNotifier {
 const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
 
 /// Off-state palette — shared with device details hero tiles (Presence off, etc.).
-const Color kDeviceOffGreyFill = Color(0xFFE5E7EB);
-const Color kDeviceOffGreyBorder = Color(0xFF6B7280);
+const Color kDeviceOffGreyFill = Color(0xFFC7CCD8);
+const Color kDeviceOffGreyBorder = Color(0xFFC7CCD8);
+/// Icon / check tint on off-grey surfaces (darker than [kDeviceOffGreyFill] for contrast).
 const Color kDeviceOffGreyIcon = Color(0xFF6B7280);
 
 /// Artwork tint matching fan_level_off.png on dashboard (Fan Level 3 off).
-const Color kDashboardFanOffIconColor = kDeviceOffGreyBorder;
+const Color kDashboardFanOffIconColor = kDeviceOffGreyFill;
 
 bool _dashboardIsOffPercent(double value) => value.clamp(0.0, 1.0) <= 0.001;
 
@@ -303,7 +304,7 @@ void _paintDashGradientRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
-  Color trackColor = kDeviceOffGreyIcon,
+  Color trackColor = kDeviceOffGreyFill,
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 1;
@@ -468,7 +469,7 @@ class _DashThermostatRingPainter extends CustomPainter {
     final Rect arcRect = Rect.fromCircle(center: center, radius: midRadius);
 
     final Paint trackPaint = Paint()
-      ..color = kDeviceOffGreyIcon
+      ..color = kDeviceOffGreyFill
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -705,7 +706,7 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Colors.transparent,
                 border: Border.all(
-                  color: const Color(0xFF9CA3AF),
+                  color: kDeviceOffGreyBorder,
                   width: ringBorder,
                 ),
               ),
@@ -992,41 +993,27 @@ class DashboardPresenceModeIcon extends StatelessWidget {
             child: baseImage,
           );
 
-    if (!isOn) {
-      return Image.asset(
-        asset,
-        width: side,
-        height: side,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
-        color: kDashboardFanOffIconColor,
-        colorBlendMode: BlendMode.srcIn,
-        errorBuilder: (_, __, ___) => Image.asset(
-          'assets/images/comfort.png',
-          width: side,
-          height: side,
-          fit: BoxFit.contain,
-          color: kDashboardFanOffIconColor,
-          colorBlendMode: BlendMode.srcIn,
-        ),
-      );
-    }
-
     return Container(
       width: side,
       height: side,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: _selectedRingGradient,
+        gradient: isOn ? _selectedRingGradient : null,
+        border: isOn
+            ? null
+            : Border.all(
+                color: const Color(0xFFE1E1E1),
+                width: 1.5 * scale,
+              ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isOn ? 0.10 : 0.05),
+            blurRadius: isOn ? 10 : 6,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      padding: EdgeInsets.all(ringInset),
+      padding: isOn ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
       child: ClipOval(
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
@@ -1061,9 +1048,9 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int displayed = selectedIndex + 1;
-    final Color textColor = const Color(0xFF111827);
+    const Color textColor = Color(0xFF111827);
     final Color checkColor =
-        isOn ? const Color(0xFF22C55E) : const Color(0xFF9CA3AF);
+        isOn ? const Color(0xFF22C55E) : kDeviceOffGreyIcon;
     final double side = kDashboardLightingIconSide;
     final double tileW = side * 46 / 52;
     final double tileH = side * 26 / 52;
@@ -1072,7 +1059,6 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: kDeviceOffGreyFill,
         borderRadius: BorderRadius.circular(18.r),
-        border: isOn ? null : Border.all(color: kDeviceOffGreyBorder),
       ),
       child: SizedBox(
         height: tileH,
@@ -1105,26 +1091,24 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
       ),
     );
 
-    if (!isOn) {
-      return SizedBox(
-        width: side,
-        height: side,
-        child: Center(child: tile),
-      );
-    }
-
     return SizedBox(
       width: side,
       height: side,
       child: Center(
         child: Container(
           decoration: BoxDecoration(
-            gradient: selectedBorderGradient,
+            gradient: isOn ? selectedBorderGradient : null,
+            border: isOn
+                ? null
+                : Border.all(
+                    color: const Color(0xFFE1E1E1),
+                    width: 1.5,
+                  ),
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 10,
+                color: Colors.black.withValues(alpha: isOn ? 0.08 : 0.05),
+                blurRadius: isOn ? 10 : 6,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -1154,7 +1138,7 @@ class DashboardAwningLevelIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final double p = level.clamp(0.0, 1.0);
     if (_dashboardIsOffPercent(p)) {
-      return const DashboardOffGreyIcon();
+      return const DashboardOffGreyIcon(circular: true);
     }
 
     final double side = kDashboardLightingIconSide;
@@ -1316,11 +1300,6 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double clampedLevel = level.clamp(0.0, 1.0);
-    if (_dashboardIsOffPercent(clampedLevel)) {
-      return const DashboardOffGreyIcon();
-    }
-
     final double side = kDashboardLightingIconSide;
     final double pad = 3.w;
     final double outerR = 12.r;
