@@ -1137,10 +1137,6 @@ class DashboardAwningLevelIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double p = level.clamp(0.0, 1.0);
-    if (_dashboardIsOffPercent(p)) {
-      return const DashboardOffGreyIcon(circular: true);
-    }
-
     final double side = kDashboardLightingIconSide;
     final double radius = 12.r;
 
@@ -1157,16 +1153,17 @@ class DashboardAwningLevelIcon extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const ColoredBox(color: kDeviceOffGreyFill),
-          Align(
-            alignment: Alignment.topCenter,
-            child: FractionallySizedBox(
-              heightFactor: p,
-              widthFactor: 1,
-              child: const DecoratedBox(
-                decoration: BoxDecoration(gradient: _awningGradient),
+          if (!_dashboardIsOffPercent(p))
+            Align(
+              alignment: Alignment.topCenter,
+              child: FractionallySizedBox(
+                heightFactor: p,
+                widthFactor: 1,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(gradient: _awningGradient),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

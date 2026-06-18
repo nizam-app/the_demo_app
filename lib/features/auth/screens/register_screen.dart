@@ -1,15 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:workpleis/core/constants/image_control/image_path.dart';
 import 'package:workpleis/features/auth/data/amin_api.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 
 class JoinAicanScreen extends StatefulWidget {
   const JoinAicanScreen({super.key});
@@ -70,9 +76,382 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
   bool _agree = false;
   bool _isLoading = false;
+  late final Future<void> _googleSignInReady;
 
   static const Color _snackBackground = Color(0xFFF3F4F6);
   static const Color _snackText = Color(0xFF111827);
+
+  void _authDebugLog(String message, [Object? detail]) {
+    if (!kDebugMode) return;
+    debugPrint('[Auth/Register] $message${detail == null ? '' : ': $detail'}');
+  }
+
+  List<String> _requestBodyKeys(String body) {
+    try {
+      final dynamic decoded = jsonDecode(body);
+      if (decoded is Map) return decoded.keys.map((k) => k.toString()).toList();
+    } catch (_) {}
+    return const <String>[];
+  }
+
+  String _sanitizeResponseBodyForLog(String body) {
+    if (body.length <= 500) return body;
+    return '${body.substring(0, 500)}...(truncated)';
+  }
+
+  Map<String, dynamic>? _decodeJsonMap(String body) {
+    try {
+      final dynamic decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (e) {
+      _authDebugLog('JSON decode failed', e);
+    }
+    return null;
+  }
+
+  String? _parseAccessToken(Map<String, dynamic> data) {
+    final dynamic token =
+        data['access_token'] ?? data['accessToken'] ?? data['token'];
+    if (token is String && token.isNotEmpty) return token;
+    return null;
+  }
+
+  Future<void> _saveSessionAndGoHome({
+    required String token,
+    required String email,
+  }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+    await prefs.setString('email', email);
+    if (!mounted) return;
+    context.go(HomeScreen.routeName);
+  }
+
+  String _unexpectedAuthErrorMessage(Object error, {required String provider}) {
+    if (error is HandshakeException || error is SocketException) {
+      return 'Network error. Please try again.';
+    }
+    if (error is FormatException) {
+      return 'Registration failed. Invalid server response.';
+    }
+    if (error is PlatformException) {
+      final String? message = error.message;
+      if (message != null && message.isNotEmpty) return message;
+      return '$provider registration failed (${error.code}).';
+    }
+    return '$provider registration failed. Please try again.';
+  }
+
+  String _googleMissingConfigMessage() {
+    return 'Google Sign-In is not configured. Set googleClientId and '
+        'googleServerClientId in amin_api.dart, then add matching GIDClientID, '
+        'GIDServerClientID, and CFBundleURLTypes in ios/Runner/Info.plist.';
+  }
+
+  String _googleIdTokenSetupMessage() {
+    if (!ApiConstants.hasGoogleServerClientId) {
+      return 'Google ID token missing. Add a Web OAuth client ID in '
+          'amin_api.dart (googleServerClientId) and GIDServerClientID in '
+          'ios/Runner/Info.plist — same Google Cloud project as the iOS client.';
+    }
+    return 'Google ID token missing. Set googleServerClientId in amin_api.dart '
+        'and GIDServerClientID in ios/Runner/Info.plist.';
+  }
+
+  String? _googleSetupMessage(String? message) {
+    if (message == null || message.isEmpty) return null;
+    final String lower = message.toLowerCase();
+    if (lower.contains('gidclientid') ||
+        lower.contains('no active configuration')) {
+      return _googleMissingConfigMessage();
+    }
+    return null;
+  }
+
+  String? _nativePluginSetupMessage(String? message) {
+    if (message == null || message.isEmpty) return null;
+    if (!message.contains('Unable to establish connection on channel')) {
+      return null;
+    }
+    return 'Native sign-in plugin not loaded. Stop the app, run '
+        '"cd ios && pod install", then rebuild with "flutter run" (not hot restart).';
+  }
+
+  String _emailFromAppleJwt(String identityToken) {
+    try {
+      final List<String> parts = identityToken.split('.');
+      if (parts.length < 2) return '';
+      final String normalized = base64Url.normalize(parts[1]);
+      final dynamic payload =
+          jsonDecode(utf8.decode(base64Url.decode(normalized)));
+      if (payload is Map<String, dynamic>) {
+        final dynamic email = payload['email'];
+        if (email is String && email.isNotEmpty) return email;
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  Future<void> _completeAuthResponse(
+    http.Response response, {
+    required String fallbackEmail,
+    required String provider,
+  }) async {
+    _authDebugLog('$provider API status', response.statusCode);
+    _authDebugLog(
+      '$provider API response',
+      _sanitizeResponseBodyForLog(response.body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final Map<String, dynamic>? data = _decodeJsonMap(response.body);
+      if (data == null) {
+        _showRegisterSnackBar('Registration failed. Invalid server response.');
+        return;
+      }
+      final String? token = _parseAccessToken(data);
+      if (token == null || token.isEmpty) {
+        _showRegisterSnackBar('Registration failed. No access token received.');
+        return;
+      }
+
+      final String? responseEmail = data['email'] as String?;
+      final String email = (responseEmail != null && responseEmail.trim().isNotEmpty)
+          ? responseEmail.trim()
+          : fallbackEmail.trim();
+      if (email.isEmpty) {
+        _showRegisterSnackBar('Registration failed. No user email received.');
+        return;
+      }
+
+      _showRegisterSnackBar('Account created successfully');
+      await _saveSessionAndGoHome(token: token, email: email);
+      return;
+    }
+
+    _showRegisterSnackBar(
+      _registerErrorMessage(response.body).isNotEmpty
+          ? _registerErrorMessage(response.body)
+          : '$provider registration failed (${response.statusCode})',
+    );
+  }
+
+  bool _requireTermsAccepted() {
+    if (_agree) return true;
+    _showRegisterSnackBar(
+      'Please accept Terms and Conditions & Privacy policy',
+    );
+    return false;
+  }
+
+  Future<void> _handleGoogleRegister() async {
+    if (_isLoading) return;
+    if (!_requireTermsAccepted()) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      _authDebugLog('Google register start');
+      await _googleSignInReady;
+
+      if (!ApiConstants.isGoogleSignInConfigured) {
+        _showRegisterSnackBar(_googleMissingConfigMessage());
+        return;
+      }
+
+      if (!GoogleSignIn.instance.supportsAuthenticate()) {
+        _showRegisterSnackBar('Google sign-in is not available on this device.');
+        return;
+      }
+
+      final GoogleSignInAccount account =
+          await GoogleSignIn.instance.authenticate();
+      final String? idToken = account.authentication.idToken;
+
+      _authDebugLog(
+        'Google idToken present',
+        idToken != null && idToken.isNotEmpty,
+      );
+
+      if (idToken == null || idToken.isEmpty) {
+        _showRegisterSnackBar(_googleIdTokenSetupMessage());
+        return;
+      }
+
+      final Uri uri =
+          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.googleLogin}');
+      final String body = jsonEncode(<String, String>{'idToken': idToken});
+
+      _authDebugLog('Google API URL', uri.toString());
+      _authDebugLog('Google request body keys', _requestBodyKeys(body));
+
+      final http.Response response = await _postRegister(uri, body);
+      if (!mounted) return;
+      await _completeAuthResponse(
+        response,
+        fallbackEmail: account.email,
+        provider: 'Google',
+      );
+    } on GoogleSignInException catch (e, stack) {
+      _authDebugLog('GoogleSignInException', '${e.code}: ${e.description}\n$stack');
+      if (e.code == GoogleSignInExceptionCode.canceled ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        return;
+      }
+      if (!mounted) return;
+      final String? description = e.description;
+      _showRegisterSnackBar(
+        _googleSetupMessage(description) ??
+            (description != null && description.isNotEmpty
+                ? description
+                : 'Google registration failed (${e.code.name}).'),
+      );
+    } on PlatformException catch (e, stack) {
+      _authDebugLog('Google PlatformException', '${e.code}: ${e.message}\n$stack');
+      if (!mounted) return;
+      _showRegisterSnackBar(
+        _googleSetupMessage(e.message) ??
+            _nativePluginSetupMessage(e.message) ??
+            e.message ??
+            'Google registration failed (${e.code}).',
+      );
+    } catch (e, stack) {
+      _authDebugLog('Google unexpected error', '$e\n$stack');
+      if (!mounted) return;
+      _showRegisterSnackBar(_unexpectedAuthErrorMessage(e, provider: 'Google'));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleAppleRegister() async {
+    if (_isLoading) return;
+    if (!_requireTermsAccepted()) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    try {
+      _authDebugLog('Apple register start');
+
+      final bool isAvailable = await SignInWithApple.isAvailable();
+      if (!isAvailable) {
+        _showRegisterSnackBar('Apple sign-in is not available on this device.');
+        return;
+      }
+
+      final AuthorizationCredentialAppleID credential =
+          await SignInWithApple.getAppleIDCredential(
+        scopes: <AppleIDAuthorizationScopes>[
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final String? identityToken = credential.identityToken;
+
+      _authDebugLog(
+        'Apple identityToken present',
+        identityToken != null && identityToken.isNotEmpty,
+      );
+
+      if (identityToken == null || identityToken.isEmpty) {
+        _showRegisterSnackBar(
+          'Apple identity token missing. Enable Sign in with Apple for '
+          'il.co.aican.flutter in Xcode.',
+        );
+        return;
+      }
+
+      final Map<String, String> body = <String, String>{
+        'idToken': identityToken,
+      };
+      final String? email = credential.email?.trim();
+      if (email != null && email.isNotEmpty) {
+        body['email'] = email;
+      }
+      final String? given = credential.givenName?.trim();
+      final String? family = credential.familyName?.trim();
+      if (given != null || family != null) {
+        final String fullName = [given, family]
+            .whereType<String>()
+            .where((s) => s.isNotEmpty)
+            .join(' ');
+        if (fullName.isNotEmpty) {
+          body['name'] = fullName;
+        }
+      }
+
+      final Uri uri =
+          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.appleLogin}');
+      final String encodedBody = jsonEncode(body);
+
+      _authDebugLog('Apple API URL', uri.toString());
+      _authDebugLog('Apple request body keys', _requestBodyKeys(encodedBody));
+
+      final http.Response response = await _postRegister(uri, encodedBody);
+      if (!mounted) return;
+
+      final String fallbackEmail = (email != null && email.isNotEmpty)
+          ? email
+          : _emailFromAppleJwt(identityToken).isNotEmpty
+              ? _emailFromAppleJwt(identityToken)
+              : (credential.userIdentifier ?? 'apple_user');
+
+      await _completeAuthResponse(
+        response,
+        fallbackEmail: fallbackEmail,
+        provider: 'Apple',
+      );
+    } on SignInWithAppleAuthorizationException catch (e, stack) {
+      _authDebugLog('Apple authorization error', '${e.code}: ${e.message}\n$stack');
+      if (e.code == AuthorizationErrorCode.canceled) return;
+      if (!mounted) return;
+      _showRegisterSnackBar(
+        e.message.isNotEmpty
+            ? e.message
+            : 'Apple registration failed (${e.code.name}).',
+      );
+    } on PlatformException catch (e, stack) {
+      _authDebugLog('Apple PlatformException', '${e.code}: ${e.message}\n$stack');
+      if (!mounted) return;
+      _showRegisterSnackBar(
+        _nativePluginSetupMessage(e.message) ??
+            e.message ??
+            'Apple registration failed (${e.code}).',
+      );
+    } catch (e, stack) {
+      _authDebugLog('Apple unexpected error', '$e\n$stack');
+      if (!mounted) return;
+      _showRegisterSnackBar(_unexpectedAuthErrorMessage(e, provider: 'Apple'));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _initGoogleSignIn() async {
+    if (!ApiConstants.isGoogleSignInConfigured) {
+      _authDebugLog('GoogleSignIn init skipped', 'googleClientId not configured');
+      return;
+    }
+
+    try {
+      await GoogleSignIn.instance.initialize(
+        clientId: ApiConstants.googleClientId,
+        serverClientId: ApiConstants.hasGoogleServerClientId
+            ? ApiConstants.googleServerClientId
+            : ApiConstants.googleClientId,
+      );
+      _authDebugLog(
+        'GoogleSignIn initialized',
+        'clientId=${ApiConstants.hasGoogleClientId}, '
+        'serverClientId=${ApiConstants.hasGoogleServerClientId}',
+      );
+    } catch (e, stack) {
+      _authDebugLog('GoogleSignIn initialize failed', '$e\n$stack');
+    }
+  }
 
   void _showRegisterSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -192,6 +571,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
   @override
   void initState() {
     super.initState();
+    _googleSignInReady = _initGoogleSignIn();
     _nameF.addListener(() => setState(() {}));
     _emailF.addListener(() => setState(() {}));
     _passF.addListener(() => setState(() {}));
@@ -536,14 +916,14 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                           label: 'Apple',
                           iconPath: ImagePath.appleLogo,
                           highlighted: false,
-                          onTap: () {},
+                          onTap: _isLoading ? null : _handleAppleRegister,
                         ),
                         SizedBox(width: 12.w),
                         _socialBtn(
                           label: 'Google',
                           iconPath: ImagePath.googleLogo,
-                          highlighted: false, // ✅ ইমেজে Google এ blue border আছে
-                          onTap: () {},
+                          highlighted: false,
+                          onTap: _isLoading ? null : _handleGoogleRegister,
                         ),
                       ],
                     ),

@@ -74,7 +74,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 10.h, bottom: 0.h),
+          padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 0.h, bottom: 16.h),
           decoration: BoxDecoration(
             // Keep the sheet clearly transparent like the dashboard header/footer.
             // color: Colors.white.withOpacity(0.28),
@@ -289,8 +289,9 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   ],
                 ),
               ),
-            )
-         
+            ),
+
+            SizedBox(height: 16.h),
           ],
             ),
           ),

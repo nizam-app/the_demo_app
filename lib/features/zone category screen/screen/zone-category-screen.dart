@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show File;
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -108,7 +109,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   bool _ventilationManual = true;
   bool _livingRoomManual = true;
 
-  /// Lighting section widget size from Edit sheet (S/M = grid, L/XL = large rows).
+  /// Dashboard section widget size from Edit sheet (S/M = grid, L/XL = large rows).
+  String _lightWidgetSize = 'S';
   String _lightingWidgetSize = 'S';
   final Map<String, int> _lightingStepMark = <String, int>{};
 
@@ -239,8 +241,56 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   DeviceControlSnapshot _snap(String title) =>
       DeviceDashboardSync.instance.snapshotFor(title);
 
+  bool _usesLargeWidgetRows(String size) => size == 'L' || size == 'XL';
+
+  int _gridColumnsForWidgetSize(String size) => size == 'M' ? 2 : 3;
+
+  int _lightGridColumnsForWidgetSize(String size) {
+    switch (size) {
+      case 'M':
+      case 'L':
+      case 'XL':
+        return 1;
+      case 'S':
+      default:
+        return 2;
+    }
+  }
+
+  double _lightCardHeightForWidgetSize(String size) {
+    switch (size) {
+      case 'XL':
+        return 220.h;
+      case 'L':
+        return 200.h;
+      case 'M':
+      case 'S':
+      default:
+        return 185.h;
+    }
+  }
+
+  double _lightHorizontalItemWidth(String size) {
+    switch (size) {
+      case 'XL':
+        return 280.w;
+      case 'L':
+        return 248.w;
+      case 'M':
+        return 210.w;
+      case 'S':
+      default:
+        return 168.w;
+    }
+  }
+
+  double _lightingLargeRowHeightForWidgetSize(String size) =>
+      size == 'XL' ? 110.h : 90.h;
+
   bool get _lightingUsesLargeWidgets =>
-      _lightingWidgetSize == 'L' || _lightingWidgetSize == 'XL';
+      _usesLargeWidgetRows(_lightingWidgetSize);
+
+  double get _lightCardHeight => _lightCardHeightForWidgetSize(_lightWidgetSize);
 
   void _patchSnap(
     String deviceTitle,
@@ -753,18 +803,24 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     if (section == _DashboardEditSection.light) {
-      if (_lightHorizontalScroll) return 168.w;
-      return (screenWidth - 32.w - 12.w) / 2;
+      if (_lightHorizontalScroll) {
+        return _lightHorizontalItemWidth(_lightWidgetSize);
+      }
+      final int cols = _lightGridColumnsForWidgetSize(_lightWidgetSize);
+      return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
     }
     if (_lightingUsesLargeWidgets) return screenWidth - 32.w;
-    return (screenWidth - 32.w - 24.w) / 3;
+    final int cols = _gridColumnsForWidgetSize(_lightingWidgetSize);
+    return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
   }
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
-      return 185.h;
+      return _lightCardHeight;
     }
-    if (_lightingUsesLargeWidgets) return 90.h;
+    if (_lightingUsesLargeWidgets) {
+      return _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize);
+    }
     return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
   }
 
@@ -817,9 +873,17 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               _lightingHorizontalScroll = v;
             }
           }),
-          showWidgetSize: section == _DashboardEditSection.lighting,
-          initialSize: _lightingWidgetSize,
-          onSizeChanged: (v) => setState(() => _lightingWidgetSize = v),
+          showWidgetSize: true,
+          initialSize: section == _DashboardEditSection.light
+              ? _lightWidgetSize
+              : _lightingWidgetSize,
+          onSizeChanged: (v) => setState(() {
+            if (section == _DashboardEditSection.light) {
+              _lightWidgetSize = v;
+            } else {
+              _lightingWidgetSize = v;
+            }
+          }),
         ),
       ),
     );
@@ -854,6 +918,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             _lightSectionTitle,
             showEditButton: _showSectionEditButtons,
             onEditTap: () => _showLightSectionEdit(context),
+            headerBackgroundImagePath: _lightSectionHeaderImagePath,
           ),
           SizedBox(height: 12.h),
           _buildLightSectionDevices(),
@@ -864,6 +929,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             'Lighting',
             showEditButton: _showSectionEditButtons,
             onEditTap: () => _showLightingSectionEdit(context),
+            headerBackgroundImagePath: _lightingSectionHeaderImagePath,
           ),
           SizedBox(height: 12.h),
           _buildLightingSectionCards(),
@@ -1540,7 +1606,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
     if (_lightHorizontalScroll) {
       return SizedBox(
-        height: 185.h,
+        height: _lightCardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
@@ -1552,7 +1618,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: 168.w,
+              width: _lightHorizontalItemWidth(_lightWidgetSize),
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.light,
                 deviceId: id,
@@ -1564,31 +1630,26 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
       );
     }
 
+    final int columns = _lightGridColumnsForWidgetSize(_lightWidgetSize);
     final List<Widget> rows = <Widget>[];
-    for (int i = 0; i < ids.length; i += 2) {
+    for (int i = 0; i < ids.length; i += columns) {
       if (i > 0) rows.add(SizedBox(height: 12.h));
       rows.add(
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _wrapDashboardDeviceCell(
-                section: _DashboardEditSection.light,
-                deviceId: ids[i],
-                child: _buildLightDeviceCard(ids[i]),
-              ),
-            ),
-            if (i + 1 < ids.length) ...[
-              SizedBox(width: 12.w),
+            for (int col = 0; col < columns; col++) ...[
+              if (col > 0) SizedBox(width: 12.w),
               Expanded(
-                child: _wrapDashboardDeviceCell(
-                  section: _DashboardEditSection.light,
-                  deviceId: ids[i + 1],
-                  child: _buildLightDeviceCard(ids[i + 1]),
-                ),
+                child: i + col < ids.length
+                    ? _wrapDashboardDeviceCell(
+                        section: _DashboardEditSection.light,
+                        deviceId: ids[i + col],
+                        child: _buildLightDeviceCard(ids[i + col]),
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ] else
-              const Expanded(child: SizedBox.shrink()),
+            ],
           ],
         ),
       );
@@ -1606,7 +1667,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     switch (deviceId) {
       case 'light_dining':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _LightDimmerCard(
             title: 'Light dinning room ',
             percent: _bedroomDimmer,
@@ -1637,7 +1698,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       case 'bathroom_heat':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ThermostatCard(
             title: 'Bathroom heating thermostat',
             value: _bathroomThermostat,
@@ -1688,7 +1749,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       case 'awning':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _BlindCard(
             title: 'Awning garden 123',
             downPercent: _awningDown,
@@ -1750,7 +1811,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       case 'irrigation':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ToggleCard(
             title: 'Irrigation entry ',
             showModeBadge: false,
@@ -1775,7 +1836,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       case 'blind_living':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _BlindCard(
             title: 'Blind Living Room',
             downPercent: _blindRoomLevel,
@@ -1837,7 +1898,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       case 'motion':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ToggleCard(
             title: 'Motion Sensor',
             showModeBadge: false,
@@ -1869,15 +1930,19 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     if (_lightingUsesLargeWidgets) {
       return _buildLightingSectionCardsLarge();
     }
-    return _buildLightingSectionCardsSmall();
+    return _buildLightingSectionCardsSmall(
+      columns: _gridColumnsForWidgetSize(_lightingWidgetSize),
+    );
   }
 
-  Widget _buildLightingSectionCardsSmall() {
+  Widget _buildLightingSectionCardsSmall({int columns = 3}) {
     final List<String> ids = _lightingDeviceOrder;
     if (ids.isEmpty) return const SizedBox.shrink();
 
-    final double cardWidth =
-        (MediaQuery.sizeOf(context).width - 32.w - 24.w) / 3;
+    final double cardWidth = (MediaQuery.sizeOf(context).width -
+            32.w -
+            (columns - 1) * 12.w) /
+        columns;
 
     if (_lightingHorizontalScroll) {
       final double cardHeight = _lightingSmallCardHeight(compact: true);
@@ -1908,13 +1973,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     }
 
     final List<Widget> rows = <Widget>[];
-    for (int i = 0; i < ids.length; i += 3) {
+    for (int i = 0; i < ids.length; i += columns) {
       if (i > 0) rows.add(SizedBox(height: 12.h));
       rows.add(
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int col = 0; col < 3; col++) ...[
+            for (int col = 0; col < columns; col++) ...[
               if (col > 0) SizedBox(width: 12.w),
               Expanded(
                 child: i + col < ids.length
@@ -2587,7 +2652,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     VoidCallback? onNavigate,
   }) {
     return Container(
-      height: 90.h,
+      height: _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(26.r),
@@ -3050,15 +3115,17 @@ class _SectionTitle extends StatelessWidget {
     this.title, {
     this.onEditTap,
     this.showEditButton = false,
+    this.headerBackgroundImagePath,
   });
 
   final String title;
   final VoidCallback? onEditTap;
   final bool showEditButton;
+  final String? headerBackgroundImagePath;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final Widget titleRow = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
@@ -3095,6 +3162,28 @@ class _SectionTitle extends StatelessWidget {
               ],
             ),
           ),
+      ],
+    );
+
+    final String? imagePath = headerBackgroundImagePath;
+    if (imagePath == null || imagePath.isEmpty) {
+      return titleRow;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: Image.file(
+            File(imagePath),
+            width: double.infinity,
+            height: 64.h,
+            fit: BoxFit.cover,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        titleRow,
       ],
     );
   }

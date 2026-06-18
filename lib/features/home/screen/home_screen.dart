@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show File;
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -116,7 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _irrigationOn = true;
   bool _motionSensorOn = true;
 
-  /// Lighting section widget size from Edit sheet (S/M = grid, L/XL = large rows).
+  /// Dashboard section widget size from Edit sheet (S/M = grid, L/XL = large rows).
+  String _lightWidgetSize = 'S';
   String _lightingWidgetSize = 'S';
   final Map<String, int> _lightingStepMark = <String, int>{};
 
@@ -268,9 +270,57 @@ class _HomeScreenState extends State<HomeScreen> {
   DeviceControlSnapshot _snap(String title) =>
       DeviceDashboardSync.instance.snapshotFor(title);
 
+  bool _usesLargeWidgetRows(String size) => size == 'L' || size == 'XL';
+
+  int _gridColumnsForWidgetSize(String size) => size == 'M' ? 2 : 3;
+
+  int _lightGridColumnsForWidgetSize(String size) {
+    switch (size) {
+      case 'M':
+      case 'L':
+      case 'XL':
+        return 1;
+      case 'S':
+      default:
+        return 2;
+    }
+  }
+
+  double _lightCardHeightForWidgetSize(String size) {
+    switch (size) {
+      case 'XL':
+        return 220.h;
+      case 'L':
+        return 200.h;
+      case 'M':
+      case 'S':
+      default:
+        return 185.h;
+    }
+  }
+
+  double _lightHorizontalItemWidth(String size) {
+    switch (size) {
+      case 'XL':
+        return 280.w;
+      case 'L':
+        return 248.w;
+      case 'M':
+        return 210.w;
+      case 'S':
+      default:
+        return 168.w;
+    }
+  }
+
+  double _lightingLargeRowHeightForWidgetSize(String size) =>
+      size == 'XL' ? 110.h : 90.h;
+
   bool get _lightingUsesLargeWidgets =>
-      _lightingWidgetSize == 'L' || _lightingWidgetSize == 'XL';
+      _usesLargeWidgetRows(_lightingWidgetSize);
   // S/M → compact grid cards (display + tap). L/XL → wide rows with ↓/↑ controls.
+
+  double get _lightCardHeight => _lightCardHeightForWidgetSize(_lightWidgetSize);
 
   void _patchSnap(
     String deviceTitle,
@@ -788,18 +838,24 @@ class _HomeScreenState extends State<HomeScreen> {
   double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     if (section == _DashboardEditSection.light) {
-      if (_lightHorizontalScroll) return 168.w;
-      return (screenWidth - 32.w - 12.w) / 2;
+      if (_lightHorizontalScroll) {
+        return _lightHorizontalItemWidth(_lightWidgetSize);
+      }
+      final int cols = _lightGridColumnsForWidgetSize(_lightWidgetSize);
+      return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
     }
     if (_lightingUsesLargeWidgets) return screenWidth - 32.w;
-    return (screenWidth - 32.w - 24.w) / 3;
+    final int cols = _gridColumnsForWidgetSize(_lightingWidgetSize);
+    return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
   }
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
-      return 185.h;
+      return _lightCardHeight;
     }
-    if (_lightingUsesLargeWidgets) return 90.h;
+    if (_lightingUsesLargeWidgets) {
+      return _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize);
+    }
     return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
   }
 
@@ -827,7 +883,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Positioned(
       left: 0,
       right: 0,
-      bottom: 0,
+      bottom: 0.h,
       child: SafeArea(
         top: false,
         child: EditAddSectionSheet(
@@ -852,9 +908,17 @@ class _HomeScreenState extends State<HomeScreen> {
             _lightingHorizontalScroll = v;
           }
         }),
-        showWidgetSize: section == _DashboardEditSection.lighting,
-        initialSize: _lightingWidgetSize,
-        onSizeChanged: (v) => setState(() => _lightingWidgetSize = v),
+        showWidgetSize: true,
+        initialSize: section == _DashboardEditSection.light
+            ? _lightWidgetSize
+            : _lightingWidgetSize,
+        onSizeChanged: (v) => setState(() {
+          if (section == _DashboardEditSection.light) {
+            _lightWidgetSize = v;
+          } else {
+            _lightingWidgetSize = v;
+          }
+        }),
         ),
       ),
     );
@@ -889,6 +953,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _lightSectionTitle,
             showEditButton: _showSectionEditButtons,
             onEditTap: () => _showLightSectionEdit(context),
+            headerBackgroundImagePath: _lightSectionHeaderImagePath,
           ),
           SizedBox(height: 12.h),
           _buildLightSectionDevices(),
@@ -899,6 +964,7 @@ class _HomeScreenState extends State<HomeScreen> {
             'Lighting',
             showEditButton: _showSectionEditButtons,
             onEditTap: () => _showLightingSectionEdit(context),
+            headerBackgroundImagePath: _lightingSectionHeaderImagePath,
           ),
           SizedBox(height: 12.h),
           _buildLightingSectionCards(),
@@ -995,7 +1061,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Blind Living Room: ↓ → level (+10 / long 0%); ↑ → angle (−10 / long 100%).
+  /// Blind Living Room: short ↓ angle −10 & level +10, short ↑ angle +10 & level −10;
+  /// long ↓ level 100%, long ↑ level 0%.
+  void _blindLivingRoomShortPress({
+    required int angleDelta,
+    required int levelDelta,
+  }) {
+    setState(() {
+      _blindRoomAngle = (_blindRoomAngle + angleDelta).clamp(0, 100);
+      _blindRoomLevel = (_blindRoomLevel + levelDelta).clamp(0, 100);
+    });
+    _pushDashboardFor('Blind Living Room');
+  }
+
   void _blindLivingRoomAdjustLevel(int delta) {
     _blindRoomLevel = (_blindRoomLevel + delta).clamp(0, 100);
     _pushDashboardFor('Blind Living Room');
@@ -1616,7 +1694,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_lightHorizontalScroll) {
       return SizedBox(
-        height: 185.h,
+        height: _lightCardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
@@ -1628,7 +1706,7 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: 168.w,
+              width: _lightHorizontalItemWidth(_lightWidgetSize),
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.light,
                 deviceId: id,
@@ -1640,31 +1718,26 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    final int columns = _lightGridColumnsForWidgetSize(_lightWidgetSize);
     final List<Widget> rows = <Widget>[];
-    for (int i = 0; i < ids.length; i += 2) {
+    for (int i = 0; i < ids.length; i += columns) {
       if (i > 0) rows.add(SizedBox(height: 12.h));
       rows.add(
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _wrapDashboardDeviceCell(
-                section: _DashboardEditSection.light,
-                deviceId: ids[i],
-                child: _buildLightDeviceCard(ids[i]),
-              ),
-            ),
-            if (i + 1 < ids.length) ...[
-              SizedBox(width: 12.w),
+            for (int col = 0; col < columns; col++) ...[
+              if (col > 0) SizedBox(width: 12.w),
               Expanded(
-                child: _wrapDashboardDeviceCell(
-                  section: _DashboardEditSection.light,
-                  deviceId: ids[i + 1],
-                  child: _buildLightDeviceCard(ids[i + 1]),
-                ),
+                child: i + col < ids.length
+                    ? _wrapDashboardDeviceCell(
+                        section: _DashboardEditSection.light,
+                        deviceId: ids[i + col],
+                        child: _buildLightDeviceCard(ids[i + col]),
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ] else
-              const Expanded(child: SizedBox.shrink()),
+            ],
           ],
         ),
       );
@@ -1682,7 +1755,7 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (deviceId) {
       case 'light_dining':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _LightDimmerCard(
             title: 'Light dinning room ',
             percent: _bedroomDimmer,
@@ -1712,7 +1785,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 'bathroom_heat':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ThermostatCard(
             title: 'Bathroom heating thermostat',
             value: _bathroomThermostat,
@@ -1762,7 +1835,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 'awning':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _BlindCard(
             title: 'Awning garden 123',
             downPercent: _awningDown,
@@ -1823,7 +1896,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 'irrigation':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ToggleCard(
             title: 'Irrigation entry ',
             mode: _irrigationManual ? 'M' : 'A',
@@ -1852,7 +1925,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 'blind_living':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _BlindCard(
             title: 'Blind Living Room',
             downPercent: _blindRoomLevel,
@@ -1883,7 +1956,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 1,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomAdjustLevel(10),
+                      action: () => _blindLivingRoomShortPress(
+                        angleDelta: -10,
+                        levelDelta: 10,
+                      ),
                     ),
             onDownLong: editing
                 ? null
@@ -1891,7 +1967,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 1,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomSetLevel(0),
+                      action: () => _blindLivingRoomSetLevel(100),
                     ),
             onUp: editing
                 ? () {}
@@ -1899,7 +1975,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 2,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomAdjustAngle(-10),
+                      action: () => _blindLivingRoomShortPress(
+                        angleDelta: 10,
+                        levelDelta: -10,
+                      ),
                     ),
             onUpLong: editing
                 ? null
@@ -1907,13 +1986,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 2,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomSetAngle(100),
+                      action: () => _blindLivingRoomSetLevel(0),
                     ),
           ),
         );
       case 'motion':
         return SizedBox(
-          height: 185.h,
+          height: _lightCardHeight,
           child: _ToggleCard(
             title: 'Motion Sensor',
             mode: _motionSensorManual ? 'M' : 'A',
@@ -1949,15 +2028,19 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_lightingUsesLargeWidgets) {
       return _buildLightingSectionCardsLarge();
     }
-    return _buildLightingSectionCardsSmall();
+    return _buildLightingSectionCardsSmall(
+      columns: _gridColumnsForWidgetSize(_lightingWidgetSize),
+    );
   }
 
-  Widget _buildLightingSectionCardsSmall() {
+  Widget _buildLightingSectionCardsSmall({int columns = 3}) {
     final List<String> ids = _lightingDeviceOrder;
     if (ids.isEmpty) return const SizedBox.shrink();
 
-    final double cardWidth =
-        (MediaQuery.sizeOf(context).width - 32.w - 24.w) / 3;
+    final double cardWidth = (MediaQuery.sizeOf(context).width -
+            32.w -
+            (columns - 1) * 12.w) /
+        columns;
 
     if (_lightingHorizontalScroll) {
       final double cardHeight = _lightingSmallCardHeight(compact: true);
@@ -1988,13 +2071,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final List<Widget> rows = <Widget>[];
-    for (int i = 0; i < ids.length; i += 3) {
+    for (int i = 0; i < ids.length; i += columns) {
       if (i > 0) rows.add(SizedBox(height: 12.h));
       rows.add(
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int col = 0; col < 3; col++) ...[
+            for (int col = 0; col < columns; col++) ...[
               if (col > 0) SizedBox(width: 12.w),
               Expanded(
                 child: i + col < ids.length
@@ -2756,7 +2839,7 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? onNavigate,
   }) {
     return Container(
-      height: 90.h,
+      height: _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(26.r),
@@ -3209,12 +3292,11 @@ class _CategoryPill extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFFFFD700), // yellow
-                      Color(0xFF00FF99), // green-ish
-                      Color(0xFF15DFFE), // cyan
+                    colors: <Color>[
+                      
+                      Color(0xFFFDD720),
+                      Color(0xFF00D1FF),
                     ],
-                    stops: [0.0, 0.55, 1.0],
                   ),
                   borderRadius: radius,
                 ),
@@ -3252,15 +3334,17 @@ class _SectionTitle extends StatelessWidget {
     this.title, {
     this.onEditTap,
     this.showEditButton = false,
+    this.headerBackgroundImagePath,
   });
 
   final String title;
   final VoidCallback? onEditTap;
   final bool showEditButton;
+  final String? headerBackgroundImagePath;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final Widget titleRow = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
@@ -3297,6 +3381,28 @@ class _SectionTitle extends StatelessWidget {
               ],
             ),
           ),
+      ],
+    );
+
+    final String? imagePath = headerBackgroundImagePath;
+    if (imagePath == null || imagePath.isEmpty) {
+      return titleRow;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12.r),
+          child: Image.file(
+            File(imagePath),
+            width: double.infinity,
+            height: 64.h,
+            fit: BoxFit.cover,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        titleRow,
       ],
     );
   }
@@ -4212,17 +4318,15 @@ class _BlindCard extends StatelessWidget {
                           children: [
                             downBtn,
                             Expanded(
-                              child: Center(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    '$levelPercent%',
-                                    style: TextStyle(
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF111827),
-                                    ),
-                                  ),
+                              child: Text(
+                                '$levelPercent%',
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF111827),
                                 ),
                               ),
                             ),
