@@ -562,8 +562,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // ✅ Field that matches Image-1:
   // - Focus হলে: only thin gradient stroke
-  // - Extra border/shadow/black edge নাই
-  // - Fill সবসময় same grey (Image-1 এর মতো)
+
 // ✅ Field that matches Image-1:
 // - Default: NO border, fill #F2F3F5
 // - Focus: thin gradient stroke only
