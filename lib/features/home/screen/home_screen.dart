@@ -1061,36 +1061,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Blind Living Room: short ↓ angle −10 & level +10, short ↑ angle +10 & level −10;
+  /// Blind Living Room: short ↓ close angle +10, short ↑ open angle −10;
   /// long ↓ level 100%, long ↑ level 0%.
-  void _blindLivingRoomShortPress({
-    required int angleDelta,
-    required int levelDelta,
-  }) {
+  void _blindLivingRoomAdjustAngle(int delta) {
     setState(() {
-      _blindRoomAngle = (_blindRoomAngle + angleDelta).clamp(0, 100);
-      _blindRoomLevel = (_blindRoomLevel + levelDelta).clamp(0, 100);
+      _blindRoomAngle = (_blindRoomAngle + delta).clamp(0, 100);
     });
     _pushDashboardFor('Blind Living Room');
   }
 
-  void _blindLivingRoomAdjustLevel(int delta) {
-    _blindRoomLevel = (_blindRoomLevel + delta).clamp(0, 100);
-    _pushDashboardFor('Blind Living Room');
-  }
-
-  void _blindLivingRoomAdjustAngle(int delta) {
-    _blindRoomAngle = (_blindRoomAngle + delta).clamp(0, 100);
-    _pushDashboardFor('Blind Living Room');
-  }
-
   void _blindLivingRoomSetLevel(int percent) {
-    _blindRoomLevel = percent.clamp(0, 100);
-    _pushDashboardFor('Blind Living Room');
-  }
-
-  void _blindLivingRoomSetAngle(int percent) {
-    _blindRoomAngle = percent.clamp(0, 100);
+    setState(() {
+      _blindRoomLevel = percent.clamp(0, 100);
+    });
     _pushDashboardFor('Blind Living Room');
   }
 
@@ -1934,6 +1917,10 @@ class _HomeScreenState extends State<HomeScreen> {
             modeFilled: _blindManual,
             previewLevel: _blindRoomLevel / 100.0,
             blindAngle: _blindRoomAngle / 100.0,
+            slatsPreviewOverride: _HomeBlindSlatsIcon(
+              level: _blindRoomLevel / 100.0,
+              angle: _blindRoomAngle / 100.0,
+            ),
             useBlindSlatsPreview: true,
             imagePath: 'assets/Rectangle 823.png',
             downMarked: _blindRoomMark == 1,
@@ -1956,10 +1943,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 1,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomShortPress(
-                        angleDelta: -10,
-                        levelDelta: 10,
-                      ),
+                      action: () => _blindLivingRoomAdjustAngle(10),
                     ),
             onDownLong: editing
                 ? null
@@ -1975,10 +1959,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: 2,
                       getCurrent: () => _blindRoomMark,
                       set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomShortPress(
-                        angleDelta: 10,
-                        levelDelta: -10,
-                      ),
+                      action: () => _blindLivingRoomAdjustAngle(-10),
                     ),
             onUpLong: editing
                 ? null
@@ -4176,6 +4157,7 @@ class _BlindCard extends StatelessWidget {
     this.useAwningPreview = false,
     this.blindAngle,
     this.useBlindSlatsPreview = false,
+    this.slatsPreviewOverride,
     this.compactControlButtons = false,
     this.onModeTap,
     this.onNavigate,
@@ -4195,6 +4177,7 @@ class _BlindCard extends StatelessWidget {
   final bool useAwningPreview;
   final double? blindAngle;
   final bool useBlindSlatsPreview;
+  final Widget? slatsPreviewOverride;
   final bool compactControlButtons;
   final VoidCallback onDown;
   final VoidCallback onUp;
@@ -4228,7 +4211,9 @@ class _BlindCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (previewLevel != null)
+              if (slatsPreviewOverride != null)
+                titleInkWell(slatsPreviewOverride!)
+              else if (previewLevel != null)
                 titleInkWell(
                   useBlindSlatsPreview
                       ? DashboardBlindSlatsIcon(
@@ -4318,15 +4303,17 @@ class _BlindCard extends StatelessWidget {
                           children: [
                             downBtn,
                             Expanded(
-                              child: Text(
-                                '$levelPercent%',
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF111827),
+                              child: Center(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    '$levelPercent%',
+                                    style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF111827),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -6008,4 +5995,173 @@ class _ToggleColorswitch extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Home Blind Living Room preview — level shows slat count, angle shows slat tilt.
+class _HomeBlindSlatsIcon extends StatelessWidget {
+  const _HomeBlindSlatsIcon({
+    required this.level,
+    required this.angle,
+  });
+
+  final double level;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    final double side = kDashboardLightingIconSide;
+    final double pad = 3.w;
+    final double outerR = 12.r;
+    final double innerR = math.max(0.0, outerR - pad);
+
+    return Container(
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+        color: kDeviceOffGreyFill,
+        borderRadius: BorderRadius.circular(outerR),
+        border: Border.all(color: kDeviceOffGreyBorder, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(outerR),
+        child: Padding(
+          padding: EdgeInsets.all(pad),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(innerR),
+            child: CustomPaint(
+              painter: _HomeBlindSlatsPainter(
+                level: level.clamp(0.0, 1.0),
+                angle: angle.clamp(0.0, 1.0),
+                cornerRadius: innerR,
+              ),
+              child: SizedBox.expand(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeBlindSlatsPainter extends CustomPainter {
+  const _HomeBlindSlatsPainter({
+    required this.level,
+    required this.angle,
+    this.cornerRadius = 0,
+  });
+
+  final double level;
+  final double angle;
+  final double cornerRadius;
+
+  static const int _slatCount = 11;
+  static const Color _slatColor = Color(0xFF38A4FE);
+  static const Color _slatShadow = Color(0xFF2196F3);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect bounds = Rect.fromLTWH(0, 0, size.width, size.height);
+    final RRect clipRrect = RRect.fromRectAndRadius(
+      bounds,
+      Radius.circular(
+        cornerRadius.clamp(0.0, math.min(size.width, size.height) / 2),
+      ),
+    );
+
+    canvas.drawRRect(clipRrect, Paint()..color = kDeviceOffGreyFill);
+
+    canvas.save();
+    canvas.clipRRect(clipRrect);
+
+    final double horizontalInset = size.width * 0.015;
+    final double cx = size.width / 2;
+    final double usableW = size.width - (horizontalInset * 2);
+    final double bandH = size.height / _slatCount;
+    const double gap = 0.8;
+    final double maxSlatInBand = math.max(2.0, bandH - gap);
+    final double a = angle.clamp(0.0, 1.0);
+    final double slatH = maxSlatInBand * a.clamp(0.14, 1.25);
+    final double topW = usableW * 1.02;
+    final double baseTaper = 0.74 + 0.16 * a;
+    final double flatBlend = a * a;
+    final double taperT =
+        (baseTaper * (1 - flatBlend) + 1.0 * flatBlend).clamp(0.66, 1.0);
+    final double botW = topW * taperT;
+    final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
+      0,
+      _slatCount,
+    );
+
+    final Paint fill = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final Paint edgeTop = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = Colors.white.withValues(alpha: 0.40)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint edgeBot = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = _slatShadow.withValues(alpha: 0.46)
+      ..strokeCap = StrokeCap.round;
+
+    final Paint divider = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.6
+      ..color = Colors.white.withValues(alpha: 0.28);
+
+    for (int i = 0; i < visible; i++) {
+      final double bandTop = i * bandH;
+      final double top = bandTop + (bandH - slatH) / 2;
+      final double bot = top + slatH;
+
+      final Path slat = Path()
+        ..moveTo(cx - topW / 2, top)
+        ..lineTo(cx + topW / 2, top)
+        ..lineTo(cx + botW / 2, bot)
+        ..lineTo(cx - botW / 2, bot)
+        ..close();
+
+      fill.color = _slatColor;
+      canvas.drawPath(slat, fill);
+
+      canvas.drawLine(
+        Offset(cx - topW / 2, top),
+        Offset(cx + topW / 2, top),
+        edgeTop,
+      );
+
+      canvas.drawLine(
+        Offset(cx - botW / 2, bot),
+        Offset(cx + botW / 2, bot),
+        edgeBot,
+      );
+
+      if (i < visible - 1) {
+        canvas.drawLine(
+          Offset(cx - botW / 2, bot + gap / 2),
+          Offset(cx + botW / 2, bot + gap / 2),
+          divider,
+        );
+      }
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _HomeBlindSlatsPainter old) =>
+      old.level != level ||
+      old.angle != angle ||
+      old.cornerRadius != cornerRadius;
 }
