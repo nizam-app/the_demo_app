@@ -79,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Blind Living Room: left stat = level, right stat = angle (sync blindDown/blindUp).
   int _blindRoomLevel = 0;
   int _blindRoomAngle = 72;
+  Timer? _blindMoveTimer;
   final List<int> _shadeDown = [100, 100, 100];
   final List<int> _shadeUp = [50, 50, 50];
   /// Shading list rows: manual (M) vs auto (A), matches prior static modes.
@@ -276,10 +277,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _lightGridColumnsForWidgetSize(String size) {
     switch (size) {
-      case 'M':
       case 'L':
       case 'XL':
         return 1;
+      case 'M':
       case 'S':
       default:
         return 2;
@@ -1075,6 +1076,28 @@ class _HomeScreenState extends State<HomeScreen> {
       _blindRoomLevel = percent.clamp(0, 100);
     });
     _pushDashboardFor('Blind Living Room');
+  }
+
+  void _startBlindLevelChange(bool down) {
+    _blindMoveTimer?.cancel();
+    _blindMoveTimer = Timer.periodic(const Duration(milliseconds: 120), (_) {
+      setState(() {
+        if (down) {
+          _blindRoomLevel = (_blindRoomLevel + 5).clamp(0, 100);
+        } else {
+          _blindRoomLevel = (_blindRoomLevel - 5).clamp(0, 100);
+        }
+      });
+      _pushDashboardFor('Blind Living Room');
+      if (_blindRoomLevel >= 100 || _blindRoomLevel <= 0) {
+        _stopBlindLevelChange();
+      }
+    });
+  }
+
+  void _stopBlindLevelChange() {
+    _blindMoveTimer?.cancel();
+    _blindMoveTimer = null;
   }
 
   /// Awning dashboard: ↓ extends (level↑), ↑ retracts (level↓); long = 100% / 0%.
@@ -1938,37 +1961,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? null
                 : () => setState(() => _blindManual = !_blindManual),
             onDown: editing
-                ? () {}
-                : () => _flashMark(
-                      value: 1,
-                      getCurrent: () => _blindRoomMark,
-                      set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomAdjustAngle(10),
-                    ),
+              ? () {}
+              : () => _flashMark(
+                  value: 1,
+                  getCurrent: () => _blindRoomMark,
+                  set: (v) => _blindRoomMark = v,
+                  action: () => _blindLivingRoomAdjustAngle(10),
+                ),
             onDownLong: editing
-                ? null
-                : () => _flashMark(
-                      value: 1,
-                      getCurrent: () => _blindRoomMark,
-                      set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomSetLevel(100),
-                    ),
+              ? null
+              : null,
+            onDownLongStart: editing
+              ? null
+              : () => _startBlindLevelChange(true),
+            onDownLongEnd: editing
+              ? null
+              : () => _stopBlindLevelChange(),
             onUp: editing
-                ? () {}
-                : () => _flashMark(
-                      value: 2,
-                      getCurrent: () => _blindRoomMark,
-                      set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomAdjustAngle(-10),
-                    ),
+              ? () {}
+              : () => _flashMark(
+                  value: 2,
+                  getCurrent: () => _blindRoomMark,
+                  set: (v) => _blindRoomMark = v,
+                  action: () => _blindLivingRoomAdjustAngle(-10),
+                ),
             onUpLong: editing
-                ? null
-                : () => _flashMark(
-                      value: 2,
-                      getCurrent: () => _blindRoomMark,
-                      set: (v) => _blindRoomMark = v,
-                      action: () => _blindLivingRoomSetLevel(0),
-                    ),
+              ? null
+              : null,
+            onUpLongStart: editing
+              ? null
+              : () => _startBlindLevelChange(false),
+            onUpLongEnd: editing
+              ? null
+              : () => _stopBlindLevelChange(),
           ),
         );
       case 'motion':
@@ -3608,6 +3633,8 @@ class _PressableCircleSurface extends StatefulWidget {
     required this.child,
     this.onTap,
     this.onLongPress,
+    this.onLongPressStart,
+    this.onLongPressEnd,
     this.marked = false,
     this.enableHaptic = true,
     this.idleTransparent = false,
@@ -3617,6 +3644,8 @@ class _PressableCircleSurface extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final VoidCallback? onLongPressStart;
+  final VoidCallback? onLongPressEnd;
   /// When true, fill stays gray (last-used / "marked" control).
   final bool marked;
   final bool enableHaptic;
@@ -3676,13 +3705,31 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
               widget.onTap!();
               _setPressed(false);
             },
-      onLongPress: widget.onLongPress == null
+      onLongPressStart: widget.onLongPressStart == null
           ? null
-          : () {
+          : (_) {
               _longPressHandled = true;
               if (widget.enableHaptic) uiTapHaptic();
-              widget.onLongPress!();
+              widget.onLongPressStart!();
               _setPressed(false);
+            },
+      onLongPressEnd: widget.onLongPressEnd == null
+          ? null
+          : (_) {
+              if (widget.enableHaptic) uiTapHaptic();
+              widget.onLongPressEnd!();
+              _setPressed(false);
+            },
+      onLongPress: widget.onLongPress == null && widget.onLongPressStart == null
+          ? null
+          : () {
+              // If caller only provided the old onLongPress, call it here.
+              if (widget.onLongPressStart == null && widget.onLongPress != null) {
+                _longPressHandled = true;
+                if (widget.enableHaptic) uiTapHaptic();
+                widget.onLongPress!();
+                _setPressed(false);
+              }
             },
       child: circle,
     );
@@ -3695,6 +3742,8 @@ class _CircleBtn extends StatelessWidget {
     this.size,
     this.onTap,
     this.onLongPress,
+    this.onLongPressStart,
+    this.onLongPressEnd,
     this.marked = false,
     this.idleTransparent = false,
   });
@@ -3703,6 +3752,8 @@ class _CircleBtn extends StatelessWidget {
   final double? size;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final VoidCallback? onLongPressStart;
+  final VoidCallback? onLongPressEnd;
   final bool marked;
   final bool idleTransparent;
 
@@ -3713,6 +3764,8 @@ class _CircleBtn extends StatelessWidget {
       side: side,
       onTap: onTap,
       onLongPress: onLongPress,
+      onLongPressStart: onLongPressStart,
+      onLongPressEnd: onLongPressEnd,
       marked: marked,
       idleTransparent: idleTransparent,
       child: child,
@@ -4149,6 +4202,10 @@ class _BlindCard extends StatelessWidget {
     required this.onUp,
     this.onDownLong,
     this.onUpLong,
+    this.onDownLongStart,
+    this.onDownLongEnd,
+    this.onUpLongStart,
+    this.onUpLongEnd,
     this.downMarked = false,
     this.upMarked = false,
     this.imagePath,
@@ -4183,6 +4240,10 @@ class _BlindCard extends StatelessWidget {
   final VoidCallback onUp;
   final VoidCallback? onDownLong;
   final VoidCallback? onUpLong;
+  final VoidCallback? onDownLongStart;
+  final VoidCallback? onDownLongEnd;
+  final VoidCallback? onUpLongStart;
+  final VoidCallback? onUpLongEnd;
   final VoidCallback? onModeTap;
   final VoidCallback? onNavigate;
   final bool downMarked;
@@ -4267,6 +4328,8 @@ class _BlindCard extends StatelessWidget {
                       marked: downMarked,
                       onTap: onDown,
                       onLongPress: onDownLong,
+                      onLongPressStart: onDownLongStart,
+                      onLongPressEnd: onDownLongEnd,
                       size: controlSize,
                       idleTransparent: false,
                       child: Image.asset(
@@ -4281,6 +4344,8 @@ class _BlindCard extends StatelessWidget {
                       marked: upMarked,
                       onTap: onUp,
                       onLongPress: onUpLong,
+                      onLongPressStart: onUpLongStart,
+                      onLongPressEnd: onUpLongEnd,
                       size: controlSize,
                       idleTransparent: false,
                       child: Transform.rotate(
