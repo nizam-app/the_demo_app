@@ -519,50 +519,32 @@ class _SizeSegment extends StatelessWidget {
       return GestureDetector(
         onTap: () => onChanged(label),
         child: Container(
-          width: 54.w,
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
+          width: 56.w,
+          height: 35.h,
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(26.r),
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Label on top
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: selected ? const Color(0xFF0F1724) : const Color(0xFF6B7280),
+                  color: _textPrimary,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.visible,
               ),
-              SizedBox(height: 4.h),
-              // Icon area
-              if (selected)
-                Container(
-                  width: 32.w,
-                  height: 28.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    img,
-                    width: 18.w,
-                    height: 14.h,
-                    fit: BoxFit.contain,
-                  ),
-                )
-              else
-                Opacity(
-                  opacity: 0.6,
-                  child: Image.asset(
-                    img,
-                    width: 18.w,
-                    height: 14.h,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+              // SizedBox(height: 4.h),
+              // Image below
+              Image.asset(
+                img,
+                width: imageWidth.w,
+                height: imageHeight.h,
+                fit: BoxFit.contain,
+              ),
             ],
           ),
         ),
@@ -570,21 +552,18 @@ class _SizeSegment extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: Colors.white.withOpacity(0.22),
         borderRadius: BorderRadius.circular(26.r),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Flexible(child: item('S', 'assets/images/size_S.png')),
-          SizedBox(width: 4.w),
-          Flexible(child: item('M', 'assets/images/size_M.png')),
-          SizedBox(width: 4.w),
-          Flexible(child: item('L', 'assets/images/size_L.png')),
-          SizedBox(width: 4.w),
-          Flexible(child: item('XL', 'assets/images/size_XL.png')),
+          item('S', 'assets/images/size_S.png'),
+          item('M', 'assets/images/size_M.png'),
+          item('L', 'assets/images/size_L.png'),
+          item('XL', 'assets/images/size_XL.png'),
         ],
       ),
     );
