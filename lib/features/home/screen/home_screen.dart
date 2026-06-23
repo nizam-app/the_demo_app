@@ -277,10 +277,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _lightGridColumnsForWidgetSize(String size) {
     switch (size) {
+      case 'M':
       case 'L':
       case 'XL':
         return 1;
-      case 'M':
       case 'S':
       default:
         return 2;
@@ -881,46 +881,57 @@ class _HomeScreenState extends State<HomeScreen> {
     final _DashboardEditSection? section = _editingSection;
     if (section == null) return const SizedBox.shrink();
 
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0.h,
-      child: SafeArea(
-        top: false,
-        child: EditAddSectionSheet(
-        onClose: _closeDashboardSectionEdit,
-        sectionRenameLabel: _sectionRenameLabel(section),
-        onRenameTap: () => _renameDashboardSection(section),
-        onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
-        onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
-        headerBackgroundImagePath: _sectionHeaderImagePath(section),
-        onMoveUp: () => _moveDashboardSection(section, -1),
-        onMoveDown: () => _moveDashboardSection(section, 1),
-        canMoveUp: _canMoveDashboardSection(section, -1),
-        canMoveDown: _canMoveDashboardSection(section, 1),
-        onRemove: () => _removeDashboardSection(section),
-        initialHorizontalScroll: section == _DashboardEditSection.light
-            ? _lightHorizontalScroll
-            : _lightingHorizontalScroll,
-        onHorizontalScrollChanged: (v) => setState(() {
-          if (section == _DashboardEditSection.light) {
-            _lightHorizontalScroll = v;
-          } else {
-            _lightingHorizontalScroll = v;
-          }
-        }),
-        showWidgetSize: true,
-        initialSize: section == _DashboardEditSection.light
-            ? _lightWidgetSize
-            : _lightingWidgetSize,
-        onSizeChanged: (v) => setState(() {
-          if (section == _DashboardEditSection.light) {
-            _lightWidgetSize = v;
-          } else {
-            _lightingWidgetSize = v;
-          }
-        }),
-        ),
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ColoredBox(
+              color: Colors.black.withOpacity(0.25),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0.h,
+            child: SafeArea(
+              top: false,
+              child: EditAddSectionSheet(
+                onClose: _closeDashboardSectionEdit,
+                sectionRenameLabel: _sectionRenameLabel(section),
+                onRenameTap: () => _renameDashboardSection(section),
+                onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
+                onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
+                headerBackgroundImagePath: _sectionHeaderImagePath(section),
+                onMoveUp: () => _moveDashboardSection(section, -1),
+                onMoveDown: () => _moveDashboardSection(section, 1),
+                canMoveUp: _canMoveDashboardSection(section, -1),
+                canMoveDown: _canMoveDashboardSection(section, 1),
+                onRemove: () => _removeDashboardSection(section),
+                initialHorizontalScroll: section == _DashboardEditSection.light
+                    ? _lightHorizontalScroll
+                    : _lightingHorizontalScroll,
+                onHorizontalScrollChanged: (v) => setState(() {
+                  if (section == _DashboardEditSection.light) {
+                    _lightHorizontalScroll = v;
+                  } else {
+                    _lightingHorizontalScroll = v;
+                  }
+                }),
+                showWidgetSize: true,
+                initialSize: section == _DashboardEditSection.light
+                    ? _lightWidgetSize
+                    : _lightingWidgetSize,
+                onSizeChanged: (v) => setState(() {
+                  if (section == _DashboardEditSection.light) {
+                    _lightWidgetSize = v;
+                  } else {
+                    _lightingWidgetSize = v;
+                  }
+                }),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -3214,6 +3225,32 @@ class _CategoryPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(999);
+    final List<Color> selectedBorderColors = switch (label) {
+      'Light' || 'Lighting' => const <Color>[
+          Color(0xFF8BCF4D),
+          Color(0xFF00D1FF),
+        ],
+      'Shading' => const <Color>[
+          Color(0xFF00D1FF),
+          Color(0xFF2AA8FF),
+        ],
+      'HVAC' => const <Color>[
+          Color(0xFFFF2D92),
+          Color(0xFF6D5BFF),
+        ],
+      'Ventilation' => const <Color>[
+          Color(0xFF00D1FF),
+          Color(0xFF2AA8FF),
+        ],
+      'Security' => const <Color>[
+          Color(0xFF2F80FF),
+          Color(0xFF8B5CFF),
+        ],
+      _ => const <Color>[
+          Color(0xFF8BCF4D),
+          Color(0xFF00D1FF),
+        ],
+    };
 
     // ✅ auto width based on content (text)
     Widget pillBody(Widget child) {
@@ -3295,14 +3332,10 @@ class _CategoryPill extends StatelessWidget {
               Container(
                 height: 63.h,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
-                    colors: <Color>[
-                      
-                      Color(0xFFFDD720),
-                      Color(0xFF00D1FF),
-                    ],
+                    colors: selectedBorderColors,
                   ),
                   borderRadius: radius,
                 ),
@@ -3403,7 +3436,7 @@ class _SectionTitle extends StatelessWidget {
           child: Image.file(
             File(imagePath),
             width: double.infinity,
-            height: 64.h,
+            height: 86.h,
             fit: BoxFit.cover,
           ),
         ),

@@ -987,7 +987,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         ? baseImage
         : ColorFiltered(
             colorFilter: const ColorFilter.mode(
-              kDeviceOffGreyIcon,
+              Color(0xFFC7CAD6),
               BlendMode.srcIn,
             ),
             child: baseImage,
@@ -1002,7 +1002,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         border: isOn
             ? null
             : Border.all(
-                color: const Color(0xFFE1E1E1),
+                color: kDeviceOffGreyFill,
                 width: 1.5 * scale,
               ),
         boxShadow: [
@@ -1017,7 +1017,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
       child: ClipOval(
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
-          color: Colors.white,
+          color: isOn ? Colors.white : _dashboardBubbleGray,
           child: Padding(
             padding: EdgeInsets.all(innerInset),
             child: modeImage,
@@ -1044,6 +1044,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
     end: Alignment.bottomRight,
     colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
   );
+  static const Color selectedFillColor = Color(0xFFC7CAD6);
 
   @override
   Widget build(BuildContext context) {
@@ -1057,7 +1058,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
 
     final Widget tile = DecoratedBox(
       decoration: BoxDecoration(
-        color: kDeviceOffGreyFill,
+        color: selectedFillColor,
         borderRadius: BorderRadius.circular(18.r),
       ),
       child: SizedBox(

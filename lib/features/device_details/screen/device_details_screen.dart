@@ -456,6 +456,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   /// Presence screen: selected circular mode (0 Comfort … 4 Individual).
   int _selectedPresenceModeIndex = 0;
+  int? _presenceOffModeIndex;
 
   /// Multi-value switch grid: selected tile index 0 … 11 (displayed as 1 … 12).
   int _selectedMultiValueSwitchIndex = 0;
@@ -582,6 +583,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     _tunableWhiteDotDx = snap.tunableWhiteDotDx;
     _tunableWhiteDotDy = snap.tunableWhiteDotDy;
     _selectedPresenceModeIndex = snap.presenceModeIndex;
+    _presenceOffModeIndex =
+        widget.controlMode == DeviceDetailsControlMode.presenceModes &&
+                !snap.isOn
+            ? snap.presenceModeIndex
+            : null;
     _thermostatSetPercent = snap.thermostatRingPercent;
     _selectedMultiValueSwitchIndex = snap.multiValueSwitchIndex;
 
@@ -1006,13 +1012,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     }) {
       final bool sel = _selectedPresenceModeIndex == index;
       final bool showRing = sel && _isOn;
-      final bool showOffGrey = sel && !_isOn;
+      final bool showOffGrey = _presenceOffModeIndex == index && !_isOn;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           uiTapHaptic();
           setState(() {
             _selectedPresenceModeIndex = index;
+            _presenceOffModeIndex = null;
             _isOn = true;
           });
         },
@@ -1020,6 +1027,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           uiTapHaptic();
           setState(() {
             _selectedPresenceModeIndex = index;
+            _presenceOffModeIndex = index;
             _isOn = false;
           });
         },
@@ -1037,13 +1045,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     ? const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
+                        colors: [Color(0xFFc7cad6), Color(0xFFAFFF54)],
                       )
                     : null,
                 border: showRing
                     ? null
                     : Border.all(
-                        color: const Color(0xFFE1E1E1),
+                        color: showOffGrey
+                            ? kDeviceOffGreyFill
+                            : const Color(0xFFE1E1E1),
                         width: 1.5,
                       ),
                 boxShadow: [
@@ -1058,7 +1068,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               child: ClipOval(
                 clipBehavior: Clip.antiAlias,
                 child: ColoredBox(
-                  color: const Color(0xFFFFFFFF),
+                  color: showOffGrey
+                      ? const Color(0xFFF3F4F6)
+                      : const Color(0xFFFFFFFF),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final double inset = 10.w;
@@ -1071,7 +1083,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       final Widget icon = showOffGrey
                           ? ColorFiltered(
                               colorFilter: const ColorFilter.mode(
-                                kDeviceOffGreyIcon,
+                                Color(0xFFC7CAD6),
                                 BlendMode.srcIn,
                               ),
                               child: iconChild,
@@ -1203,6 +1215,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       end: Alignment.bottomRight,
       colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
     );
+    const Color selectedFillColor = Color(0xFFC7CAD6);
 
     Widget valueTile(int index) {
       final int displayed = index + 1;
@@ -1261,7 +1274,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               padding: sel ? EdgeInsets.all(3.w) : EdgeInsets.zero,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: sel ? kDeviceOffGreyFill : Colors.white,
+                  color: sel ? selectedFillColor : Colors.white,
                   borderRadius: BorderRadius.circular(radiusInner),
                 ),
                 child: SizedBox(
