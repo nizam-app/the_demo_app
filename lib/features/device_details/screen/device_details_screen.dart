@@ -1215,7 +1215,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       end: Alignment.bottomRight,
       colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
     );
-    const Color selectedFillColor = Color(0xFFC7CAD6);
+    const Color selectedFillColor = Color(0xFFE1E1E1);
 
     Widget valueTile(int index) {
       final int displayed = index + 1;
@@ -2970,9 +2970,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 selected: _selectedSceneIndex == i,
                 child: _sceneValueIcon(i),
                 onTap: () => setState(() => _selectedSceneIndex = i),
-                selectedBackgroundOverride:
-                    i == 2 ? kDeviceOffGreyFill : null,
-                selectedBorderOverride: i == 2 ? kDeviceOffGreyFill : null,
+                selectedBackgroundOverride: i == 2 ? Colors.white : null,
+                selectedBorderOverride:
+                    i == 2 ? const Color(0xFFE5E7EB) : null,
               );
               if (i == 0) return option;
               return Padding(

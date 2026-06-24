@@ -845,46 +845,60 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final _DashboardEditSection? section = _editingSection;
     if (section == null) return const SizedBox.shrink();
 
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: SafeArea(
-        top: false,
-        child: EditAddSectionSheet(
-          onClose: _closeDashboardSectionEdit,
-          sectionRenameLabel: _sectionRenameLabel(section),
-          onRenameTap: () => _renameDashboardSection(section),
-          onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
-          onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
-          headerBackgroundImagePath: _sectionHeaderImagePath(section),
-          onMoveUp: () => _moveDashboardSection(section, -1),
-          onMoveDown: () => _moveDashboardSection(section, 1),
-          canMoveUp: _canMoveDashboardSection(section, -1),
-          canMoveDown: _canMoveDashboardSection(section, 1),
-          onRemove: () => _removeDashboardSection(section),
-          initialHorizontalScroll: section == _DashboardEditSection.light
-              ? _lightHorizontalScroll
-              : _lightingHorizontalScroll,
-          onHorizontalScrollChanged: (v) => setState(() {
-            if (section == _DashboardEditSection.light) {
-              _lightHorizontalScroll = v;
-            } else {
-              _lightingHorizontalScroll = v;
-            }
-          }),
-          showWidgetSize: true,
-          initialSize: section == _DashboardEditSection.light
-              ? _lightWidgetSize
-              : _lightingWidgetSize,
-          onSizeChanged: (v) => setState(() {
-            if (section == _DashboardEditSection.light) {
-              _lightWidgetSize = v;
-            } else {
-              _lightingWidgetSize = v;
-            }
-          }),
-        ),
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: Colors.black.withOpacity(0.25),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0.h,
+            child: SafeArea(
+              top: false,
+              child: EditAddSectionSheet(
+                onClose: _closeDashboardSectionEdit,
+                sectionRenameLabel: _sectionRenameLabel(section),
+                onRenameTap: () => _renameDashboardSection(section),
+                onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
+                onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
+                headerBackgroundImagePath: _sectionHeaderImagePath(section),
+                onMoveUp: () => _moveDashboardSection(section, -1),
+                onMoveDown: () => _moveDashboardSection(section, 1),
+                canMoveUp: _canMoveDashboardSection(section, -1),
+                canMoveDown: _canMoveDashboardSection(section, 1),
+                onRemove: () => _removeDashboardSection(section),
+                initialHorizontalScroll:
+                    section == _DashboardEditSection.light
+                        ? _lightHorizontalScroll
+                        : _lightingHorizontalScroll,
+                onHorizontalScrollChanged: (v) => setState(() {
+                  if (section == _DashboardEditSection.light) {
+                    _lightHorizontalScroll = v;
+                  } else {
+                    _lightingHorizontalScroll = v;
+                  }
+                }),
+                showWidgetSize: true,
+                initialSize: section == _DashboardEditSection.light
+                    ? _lightWidgetSize
+                    : _lightingWidgetSize,
+                onSizeChanged: (v) => setState(() {
+                  if (section == _DashboardEditSection.light) {
+                    _lightWidgetSize = v;
+                  } else {
+                    _lightingWidgetSize = v;
+                  }
+                }),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1204,7 +1218,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ],
             ),
-            if (_editingSection != null) _buildDashboardEditOverlay(),
             Positioned(
               top: 0,
               left: 0,
@@ -1243,6 +1256,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ),
             ),
+            if (_editingSection != null) _buildDashboardEditOverlay(),
           ],
         ),
       ),
@@ -2999,6 +3013,32 @@ class _CategoryPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(999);
+    final List<Color> selectedBorderColors = switch (label) {
+      'Light' || 'Lighting' => const <Color>[
+          Color(0xFF8BCF4D),
+          Color(0xFF00D1FF),
+        ],
+      'Shading' => const <Color>[
+          Color(0xFF00D1FF),
+          Color(0xFF2AA8FF),
+        ],
+      'HVAC' => const <Color>[
+          Color(0xFFFF2D92),
+          Color(0xFF6D5BFF),
+        ],
+      'Ventilation' => const <Color>[
+          Color(0xFF00D1FF),
+          Color(0xFF2AA8FF),
+        ],
+      'Security' => const <Color>[
+          Color(0xFF2F80FF),
+          Color(0xFF8B5CFF),
+        ],
+      _ => const <Color>[
+          Color(0xFF8BCF4D),
+          Color(0xFF00D1FF),
+        ],
+    };
 
     // ✅ auto width based on content (text)
     Widget pillBody(Widget child) {
@@ -3069,15 +3109,10 @@ class _CategoryPill extends StatelessWidget {
         Container(
           height: 63.h,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: [
-                Color(0xFFFFD700), // yellow
-                Color(0xFF00FF99), // green-ish
-                Color(0xFF15DFFE), // cyan
-              ],
-              stops: [0.0, 0.55, 1.0],
+              colors: selectedBorderColors,
             ),
             borderRadius: radius,
           ),
