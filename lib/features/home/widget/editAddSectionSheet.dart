@@ -90,7 +90,12 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
               mainAxisSize: MainAxisSize.min,
               children: [
             Padding(
-              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
+              padding: EdgeInsets.only(
+                left: 14.w,
+                top: 8.h,
+                right: 0.w,
+                bottom: 10.h,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [

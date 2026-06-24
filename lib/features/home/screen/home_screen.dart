@@ -118,9 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _irrigationOn = true;
   bool _motionSensorOn = true;
 
-  /// Dashboard section widget size from Edit sheet (S/M = grid, L/XL = large rows).
-  String _lightWidgetSize = 'S';
-  String _lightingWidgetSize = 'S';
+  /// Dashboard section layouts: S=Shading, M=Favorites, L=Lighting, XL=Light.
+  String _lightWidgetSize = 'XL';
+  String _lightingWidgetSize = 'L';
   final Map<String, int> _lightingStepMark = <String, int>{};
 
   static const List<String> _kDefaultLightDeviceOrder = <String>[
@@ -271,17 +271,27 @@ class _HomeScreenState extends State<HomeScreen> {
   DeviceControlSnapshot _snap(String title) =>
       DeviceDashboardSync.instance.snapshotFor(title);
 
-  bool _usesLargeWidgetRows(String size) => size == 'L' || size == 'XL';
+  bool _usesLargeWidgetRows(String size) => size == 'S';
 
-  int _gridColumnsForWidgetSize(String size) => size == 'M' ? 2 : 3;
+  int _gridColumnsForWidgetSize(String size) {
+    switch (size) {
+      case 'L':
+        return 3;
+      case 'M':
+      case 'XL':
+      default:
+        return 2;
+    }
+  }
 
   int _lightGridColumnsForWidgetSize(String size) {
     switch (size) {
-      case 'M':
-      case 'L':
-      case 'XL':
-        return 1;
       case 'S':
+        return 1;
+      case 'L':
+        return 3;
+      case 'M':
+      case 'XL':
       default:
         return 2;
     }
@@ -292,11 +302,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'XL':
         return 220.h;
       case 'L':
-        return 200.h;
+        return 150.h;
       case 'M':
+        return 185.h;
       case 'S':
       default:
-        return 185.h;
+        return 150.h;
     }
   }
 
@@ -305,21 +316,20 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'XL':
         return 280.w;
       case 'L':
-        return 248.w;
+        return 120.w;
       case 'M':
         return 210.w;
       case 'S':
       default:
-        return 168.w;
+        return 320.w;
     }
   }
 
-  double _lightingLargeRowHeightForWidgetSize(String size) =>
-      size == 'XL' ? 110.h : 90.h;
+  double _lightingLargeRowHeightForWidgetSize(String size) => 90.h;
 
   bool get _lightingUsesLargeWidgets =>
       _usesLargeWidgetRows(_lightingWidgetSize);
-  // S/M → compact grid cards (display + tap). L/XL → wide rows with ↓/↑ controls.
+  // S → full-width rows; M/XL → two columns; L → three columns.
 
   double get _lightCardHeight => _lightCardHeightForWidgetSize(_lightWidgetSize);
 
@@ -839,6 +849,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     if (section == _DashboardEditSection.light) {
+      if (_lightWidgetSize == 'S') return screenWidth - 32.w;
       if (_lightHorizontalScroll) {
         return _lightHorizontalItemWidth(_lightWidgetSize);
       }
@@ -852,6 +863,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
+      if (_lightWidgetSize == 'S') return 90.h;
       return _lightCardHeight;
     }
     if (_lightingUsesLargeWidgets) {
@@ -885,8 +897,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: ColoredBox(
-              color: Colors.black.withOpacity(0.25),
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: Colors.black.withOpacity(0.25),
+              ),
             ),
           ),
           Positioned(
@@ -1188,15 +1202,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isSelected: _homeCategoryIndex == 0,
                                 icon: Icons.lightbulb_outline,
                                 imagePath: 'assets/Mask group (3).png',
-                                onTap: () {
-                                  setState(() => _homeCategoryIndex = 0);
-                                  DeviceDetailsScreen.go(
-                                    context,
-                                    deviceTitle: 'Light dinning room',
-                                    imageAssetPath: 'assets/Mask group (5).png',
-                                    controlButtonCount: 3,
-                                  );
-                                },
+                                onTap: () =>
+                                    setState(() => _homeCategoryIndex = 0),
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
@@ -1235,7 +1242,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          if (_editingSection != null) _buildDashboardEditOverlay(),
           Positioned(
             top: 0,
             left: 0,
@@ -1273,6 +1279,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          if (_editingSection != null) _buildDashboardEditOverlay(),
         ],
       ),
       ),
@@ -1709,6 +1716,21 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
+    if (_lightWidgetSize == 'S') {
+      return Column(
+        children: [
+          for (int i = 0; i < ids.length; i++) ...[
+            if (i > 0) SizedBox(height: 12.h),
+            _wrapDashboardDeviceCell(
+              section: _DashboardEditSection.light,
+              deviceId: ids[i],
+              child: _buildLightLargeRowById(ids[i]),
+            ),
+          ],
+        ],
+      );
+    }
+
     if (_lightHorizontalScroll) {
       return SizedBox(
         height: _lightCardHeight,
@@ -1762,9 +1784,218 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(mainAxisSize: MainAxisSize.min, children: rows);
   }
 
+  Widget _buildLightLargeRowById(String deviceId) {
+    final bool editing = _editingSection == _DashboardEditSection.light ||
+        _showSectionEditButtons;
+    VoidCallback? detailsTap(VoidCallback action) => editing ? null : action;
+
+    switch (deviceId) {
+      case 'light_dining':
+        final DeviceControlSnapshot light = _snap('Light dinning room');
+        return _buildLightingLargeRow(
+          icon: Image.asset(
+            light.isOn
+                ? 'assets/Mask group (5).png'
+                : 'assets/images/light_of.png',
+            fit: BoxFit.contain,
+          ),
+          deviceName: 'Light dinning room',
+          statusText: '${(_bedroomDimmer * 100).round()}%',
+          mode: _bedroomManual ? 'M' : 'A',
+          modeFilled: _bedroomManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _bedroomManual = !_bedroomManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'light_dining_s',
+            onDown: () {
+              setState(() {
+                _bedroomDimmer = (_bedroomDimmer - 0.10).clamp(0.0, 1.0);
+              });
+              _pushDashboardFor('Light dinning room');
+            },
+            onUp: () {
+              setState(() {
+                _bedroomDimmer = (_bedroomDimmer + 0.10).clamp(0.0, 1.0);
+              });
+              _pushDashboardFor('Light dinning room');
+            },
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Light dinning room',
+                imageAssetPath: 'assets/Mask group (5).png',
+                controlButtonCount: 1,
+              )),
+        );
+      case 'bathroom_heat':
+        final DeviceControlSnapshot bathroom =
+            _snap('Bathroom heating thermostat');
+        return _buildLightingLargeRow(
+          icon: Image.asset(
+            bathroom.isOn
+                ? 'assets/Mask group (6).png'
+                : 'assets/images/bathroom_off.png',
+            fit: BoxFit.contain,
+          ),
+          deviceName: 'Bathroom heating thermostat',
+          statusText: '${_bathroomThermostat.toStringAsFixed(1)}° c',
+          mode: _bathroomManual ? 'M' : 'A',
+          modeFilled: _bathroomManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _bathroomManual = !_bathroomManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'bathroom_heat_s',
+            onDown: () {
+              setState(() {
+                _bathroomThermostat =
+                    (_bathroomThermostat - 0.5).clamp(10.0, 35.0);
+              });
+              _pushDashboardFor('Bathroom heating thermostat');
+            },
+            onUp: () {
+              setState(() {
+                _bathroomThermostat =
+                    (_bathroomThermostat + 0.5).clamp(10.0, 35.0);
+              });
+              _pushDashboardFor('Bathroom heating thermostat');
+            },
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Bathroom heating thermostat',
+                imageAssetPath: 'assets/Mask group (6).png',
+                controlButtonCount: 3,
+              )),
+        );
+      case 'awning':
+        return _buildLightingLargeRow(
+          icon: DashboardAwningLevelIcon(level: _awningUp / 100.0),
+          deviceName: 'Awning garden 123',
+          statusText: '$_awningUp%',
+          mode: _awningManual ? 'M' : 'A',
+          modeFilled: _awningManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _awningManual = !_awningManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'awning_s',
+            onDown: () => setState(() => _awningAdjustLevel(-10)),
+            onUp: () => setState(() => _awningAdjustLevel(10)),
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Awning garden 123',
+                imageAssetPath: 'assets/Rectangle 823.png',
+                controlButtonCount: 1,
+                controlMode: DeviceDetailsControlMode.awningControl,
+              )),
+        );
+      case 'irrigation':
+        return _buildLightingLargeRow(
+          icon: Image.asset(
+            _irrigationOn
+                ? 'assets/Mask group (7).png'
+                : 'assets/images/irrigation_of.png',
+            fit: BoxFit.contain,
+          ),
+          deviceName: 'Irrigation entry',
+          statusText: _irrigationOn ? 'On' : 'Off',
+          mode: _irrigationManual ? 'M' : 'A',
+          modeFilled: _irrigationManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _irrigationManual = !_irrigationManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'irrigation_s',
+            onDown: () {
+              setState(() => _irrigationOn = false);
+              _pushDashboardFor('Irrigation entry');
+            },
+            onUp: () {
+              setState(() => _irrigationOn = true);
+              _pushDashboardFor('Irrigation entry');
+            },
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Irrigation entry',
+                imageAssetPath: 'assets/Mask group (7).png',
+                controlButtonCount: 1,
+              )),
+        );
+      case 'blind_living':
+        return _buildLightingLargeRow(
+          icon: _HomeBlindSlatsIcon(
+            level: _blindRoomLevel / 100.0,
+            angle: _blindRoomAngle / 100.0,
+          ),
+          deviceName: 'Blind Living Room',
+          statusText: '$_blindRoomLevel%  $_blindRoomAngle%',
+          mode: _blindManual ? 'M' : 'A',
+          modeFilled: _blindManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _blindManual = !_blindManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'blind_living_s',
+            onDown: () => setState(() => _blindLivingRoomAdjustAngle(10)),
+            onUp: () => setState(() => _blindLivingRoomAdjustAngle(-10)),
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Blind Living Room',
+                imageAssetPath: 'assets/Rectangle 823.png',
+                controlButtonCount: 1,
+                controlMode: DeviceDetailsControlMode.blindControl,
+              )),
+        );
+      case 'motion':
+        return _buildLightingLargeRow(
+          icon: Image.asset(
+            _motionSensorOn
+                ? 'assets/images/update_sensor.png'
+                : 'assets/images/motion_sensor_off.png',
+            fit: BoxFit.contain,
+          ),
+          deviceName: 'Motion Sensor',
+          statusText: _motionSensorOn ? 'On' : 'Off',
+          mode: _motionSensorManual ? 'M' : 'A',
+          modeFilled: _motionSensorManual,
+          onModeTap: editing
+              ? null
+              : () =>
+                  setState(() => _motionSensorManual = !_motionSensorManual),
+          controls: _buildLightingStepButtons(
+            markKey: 'motion_s',
+            onDown: () {
+              setState(() => _motionSensorOn = false);
+              _pushDashboardFor('Motion Sensor');
+            },
+            onUp: () {
+              setState(() => _motionSensorOn = true);
+              _pushDashboardFor('Motion Sensor');
+            },
+          ),
+          onNavigate: detailsTap(() => DeviceDetailsScreen.go(
+                context,
+                deviceTitle: 'Motion Sensor',
+                imageAssetPath: 'assets/images/update_sensor.png',
+                controlButtonCount: 1,
+              )),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
   Widget _buildLightDeviceCard(String deviceId) {
     final bool editing = _editingSection == _DashboardEditSection.light ||
         _showSectionEditButtons;
+    final bool compact = _lightWidgetSize == 'L';
+    final bool xlLayout = _lightWidgetSize == 'XL';
+    final double valueFontSize = xlLayout ? 18 : 16;
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
     final DeviceControlSnapshot bathroomHeat =
         _snap('Bathroom heating thermostat');
@@ -1781,6 +2012,8 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: diningLight.isOn,
             imagePath: 'assets/Mask group (5).png',
             imagePathOff: 'assets/images/light_of.png',
+            compact: compact,
+            valueFontSize: valueFontSize,
             onModeTap: editing
                 ? null
                 : () => setState(() => _bedroomManual = !_bedroomManual),
@@ -1811,6 +2044,8 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: bathroomHeat.isOn,
             imagePath: 'assets/Mask group (6).png',
             imagePathOff: 'assets/images/bathroom_off.png',
+            compact: compact,
+            valueFontSize: valueFontSize,
             minusMarked: _bathroomThermoMark == 1,
             plusMarked: _bathroomThermoMark == 2,
             onNavigate: editing
@@ -1863,6 +2098,9 @@ class _HomeScreenState extends State<HomeScreen> {
             previewLevel: _awningUp / 100.0,
             useAwningPreview: true,
             imagePath: 'assets/Rectangle 823.png',
+            compact: compact,
+            softPreviewInterior: xlLayout,
+            valueFontSize: valueFontSize,
             downMarked: _awningMark == 1,
             upMarked: _awningMark == 2,
             onNavigate: editing
@@ -1924,6 +2162,8 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: _irrigationOn,
             imagePath: 'assets/Mask group (7).png',
             imagePathOff: 'assets/images/irrigation_of.png',
+            compact: compact,
+            valueFontSize: valueFontSize,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -1954,9 +2194,13 @@ class _HomeScreenState extends State<HomeScreen> {
             slatsPreviewOverride: _HomeBlindSlatsIcon(
               level: _blindRoomLevel / 100.0,
               angle: _blindRoomAngle / 100.0,
+              softInterior: xlLayout,
             ),
             useBlindSlatsPreview: true,
             imagePath: 'assets/Rectangle 823.png',
+            compact: compact,
+            softPreviewInterior: xlLayout,
+            valueFontSize: valueFontSize,
             downMarked: _blindRoomMark == 1,
             upMarked: _blindRoomMark == 2,
             onNavigate: editing
@@ -2020,6 +2264,8 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: _motionSensorOn,
             imagePath: 'assets/images/update_sensor.png',
             imagePathOff: 'assets/images/motion_sensor_off.png',
+            compact: compact,
+            valueFontSize: valueFontSize,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -3227,27 +3473,27 @@ class _CategoryPill extends StatelessWidget {
     final radius = BorderRadius.circular(999);
     final List<Color> selectedBorderColors = switch (label) {
       'Light' || 'Lighting' => const <Color>[
-          Color(0xFF8BCF4D),
+          Color(0xFFFDD720),
           Color(0xFF00D1FF),
         ],
       'Shading' => const <Color>[
           Color(0xFF00D1FF),
-          Color(0xFF2AA8FF),
+          Color(0xFF38A4FE),
         ],
       'HVAC' => const <Color>[
-          Color(0xFFFF2D92),
-          Color(0xFF6D5BFF),
+          Color(0xFF0088FE),
+          Color(0xFFFE019A),
         ],
       'Ventilation' => const <Color>[
           Color(0xFF00D1FF),
           Color(0xFF2AA8FF),
         ],
       'Security' => const <Color>[
-          Color(0xFF2F80FF),
-          Color(0xFF8B5CFF),
+          Color(0xFF0088FE),
+          Color(0xFFEB0FFD),
         ],
       _ => const <Color>[
-          Color(0xFF8BCF4D),
+          Color(0xFFFDD720),
           Color(0xFF00D1FF),
         ],
     };
@@ -3339,7 +3585,7 @@ class _CategoryPill extends StatelessWidget {
                   ),
                   borderRadius: radius,
                 ),
-                padding: EdgeInsets.all(1.6.r), // ✅ border thickness
+                padding: EdgeInsets.all(1.6.r),
                 child: Container(
                   height: 63.h,
                   decoration: BoxDecoration(
@@ -3587,8 +3833,9 @@ class _DashboardDraggableReorderSlot extends StatelessWidget {
 // Common Card Wrapper
 // ---------------------------
 class _CardShell extends StatelessWidget {
-  const _CardShell({required this.child});
+  const _CardShell({required this.child, this.compact = false});
   final Widget child;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -3597,7 +3844,7 @@ class _CardShell extends StatelessWidget {
         color: const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(26.r), // ✅ FIX
       ),
-      padding: EdgeInsets.all(16.w), // ✅ FIX
+      padding: EdgeInsets.all(compact ? 8.w : 16.w),
       child: child,
     );
   }
@@ -3822,6 +4069,8 @@ class _LightDimmerCard extends StatelessWidget {
     this.onNavigate,
     this.onModeTap,
     this.showModeBadge = true,
+    this.compact = false,
+    this.valueFontSize = 16,
   });
 
   final String title;
@@ -3829,6 +4078,8 @@ class _LightDimmerCard extends StatelessWidget {
   final String mode;
   final bool modeFilled;
   final bool showModeBadge;
+  final bool compact;
+  final double valueFontSize;
   final bool isOn;
   final String? imagePath;
   final String? imagePathOff;
@@ -3851,8 +4102,8 @@ class _LightDimmerCard extends StatelessWidget {
         _displayImagePath != null
             ? Image.asset(
                 _displayImagePath!,
-                width: 52.w,
-                height: 52.w,
+                width: compact ? 34.w : 52.w,
+                height: compact ? 34.w : 52.w,
                 fit: BoxFit.contain,
               )
             : Icon(
@@ -3862,7 +4113,7 @@ class _LightDimmerCard extends StatelessWidget {
                     ? const Color(0xFF9CA3AF)
                     : const Color(0xFF15DFFE),
               ),
-        SizedBox(height: 10.h),
+        SizedBox(height: compact ? 3.h : 10.h),
         Text(
           title,
           style: TextStyle(
@@ -3871,8 +4122,8 @@ class _LightDimmerCard extends StatelessWidget {
             color: const Color(0xFF111827),
             height: 1.18,
           ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+          maxLines: compact ? 4 : 2,
+          overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
         ),
       ],
     );
@@ -3880,6 +4131,7 @@ class _LightDimmerCard extends StatelessWidget {
     return Stack(
       children: [
         _CardShell(
+          compact: compact,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -3901,14 +4153,15 @@ class _LightDimmerCard extends StatelessWidget {
               Row(
                 children: [
                   SizedBox(
-                    width: 52.w,
+                    width: compact ? 32.w : 52.w,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
                         '${(percent * 100).round()}%',
                         style: TextStyle(
-                          fontSize: 16.sp, fontWeight: FontWeight.bold,
+                          fontSize: valueFontSize.sp,
+                          fontWeight: FontWeight.bold,
                           color: const Color(0xFF111827),
                         ),
                         textAlign: TextAlign.left,
@@ -4060,6 +4313,8 @@ class _ThermostatCard extends StatelessWidget {
     this.onModeTap,
     this.onNavigate,
     this.showModeBadge = true,
+    this.compact = false,
+    this.valueFontSize = 16,
   });
 
   final String title;
@@ -4076,6 +4331,8 @@ class _ThermostatCard extends StatelessWidget {
   final VoidCallback? onNavigate;
   final bool minusMarked;
   final bool plusMarked;
+  final bool compact;
+  final double valueFontSize;
 
   String? get _displayImagePath {
     if (!isOn && imagePathOff != null) {
@@ -4092,8 +4349,8 @@ class _ThermostatCard extends StatelessWidget {
         _displayImagePath != null
             ? Image.asset(
                 _displayImagePath!,
-                width: 52.w,
-                height: 52.w,
+                width: compact ? 34.w : 52.w,
+                height: compact ? 34.w : 52.w,
                 fit: BoxFit.contain,
               )
             : Icon(
@@ -4101,7 +4358,7 @@ class _ThermostatCard extends StatelessWidget {
                 size: 44.sp,
                 color: const Color(0xFF0088FE),
               ),
-        SizedBox(height: 10.h),
+        SizedBox(height: compact ? 3.h : 10.h),
         Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -4115,8 +4372,9 @@ class _ThermostatCard extends StatelessWidget {
                     color: const Color(0xFF111827),
                     height: 1.15,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: compact ? 4 : 2,
+                  overflow:
+                      compact ? TextOverflow.visible : TextOverflow.ellipsis,
                 ),
               ),
               if (title.contains('\n')) ...[
@@ -4130,8 +4388,9 @@ class _ThermostatCard extends StatelessWidget {
                       height: 1.15,
                       //fontWeight: FontWeight.w700,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: compact ? 4 : 2,
+                    overflow:
+                        compact ? TextOverflow.visible : TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -4144,6 +4403,7 @@ class _ThermostatCard extends StatelessWidget {
     return Stack(
       children: [
         _CardShell(
+          compact: compact,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -4162,11 +4422,12 @@ class _ThermostatCard extends StatelessWidget {
                       )
                     : headerColumn,
               ),
-              SizedBox(height: 10.h),
+              SizedBox(height: compact ? 2.h : 10.h),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final bool compact = constraints.maxWidth < 120;
-                  final double btnSize = compact ? 30 : 35;
+                  final bool compactControls =
+                      compact || constraints.maxWidth < 120;
+                  final double btnSize = compactControls ? 22 : 35;
                   return Row(
                     children: [
                       _CircleBtn(
@@ -4175,7 +4436,7 @@ class _ThermostatCard extends StatelessWidget {
                         onTap: onMinus,
                         child: Icon(
                           Icons.remove,
-                          size: compact ? 20.sp : 23.sp,
+                          size: compactControls ? 15.sp : 23.sp,
                           color: const Color(0xFF6B7280),
                         ),
                       ),
@@ -4186,7 +4447,7 @@ class _ThermostatCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: valueFontSize.sp,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF111827),
                           ),
@@ -4198,7 +4459,7 @@ class _ThermostatCard extends StatelessWidget {
                         onTap: onPlus,
                         child: Icon(
                           Icons.add,
-                          size: compact ? 20.sp : 23.sp,
+                          size: compactControls ? 15.sp : 23.sp,
                           color: const Color(0xFF6B7280),
                         ),
                       ),
@@ -4249,6 +4510,9 @@ class _BlindCard extends StatelessWidget {
     this.useBlindSlatsPreview = false,
     this.slatsPreviewOverride,
     this.compactControlButtons = false,
+    this.compact = false,
+    this.softPreviewInterior = false,
+    this.valueFontSize = 18,
     this.onModeTap,
     this.onNavigate,
     this.showModeBadge = true,
@@ -4269,6 +4533,9 @@ class _BlindCard extends StatelessWidget {
   final bool useBlindSlatsPreview;
   final Widget? slatsPreviewOverride;
   final bool compactControlButtons;
+  final bool compact;
+  final bool softPreviewInterior;
+  final double valueFontSize;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onDownLong;
@@ -4302,11 +4569,20 @@ class _BlindCard extends StatelessWidget {
     return Stack(
       children: [
         _CardShell(
+          compact: compact,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (slatsPreviewOverride != null)
-                titleInkWell(slatsPreviewOverride!)
+                titleInkWell(
+                  compact
+                      ? SizedBox(
+                          width: 36.w,
+                          height: 36.w,
+                          child: FittedBox(child: slatsPreviewOverride!),
+                        )
+                      : slatsPreviewOverride!,
+                )
               else if (previewLevel != null)
                 titleInkWell(
                   useBlindSlatsPreview
@@ -4315,7 +4591,10 @@ class _BlindCard extends StatelessWidget {
                           angle: blindAngle ?? 1.0,
                         )
                       : useAwningPreview
-                          ? DashboardAwningLevelIcon(level: previewLevel!)
+                          ? DashboardAwningLevelIcon(
+                              level: previewLevel!,
+                              softInterior: softPreviewInterior,
+                            )
                           : DashboardBlindSlatsIcon(
                               level: previewLevel!,
                               angle: 1.0,
@@ -4325,12 +4604,12 @@ class _BlindCard extends StatelessWidget {
                 titleInkWell(
                   Image.asset(
                     imagePath!,
-                    width: 65.w,
-                    height: 65.w,
+                    width: compact ? 36.w : 65.w,
+                    height: compact ? 36.w : 65.w,
                     fit: BoxFit.contain,
                   ),
                 ),
-              SizedBox(height: 17.h),
+              SizedBox(height: compact ? 3.h : 17.h),
               Expanded(
                 child: titleInkWell(
                   SizedBox.expand(
@@ -4344,19 +4623,22 @@ class _BlindCard extends StatelessWidget {
                           color: const Color(0xFF111827),
                           height: 1.18,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: compact ? 4 : 2,
+                        overflow:
+                            compact ? TextOverflow.visible : TextOverflow.ellipsis,
                       ),
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: compact ? 2.h : 8.h),
               Flexible(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final double controlSize = compactControlButtons ? 40 : 35;
-                    final double iconSize = compactControlButtons ? 14.sp : 13.sp;
+                    final bool compactControls =
+                        compact || compactControlButtons;
+                    final double controlSize = compact ? 22 : 35;
+                    final double iconSize = compactControls ? 9.sp : 13.sp;
                     final Widget downBtn = _CircleBtn(
                       marked: downMarked,
                       onTap: onDown,
@@ -4407,7 +4689,8 @@ class _BlindCard extends StatelessWidget {
                                   child: Text(
                                     '$levelPercent%',
                                     style: TextStyle(
-                                      fontSize: 18.sp,
+                                      fontSize:
+                                          compact ? 16.sp : valueFontSize.sp,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF111827),
                                     ),
@@ -4438,7 +4721,7 @@ class _BlindCard extends StatelessWidget {
                           Text(
                             '$downPercent%',
                             style: TextStyle(
-                              fontSize: 18.sp,
+                              fontSize: compact ? 16.sp : valueFontSize.sp,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF111827),
                             ),
@@ -4461,7 +4744,7 @@ class _BlindCard extends StatelessWidget {
                           Text(
                             '$upPercent%',
                             style: TextStyle(
-                              fontSize: 18.sp,
+                              fontSize: compact ? 16.sp : valueFontSize.sp,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF111827),
                             ),
@@ -4485,7 +4768,7 @@ class _BlindCard extends StatelessWidget {
                                   children: [
                                     levelStat(),
                                     SizedBox(
-                                      width: compactControlButtons ? 8.w : 10.w,
+                                      width: compactControls ? 3.w : 10.w,
                                     ),
                                     angleStat(),
                                   ],
@@ -4529,6 +4812,8 @@ class _ToggleCard extends StatefulWidget {
     this.onNavigate,
     this.onIsOnChanged,
     this.onModeTap,
+    this.compact = false,
+    this.valueFontSize = 16,
   });
 
   final String title;
@@ -4540,6 +4825,8 @@ class _ToggleCard extends StatefulWidget {
   final VoidCallback? onNavigate;
   final ValueChanged<bool>? onIsOnChanged;
   final VoidCallback? onModeTap;
+  final bool compact;
+  final double valueFontSize;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -4577,8 +4864,8 @@ class _ToggleCardState extends State<_ToggleCard> {
         _heroImagePath != null
             ? Image.asset(
                 _heroImagePath!,
-                width: 52.w,
-                height: 52.w,
+                width: widget.compact ? 34.w : 52.w,
+                height: widget.compact ? 34.w : 52.w,
                 fit: BoxFit.contain,
               )
             : Icon(
@@ -4586,7 +4873,7 @@ class _ToggleCardState extends State<_ToggleCard> {
                 size: 42.sp,
                 color: const Color(0xFF00C2FF),
               ),
-        SizedBox(height: 17.h),
+        SizedBox(height: widget.compact ? 3.h : 17.h),
         Expanded(
           child: Text(
             widget.title,
@@ -4596,8 +4883,9 @@ class _ToggleCardState extends State<_ToggleCard> {
               color: const Color(0xFF111827),
               height: 1.15,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            maxLines: widget.compact ? 4 : 2,
+            overflow:
+                widget.compact ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -4606,6 +4894,7 @@ class _ToggleCardState extends State<_ToggleCard> {
     return Stack(
       children: [
         _CardShell(
+          compact: widget.compact,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -4632,22 +4921,25 @@ class _ToggleCardState extends State<_ToggleCard> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: widget.valueFontSize.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF111827),
                     ),
                   ),
-                  SizedBox(
-                    height: 35.h,
-                    width: 60.w,
-                    child: CupertinoSwitch(
-                      value: _on,
-                      onChanged: (v) {
-                        uiTapHaptic();
-                        setState(() => _on = v);
-                        widget.onIsOnChanged?.call(v);
-                      },
-                      activeColor: const Color(0xFF0088FE),
+                  Transform.translate(
+                    offset: Offset(0, widget.compact ? -5.h : 0),
+                    child: SizedBox(
+                      height: widget.compact ? 24.h : 35.h,
+                      width: widget.compact ? 40.w : 60.w,
+                      child: CupertinoSwitch(
+                        value: _on,
+                        onChanged: (v) {
+                          uiTapHaptic();
+                          setState(() => _on = v);
+                          widget.onIsOnChanged?.call(v);
+                        },
+                        activeColor: const Color(0xFF0088FE),
+                      ),
                     ),
                   ),
                 ],
@@ -6100,10 +6392,12 @@ class _HomeBlindSlatsIcon extends StatelessWidget {
   const _HomeBlindSlatsIcon({
     required this.level,
     required this.angle,
+    this.softInterior = false,
   });
 
   final double level;
   final double angle;
+  final bool softInterior;
 
   @override
   Widget build(BuildContext context) {
@@ -6111,12 +6405,14 @@ class _HomeBlindSlatsIcon extends StatelessWidget {
     final double pad = 3.w;
     final double outerR = 12.r;
     final double innerR = math.max(0.0, outerR - pad);
+    final Color interiorColor =
+        softInterior ? const Color(0xFFF3F4F6) : kDeviceOffGreyFill;
 
     return Container(
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: kDeviceOffGreyFill,
+        color: interiorColor,
         borderRadius: BorderRadius.circular(outerR),
         border: Border.all(color: kDeviceOffGreyBorder, width: 1),
         boxShadow: [
@@ -6138,6 +6434,7 @@ class _HomeBlindSlatsIcon extends StatelessWidget {
                 level: level.clamp(0.0, 1.0),
                 angle: angle.clamp(0.0, 1.0),
                 cornerRadius: innerR,
+                backgroundColor: interiorColor,
               ),
               child: SizedBox.expand(),
             ),
@@ -6153,11 +6450,13 @@ class _HomeBlindSlatsPainter extends CustomPainter {
     required this.level,
     required this.angle,
     this.cornerRadius = 0,
+    this.backgroundColor = kDeviceOffGreyFill,
   });
 
   final double level;
   final double angle;
   final double cornerRadius;
+  final Color backgroundColor;
 
   static const int _slatCount = 11;
   static const Color _slatColor = Color(0xFF38A4FE);
@@ -6173,7 +6472,7 @@ class _HomeBlindSlatsPainter extends CustomPainter {
       ),
     );
 
-    canvas.drawRRect(clipRrect, Paint()..color = kDeviceOffGreyFill);
+    canvas.drawRRect(clipRrect, Paint()..color = backgroundColor);
 
     canvas.save();
     canvas.clipRRect(clipRrect);
@@ -6261,5 +6560,6 @@ class _HomeBlindSlatsPainter extends CustomPainter {
   bool shouldRepaint(covariant _HomeBlindSlatsPainter old) =>
       old.level != level ||
       old.angle != angle ||
-      old.cornerRadius != cornerRadius;
+      old.cornerRadius != cornerRadius ||
+      old.backgroundColor != backgroundColor;
 }

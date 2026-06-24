@@ -634,7 +634,10 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
-      return const DashboardOffGreyIcon(circular: true);
+      return const DashboardRingProgressIcon(
+        percent: 0,
+        ringStyle: DashboardRingStyle.led,
+      );
     }
 
     final double side = kDashboardLightingIconSide;
@@ -756,7 +759,10 @@ class DashboardRgbwIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
-      return const DashboardOffGreyIcon(circular: true);
+      return const DashboardRingProgressIcon(
+        percent: 0,
+        ringStyle: DashboardRingStyle.led,
+      );
     }
 
     final double side = kDashboardLightingIconSide;
@@ -1044,7 +1050,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
     end: Alignment.bottomRight,
     colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
   );
-  static const Color selectedFillColor = Color(0xFFC7CAD6);
+  static const Color selectedFillColor = Color(0xFFE1E1E1);
 
   @override
   Widget build(BuildContext context) {
@@ -1124,10 +1130,15 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
 
 /// Awning level preview (blue gradient fill from top — matches details hero).
 class DashboardAwningLevelIcon extends StatelessWidget {
-  const DashboardAwningLevelIcon({super.key, required this.level});
+  const DashboardAwningLevelIcon({
+    super.key,
+    required this.level,
+    this.softInterior = false,
+  });
 
   /// 0 = empty (0%), 1 = full (100%).
   final double level;
+  final bool softInterior;
 
   static const LinearGradient _awningGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -1140,32 +1151,42 @@ class DashboardAwningLevelIcon extends StatelessWidget {
     final double p = level.clamp(0.0, 1.0);
     final double side = kDashboardLightingIconSide;
     final double radius = 12.r;
+    final double inset = softInterior ? 3.w : 0;
+    final double innerRadius = math.max(0.0, radius - inset);
+    final Color interiorColor =
+        softInterior ? _dashboardBubbleGray : kDeviceOffGreyFill;
 
     return Container(
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: kDeviceOffGreyFill,
+        color: interiorColor,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: kDeviceOffGreyBorder),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const ColoredBox(color: kDeviceOffGreyFill),
-          if (!_dashboardIsOffPercent(p))
-            Align(
-              alignment: Alignment.topCenter,
-              child: FractionallySizedBox(
-                heightFactor: p,
-                widthFactor: 1,
-                child: const DecoratedBox(
-                  decoration: BoxDecoration(gradient: _awningGradient),
+      child: Padding(
+        padding: EdgeInsets.all(inset),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(innerRadius),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ColoredBox(color: interiorColor),
+              if (!_dashboardIsOffPercent(p))
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: FractionallySizedBox(
+                    heightFactor: p,
+                    widthFactor: 1,
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(gradient: _awningGradient),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-        ],
+            ],
+          ),
+        ),
       ),
     );
   }
