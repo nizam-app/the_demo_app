@@ -204,6 +204,7 @@ const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
 /// Off-state palette — shared with device details hero tiles (Presence off, etc.).
 const Color kDeviceOffGreyFill = Color(0xFFC7CCD8);
 const Color kDeviceOffGreyBorder = Color(0xFFC7CCD8);
+const Color kDeviceSoftGreyOutline = Color(0xFFE1E1E1);
 /// Icon / check tint on off-grey surfaces (darker than [kDeviceOffGreyFill] for contrast).
 const Color kDeviceOffGreyIcon = Color(0xFF6B7280);
 
@@ -379,6 +380,7 @@ class _DashLedRingPainter extends CustomPainter {
       strokeWidth: _dashProgressRingStroke,
       gradientColors: const <Color>[Color(0xFF00D1FF), Color(0xFF00E52A)],
       gradientStops: const <double>[0.0, 0.8],
+      trackColor: const Color(0xFFC7CCD7),
     );
   }
 
@@ -634,9 +636,15 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
-      return const DashboardRingProgressIcon(
-        percent: 0,
-        ringStyle: DashboardRingStyle.led,
+      final double side = kDashboardLightingIconSide;
+      return Container(
+        width: side,
+        height: side,
+        decoration: BoxDecoration(
+          color: kDeviceOffGreyFill,
+          shape: BoxShape.circle,
+          border: Border.all(color: kDeviceSoftGreyOutline),
+        ),
       );
     }
 
@@ -759,9 +767,15 @@ class DashboardRgbwIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
-      return const DashboardRingProgressIcon(
-        percent: 0,
-        ringStyle: DashboardRingStyle.led,
+      final double side = kDashboardLightingIconSide;
+      return Container(
+        width: side,
+        height: side,
+        decoration: BoxDecoration(
+          color: kDeviceOffGreyFill,
+          shape: BoxShape.circle,
+          border: Border.all(color: kDeviceSoftGreyOutline),
+        ),
       );
     }
 
@@ -847,12 +861,16 @@ class DashboardLightSceneIcon extends StatelessWidget {
         width: side,
         height: side,
         fit: BoxFit.contain,
+        color: const Color(0xFFC7CCD7),
+        colorBlendMode: BlendMode.srcIn,
         filterQuality: FilterQuality.medium,
         errorBuilder: (_, __, ___) => Image.asset(
           'assets/light-scenc_off.png',
           width: side,
           height: side,
           fit: BoxFit.contain,
+          color: const Color(0xFFC7CCD7),
+          colorBlendMode: BlendMode.srcIn,
         ),
       );
     }
@@ -1050,7 +1068,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
     end: Alignment.bottomRight,
     colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
   );
-  static const Color selectedFillColor = Color(0xFFE1E1E1);
+  static const Color selectedFillColor = Color(0xFFC6CBD8);
 
   @override
   Widget build(BuildContext context) {
@@ -1151,25 +1169,18 @@ class DashboardAwningLevelIcon extends StatelessWidget {
     final double p = level.clamp(0.0, 1.0);
     final double side = kDashboardLightingIconSide;
     final double radius = 12.r;
-    final double inset = softInterior ? 3.w : 0;
-    final double innerRadius = math.max(0.0, radius - inset);
     final Color interiorColor =
         softInterior ? _dashboardBubbleGray : kDeviceOffGreyFill;
 
-    return Container(
+    return SizedBox(
       width: side,
       height: side,
-      decoration: BoxDecoration(
-        color: interiorColor,
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: kDeviceOffGreyBorder),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: EdgeInsets.all(inset),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(innerRadius),
-          child: Stack(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Stack(
             fit: StackFit.expand,
             children: [
               ColoredBox(color: interiorColor),
@@ -1186,7 +1197,19 @@ class DashboardAwningLevelIcon extends StatelessWidget {
                 ),
             ],
           ),
-        ),
+          ),
+          IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(radius),
+                border: Border.all(
+                  color: kDeviceOffGreyBorder,
+                  width: softInterior ? 2.w : 1.w,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1215,7 +1215,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       end: Alignment.bottomRight,
       colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
     );
-    const Color selectedFillColor = Color(0xFFE1E1E1);
+    const Color selectedFillColor = Color(0xFFC6CBD8);
 
     Widget valueTile(int index) {
       final int displayed = index + 1;
