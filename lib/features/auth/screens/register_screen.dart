@@ -80,6 +80,8 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
   static const Color _snackBackground = Color(0xFFF3F4F6);
   static const Color _snackText = Color(0xFF111827);
+  static const String _registerEndpoint =
+      '${ApiConstants.baseUrl}${ApiConstants.register}';
 
   void _authDebugLog(String message, [Object? detail]) {
     if (!kDebugMode) return;
@@ -182,8 +184,9 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       final List<String> parts = identityToken.split('.');
       if (parts.length < 2) return '';
       final String normalized = base64Url.normalize(parts[1]);
-      final dynamic payload =
-          jsonDecode(utf8.decode(base64Url.decode(normalized)));
+      final dynamic payload = jsonDecode(
+        utf8.decode(base64Url.decode(normalized)),
+      );
       if (payload is Map<String, dynamic>) {
         final dynamic email = payload['email'];
         if (email is String && email.isNotEmpty) return email;
@@ -216,7 +219,8 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       }
 
       final String? responseEmail = data['email'] as String?;
-      final String email = (responseEmail != null && responseEmail.trim().isNotEmpty)
+      final String email =
+          (responseEmail != null && responseEmail.trim().isNotEmpty)
           ? responseEmail.trim()
           : fallbackEmail.trim();
       if (email.isEmpty) {
@@ -261,12 +265,14 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       }
 
       if (!GoogleSignIn.instance.supportsAuthenticate()) {
-        _showRegisterSnackBar('Google sign-in is not available on this device.');
+        _showRegisterSnackBar(
+          'Google sign-in is not available on this device.',
+        );
         return;
       }
 
-      final GoogleSignInAccount account =
-          await GoogleSignIn.instance.authenticate();
+      final GoogleSignInAccount account = await GoogleSignIn.instance
+          .authenticate();
       final String? idToken = account.authentication.idToken;
 
       _authDebugLog(
@@ -279,8 +285,9 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
         return;
       }
 
-      final Uri uri =
-          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.googleLogin}');
+      final Uri uri = Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.googleLogin}',
+      );
       final String body = jsonEncode(<String, String>{'idToken': idToken});
 
       _authDebugLog('Google API URL', uri.toString());
@@ -294,7 +301,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
         provider: 'Google',
       );
     } on GoogleSignInException catch (e, stack) {
-      _authDebugLog('GoogleSignInException', '${e.code}: ${e.description}\n$stack');
+      _authDebugLog(
+        'GoogleSignInException',
+        '${e.code}: ${e.description}\n$stack',
+      );
       if (e.code == GoogleSignInExceptionCode.canceled ||
           e.code == GoogleSignInExceptionCode.interrupted) {
         return;
@@ -308,7 +318,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                 : 'Google registration failed (${e.code.name}).'),
       );
     } on PlatformException catch (e, stack) {
-      _authDebugLog('Google PlatformException', '${e.code}: ${e.message}\n$stack');
+      _authDebugLog(
+        'Google PlatformException',
+        '${e.code}: ${e.message}\n$stack',
+      );
       if (!mounted) return;
       _showRegisterSnackBar(
         _googleSetupMessage(e.message) ??
@@ -343,11 +356,11 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
       final AuthorizationCredentialAppleID credential =
           await SignInWithApple.getAppleIDCredential(
-        scopes: <AppleIDAuthorizationScopes>[
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
+            scopes: <AppleIDAuthorizationScopes>[
+              AppleIDAuthorizationScopes.email,
+              AppleIDAuthorizationScopes.fullName,
+            ],
+          );
 
       final String? identityToken = credential.identityToken;
 
@@ -374,17 +387,18 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       final String? given = credential.givenName?.trim();
       final String? family = credential.familyName?.trim();
       if (given != null || family != null) {
-        final String fullName = [given, family]
-            .whereType<String>()
-            .where((s) => s.isNotEmpty)
-            .join(' ');
+        final String fullName = [
+          given,
+          family,
+        ].whereType<String>().where((s) => s.isNotEmpty).join(' ');
         if (fullName.isNotEmpty) {
           body['name'] = fullName;
         }
       }
 
-      final Uri uri =
-          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.appleLogin}');
+      final Uri uri = Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.appleLogin}',
+      );
       final String encodedBody = jsonEncode(body);
 
       _authDebugLog('Apple API URL', uri.toString());
@@ -396,8 +410,8 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       final String fallbackEmail = (email != null && email.isNotEmpty)
           ? email
           : _emailFromAppleJwt(identityToken).isNotEmpty
-              ? _emailFromAppleJwt(identityToken)
-              : (credential.userIdentifier ?? 'apple_user');
+          ? _emailFromAppleJwt(identityToken)
+          : (credential.userIdentifier ?? 'apple_user');
 
       await _completeAuthResponse(
         response,
@@ -405,7 +419,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
         provider: 'Apple',
       );
     } on SignInWithAppleAuthorizationException catch (e, stack) {
-      _authDebugLog('Apple authorization error', '${e.code}: ${e.message}\n$stack');
+      _authDebugLog(
+        'Apple authorization error',
+        '${e.code}: ${e.message}\n$stack',
+      );
       if (e.code == AuthorizationErrorCode.canceled) return;
       if (!mounted) return;
       _showRegisterSnackBar(
@@ -414,7 +431,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
             : 'Apple registration failed (${e.code.name}).',
       );
     } on PlatformException catch (e, stack) {
-      _authDebugLog('Apple PlatformException', '${e.code}: ${e.message}\n$stack');
+      _authDebugLog(
+        'Apple PlatformException',
+        '${e.code}: ${e.message}\n$stack',
+      );
       if (!mounted) return;
       _showRegisterSnackBar(
         _nativePluginSetupMessage(e.message) ??
@@ -432,7 +452,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
   Future<void> _initGoogleSignIn() async {
     if (!ApiConstants.isGoogleSignInConfigured) {
-      _authDebugLog('GoogleSignIn init skipped', 'googleClientId not configured');
+      _authDebugLog(
+        'GoogleSignIn init skipped',
+        'googleClientId not configured',
+      );
       return;
     }
 
@@ -446,7 +469,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       _authDebugLog(
         'GoogleSignIn initialized',
         'clientId=${ApiConstants.hasGoogleClientId}, '
-        'serverClientId=${ApiConstants.hasGoogleServerClientId}',
+            'serverClientId=${ApiConstants.hasGoogleServerClientId}',
       );
     } catch (e, stack) {
       _authDebugLog('GoogleSignIn initialize failed', '$e\n$stack');
@@ -460,10 +483,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
         behavior: SnackBarBehavior.floating,
         content: Text(
           message,
-          style: const TextStyle(
-            color: _snackText,
-            fontFamily: 'Inter',
-          ),
+          style: const TextStyle(color: _snackText, fontFamily: 'Inter'),
         ),
       ),
     );
@@ -499,16 +519,25 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final Uri uri =
-          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.register}');
+      final Uri uri = Uri.parse(_registerEndpoint);
       final String body = jsonEncode(<String, String>{
         'name': name,
         'email': email,
         'password': password,
       });
+
+      _authDebugLog('email/password register start', uri.toString());
+      _authDebugLog('request body keys', _requestBodyKeys(body));
+
       final http.Response response = await _postRegister(uri, body);
 
       if (!mounted) return;
+
+      _authDebugLog('email/password status', response.statusCode);
+      _authDebugLog(
+        'email/password response',
+        _sanitizeResponseBodyForLog(response.body),
+      );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         _showRegisterSnackBar(_registerSuccessMessage(response.body));
@@ -517,9 +546,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
       }
 
       _showRegisterSnackBar(_registerErrorMessage(response.body));
-    } catch (e) {
+    } catch (e, stack) {
+      _authDebugLog('email/password error', '$e\n$stack');
       if (!mounted) return;
-      _showRegisterSnackBar('Registration failed. Please try again.');
+      _showRegisterSnackBar(_unexpectedAuthErrorMessage(e, provider: 'Email'));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -534,7 +564,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
     try {
       return await client.post(
         uri,
-        headers: const {'Content-Type': 'application/json'},
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
         body: body,
       );
     } finally {
@@ -605,10 +638,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
     const focusGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: [
-        Color(0xFF0088FE),
-        Color(0xFFB400FF),
-      ],
+      colors: [Color(0xFF0088FE), Color(0xFFB400FF)],
     );
 
     final radius = 26.r;
@@ -616,10 +646,10 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
     return CustomPaint(
       foregroundPainter: isFocus
           ? _GradientRRectBorderPainter(
-        radius: radius,
-        strokeWidth: 1.1,
-        gradient: focusGradient,
-      )
+              radius: radius,
+              strokeWidth: 1.1,
+              gradient: focusGradient,
+            )
           : null,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -674,7 +704,9 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: highlighted ? const Color(0xFF0088FE) : const Color(0xFFE6E8EE),
+              color: highlighted
+                  ? const Color(0xFF0088FE)
+                  : const Color(0xFFE6E8EE),
               width: highlighted ? 1.6 : 1.0,
             ),
           ),
@@ -712,7 +744,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
 
               // ✅ Back button (circle)
               Padding(
-                padding:  EdgeInsets.symmetric(horizontal: 15.w),
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: GestureDetector(
@@ -726,14 +758,18 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                         shape: BoxShape.circle,
                         // border: Border.all(color: const Color(0xFFE6E8EE)),
                       ),
-                      child: Image.asset("assets/aro.png",width: 16.w,height: 16.h,),
+                      child: Image.asset(
+                        "assets/aro.png",
+                        width: 16.w,
+                        height: 16.h,
+                      ),
                     ),
                   ),
                 ),
               ),
 
               Padding(
-                padding:  EdgeInsets.symmetric(horizontal: 25.w),
+                padding: EdgeInsets.symmetric(horizontal: 25.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -754,7 +790,6 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                         fontSize: 26.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF111827),
-                        
                       ),
                     ),
 
@@ -767,13 +802,16 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF111827),
-
                       ),
                     ),
 
                     SizedBox(height: 25.h),
 
-                    _pillField(controller: _nameC, focusNode: _nameF, hint: 'Name'),
+                    _pillField(
+                      controller: _nameC,
+                      focusNode: _nameF,
+                      hint: 'Name',
+                    ),
                     SizedBox(height: 18.h),
                     _pillField(
                       controller: _emailC,
@@ -809,13 +847,15 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                             height: 22.h,
                             child: Checkbox(
                               value: _agree,
-                              onChanged: (v) => setState(() => _agree = v ?? false),
+                              onChanged: (v) =>
+                                  setState(() => _agree = v ?? false),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4.r),
                               ),
                               side: const BorderSide(color: Color(0xFFE6E8EE)),
                               activeColor: const Color(0xFF0088FE),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             ),
                           ),
                           SizedBox(width: 10.w),
@@ -845,9 +885,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                           ),
                         ],
                       ),
-                    )
-                         ,
-
+                    ),
 
                     SizedBox(height: 18.h),
 
@@ -864,10 +902,7 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                             gradient: const LinearGradient(
                               begin: Alignment.centerLeft,
                               end: Alignment.centerRight,
-                              colors: [
-                                Color(0xFF0088FE),
-                                Color(0xFFEB0FFE),
-                              ],
+                              colors: [Color(0xFF0088FE), Color(0xFFEB0FFE)],
                             ),
                           ),
                           child: Center(
@@ -946,14 +981,14 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                           context.push(LoginScreen.routeName);
+                              context.push(LoginScreen.routeName);
                             },
                             child: Text(
                               'Login',
                               style: GoogleFonts.roboto(
                                 fontSize: 16.sp,
                                 color: const Color(0xFF0088FE),
-                             
+
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -968,7 +1003,6 @@ class _JoinAicanScreenState extends State<JoinAicanScreen> {
               ),
 
               // ✅ logo
-             
             ],
           ),
         ),
