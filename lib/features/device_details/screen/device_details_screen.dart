@@ -1045,7 +1045,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     ? const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xFFc7cad6), Color(0xFFAFFF54)],
+                        colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
                 border: showRing
@@ -1215,7 +1215,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       end: Alignment.bottomRight,
       colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
     );
-    const Color selectedFillColor = Color(0xFFC6CBD8);
+    const Color selectedFillColor = Color(0xFFF3F4F6);
 
     Widget valueTile(int index) {
       final int displayed = index + 1;
