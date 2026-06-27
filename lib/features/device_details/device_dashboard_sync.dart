@@ -1041,7 +1041,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
       child: ClipOval(
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
-          color: isOn ? Colors.white : _dashboardBubbleGray,
+          color: _dashboardBubbleGray,
           child: Padding(
             padding: EdgeInsets.all(innerInset),
             child: modeImage,
@@ -1068,7 +1068,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
     end: Alignment.bottomRight,
     colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
   );
-  static const Color selectedFillColor = Color(0xFFC6CBD8);
+  static const Color selectedFillColor = Color(0xFFF3F4F6);
 
   @override
   Widget build(BuildContext context) {

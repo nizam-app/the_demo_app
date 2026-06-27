@@ -19,6 +19,7 @@ Future<List<String>?> showAddDashboardDeviceSheet(
   BuildContext context, {
   required List<DashboardAddDeviceOption> devices,
   Set<String> disabledDeviceIds = const <String>{},
+  List<String> initialSelectedDeviceIds = const <String>[],
 }) {
   return showModalBottomSheet<List<String>>(
     context: context,
@@ -36,6 +37,7 @@ Future<List<String>?> showAddDashboardDeviceSheet(
         scrollController: controller,
         devices: devices,
         disabledDeviceIds: disabledDeviceIds,
+        initialSelectedDeviceIds: initialSelectedDeviceIds,
       ),
     ),
   );
@@ -47,14 +49,17 @@ class AddDashboardDeviceSheet extends StatefulWidget {
     required this.scrollController,
     required this.devices,
     this.disabledDeviceIds = const <String>{},
+    this.initialSelectedDeviceIds = const <String>[],
   });
 
   final ScrollController scrollController;
   final List<DashboardAddDeviceOption> devices;
   final Set<String> disabledDeviceIds;
+  final List<String> initialSelectedDeviceIds;
 
   @override
-  State<AddDashboardDeviceSheet> createState() => _AddDashboardDeviceSheetState();
+  State<AddDashboardDeviceSheet> createState() =>
+      _AddDashboardDeviceSheetState();
 }
 
 class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
@@ -66,10 +71,19 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
 
   final List<String> _selectedIds = <String>[];
 
-  void _closeWithSelection() {
-    Navigator.of(context).pop(
-      _selectedIds.isEmpty ? null : List<String>.from(_selectedIds),
+  @override
+  void initState() {
+    super.initState();
+    final Set<String> availableIds = widget.devices
+        .map((DashboardAddDeviceOption device) => device.id)
+        .toSet();
+    _selectedIds.addAll(
+      widget.initialSelectedDeviceIds.where(availableIds.contains),
     );
+  }
+
+  void _closeWithSelection() {
+    Navigator.of(context).pop(List<String>.from(_selectedIds));
   }
 
   @override
@@ -130,7 +144,8 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                 separatorBuilder: (_, index) {
                   final String leftId = widget.devices[index].id;
                   final String rightId = widget.devices[index + 1].id;
-                  final bool bothSelected = _selectedIds.contains(leftId) &&
+                  final bool bothSelected =
+                      _selectedIds.contains(leftId) &&
                       _selectedIds.contains(rightId);
                   return Container(
                     height: 1.h,
@@ -142,12 +157,12 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                 },
                 itemBuilder: (context, i) {
                   final DashboardAddDeviceOption device = widget.devices[i];
-                  final bool disabled =
-                      widget.disabledDeviceIds.contains(device.id);
+                  final bool disabled = widget.disabledDeviceIds.contains(
+                    device.id,
+                  );
                   final bool selected = _selectedIds.contains(device.id);
                   final int orderIndex = _selectedIds.indexOf(device.id);
-                  final int? badgeCount =
-                      selected ? orderIndex + 1 : null;
+                  final int? badgeCount = selected ? orderIndex + 1 : null;
                   return _AddDashboardDeviceRow(
                     imagePath: device.imagePath,
                     title: device.title,
@@ -217,82 +232,85 @@ class _AddDashboardDeviceRow extends StatelessWidget {
             child: Opacity(
               opacity: enabled ? 1 : 0.45,
               child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 16.h),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32.w,
-                    height: 32.h,
-                    color: selected ? _selectedBg : null,
-                    alignment: Alignment.center,
-                    child: Image.asset(
-                      imagePath,
-                      width: 26.w,
-                      height: 26.h,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => Icon(
-                        Icons.device_hub,
-                        size: 24.sp,
-                        color: _textSecondary,
+                padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 16.h),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32.w,
+                      height: 32.h,
+                      color: selected ? _selectedBg : null,
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        imagePath,
+                        width: 26.w,
+                        height: 26.h,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.device_hub,
+                          size: 24.sp,
+                          color: _textSecondary,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                            color: titleColor,
-                          ),
-                        ),
-                        if (subText != null && subText!.isNotEmpty) ...[
-                          SizedBox(height: 4.h),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            subText!,
+                            title,
                             style: TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 12.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w400,
-                              color: _textSecondary,
+                              color: titleColor,
                             ),
                           ),
+                          if (subText != null && subText!.isNotEmpty) ...[
+                            SizedBox(height: 4.h),
+                            Text(
+                              subText!,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: _textSecondary,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ),
-                  if (badgeCount != null)
-                    Container(
-                      width: 24.w,
-                      height: 24.w,
-                      decoration: const BoxDecoration(
-                        color: _badgeBlue,
-                        shape: BoxShape.circle,
                       ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '$badgeCount',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                    ),
+                    if (badgeCount != null)
+                      Container(
+                        width: 24.w,
+                        height: 24.w,
+                        decoration: const BoxDecoration(
+                          color: _badgeBlue,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$badgeCount',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
             ),
           ),
           if (selected)
-            SizedBox(height: 1.h, child: ColoredBox(color: _selectedBg)),
+            SizedBox(
+              height: 1.h,
+              child: ColoredBox(color: _selectedBg),
+            ),
         ],
       ),
     );
