@@ -538,25 +538,31 @@ class _HomeScreenState extends State<HomeScreen> {
       ? _DashboardBlock.light
       : _DashboardBlock.lighting;
 
-  bool _canMoveDashboardSection(_DashboardEditSection section, int delta) {
-    final _DashboardBlock block = _blockForEditSection(section);
-    final int index = _dashboardBlockOrder.indexOf(block);
-    if (index < 0) return false;
+  bool _canMoveSelectedDeviceInSection(
+    _DashboardEditSection section,
+    int delta,
+  ) {
+    final String? selectedDeviceId = _selectedEditDeviceId;
+    if (selectedDeviceId == null) return false;
+    final List<String> order = _deviceOrderFor(section);
+    final int index = order.indexOf(selectedDeviceId);
     final int target = index + delta;
-    return target >= 0 && target < _dashboardBlockOrder.length;
+    return index >= 0 && target >= 0 && target < order.length;
   }
 
-  void _moveDashboardSection(_DashboardEditSection section, int delta) {
-    if (!_canMoveDashboardSection(section, delta)) return;
-    final _DashboardBlock block = _blockForEditSection(section);
-    final List<_DashboardBlock> order = List<_DashboardBlock>.from(
-      _dashboardBlockOrder,
-    );
-    final int index = order.indexOf(block);
+  void _moveSelectedDeviceInSection(_DashboardEditSection section, int delta) {
+    final String? selectedDeviceId = _selectedEditDeviceId;
+    if (selectedDeviceId == null) return;
+    final List<String> order = List<String>.from(_deviceOrderFor(section));
+    final int index = order.indexOf(selectedDeviceId);
     final int target = index + delta;
-    order[index] = order[target];
-    order[target] = block;
-    setState(() => _dashboardBlockOrder = order);
+    if (index < 0 || target < 0 || target >= order.length) return;
+    order.removeAt(index);
+    order.insert(target, selectedDeviceId);
+    setState(() {
+      _setDeviceOrderFor(section, order);
+      _selectedEditDeviceId = selectedDeviceId;
+    });
   }
 
   void _removeDashboardSection(_DashboardEditSection section) {
@@ -885,10 +891,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
                 onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
                 headerBackgroundImagePath: _sectionHeaderImagePath(section),
-                onMoveUp: () => _moveDashboardSection(section, -1),
-                onMoveDown: () => _moveDashboardSection(section, 1),
-                canMoveUp: _canMoveDashboardSection(section, -1),
-                canMoveDown: _canMoveDashboardSection(section, 1),
+                onMoveUp: () => _moveSelectedDeviceInSection(section, -1),
+                onMoveDown: () => _moveSelectedDeviceInSection(section, 1),
+                canMoveUp: _canMoveSelectedDeviceInSection(section, -1),
+                canMoveDown: _canMoveSelectedDeviceInSection(section, 1),
                 onRemove: () => _removeDashboardSection(section),
                 initialHorizontalScroll: section == _DashboardEditSection.light
                     ? _lightHorizontalScroll
@@ -970,13 +976,26 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => section.headerBackgroundPath = path);
   }
 
-  void _moveAddedSection(_AddedDashboardSection section, int delta) {
-    final int index = _addedSections.indexOf(section);
+  bool _canMoveSelectedAddedDevice(_AddedDashboardSection section, int delta) {
+    final String? selectedDeviceId = _selectedAddedDeviceId;
+    if (selectedDeviceId == null) return false;
+    final int index = section.deviceOrder.indexOf(selectedDeviceId);
     final int target = index + delta;
-    if (index < 0 || target < 0 || target >= _addedSections.length) return;
+    return index >= 0 && target >= 0 && target < section.deviceOrder.length;
+  }
+
+  void _moveSelectedAddedDevice(_AddedDashboardSection section, int delta) {
+    final String? selectedDeviceId = _selectedAddedDeviceId;
+    if (selectedDeviceId == null) return;
+    final List<String> order = List<String>.from(section.deviceOrder);
+    final int index = order.indexOf(selectedDeviceId);
+    final int target = index + delta;
+    if (index < 0 || target < 0 || target >= order.length) return;
+    order.removeAt(index);
+    order.insert(target, selectedDeviceId);
     setState(() {
-      _addedSections.removeAt(index);
-      _addedSections.insert(target, section);
+      section.deviceOrder = order;
+      _selectedAddedDeviceId = selectedDeviceId;
     });
   }
 
@@ -994,7 +1013,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _editingAddedSectionId,
     );
     if (section == null) return const SizedBox.shrink();
-    final int index = _addedSections.indexOf(section);
 
     return Positioned.fill(
       child: Stack(
@@ -1012,10 +1030,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onAddDeviceTap: () => _addDevicesToAddedSection(section),
                 onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
                 headerBackgroundImagePath: section.headerBackgroundPath,
-                onMoveUp: () => _moveAddedSection(section, -1),
-                onMoveDown: () => _moveAddedSection(section, 1),
-                canMoveUp: index > 0,
-                canMoveDown: index >= 0 && index < _addedSections.length - 1,
+                onMoveUp: () => _moveSelectedAddedDevice(section, -1),
+                onMoveDown: () => _moveSelectedAddedDevice(section, 1),
+                canMoveUp: _canMoveSelectedAddedDevice(section, -1),
+                canMoveDown: _canMoveSelectedAddedDevice(section, 1),
                 onRemove: () => _removeAddedSection(section),
                 initialHorizontalScroll: section.horizontalScrolling,
                 onHorizontalScrollChanged: (value) =>
