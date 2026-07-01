@@ -6,12 +6,14 @@ class DashboardAddDeviceOption {
     required this.id,
     required this.title,
     required this.imagePath,
+    this.iconWidget,
     this.subText,
   });
 
   final String id;
   final String title;
   final String imagePath;
+  final Widget? iconWidget;
   final String? subText;
 }
 
@@ -165,6 +167,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                   final int? badgeCount = selected ? orderIndex + 1 : null;
                   return _AddDashboardDeviceRow(
                     imagePath: device.imagePath,
+                    iconWidget: device.iconWidget,
                     title: device.title,
                     subText: device.subText,
                     selected: selected,
@@ -196,6 +199,7 @@ class _AddDashboardDeviceRow extends StatelessWidget {
   const _AddDashboardDeviceRow({
     required this.imagePath,
     required this.title,
+    this.iconWidget,
     this.onTap,
     this.subText,
     this.selected = false,
@@ -205,6 +209,7 @@ class _AddDashboardDeviceRow extends StatelessWidget {
 
   final String imagePath;
   final String title;
+  final Widget? iconWidget;
   final String? subText;
   final VoidCallback? onTap;
   final bool selected;
@@ -240,17 +245,19 @@ class _AddDashboardDeviceRow extends StatelessWidget {
                       height: 32.h,
                       color: selected ? _selectedBg : null,
                       alignment: Alignment.center,
-                      child: Image.asset(
-                        imagePath,
-                        width: 26.w,
-                        height: 26.h,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.device_hub,
-                          size: 24.sp,
-                          color: _textSecondary,
-                        ),
-                      ),
+                      child:
+                          iconWidget ??
+                          Image.asset(
+                            imagePath,
+                            width: 26.w,
+                            height: 26.h,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.device_hub,
+                              size: 24.sp,
+                              color: _textSecondary,
+                            ),
+                          ),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
