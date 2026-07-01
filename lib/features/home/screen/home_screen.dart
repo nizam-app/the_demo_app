@@ -610,34 +610,53 @@ class _HomeScreenState extends State<HomeScreen> {
   DashboardAddDeviceOption _dashboardAddDeviceOption(String deviceId) {
     switch (deviceId) {
       case 'light_dining':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot light = _snap('Light dinning room');
+        return DashboardAddDeviceOption(
           id: 'light_dining',
           title: 'Light dinning room',
-          imagePath: 'assets/Mask group (5).png',
+          imagePath: light.isOn
+              ? 'assets/Mask group (5).png'
+              : 'assets/images/light_of.png',
         );
       case 'bathroom_heat':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot bathroom = _snap(
+          'Bathroom heating thermostat',
+        );
+        return DashboardAddDeviceOption(
           id: 'bathroom_heat',
           title: 'Bathroom heating thermostat',
-          imagePath: 'assets/Mask group (6).png',
+          imagePath: bathroom.isOn
+              ? 'assets/Mask group (6).png'
+              : 'assets/images/bathroom_off.png',
         );
       case 'awning':
-        return const DashboardAddDeviceOption(
+        return DashboardAddDeviceOption(
           id: 'awning',
           title: 'Awning garden 123',
           imagePath: 'assets/Rectangle 823.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardAwningLevelIcon(level: _awningUp / 100.0),
+          ),
         );
       case 'irrigation':
-        return const DashboardAddDeviceOption(
+        return DashboardAddDeviceOption(
           id: 'irrigation',
           title: 'Irrigation entry',
-          imagePath: 'assets/Mask group (7).png',
+          imagePath: _irrigationOn
+              ? 'assets/Mask group (7).png'
+              : 'assets/images/irrigation_of.png',
         );
       case 'blind_living':
-        return const DashboardAddDeviceOption(
+        return DashboardAddDeviceOption(
           id: 'blind_living',
           title: 'Blind Living Room',
           imagePath: 'assets/Rectangle 823.png',
+          iconWidget: dashboardLightingIconFrame(
+            _HomeBlindSlatsIcon(
+              level: _blindRoomLevel / 100.0,
+              angle: _blindRoomAngle / 100.0,
+            ),
+          ),
         );
       case 'motion':
         return const DashboardAddDeviceOption(
@@ -646,69 +665,129 @@ class _HomeScreenState extends State<HomeScreen> {
           imagePath: 'assets/images/update_sensor.png',
         );
       case 'light_scene':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot scene = _snap('Light Scene');
+        return DashboardAddDeviceOption(
           id: 'light_scene',
           title: 'Light Scene',
           imagePath:
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
+          ),
         );
       case 'rgbw':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
+        return DashboardAddDeviceOption(
           id: 'rgbw',
           title: 'RGBW room abc',
           imagePath:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardRgbwIcon(
+              hue: rgbw.rgbwHue,
+              saturation: rgbw.rgbwSaturation,
+              intensity: rgbw.rgbwIntensity,
+            ),
+          ),
         );
       case 'led_dimmer':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot led = _snap('LED Dimmer living room');
+        return DashboardAddDeviceOption(
           id: 'led_dimmer',
           title: 'LED Dimmer living room',
           imagePath:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardRingProgressIcon(
+              percent: led.ledDimmerPercent,
+              ringStyle: DashboardRingStyle.led,
+            ),
+          ),
         );
       case 'heating_cooling':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot hvac = _snap('Heating & Cooling');
+        return DashboardAddDeviceOption(
           id: 'heating_cooling',
           title: 'Heating & Cooling',
           imagePath: 'assets/images/heating_cooling.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardHeatingCoolingIcon(isOn: hvac.isOn),
+          ),
         );
       case 'tunable_white':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot tunable = _snap('Tunable white light');
+        return DashboardAddDeviceOption(
           id: 'tunable_white',
           title: 'Tunable white light',
           imagePath: 'assets/white_light.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardTunableWhiteIcon(
+              dotDx: tunable.tunableWhiteDotDx,
+              dotDy: tunable.tunableWhiteDotDy,
+              intensity: tunable.tunableWhiteIntensity,
+            ),
+          ),
         );
       case 'ventilation':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot vent = _snap('Ventilation');
+        return DashboardAddDeviceOption(
           id: 'ventilation',
           title: 'Ventilation',
           imagePath: 'assets/images/ventilations.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardVentilationIcon(percent: vent.ventilationPercent),
+          ),
         );
       case 'fan_level_3':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot fan = _snap('Fan Level 3');
+        return DashboardAddDeviceOption(
           id: 'fan_level_3',
           title: 'Fan Level 3',
           imagePath: 'assets/images/Fun_level3.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardFanLevelIcon(level: fan.fanLevel),
+          ),
         );
       case 'presence':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot presence = _snap('Presence');
+        return DashboardAddDeviceOption(
           id: 'presence',
           title: 'Presence',
           imagePath: 'assets/images/comfort.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardPresenceModeIcon(
+              modeIndex: presence.presenceModeIndex,
+              isOn: presence.isOn,
+            ),
+          ),
         );
       case 'living_room':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot living = _snap('Living Room');
+        return DashboardAddDeviceOption(
           id: 'living_room',
           title: 'Living room',
           imagePath:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardThermostatRingIcon(
+              percent: living.thermostatRingPercent,
+              currentTempCelsius: living.thermostatCelsius,
+            ),
+          ),
         );
       case 'multi_value_switch':
-        return const DashboardAddDeviceOption(
+        final DeviceControlSnapshot multi = _snap('Multi-Value Switch');
+        return DashboardAddDeviceOption(
           id: 'multi_value_switch',
           title: 'Multi-Value Switch',
           imagePath:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          iconWidget: dashboardLightingIconFrame(
+            DashboardMultiValueSwitchIcon(
+              selectedIndex: multi.multiValueSwitchIndex,
+              isOn: multi.isOn,
+            ),
+          ),
         );
       default:
         return DashboardAddDeviceOption(
@@ -2359,6 +2438,7 @@ class _HomeScreenState extends State<HomeScreen> {
         required String mode,
         required bool modeFilled,
         Widget? iconWidget,
+        Widget? controls,
         VoidCallback? onTap,
         VoidCallback? onModeTap,
       }) {
@@ -2369,6 +2449,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mode: mode,
           modeFilled: modeFilled,
           iconWidget: iconWidget,
+          controls: controls,
           onTap: onTap,
           onModeTap: onModeTap,
           compactOverride: compact,
@@ -2389,6 +2470,13 @@ class _HomeScreenState extends State<HomeScreen> {
             iconImage: diningLight.isOn
                 ? 'assets/Mask group (5).png'
                 : 'assets/images/light_of.png',
+            controls: _buildLightingSliderControl(
+              value: _bedroomDimmer,
+              onChanged: (v) {
+                setState(() => _bedroomDimmer = v.clamp(0.0, 1.0));
+                _pushDashboardFor('Light dinning room');
+              },
+            ),
             onTap: editing
                 ? null
                 : () => DeviceDetailsScreen.go(
@@ -2410,6 +2498,27 @@ class _HomeScreenState extends State<HomeScreen> {
             iconImage: bathroomHeat.isOn
                 ? 'assets/Mask group (6).png'
                 : 'assets/images/bathroom_off.png',
+            controls: _buildLightingPlusMinusButtons(
+              markKey: 'bathroom_heat',
+              onMinus: () {
+                setState(() {
+                  _bathroomThermostat = (_bathroomThermostat - 0.5).clamp(
+                    10.0,
+                    35.0,
+                  );
+                });
+                _pushDashboardFor('Bathroom heating thermostat');
+              },
+              onPlus: () {
+                setState(() {
+                  _bathroomThermostat = (_bathroomThermostat + 0.5).clamp(
+                    10.0,
+                    35.0,
+                  );
+                });
+                _pushDashboardFor('Bathroom heating thermostat');
+              },
+            ),
             onTap: editing
                 ? null
                 : () => DeviceDetailsScreen.go(
@@ -2433,6 +2542,11 @@ class _HomeScreenState extends State<HomeScreen> {
               level: _awningUp / 100.0,
               softInterior: xlLayout,
             ),
+            controls: _buildLightingStepButtons(
+              markKey: 'awning',
+              onDown: () => setState(() => _awningAdjustLevel(-10)),
+              onUp: () => setState(() => _awningAdjustLevel(10)),
+            ),
             onTap: editing
                 ? null
                 : () => DeviceDetailsScreen.go(
@@ -2455,6 +2569,13 @@ class _HomeScreenState extends State<HomeScreen> {
             iconImage: _irrigationOn
                 ? 'assets/Mask group (7).png'
                 : 'assets/images/irrigation_of.png',
+            controls: _buildLightingSwitchControl(
+              value: _irrigationOn,
+              onChanged: (v) {
+                setState(() => _irrigationOn = v);
+                _pushDashboardFor('Irrigation entry');
+              },
+            ),
             onTap: editing
                 ? null
                 : () => DeviceDetailsScreen.go(
@@ -2478,6 +2599,11 @@ class _HomeScreenState extends State<HomeScreen> {
               level: _blindRoomLevel / 100.0,
               angle: _blindRoomAngle / 100.0,
               softInterior: xlLayout,
+            ),
+            controls: _buildLightingStepButtons(
+              markKey: 'blind_living',
+              onDown: () => setState(() => _blindLivingRoomAdjustAngle(10)),
+              onUp: () => setState(() => _blindLivingRoomAdjustAngle(-10)),
             ),
             onTap: editing
                 ? null
@@ -2503,6 +2629,13 @@ class _HomeScreenState extends State<HomeScreen> {
             iconImage: _motionSensorOn
                 ? 'assets/images/update_sensor.png'
                 : 'assets/images/motion_sensor_off.png',
+            controls: _buildLightingSwitchControl(
+              value: _motionSensorOn,
+              onChanged: (v) {
+                setState(() => _motionSensorOn = v);
+                _pushDashboardFor('Motion Sensor');
+              },
+            ),
             onTap: editing
                 ? null
                 : () => DeviceDetailsScreen.go(
@@ -2900,6 +3033,17 @@ class _HomeScreenState extends State<HomeScreen> {
           iconImage:
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
+          controls: _buildLightingChevronButtons(
+            markKey: 'scene',
+            onLeft: () => _patchSnap(
+              'Light Scene',
+              (p) => p.copyWith(sceneIndex: (p.sceneIndex - 1).clamp(0, 2)),
+            ),
+            onRight: () => _patchSnap(
+              'Light Scene',
+              (p) => p.copyWith(sceneIndex: (p.sceneIndex + 1).clamp(0, 2)),
+            ),
+          ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           onTap: detailsTap(
@@ -2926,6 +3070,13 @@ class _HomeScreenState extends State<HomeScreen> {
             hue: rgbw.rgbwHue,
             saturation: rgbw.rgbwSaturation,
             intensity: rgbw.rgbwIntensity,
+          ),
+          controls: _buildLightingSliderControl(
+            value: rgbw.rgbwIntensity,
+            onChanged: (v) => _patchSnap(
+              'RGBW room abc',
+              (p) => p.copyWith(rgbwIntensity: v),
+            ),
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -2957,6 +3108,13 @@ class _HomeScreenState extends State<HomeScreen> {
             percent: led.ledDimmerPercent,
             ringStyle: DashboardRingStyle.led,
           ),
+          controls: _buildLightingSliderControl(
+            value: led.ledDimmerPercent,
+            onChanged: (v) => _patchSnap(
+              'LED Dimmer living room',
+              (p) => p.copyWith(ledDimmerPercent: v),
+            ),
+          ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           compactOverride: compactOverride,
@@ -2985,6 +3143,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           iconImage: 'assets/images/heating_cooling.png',
           iconWidget: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
+          controls: _buildLightingSwitchControl(
+            value: hvac.isOn,
+            onChanged: (v) =>
+                _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
+          ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           onTap: detailsTap(
@@ -3013,6 +3176,13 @@ class _HomeScreenState extends State<HomeScreen> {
             dotDy: tunable.tunableWhiteDotDy,
             intensity: tunable.tunableWhiteIntensity,
           ),
+          controls: _buildLightingSliderControl(
+            value: tunable.tunableWhiteIntensity,
+            onChanged: (v) => _patchSnap(
+              'Tunable white light',
+              (p) => p.copyWith(tunableWhiteIntensity: v),
+            ),
+          ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           onTap: detailsTap(
@@ -3036,6 +3206,13 @@ class _HomeScreenState extends State<HomeScreen> {
               : () => setState(() => _ventilationManual = !_ventilationManual),
           iconWidget: DashboardVentilationIcon(
             percent: vent.ventilationPercent,
+          ),
+          controls: _buildLightingSliderControl(
+            value: vent.ventilationPercent,
+            onChanged: (v) => _patchSnap(
+              'Ventilation',
+              (p) => p.copyWith(ventilationPercent: v),
+            ),
           ),
           iconImage: 'assets/images/ventilations.png',
           compactOverride: compactOverride,
@@ -3061,6 +3238,17 @@ class _HomeScreenState extends State<HomeScreen> {
               : () => setState(() => _fanLevelManual = !_fanLevelManual),
           iconImage: 'assets/images/Fun_level3.png',
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
+          controls: _buildLightingPlusMinusButtons(
+            markKey: 'fan',
+            onMinus: () => _patchSnap(
+              'Fan Level 3',
+              (p) => p.copyWith(fanLevel: (p.fanLevel - 1).clamp(0, 3)),
+            ),
+            onPlus: () => _patchSnap(
+              'Fan Level 3',
+              (p) => p.copyWith(fanLevel: (p.fanLevel + 1).clamp(0, 3)),
+            ),
+          ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           onTap: detailsTap(
@@ -3087,6 +3275,27 @@ class _HomeScreenState extends State<HomeScreen> {
             modeIndex: presence.presenceModeIndex,
             isOn: presence.isOn,
           ),
+          controls: _buildLightingChevronButtons(
+            markKey: 'presence',
+            onLeft: () => _patchSnap(
+              'Presence',
+              (p) => p.copyWith(
+                isOn: true,
+                presenceModeIndex: (p.presenceModeIndex - 1).clamp(0, 4),
+              ),
+            ),
+            onLeftLong: () =>
+                _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
+            onRight: () => _patchSnap(
+              'Presence',
+              (p) => p.copyWith(
+                isOn: true,
+                presenceModeIndex: (p.presenceModeIndex + 1).clamp(0, 4),
+              ),
+            ),
+            onRightLong: () =>
+                _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
+          ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           onTap: detailsTap(
@@ -3111,6 +3320,27 @@ class _HomeScreenState extends State<HomeScreen> {
           iconWidget: DashboardThermostatRingIcon(
             percent: living.thermostatRingPercent,
             currentTempCelsius: living.thermostatCelsius,
+          ),
+          controls: _buildLightingPlusMinusButtons(
+            markKey: 'living',
+            onMinus: () => _patchSnap(
+              'Living Room',
+              (p) => p.copyWith(
+                thermostatRingPercent: (p.thermostatRingPercent - 0.10).clamp(
+                  0.0,
+                  1.0,
+                ),
+              ),
+            ),
+            onPlus: () => _patchSnap(
+              'Living Room',
+              (p) => p.copyWith(
+                thermostatRingPercent: (p.thermostatRingPercent + 0.10).clamp(
+                  0.0,
+                  1.0,
+                ),
+              ),
+            ),
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -3143,6 +3373,37 @@ class _HomeScreenState extends State<HomeScreen> {
           iconWidget: DashboardMultiValueSwitchIcon(
             selectedIndex: multi.multiValueSwitchIndex,
             isOn: multi.isOn,
+          ),
+          controls: _buildLightingChevronButtons(
+            markKey: 'multi',
+            onLeft: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(
+                isOn: true,
+                multiValueSwitchIndex: (p.multiValueSwitchIndex - 1).clamp(
+                  0,
+                  2,
+                ),
+              ),
+            ),
+            onLeftLong: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(isOn: false),
+            ),
+            onRight: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(
+                isOn: true,
+                multiValueSwitchIndex: (p.multiValueSwitchIndex + 1).clamp(
+                  0,
+                  2,
+                ),
+              ),
+            ),
+            onRightLong: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(isOn: false),
+            ),
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
@@ -3873,12 +4134,12 @@ class _HomeScreenState extends State<HomeScreen> {
     required String mode,
     required bool modeFilled,
     Widget? iconWidget,
+    Widget? controls,
     VoidCallback? onTap,
     VoidCallback? onModeTap,
     bool? compactOverride,
     double? cardHeightOverride,
   }) {
-    // Small widget: icon + name + status only (tap opens details; no controls).
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
@@ -3952,20 +4213,39 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: gap),
             SizedBox(
               height: statusH,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
-                    height: 1.0,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF111827),
+                          fontFamily: 'Inter',
+                          height: 1.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  if (controls != null) ...[
+                    SizedBox(width: 6.w),
+                    SizedBox(
+                      width: compact ? 58.w : 88.w,
+                      height: statusH,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: controls,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
