@@ -217,9 +217,10 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
 
                           _SimpleRow(
                             title: 'Move down',
-                            imagePath: 'assets/images/move_down.png',
+                            imagePath: 'assets/images/move_up.png',
                             imageWidth: 22.w,
-                            imageHeight: 26.h,
+                            imageHeight: 22.h,
+                            imageQuarterTurns: 2,
                             onTap: widget.canMoveDown
                                 ? widget.onMoveDown
                                 : null,
@@ -255,8 +256,6 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                                   _selectedSize = v;
                                   widget.onSizeChanged?.call(v);
                                 }),
-                                imageWidth: 22.w,
-                                imageHeight: 22.h,
                               ),
                             ),
                           if (widget.showWidgetSize) SizedBox(height: 13.h),
@@ -421,6 +420,7 @@ class _SimpleRow extends StatelessWidget {
   final String? trailingText;
   final double imageWidth;
   final double imageHeight;
+  final int imageQuarterTurns;
   final double iconWidth;
   final double iconHeight;
 
@@ -432,6 +432,7 @@ class _SimpleRow extends StatelessWidget {
     this.trailingText,
     this.imageWidth = 20,
     this.imageHeight = 20,
+    this.imageQuarterTurns = 0,
     this.iconWidth = 14,
     this.iconHeight = 14,
     this.onTap,
@@ -444,11 +445,14 @@ class _SimpleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget leading = imagePath != null
-        ? Image.asset(
-            imagePath!,
-            width: imageWidth.w,
-            height: imageHeight.h,
-            fit: BoxFit.contain,
+        ? RotatedBox(
+            quarterTurns: imageQuarterTurns,
+            child: Image.asset(
+              imagePath!,
+              width: imageWidth.w,
+              height: imageHeight.h,
+              fit: BoxFit.contain,
+            ),
           )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
@@ -512,50 +516,90 @@ class _SimpleRow extends StatelessWidget {
 class _SizeSegment extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
-  final double imageWidth;
-  final double imageHeight;
 
   const _SizeSegment({
     required this.value,
     required this.onChanged,
-    this.imageWidth = 26,
-    this.imageHeight = 17,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget item(String label, String img) {
+    Widget glyph(String label, Color color) {
+      if (label == 'S') {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List<Widget>.generate(
+            4,
+            (index) => Container(
+              width: 20.w,
+              height: 3.6.h,
+              margin: EdgeInsets.only(bottom: index == 3 ? 0 : 2.h),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(1.r),
+              ),
+            ),
+          ),
+        );
+      }
+
+      final int columns = label == 'L' ? 3 : 2;
+      final int rows = label == 'XL' ? 2 : 3;
+      final double cell = label == 'XL' ? 7.w : 5.8.w;
+      final double gap = 2.w;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: List<Widget>.generate(
+          rows,
+          (row) => Padding(
+            padding: EdgeInsets.only(bottom: row == rows - 1 ? 0 : gap),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List<Widget>.generate(
+                columns,
+                (col) => Container(
+                  width: cell,
+                  height: cell,
+                  margin: EdgeInsets.only(right: col == columns - 1 ? 0 : gap),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(1.5.r),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget item(String label) {
       final selected = label == value;
+      final Color contentColor = selected ? _textPrimary : _textSecondary;
 
       return GestureDetector(
         onTap: () => onChanged(label),
         child: Container(
-          width: 56.w,
-          height: 35.h,
+          width: selected ? 54.w : 42.w,
+          height: 42.w,
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(26.r),
+            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
+            borderRadius: BorderRadius.circular(22.r),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Label on top
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: _textPrimary,
+                  color: contentColor,
                 ),
               ),
-              // SizedBox(height: 4.h),
-              // Image below
-              Image.asset(
-                img,
-                width: imageWidth.w,
-                height: imageHeight.h,
-                fit: BoxFit.contain,
-              ),
+              SizedBox(height: 2.h),
+              glyph(label, contentColor),
             ],
           ),
         ),
@@ -571,10 +615,10 @@ class _SizeSegment extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          item('S', 'assets/images/size_S.png'),
-          item('M', 'assets/images/size_M.png'),
-          item('L', 'assets/images/size_L.png'),
-          item('XL', 'assets/images/size_XL.png'),
+          item('S'),
+          item('M'),
+          item('L'),
+          item('XL'),
         ],
       ),
     );
