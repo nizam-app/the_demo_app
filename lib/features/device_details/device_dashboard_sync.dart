@@ -96,11 +96,13 @@ class DeviceControlSnapshot {
       sceneIndex: sceneIndex ?? this.sceneIndex,
       fanLevel: fanLevel ?? this.fanLevel,
       heatingCoolingMode: heatingCoolingMode ?? this.heatingCoolingMode,
-      tunableWhiteIntensity: tunableWhiteIntensity ?? this.tunableWhiteIntensity,
+      tunableWhiteIntensity:
+          tunableWhiteIntensity ?? this.tunableWhiteIntensity,
       tunableWhiteDotDx: tunableWhiteDotDx ?? this.tunableWhiteDotDx,
       tunableWhiteDotDy: tunableWhiteDotDy ?? this.tunableWhiteDotDy,
       presenceModeIndex: presenceModeIndex ?? this.presenceModeIndex,
-      thermostatRingPercent: thermostatRingPercent ?? this.thermostatRingPercent,
+      thermostatRingPercent:
+          thermostatRingPercent ?? this.thermostatRingPercent,
       multiValueSwitchIndex:
           multiValueSwitchIndex ?? this.multiValueSwitchIndex,
     );
@@ -113,8 +115,7 @@ class DeviceControlSnapshot {
   String lightSceneHeroAssetPath({
     String onAssetPath =
         'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
-  }) =>
-      lightSceneHeroAssetForIndex(sceneIndex, onAssetPath: onAssetPath);
+  }) => lightSceneHeroAssetForIndex(sceneIndex, onAssetPath: onAssetPath);
 
   static String lightSceneHeroAssetForIndex(
     int index, {
@@ -134,8 +135,10 @@ class DeviceControlSnapshot {
 
   String get presenceLabel {
     if (!isOn) return 'Off';
-    return presenceLabels[
-        presenceModeIndex.clamp(0, presenceLabels.length - 1)];
+    return presenceLabels[presenceModeIndex.clamp(
+      0,
+      presenceLabels.length - 1,
+    )];
   }
 
   static const List<String> presenceModeAssetPaths = <String>[
@@ -146,8 +149,11 @@ class DeviceControlSnapshot {
     'assets/images/Individual.png',
   ];
 
-  String get presenceModeAssetPath => presenceModeAssetPaths[
-      presenceModeIndex.clamp(0, presenceModeAssetPaths.length - 1)];
+  String get presenceModeAssetPath =>
+      presenceModeAssetPaths[presenceModeIndex.clamp(
+        0,
+        presenceModeAssetPaths.length - 1,
+      )];
 
   String get fanStatusLabel {
     if (fanLevel <= 0) return 'Off';
@@ -167,8 +173,8 @@ class DeviceControlSnapshot {
 
   String get multiValueSwitchCaption {
     if (!isOn) return 'Off';
-    return multiValueSwitchRowLabels[
-        multiValueSwitchIndex % multiValueSwitchRowLabels.length];
+    return multiValueSwitchRowLabels[multiValueSwitchIndex %
+        multiValueSwitchRowLabels.length];
   }
 
   double get thermostatRingCelsius =>
@@ -181,10 +187,10 @@ class DeviceDashboardSync extends ChangeNotifier {
 
   static final DeviceDashboardSync instance = DeviceDashboardSync._();
 
-  final Map<String, DeviceControlSnapshot> _snapshots = <String, DeviceControlSnapshot>{};
+  final Map<String, DeviceControlSnapshot> _snapshots =
+      <String, DeviceControlSnapshot>{};
 
-  static String keyFor(String deviceTitle) =>
-      deviceTitle.trim().toLowerCase();
+  static String keyFor(String deviceTitle) => deviceTitle.trim().toLowerCase();
 
   DeviceControlSnapshot snapshotFor(String deviceTitle) {
     return _snapshots[keyFor(deviceTitle)] ?? const DeviceControlSnapshot();
@@ -205,6 +211,7 @@ const Color _dashboardBubbleGray = Color(0xFFF3F4F6);
 const Color kDeviceOffGreyFill = Color(0xFFC7CCD8);
 const Color kDeviceOffGreyBorder = Color(0xFFC7CCD8);
 const Color kDeviceSoftGreyOutline = Color(0xFFE1E1E1);
+
 /// Icon / check tint on off-grey surfaces (darker than [kDeviceOffGreyFill] for contrast).
 const Color kDeviceOffGreyIcon = Color(0xFF6B7280);
 
@@ -226,10 +233,7 @@ Widget dashboardLightingIconFrame(Widget child) {
 }
 
 /// Unified dashboard off icon — grey fill, border, optional inner artwork.
-Widget _dashboardMutedCircleIcon({
-  Widget? child,
-  double padding = 10,
-}) {
+Widget _dashboardMutedCircleIcon({Widget? child, double padding = 10}) {
   final double side = kDashboardLightingIconSide;
   return Container(
     width: side,
@@ -417,10 +421,12 @@ class DashboardRingProgressIcon extends StatelessWidget {
     super.key,
     required this.percent,
     required this.ringStyle,
+    this.labelFontSize = 12,
   });
 
   final double percent;
   final DashboardRingStyle ringStyle;
+  final double labelFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +453,7 @@ class DashboardRingProgressIcon extends StatelessWidget {
               color: _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
-            child: _dashboardRingInnerLabel('$pct%'),
+            child: _dashboardRingInnerLabel('$pct%', fontSize: labelFontSize),
           ),
         ],
       ),
@@ -482,8 +488,9 @@ class _DashThermostatRingPainter extends CustomPainter {
       return;
     }
 
-    final double sweepAngle =
-        clamped >= 0.999 ? _dashRingSweep : _dashRingSweep * clamped;
+    final double sweepAngle = clamped >= 0.999
+        ? _dashRingSweep
+        : _dashRingSweep * clamped;
 
     const SweepGradient gradient = SweepGradient(
       colors: <Color>[
@@ -513,15 +520,21 @@ class _DashThermostatRingPainter extends CustomPainter {
 
 /// Ventilation dashboard ring (same layout as LED [DashboardRingProgressIcon]).
 class DashboardVentilationIcon extends StatelessWidget {
-  const DashboardVentilationIcon({super.key, required this.percent});
+  const DashboardVentilationIcon({
+    super.key,
+    required this.percent,
+    this.labelFontSize = 12,
+  });
 
   final double percent;
+  final double labelFontSize;
 
   @override
   Widget build(BuildContext context) {
     return DashboardRingProgressIcon(
       percent: percent,
       ringStyle: DashboardRingStyle.ventilation,
+      labelFontSize: labelFontSize,
     );
   }
 }
@@ -533,11 +546,13 @@ class DashboardThermostatRingIcon extends StatelessWidget {
     required this.percent,
     this.currentTempCelsius = 24.6,
     this.humidityPercent = 21,
+    this.labelFontSize = 11,
   });
 
   final double percent;
   final double currentTempCelsius;
   final int humidityPercent;
+  final double labelFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -566,7 +581,7 @@ class DashboardThermostatRingIcon extends StatelessWidget {
             alignment: Alignment.center,
             child: _dashboardRingInnerLabel(
               '$tempInt.$tempFrac°',
-              fontSize: 11,
+              fontSize: labelFontSize,
             ),
           ),
         ],
@@ -591,10 +606,7 @@ class _DashRgbHueWheelPainter extends CustomPainter {
     final Paint sweep = Paint()
       ..shader = SweepGradient(
         colors: <Color>[..._hueColors.sublist(0, 360), _hueColors[0]],
-        stops: <double>[
-          ...List<double>.generate(360, (int i) => i / 360),
-          1.0,
-        ],
+        stops: <double>[...List<double>.generate(360, (int i) => i / 360), 1.0],
         tileMode: TileMode.clamp,
       ).createShader(bounds);
     canvas.drawCircle(center, radius, sweep);
@@ -810,9 +822,7 @@ class DashboardRgbwIcon extends StatelessWidget {
               ),
             ),
             child: ClipOval(
-              child: CustomPaint(
-                painter: _DashRgbHueWheelPainter(),
-              ),
+              child: CustomPaint(painter: _DashRgbHueWheelPainter()),
             ),
           ),
           Positioned(
@@ -902,10 +912,7 @@ class DashboardLightSceneIcon extends StatelessWidget {
 
 /// Heating & cooling hero image (on vs off artwork from details screen).
 class DashboardHeatingCoolingIcon extends StatelessWidget {
-  const DashboardHeatingCoolingIcon({
-    super.key,
-    required this.isOn,
-  });
+  const DashboardHeatingCoolingIcon({super.key, required this.isOn});
 
   final bool isOn;
 
@@ -999,8 +1006,11 @@ class DashboardPresenceModeIcon extends StatelessWidget {
     final double scale = side / detailsCircle;
     final double ringInset = 3.8 * scale;
     final double innerInset = 10 * scale;
-    final String asset = DeviceControlSnapshot.presenceModeAssetPaths[
-        modeIndex.clamp(0, DeviceControlSnapshot.presenceModeAssetPaths.length - 1)];
+    final String asset =
+        DeviceControlSnapshot.presenceModeAssetPaths[modeIndex.clamp(
+          0,
+          DeviceControlSnapshot.presenceModeAssetPaths.length - 1,
+        )];
 
     final Widget baseImage = Image.asset(
       asset,
@@ -1025,10 +1035,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         gradient: isOn ? _selectedRingGradient : null,
         border: isOn
             ? null
-            : Border.all(
-                color: kDeviceOffGreyFill,
-                width: 1.5 * scale,
-              ),
+            : Border.all(color: kDeviceOffGreyFill, width: 1.5 * scale),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isOn ? 0.10 : 0.05),
@@ -1042,10 +1049,7 @@ class DashboardPresenceModeIcon extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: ColoredBox(
           color: _dashboardBubbleGray,
-          child: Padding(
-            padding: EdgeInsets.all(innerInset),
-            child: modeImage,
-          ),
+          child: Padding(padding: EdgeInsets.all(innerInset), child: modeImage),
         ),
       ),
     );
@@ -1074,8 +1078,9 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final int displayed = selectedIndex + 1;
     const Color textColor = Color(0xFF111827);
-    final Color checkColor =
-        isOn ? const Color(0xFF22C55E) : kDeviceOffGreyIcon;
+    final Color checkColor = isOn
+        ? const Color(0xFF22C55E)
+        : kDeviceOffGreyIcon;
     final double side = kDashboardLightingIconSide;
     final double tileW = side * 46 / 52;
     final double tileH = side * 26 / 52;
@@ -1105,11 +1110,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
             Positioned(
               top: 3.5.h,
               right: 2.5.w,
-              child: Icon(
-                Icons.check_circle,
-                size: 16.sp,
-                color: checkColor,
-              ),
+              child: Icon(Icons.check_circle, size: 16.sp, color: checkColor),
             ),
           ],
         ),
@@ -1125,10 +1126,7 @@ class DashboardMultiValueSwitchIcon extends StatelessWidget {
             gradient: isOn ? selectedBorderGradient : null,
             border: isOn
                 ? null
-                : Border.all(
-                    color: const Color(0xFFE1E1E1),
-                    width: 1.5,
-                  ),
+                : Border.all(color: const Color(0xFFE1E1E1), width: 1.5),
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
@@ -1169,8 +1167,9 @@ class DashboardAwningLevelIcon extends StatelessWidget {
     final double p = level.clamp(0.0, 1.0);
     final double side = kDashboardLightingIconSide;
     final double radius = 12.r;
-    final Color interiorColor =
-        softInterior ? _dashboardBubbleGray : kDeviceOffGreyFill;
+    final Color interiorColor = softInterior
+        ? _dashboardBubbleGray
+        : kDeviceOffGreyFill;
 
     return SizedBox(
       width: side,
@@ -1181,22 +1180,22 @@ class DashboardAwningLevelIcon extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(radius),
             child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ColoredBox(color: interiorColor),
-              if (!_dashboardIsOffPercent(p))
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: FractionallySizedBox(
-                    heightFactor: p,
-                    widthFactor: 1,
-                    child: const DecoratedBox(
-                      decoration: BoxDecoration(gradient: _awningGradient),
+              fit: StackFit.expand,
+              children: [
+                ColoredBox(color: interiorColor),
+                if (!_dashboardIsOffPercent(p))
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: FractionallySizedBox(
+                      heightFactor: p,
+                      widthFactor: 1,
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(gradient: _awningGradient),
+                      ),
                     ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            ),
           ),
           IgnorePointer(
             child: DecoratedBox(

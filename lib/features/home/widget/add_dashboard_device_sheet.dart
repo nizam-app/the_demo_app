@@ -245,19 +245,19 @@ class _AddDashboardDeviceRow extends StatelessWidget {
                       height: 32.h,
                       color: selected ? _selectedBg : null,
                       alignment: Alignment.center,
-                      child:
-                          iconWidget ??
-                          Image.asset(
-                            imagePath,
-                            width: 26.w,
-                            height: 26.h,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => Icon(
-                              Icons.device_hub,
-                              size: 24.sp,
-                              color: _textSecondary,
+                      child: iconWidget != null
+                          ? FittedBox(fit: BoxFit.contain, child: iconWidget)
+                          : Image.asset(
+                              imagePath,
+                              width: 26.w,
+                              height: 26.h,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.device_hub,
+                                size: 24.sp,
+                                color: _textSecondary,
+                              ),
                             ),
-                          ),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
