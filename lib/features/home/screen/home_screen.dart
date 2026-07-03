@@ -251,6 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _blindRoomAngle = blind.blindUpPercent;
     });
   }
+  //just update
 
   void _pushDashboardFor(String deviceTitle) {
     final DeviceControlSnapshot prev = DeviceDashboardSync.instance.snapshotFor(
