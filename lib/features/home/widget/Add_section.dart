@@ -28,7 +28,7 @@ class AddSectionConfiguration {
 class AddSectionSheet extends StatefulWidget {
   const AddSectionSheet({
     super.key,
-    this.initialName = 'Light',
+    this.initialName = '',
     this.initialDeviceIds = const <String>[],
     this.initialHorizontalScrolling = true,
     this.initialWidgetSize = 'S',
@@ -37,6 +37,7 @@ class AddSectionSheet extends StatefulWidget {
     this.onDevicesRequested,
     this.onHeaderBackgroundRequested,
     this.onAdd,
+    this.onClose,
   });
 
   final String initialName;
@@ -49,6 +50,7 @@ class AddSectionSheet extends StatefulWidget {
   onDevicesRequested;
   final Future<String?> Function()? onHeaderBackgroundRequested;
   final ValueChanged<AddSectionConfiguration>? onAdd;
+  final VoidCallback? onClose;
 
   @override
   State<AddSectionSheet> createState() => _AddSectionSheetState();
@@ -129,224 +131,239 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
           ),
           child: SafeArea(
             top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 14.w,
-                    right: 0.w,
-                    bottom: 10.h,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Left spacer (same size as close button)
-                      SizedBox(width: 30.w, height: 30.w),
-
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Add Section',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: _textPrimary,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Close button (right)
-                      Container(
-                        width: 30.w,
-                        height: 30.w,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          icon: Icon(
-                            Icons.close_rounded,
-                            size: 20.sp,
-                            color: _textPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// CARD 1
-                _Card(
-                  child: Column(
-                    children: [
-                      // _SimpleRow(
-                      //   imagePath: 'assets/images/add_device.png',
-                      //   title: 'Add device',
-                      //   imageWidth: 23.w,
-                      //   imageHeight: 23.h,
-                      // ),
-                      _SimpleRow(
-                        imagePath: 'assets/images/rename.png',
-                        title: 'Name',
-                        trailingText: _name,
-                        iconPath: 'assets/images/edit_image.png',
-                        imageWidth: 26.w,
-                        imageHeight: 26.h,
-                        iconHeight: 13.h,
-                        iconWidth: 14.w,
-                        onTap: _rename,
-                      ),
-
-                      _SimpleRow(
-                        imagePath: 'assets/images/add_device.png',
-                        title: 'Add device',
-                        imageWidth: 23.w,
-                        imageHeight: 23.h,
-                        trailingText: _deviceIds.isEmpty
-                            ? null
-                            : '${_deviceIds.length}',
-                        onTap: _addDevices,
-                      ),
-
-                      // _SimpleRow(
-                      //   imagePath: 'assets/images/move_up.png',
-                      //   title: 'Move up',
-                      //   imageWidth: 22.w,
-                      //   imageHeight: 22.h,
-                      // ),
-                      //
-                      // _SimpleRow(
-                      //   title: 'Move down',
-                      //   imagePath: 'assets/images/move_down.png',
-                      //   imageWidth: 22.w,
-                      //   imageHeight: 22.h,
-                      // ),
-                    ],
-                  ),
-                ),
-
-                /// CARD 2
-                SizedBox(height: 10.h),
-                _Card(
-                  child: Column(
-                    children: [
-                      _RowItem(
-                        imagePath: 'assets/images/header_icon.png',
-                        title: 'Header background',
-                        imageHeight: 26.h,
-                        imageWidth: 26.w,
-                        onTap: _pickHeaderBackground,
-                        trailing: _headerBackgroundPath != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(6.r),
-                                child: Image.file(
-                                  File(_headerBackgroundPath!),
-                                  height: 39.h,
-                                  width: 39.w,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : Image.asset(
-                                'assets/images/header_image.png',
-                                height: 39.h,
-                                width: 39.w,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-
-                      /// SLIDER WIDGET
-                      _RowItem(
-                        imagePath: 'assets/images/Slider.png',
-                        title: 'Horizontal scrolling',
-                        imageHeight: 22.h,
-                        imageWidth: 22.w,
-                        trailing: CupertinoSwitch(
-                          value: _sliderWidget,
-                          onChanged: (v) => setState(() => _sliderWidget = v),
-                          activeColor: _blue,
-                        ),
-                      ),
-
-                      _RowItem(
-                        imagePath: 'assets/images/widget_size.png',
-                        title: 'Widget size',
-                        trailing: _SizeSegment(
-                          value: _selectedSize,
-                          onChanged: (v) => setState(() => _selectedSize = v),
-                          imageWidth: 22.w, // custom image width
-                          imageHeight: 22.h, // custom image height
-                        ),
-                      ),
-                      SizedBox(height: 13.h),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 18.h),
-
-                /// REMOVE
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: 18.w,
-                    right: 17.w,
-                    bottom: 25.h,
-                  ),
-                  child: GestureDetector(
-                    onTap: _submit,
-                    child: Container(
-                      height: 52.h,
-                      width: double.infinity,
-
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0088FE),
-                        borderRadius: BorderRadius.circular(26.r),
-                        // border: Border.all(color: Color(0xFF0088FE),width: 1.w)
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.72,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: 14.w,
+                        right: 0.w,
+                        bottom: 10.h,
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Image.asset(
-                          //   'assets/images/+ (1).png',
-                          //
-                          //   height: 14.h,
-                          //   color: Color(0xFFFFFFFF),
-                          // ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 3.5.h),
-                            child: Text(
-                              '+',
-                              style: TextStyle(
-                                color: Color(0xFFFFFFFF),
-                                fontWeight: FontWeight.w400,
-                                fontSize: 22.sp,
-                                fontFamily: 'Inter',
+                          // Left spacer (same size as close button)
+                          SizedBox(width: 30.w, height: 30.w),
+
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'Add Section',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: _textPrimary,
+                                  fontFamily: 'Inter',
+                                ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            'Add',
-                            style: TextStyle(
-                              color: Color(0xFFFFFFFF),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16.sp,
-                              fontFamily: 'Inter',
+
+                          // Close button (right)
+                          Container(
+                            width: 30.w,
+                            height: 30.w,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                if (widget.onClose != null) {
+                                  widget.onClose!();
+                                } else {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size: 20.sp,
+                                color: _textPrimary,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+
+                    /// CARD 1
+                    _Card(
+                      child: Column(
+                        children: [
+                          // _SimpleRow(
+                          //   imagePath: 'assets/images/add_device.png',
+                          //   title: 'Add device',
+                          //   imageWidth: 23.w,
+                          //   imageHeight: 23.h,
+                          // ),
+                          _SimpleRow(
+                            imagePath: 'assets/images/rename.png',
+                            title: 'Name',
+                            trailingText: _name,
+                            iconPath: 'assets/images/edit_image.png',
+                            imageWidth: 26.w,
+                            imageHeight: 26.h,
+                            iconHeight: 13.h,
+                            iconWidth: 14.w,
+                            onTap: _rename,
+                          ),
+
+                          _SimpleRow(
+                            imagePath: 'assets/images/add_device.png',
+                            title: 'Add device',
+                            imageWidth: 23.w,
+                            imageHeight: 23.h,
+                            trailingText: _deviceIds.isEmpty
+                                ? null
+                                : '${_deviceIds.length}',
+                            onTap: _addDevices,
+                          ),
+
+                          // _SimpleRow(
+                          //   imagePath: 'assets/images/move_up.png',
+                          //   title: 'Move up',
+                          //   imageWidth: 22.w,
+                          //   imageHeight: 22.h,
+                          // ),
+                          //
+                          // _SimpleRow(
+                          //   title: 'Move down',
+                          //   imagePath: 'assets/images/move_down.png',
+                          //   imageWidth: 22.w,
+                          //   imageHeight: 22.h,
+                          // ),
+                        ],
+                      ),
+                    ),
+
+                    /// CARD 2
+                    SizedBox(height: 10.h),
+                    _Card(
+                      child: Column(
+                        children: [
+                          _RowItem(
+                            imagePath: 'assets/images/header_icon.png',
+                            title: 'Header background',
+                            imageHeight: 26.h,
+                            imageWidth: 26.w,
+                            onTap: _pickHeaderBackground,
+                            trailing: _headerBackgroundPath != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(6.r),
+                                    child: Image.file(
+                                      File(_headerBackgroundPath!),
+                                      height: 39.h,
+                                      width: 39.w,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/images/header_image.png',
+                                    height: 39.h,
+                                    width: 39.w,
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+
+                          /// SLIDER WIDGET
+                          _RowItem(
+                            imagePath: 'assets/images/Slider.png',
+                            title: 'Horizontal scrolling',
+                            imageHeight: 22.h,
+                            imageWidth: 22.w,
+                            trailing: CupertinoSwitch(
+                              value: _sliderWidget,
+                              onChanged: (v) =>
+                                  setState(() => _sliderWidget = v),
+                              activeColor: _blue,
+                            ),
+                          ),
+
+                          _RowItem(
+                            imagePath: 'assets/images/widget_size.png',
+                            title: 'Widget size',
+                            trailing: _SizeSegment(
+                              value: _selectedSize,
+                              onChanged: (v) =>
+                                  setState(() => _selectedSize = v),
+                              imageWidth: 22.w, // custom image width
+                              imageHeight: 22.h, // custom image height
+                            ),
+                          ),
+                          SizedBox(height: 13.h),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 18.h),
+
+                    /// REMOVE
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: 18.w,
+                        right: 17.w,
+                        bottom: 25.h,
+                      ),
+                      child: GestureDetector(
+                        onTap: _submit,
+                        child: Container(
+                          height: 52.h,
+                          width: double.infinity,
+
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0088FE),
+                            borderRadius: BorderRadius.circular(26.r),
+                            // border: Border.all(color: Color(0xFF0088FE),width: 1.w)
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Image.asset(
+                              //   'assets/images/+ (1).png',
+                              //
+                              //   height: 14.h,
+                              //   color: Color(0xFFFFFFFF),
+                              // ),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 3.5.h),
+                                child: Text(
+                                  '+',
+                                  style: TextStyle(
+                                    color: Color(0xFFFFFFFF),
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 22.sp,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add',
+                                style: TextStyle(
+                                  color: Color(0xFFFFFFFF),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16.sp,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -543,6 +560,7 @@ class _SizeSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget item(String label, String img) {
       final selected = label == value;
+      final tintSelectedIcon = selected && label != 'S';
 
       return GestureDetector(
         onTap: () => onChanged(label),
@@ -573,6 +591,7 @@ class _SizeSegment extends StatelessWidget {
                 width: imageWidth.w,
                 height: imageHeight.h,
                 fit: BoxFit.contain,
+                color: tintSelectedIcon ? _textPrimary : null,
               ),
             ],
           ),

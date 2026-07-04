@@ -492,46 +492,62 @@ class _HomeScreenState extends State<HomeScreen> {
     return picked;
   }
 
-  Future<void> _showAddDashboardSectionSheet() async {
+  void _showAddDashboardSectionSheet() {
     if (_isAddDashboardSectionSheetOpen ||
         _editingSection != null ||
         _editingAddedSectionId != null) {
       return;
     }
 
+    _setShellBottomBarVisible(false);
     setState(() => _isAddDashboardSectionSheetOpen = true);
-    try {
-      await showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        barrierColor: Colors.black.withOpacity(0.25),
-        builder: (ctx) => AddSectionSheet(
-          onNameRequested: _promptDashboardSectionName,
-          onDevicesRequested: _pickDevicesForNewSection,
-          onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
-          onAdd: (AddSectionConfiguration configuration) {
-            setState(() {
-              _addedSections.add(
-                _AddedDashboardSection(
-                  id: _nextAddedSectionId++,
-                  title: configuration.name,
-                  deviceOrder: configuration.deviceIds,
-                  horizontalScrolling: configuration.horizontalScrolling,
-                  widgetSize: configuration.widgetSize,
-                  headerBackgroundPath: configuration.headerBackgroundPath,
-                ),
-              );
-            });
-            Navigator.of(ctx).pop();
-          },
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isAddDashboardSectionSheetOpen = false);
-      }
-    }
+  }
+
+  void _closeAddDashboardSectionSheet() {
+    if (!mounted) return;
+    _setShellBottomBarVisible(true);
+    setState(() => _isAddDashboardSectionSheetOpen = false);
+  }
+
+  Widget _buildAddDashboardSectionOverlay() {
+    if (!_isAddDashboardSectionSheetOpen) return const SizedBox.shrink();
+
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: AddSectionSheet(
+                onClose: _closeAddDashboardSectionSheet,
+                onNameRequested: _promptDashboardSectionName,
+                onDevicesRequested: _pickDevicesForNewSection,
+                onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
+                onAdd: (AddSectionConfiguration configuration) {
+                  setState(() {
+                    _addedSections.add(
+                      _AddedDashboardSection(
+                        id: _nextAddedSectionId++,
+                        title: configuration.name,
+                        deviceOrder: configuration.deviceIds,
+                        horizontalScrolling: configuration.horizontalScrolling,
+                        widgetSize: configuration.widgetSize,
+                        headerBackgroundPath:
+                            configuration.headerBackgroundPath,
+                      ),
+                    );
+                  });
+                  _closeAddDashboardSectionSheet();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   _DashboardBlock _blockForEditSection(_DashboardEditSection section) =>
@@ -1682,6 +1698,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+            if (_isAddDashboardSectionSheetOpen)
+              _buildAddDashboardSectionOverlay(),
             if (_editingSection != null) _buildDashboardEditOverlay(),
             if (_editingAddedSectionId != null) _buildAddedSectionEditOverlay(),
           ],
