@@ -254,7 +254,9 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                                 value: _selectedSize,
                                 onChanged: (v) => setState(() {
                                   _selectedSize = v;
-                                  widget.onSizeChanged?.call(v);
+                                  widget.onSizeChanged?.call(
+                                    v == 'M' ? 'L' : v == 'L' ? 'M' : v,
+                                  );
                                 }),
                               ),
                             ),
@@ -524,68 +526,17 @@ class _SizeSegment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget glyph(String label, Color color) {
-      if (label == 'S') {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List<Widget>.generate(
-            4,
-            (index) => Container(
-              width: 20.w,
-              height: 3.6.h,
-              margin: EdgeInsets.only(bottom: index == 3 ? 0 : 2.h),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(1.r),
-              ),
-            ),
-          ),
-        );
-      }
-
-      final int columns = label == 'L' ? 3 : 2;
-      final int rows = label == 'XL' ? 2 : 3;
-      final double cell = label == 'XL' ? 7.w : 5.8.w;
-      final double gap = 2.w;
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: List<Widget>.generate(
-          rows,
-          (row) => Padding(
-            padding: EdgeInsets.only(bottom: row == rows - 1 ? 0 : gap),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List<Widget>.generate(
-                columns,
-                (col) => Container(
-                  width: cell,
-                  height: cell,
-                  margin: EdgeInsets.only(right: col == columns - 1 ? 0 : gap),
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(1.5.r),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget item(String label) {
+    Widget item(String label, String img) {
       final selected = label == value;
-      final Color contentColor = selected ? _textPrimary : _textSecondary;
 
       return GestureDetector(
         onTap: () => onChanged(label),
         child: Container(
-          width: selected ? 54.w : 42.w,
-          height: 42.w,
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          width: 56.w,
+          height: 35.h,
           decoration: BoxDecoration(
-            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
-            borderRadius: BorderRadius.circular(22.r),
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(26.r),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -595,11 +546,15 @@ class _SizeSegment extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: contentColor,
+                  color: _textPrimary,
                 ),
               ),
-              SizedBox(height: 2.h),
-              glyph(label, contentColor),
+              Image.asset(
+                img,
+                width: 26.w,
+                height: 17.h,
+                fit: BoxFit.contain,
+              ),
             ],
           ),
         ),
@@ -615,10 +570,10 @@ class _SizeSegment extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          item('S'),
-          item('M'),
-          item('L'),
-          item('XL'),
+          item('S', 'assets/images/size_S.png'),
+          item('M', 'assets/images/size_M.png'),
+          item('L', 'assets/images/size_L.png'),
+          item('XL', 'assets/images/size_XL.png'),
         ],
       ),
     );

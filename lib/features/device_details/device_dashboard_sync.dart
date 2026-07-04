@@ -1150,11 +1150,15 @@ class DashboardAwningLevelIcon extends StatelessWidget {
     super.key,
     required this.level,
     this.softInterior = false,
+    this.cornerRadius,
+    this.showBorder = true,
   });
 
   /// 0 = empty (0%), 1 = full (100%).
   final double level;
   final bool softInterior;
+  final double? cornerRadius;
+  final bool showBorder;
 
   static const LinearGradient _awningGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -1166,7 +1170,7 @@ class DashboardAwningLevelIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final double p = level.clamp(0.0, 1.0);
     final double side = kDashboardLightingIconSide;
-    final double radius = 12.r;
+    final double radius = cornerRadius ?? 12.r;
     final Color interiorColor = softInterior
         ? _dashboardBubbleGray
         : kDeviceOffGreyFill;
@@ -1197,17 +1201,18 @@ class DashboardAwningLevelIcon extends StatelessWidget {
               ],
             ),
           ),
-          IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(radius),
-                border: Border.all(
-                  color: kDeviceOffGreyBorder,
-                  width: softInterior ? 2.w : 1.w,
+          if (showBorder)
+            IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(radius),
+                  border: Border.all(
+                    color: kDeviceOffGreyBorder,
+                    width: softInterior ? 2.w : 1.w,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -1334,17 +1339,23 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
     super.key,
     required this.level,
     required this.angle,
+    this.outerCornerRadius,
+    this.innerCornerRadius,
+    this.showBorder = true,
   });
 
   final double level;
   final double angle;
+  final double? outerCornerRadius;
+  final double? innerCornerRadius;
+  final bool showBorder;
 
   @override
   Widget build(BuildContext context) {
     final double side = kDashboardLightingIconSide;
     final double pad = 3.w;
-    final double outerR = 12.r;
-    final double innerR = math.max(0.0, outerR - pad);
+    final double outerR = outerCornerRadius ?? 12.r;
+    final double innerR = innerCornerRadius ?? math.max(0.0, outerR - pad);
 
     return Container(
       width: side,
@@ -1352,7 +1363,9 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: kDeviceOffGreyFill,
         borderRadius: BorderRadius.circular(outerR),
-        border: Border.all(color: kDeviceOffGreyBorder, width: 1),
+        border: showBorder
+            ? Border.all(color: kDeviceOffGreyBorder, width: 1)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
