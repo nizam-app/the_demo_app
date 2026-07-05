@@ -636,39 +636,45 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(width: 28.w, height: 28.w),
-                    Expanded(
-                      child: Text(
-                        'Rename section',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                          fontFamily: 'Inter',
+                SizedBox(
+                  height: 36.h,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Center(
+                        child: Text(
+                          'Rename section',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.of(ctx).pop(),
-                      child: Container(
-                        width: 28.w,
-                        height: 28.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 17.sp,
-                          color: const Color(0xFF111827),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(ctx).pop(),
+                          child: Container(
+                            width: 28.w,
+                            height: 28.w,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF3F4F6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 17.sp,
+                              color: const Color(0xFF111827),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 SizedBox(height: 14.h),
                 TextField(
@@ -710,34 +716,29 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                   ),
                 ),
                 SizedBox(height: 14.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        final String val = controller.text.trim();
-                        if (val.isNotEmpty) Navigator.of(ctx).pop(val);
-                      },
-                      child: Container(
-                        height: 36.h,
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0088FE),
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Confirm',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
+                GestureDetector(
+                  onTap: () {
+                    final String val = controller.text.trim();
+                    if (val.isNotEmpty) Navigator.of(ctx).pop(val);
+                  },
+                  child: Container(
+                    height: 52.h,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0088FE),
+                      borderRadius: BorderRadius.circular(26.r),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontFamily: 'Inter',
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),

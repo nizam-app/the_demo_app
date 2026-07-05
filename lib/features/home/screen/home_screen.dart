@@ -4372,42 +4372,45 @@ class _DashboardSectionNameDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(width: 28.w, height: 28.w),
-                Expanded(
-                  child: Text(
-                    'Name section',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF111827),
-                      fontFamily: 'Inter',
+            SizedBox(
+              height: 36.h,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Center(
+                    child: Text(
+                      'Name section',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
-                ),
-                Transform.translate(
-                  offset: Offset(0, -6.h),
-                  child: IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints.tightFor(
-                      width: 28.w,
-                      height: 28.w,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFFF3F4F6),
-                    ),
-                    icon: Icon(
-                      Icons.close_rounded,
-                      size: 17.sp,
-                      color: const Color(0xFF111827),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints.tightFor(
+                        width: 28.w,
+                        height: 28.w,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xFFF3F4F6),
+                      ),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: 17.sp,
+                        color: const Color(0xFF111827),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             SizedBox(height: 14.h),
             TextField(
@@ -4451,26 +4454,23 @@ class _DashboardSectionNameDialogState
               ),
             ),
             SizedBox(height: 14.h),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GestureDetector(
-                onTap: _confirm,
-                child: Container(
-                  height: 36.h,
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0088FE),
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Confirm',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      fontFamily: 'Inter',
-                    ),
+            GestureDetector(
+              onTap: _confirm,
+              child: Container(
+                height: 52.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0088FE),
+                  borderRadius: BorderRadius.circular(26.r),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),
