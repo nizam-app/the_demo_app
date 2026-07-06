@@ -69,18 +69,34 @@ class _AddedDashboardSection {
   _AddedDashboardSection({
     required this.id,
     required this.title,
-    required this.deviceOrder,
+    required List<String> deviceOrder,
     required this.horizontalScrolling,
-    required this.widgetSize,
+    required String widgetSize,
     this.headerBackgroundPath,
-  });
+  }) : widgetSize = widgetSize,
+       deviceOrdersByWidgetSize = <String, List<String>>{
+         widgetSize: List<String>.from(deviceOrder),
+       };
 
   final int id;
   String title;
-  List<String> deviceOrder;
   bool horizontalScrolling;
   String widgetSize;
   String? headerBackgroundPath;
+  final Map<String, List<String>> deviceOrdersByWidgetSize;
+
+  List<String> get deviceOrder {
+    final List<String>? current = deviceOrdersByWidgetSize[widgetSize];
+    if (current != null && current.isNotEmpty) return current;
+    for (final List<String> ids in deviceOrdersByWidgetSize.values) {
+      if (ids.isNotEmpty) return ids;
+    }
+    return deviceOrdersByWidgetSize.putIfAbsent(widgetSize, () => <String>[]);
+  }
+
+  set deviceOrder(List<String> value) {
+    deviceOrdersByWidgetSize[widgetSize] = List<String>.from(value);
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -190,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showSectionEditButtons = false;
   bool _isAddDashboardSectionSheetOpen = false;
   String? _dashboardDraggingDeviceId;
-  List<_DashboardBlock> _dashboardBlockOrder = const <_DashboardBlock>[
+  List<Object> _dashboardSectionOrder = <Object>[
     _DashboardBlock.light,
     _DashboardBlock.lighting,
     _DashboardBlock.favorites,
@@ -528,9 +544,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
                 onAdd: (AddSectionConfiguration configuration) {
                   setState(() {
+                    final int sectionId = _nextAddedSectionId++;
                     _addedSections.add(
                       _AddedDashboardSection(
-                        id: _nextAddedSectionId++,
+                        id: sectionId,
                         title: configuration.name,
                         deviceOrder: configuration.deviceIds,
                         horizontalScrolling: configuration.horizontalScrolling,
@@ -538,6 +555,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         headerBackgroundPath:
                             configuration.headerBackgroundPath,
                       ),
+                    );
+                    final int chartIndex = _dashboardSectionOrder.indexOf(
+                      _DashboardBlock.chart,
+                    );
+                    _dashboardSectionOrder.insert(
+                      chartIndex >= 0
+                          ? chartIndex
+                          : _dashboardSectionOrder.length,
+                      sectionId,
                     );
                   });
                   _closeAddDashboardSectionSheet();
@@ -557,29 +583,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _canMoveDashboardSection(_DashboardEditSection section, int delta) {
     final _DashboardBlock block = _blockForEditSection(section);
-    final int index = _dashboardBlockOrder.indexOf(block);
+    final int index = _dashboardSectionOrder.indexOf(block);
     final int target = index + delta;
-    return index >= 0 && target >= 0 && target < _dashboardBlockOrder.length;
+    return index >= 0 && target >= 0 && target < _dashboardSectionOrder.length;
   }
 
   void _moveDashboardSection(_DashboardEditSection section, int delta) {
     if (!_canMoveDashboardSection(section, delta)) return;
     final _DashboardBlock block = _blockForEditSection(section);
-    final List<_DashboardBlock> order = List<_DashboardBlock>.from(
-      _dashboardBlockOrder,
-    );
+    final List<Object> order = List<Object>.from(_dashboardSectionOrder);
     final int index = order.indexOf(block);
     final int target = index + delta;
     order.removeAt(index);
     order.insert(target, block);
-    setState(() => _dashboardBlockOrder = order);
+    setState(() => _dashboardSectionOrder = order);
   }
 
   void _removeDashboardSection(_DashboardEditSection section) {
     final _DashboardBlock block = _blockForEditSection(section);
     setState(() {
-      _dashboardBlockOrder = _dashboardBlockOrder
-          .where((_DashboardBlock item) => item != block)
+      _dashboardSectionOrder = _dashboardSectionOrder
+          .where((Object item) => item != block)
           .toList(growable: false);
       _editingSection = null;
       _selectedEditDeviceId = null;
@@ -1057,32 +1081,31 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => section.headerBackgroundPath = path);
   }
 
-  bool _canMoveSelectedAddedDevice(_AddedDashboardSection section, int delta) {
-    final String? selectedDeviceId = _selectedAddedDeviceId;
-    if (selectedDeviceId == null) return false;
-    final int index = section.deviceOrder.indexOf(selectedDeviceId);
+  bool _canMoveAddedSection(_AddedDashboardSection section, int delta) {
+    final int index = _dashboardSectionOrder.indexOf(section.id);
     final int target = index + delta;
-    return index >= 0 && target >= 0 && target < section.deviceOrder.length;
+    return index >= 0 && target >= 0 && target < _dashboardSectionOrder.length;
   }
 
-  void _moveSelectedAddedDevice(_AddedDashboardSection section, int delta) {
-    final String? selectedDeviceId = _selectedAddedDeviceId;
-    if (selectedDeviceId == null) return;
-    final List<String> order = List<String>.from(section.deviceOrder);
-    final int index = order.indexOf(selectedDeviceId);
+  void _moveAddedSection(_AddedDashboardSection section, int delta) {
+    if (!_canMoveAddedSection(section, delta)) return;
+    final List<Object> order = List<Object>.from(_dashboardSectionOrder);
+    final int index = order.indexOf(section.id);
     final int target = index + delta;
-    if (index < 0 || target < 0 || target >= order.length) return;
-    order.removeAt(index);
-    order.insert(target, selectedDeviceId);
+    final Object moved = order.removeAt(index);
+    order.insert(target, moved);
     setState(() {
-      section.deviceOrder = order;
-      _selectedAddedDeviceId = selectedDeviceId;
+      _dashboardSectionOrder = order;
+      _editingAddedSectionId = section.id;
     });
   }
 
   void _removeAddedSection(_AddedDashboardSection section) {
     setState(() {
       _addedSections.remove(section);
+      _dashboardSectionOrder = _dashboardSectionOrder
+          .where((Object item) => item != section.id)
+          .toList(growable: false);
       _editingAddedSectionId = null;
       _selectedAddedDeviceId = null;
     });
@@ -1109,19 +1132,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 sectionRenameLabel: section.title,
                 onRenameTap: () => _renameAddedSection(section),
                 onAddDeviceTap: () => _addDevicesToAddedSection(section),
+                addDeviceCountLabel: section.deviceOrder.isEmpty
+                    ? null
+                    : '${section.deviceOrder.length}',
                 onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
                 headerBackgroundImagePath: section.headerBackgroundPath,
-                onMoveUp: () => _moveSelectedAddedDevice(section, -1),
-                onMoveDown: () => _moveSelectedAddedDevice(section, 1),
-                canMoveUp: _canMoveSelectedAddedDevice(section, -1),
-                canMoveDown: _canMoveSelectedAddedDevice(section, 1),
+                onMoveUp: () => _moveAddedSection(section, -1),
+                onMoveDown: () => _moveAddedSection(section, 1),
+                canMoveUp: _canMoveAddedSection(section, -1),
+                canMoveDown: _canMoveAddedSection(section, 1),
                 onRemove: () => _removeAddedSection(section),
                 initialHorizontalScroll: section.horizontalScrolling,
                 onHorizontalScrollChanged: (value) =>
                     setState(() => section.horizontalScrolling = value),
                 initialSize: section.widgetSize,
-                onSizeChanged: (value) =>
-                    setState(() => section.widgetSize = value),
+                onSizeChanged: (value) => setState(() {
+                  section.widgetSize = value;
+                  _selectedAddedDeviceId = section.deviceOrder.isEmpty
+                      ? null
+                      : section.deviceOrder.first;
+                }),
               ),
             ),
           ),
@@ -1256,17 +1286,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLightingDevice(deviceId)) {
       if (section.widgetSize == 'S')
         return _buildLightingLargeRowById(deviceId);
-      return _buildLightingSmallCardById(
-        deviceId,
-        compactOverride: section.horizontalScrolling,
-        cardHeightOverride: section.horizontalScrolling
-            ? _lightCardHeightForWidgetSize(section.widgetSize)
-            : null,
-      );
+      return _buildLightingSmallCardById(deviceId, uniformControlSlot: true);
     }
     return section.widgetSize == 'S'
         ? _buildLightLargeRowById(deviceId)
-        : _buildLightDeviceCard(deviceId, widgetSize: section.widgetSize);
+        : _buildLightDeviceCard(
+            deviceId,
+            widgetSize: section.widgetSize,
+            uniformControls: true,
+          );
   }
 
   Widget _buildAddedSectionDevices(_AddedDashboardSection section) {
@@ -1363,19 +1391,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildOrderedDashboardBlocks(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    for (int i = 0; i < _dashboardBlockOrder.length; i++) {
-      if (_dashboardBlockOrder[i] == _DashboardBlock.chart) {
-        for (final _AddedDashboardSection section in _addedSections) {
-          if (children.isNotEmpty) children.add(SizedBox(height: 18.h));
-          children.addAll(_buildAddedSectionWidgets(section));
-        }
+    for (final Object entry in _dashboardSectionOrder) {
+      final List<Widget> entryWidgets;
+      if (entry is _DashboardBlock) {
+        entryWidgets = _widgetsForDashboardBlock(context, entry);
+      } else if (entry is int) {
+        final _AddedDashboardSection? section = _addedSectionById(entry);
+        if (section == null) continue;
+        entryWidgets = _buildAddedSectionWidgets(section);
+      } else {
+        continue;
       }
-      if (i > 0) {
+      if (children.isNotEmpty) {
         children.add(SizedBox(height: 18.h));
       }
-      children.addAll(
-        _widgetsForDashboardBlock(context, _dashboardBlockOrder[i]),
-      );
+      children.addAll(entryWidgets);
     }
     children.add(SizedBox(height: 70.h));
     return children;
@@ -2420,7 +2450,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildLightDeviceCard(String deviceId, {String? widgetSize}) {
+  Widget _buildLightDeviceCard(
+    String deviceId, {
+    String? widgetSize,
+    bool uniformControls = false,
+  }) {
     final String effectiveSize = widgetSize ?? _lightWidgetSize;
     final bool editing =
         _editingSection == _DashboardEditSection.light ||
@@ -2458,6 +2492,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onModeTap: onModeTap,
           compactOverride: compact,
           cardHeightOverride: cardHeight,
+          uniformControlSlot: uniformControls,
         );
       }
 
@@ -2671,6 +2706,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Mask group (5).png',
             imagePathOff: 'assets/images/light_of.png',
             compact: compact,
+            uniformControls: uniformControls,
             onModeTap: editing
                 ? null
                 : () => setState(() => _bedroomManual = !_bedroomManual),
@@ -2702,6 +2738,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Mask group (6).png',
             imagePathOff: 'assets/images/bathroom_off.png',
             compact: compact,
+            uniformControls: uniformControls,
             minusMarked: _bathroomThermoMark == 1,
             plusMarked: _bathroomThermoMark == 2,
             onNavigate: editing
@@ -2759,6 +2796,7 @@ class _HomeScreenState extends State<HomeScreen> {
             useAwningPreview: true,
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
+            uniformControls: uniformControls,
             softPreviewInterior: xlLayout,
             downMarked: _awningMark == 1,
             upMarked: _awningMark == 2,
@@ -2822,6 +2860,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Mask group (7).png',
             imagePathOff: 'assets/images/irrigation_of.png',
             compact: compact,
+            uniformControls: uniformControls,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -2857,6 +2896,7 @@ class _HomeScreenState extends State<HomeScreen> {
             useBlindSlatsPreview: true,
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
+            uniformControls: uniformControls,
             softPreviewInterior: xlLayout,
             downMarked: _blindRoomMark == 1,
             upMarked: _blindRoomMark == 2,
@@ -2914,6 +2954,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/images/update_sensor.png',
             imagePathOff: 'assets/images/motion_sensor_off.png',
             compact: compact,
+            uniformControls: uniformControls,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -3010,6 +3051,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String deviceId, {
     bool? compactOverride,
     double? cardHeightOverride,
+    bool uniformControlSlot = false,
   }) {
     final bool editing =
         _editingSection == _DashboardEditSection.lighting ||
@@ -3054,6 +3096,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3090,6 +3133,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3127,6 +3171,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3158,6 +3203,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3193,6 +3239,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3225,6 +3272,7 @@ class _HomeScreenState extends State<HomeScreen> {
           iconImage: 'assets/images/ventilations.png',
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3259,6 +3307,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3306,6 +3355,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3354,6 +3404,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3415,6 +3466,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -4147,8 +4199,19 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? onModeTap,
     bool? compactOverride,
     double? cardHeightOverride,
+    bool uniformControlSlot = false,
   }) {
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
+    final double controlSlotWidth = uniformControlSlot
+        ? (compact ? 72.w : 96.w)
+        : (compact ? 58.w : 88.w);
+    final double controlMaxWidth = uniformControlSlot
+        ? controlSlotWidth
+        : (compact ? 72.w : 96.w);
+    final double controlContentWidth = uniformControlSlot
+        ? (compact ? 72.w : 87.w)
+        : (compact ? 72.w : 96.w);
+    final double controlContentHeight = compact ? 30.h : 35.h;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
@@ -4244,15 +4307,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (controls != null) ...[
                     SizedBox(width: 6.w),
                     SizedBox(
-                      width: compact ? 58.w : 88.w,
+                      width: controlSlotWidth,
                       height: statusH,
                       child: OverflowBox(
-                        maxWidth: compact ? 72.w : 96.w,
-                        maxHeight: compact ? 30.h : 35.h,
+                        maxWidth: controlMaxWidth,
+                        maxHeight: controlContentHeight,
                         alignment: Alignment.centerRight,
                         child: SizedBox(
-                          width: compact ? 72.w : 96.w,
-                          height: compact ? 30.h : 35.h,
+                          width: controlContentWidth,
+                          height: controlContentHeight,
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerRight,
@@ -5164,6 +5227,7 @@ class _LightDimmerCard extends StatelessWidget {
     this.onModeTap,
     this.showModeBadge = true,
     this.compact = false,
+    this.uniformControls = false,
   });
 
   final String title;
@@ -5172,6 +5236,7 @@ class _LightDimmerCard extends StatelessWidget {
   final bool modeFilled;
   final bool showModeBadge;
   final bool compact;
+  final bool uniformControls;
   final bool isOn;
   final String? imagePath;
   final String? imagePathOff;
@@ -5245,7 +5310,7 @@ class _LightDimmerCard extends StatelessWidget {
               Row(
                 children: [
                   SizedBox(
-                    width: compact ? 32.w : 52.w,
+                    width: uniformControls ? 52.w : (compact ? 32.w : 52.w),
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -5409,6 +5474,7 @@ class _ThermostatCard extends StatelessWidget {
     this.onNavigate,
     this.showModeBadge = true,
     this.compact = false,
+    this.uniformControls = false,
   });
 
   final String title;
@@ -5426,6 +5492,7 @@ class _ThermostatCard extends StatelessWidget {
   final bool minusMarked;
   final bool plusMarked;
   final bool compact;
+  final bool uniformControls;
 
   String? get _displayImagePath {
     if (!isOn && imagePathOff != null) {
@@ -5521,7 +5588,8 @@ class _ThermostatCard extends StatelessWidget {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final bool compactControls =
-                      compact || constraints.maxWidth < 120;
+                      !uniformControls &&
+                      (compact || constraints.maxWidth < 120);
                   final double btnSize = compactControls ? 22 : 35;
                   return Row(
                     children: [
@@ -5606,6 +5674,7 @@ class _BlindCard extends StatelessWidget {
     this.onModeTap,
     this.onNavigate,
     this.showModeBadge = true,
+    this.uniformControls = false,
   });
 
   final String title;
@@ -5626,6 +5695,7 @@ class _BlindCard extends StatelessWidget {
   final bool compactControlButtons;
   final bool compact;
   final bool softPreviewInterior;
+  final bool uniformControls;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onDownLong;
@@ -5727,8 +5797,8 @@ class _BlindCard extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final bool compactControls =
-                        compact || compactControlButtons;
-                    final double controlSize = compact ? 22 : 35;
+                        !uniformControls && (compact || compactControlButtons);
+                    final double controlSize = compactControls ? 22 : 35;
                     final double iconSize = compactControls ? 9.sp : 13.sp;
                     final Widget downBtn = _CircleBtn(
                       marked: downMarked,
@@ -5899,6 +5969,7 @@ class _ToggleCard extends StatefulWidget {
     this.onIsOnChanged,
     this.onModeTap,
     this.compact = false,
+    this.uniformControls = false,
   });
 
   final String title;
@@ -5911,6 +5982,7 @@ class _ToggleCard extends StatefulWidget {
   final ValueChanged<bool>? onIsOnChanged;
   final VoidCallback? onModeTap;
   final bool compact;
+  final bool uniformControls;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -6012,10 +6084,17 @@ class _ToggleCardState extends State<_ToggleCard> {
                     ),
                   ),
                   Transform.translate(
-                    offset: Offset(0, widget.compact ? -5.h : 0),
+                    offset: Offset(
+                      0,
+                      widget.compact && !widget.uniformControls ? -5.h : 0,
+                    ),
                     child: SizedBox(
-                      height: widget.compact ? 24.h : 35.h,
-                      width: widget.compact ? 40.w : 60.w,
+                      height: widget.compact && !widget.uniformControls
+                          ? 24.h
+                          : 35.h,
+                      width: widget.compact && !widget.uniformControls
+                          ? 40.w
+                          : 60.w,
                       child: CupertinoSwitch(
                         value: _on,
                         onChanged: (v) {

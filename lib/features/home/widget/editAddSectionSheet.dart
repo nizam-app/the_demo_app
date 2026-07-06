@@ -17,6 +17,7 @@ class EditAddSectionSheet extends StatefulWidget {
     this.initialSize = 'S',
     this.onSizeChanged,
     this.sectionRenameLabel,
+    this.addDeviceCountLabel,
     this.onRenameTap,
     this.onAddDeviceTap,
     this.onHeaderBackgroundTap,
@@ -35,6 +36,7 @@ class EditAddSectionSheet extends StatefulWidget {
   final String initialSize;
   final ValueChanged<String>? onSizeChanged;
   final String? sectionRenameLabel;
+  final String? addDeviceCountLabel;
   final VoidCallback? onRenameTap;
   final VoidCallback? onAddDeviceTap;
   final VoidCallback? onHeaderBackgroundTap;
@@ -186,6 +188,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                             title: 'Add device',
                             imageWidth: 23.w,
                             imageHeight: 23.h,
+                            trailingText: widget.addDeviceCountLabel,
                             onTap: widget.onAddDeviceTap,
                           ),
                         ],
@@ -255,7 +258,11 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                                 onChanged: (v) => setState(() {
                                   _selectedSize = v;
                                   widget.onSizeChanged?.call(
-                                    v == 'M' ? 'L' : v == 'L' ? 'M' : v,
+                                    v == 'M'
+                                        ? 'L'
+                                        : v == 'L'
+                                        ? 'M'
+                                        : v,
                                   );
                                 }),
                               ),
@@ -496,13 +503,15 @@ class _SimpleRow extends StatelessWidget {
                           fontFamily: 'Inter',
                         ),
                       ),
-                      SizedBox(width: 5.w),
-                      Image.asset(
-                        iconPath!,
-                        width: iconWidth.w,
-                        height: iconHeight.h,
-                        fit: BoxFit.contain,
-                      ),
+                      if (iconPath != null) ...[
+                        SizedBox(width: 5.w),
+                        Image.asset(
+                          iconPath!,
+                          width: iconWidth.w,
+                          height: iconHeight.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -519,10 +528,7 @@ class _SizeSegment extends StatelessWidget {
   final String value;
   final ValueChanged<String> onChanged;
 
-  const _SizeSegment({
-    required this.value,
-    required this.onChanged,
-  });
+  const _SizeSegment({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -549,12 +555,7 @@ class _SizeSegment extends StatelessWidget {
                   color: _textPrimary,
                 ),
               ),
-              Image.asset(
-                img,
-                width: 26.w,
-                height: 17.h,
-                fit: BoxFit.contain,
-              ),
+              Image.asset(img, width: 26.w, height: 17.h, fit: BoxFit.contain),
             ],
           ),
         ),
