@@ -73,30 +73,15 @@ class _AddedDashboardSection {
     required this.horizontalScrolling,
     required String widgetSize,
     this.headerBackgroundPath,
-  }) : widgetSize = widgetSize,
-       deviceOrdersByWidgetSize = <String, List<String>>{
-         widgetSize: List<String>.from(deviceOrder),
-       };
+  }) : deviceOrder = List<String>.from(deviceOrder),
+       widgetSize = widgetSize;
 
   final int id;
   String title;
+  List<String> deviceOrder;
   bool horizontalScrolling;
   String widgetSize;
   String? headerBackgroundPath;
-  final Map<String, List<String>> deviceOrdersByWidgetSize;
-
-  List<String> get deviceOrder {
-    final List<String>? current = deviceOrdersByWidgetSize[widgetSize];
-    if (current != null && current.isNotEmpty) return current;
-    for (final List<String> ids in deviceOrdersByWidgetSize.values) {
-      if (ids.isNotEmpty) return ids;
-    }
-    return deviceOrdersByWidgetSize.putIfAbsent(widgetSize, () => <String>[]);
-  }
-
-  set deviceOrder(List<String> value) {
-    deviceOrdersByWidgetSize[widgetSize] = List<String>.from(value);
-  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -318,9 +303,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _gridColumnsForWidgetSize(String size) {
     switch (size) {
-      case 'L':
-        return 3;
       case 'M':
+        return 3;
+      case 'L':
+        return 2;
       case 'XL':
       default:
         return 2;
@@ -331,9 +317,10 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (size) {
       case 'S':
         return 1;
-      case 'L':
-        return 3;
       case 'M':
+        return 3;
+      case 'L':
+        return 2;
       case 'XL':
       default:
         return 2;
@@ -344,9 +331,9 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (size) {
       case 'XL':
         return 220.h;
-      case 'L':
-        return 150.h;
       case 'M':
+        return 150.h;
+      case 'L':
         return 185.h;
       case 'S':
       default:
@@ -358,9 +345,9 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (size) {
       case 'XL':
         return 280.w;
-      case 'L':
-        return 120.w;
       case 'M':
+        return 120.w;
+      case 'L':
         return 210.w;
       case 'S':
       default:
@@ -372,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool get _lightingUsesLargeWidgets =>
       _usesLargeWidgetRows(_lightingWidgetSize);
-  // S → full-width rows; M/XL → two columns; L → three columns.
+  // S → full-width rows; M → three columns; L → two columns; XL → two large columns.
 
   double get _lightCardHeight =>
       _lightCardHeightForWidgetSize(_lightWidgetSize);
@@ -399,9 +386,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _setDeviceOrderFor(_DashboardEditSection section, List<String> next) {
     if (section == _DashboardEditSection.light) {
-      _lightDeviceOrder = next;
+      _lightDeviceOrder = List<String>.from(next);
     } else {
-      _lightingDeviceOrder = next;
+      _lightingDeviceOrder = List<String>.from(next);
     }
   }
 
@@ -498,10 +485,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<List<String>?> _pickDevicesForNewSection(List<String> current) async {
+  Future<List<String>?> _pickDevicesForNewSection(
+    List<String> current, {
+    Set<String> disabledDeviceIds = const <String>{},
+  }) async {
     final List<String>? picked = await showAddDashboardDeviceSheet(
       context,
       devices: _dashboardDeviceCatalog(),
+      disabledDeviceIds: disabledDeviceIds,
       initialSelectedDeviceIds: current,
     );
     if (picked == null) return null;
@@ -832,7 +823,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Set<String> _disabledDeviceIdsForAddPicker(_DashboardEditSection section) {
-    final Set<String> disabled = _deviceOrderFor(section).toSet();
+    final Set<String> disabled = <String>{};
     final Set<String> sectionPool =
         (section == _DashboardEditSection.light
                 ? _kDefaultLightDeviceOrder
@@ -942,6 +933,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
     }
     if (_lightingUsesLargeWidgets) return screenWidth - 32.w;
+    if (_lightingHorizontalScroll) {
+      return _lightHorizontalItemWidth(_lightingWidgetSize);
+    }
     final int cols = _gridColumnsForWidgetSize(_lightingWidgetSize);
     return (screenWidth - 32.w - (cols - 1) * 12.w) / cols;
   }
@@ -953,6 +947,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (_lightingUsesLargeWidgets) {
       return _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize);
+    }
+    if (_lightingWidgetSize == 'XL') {
+      return _lightCardHeightForWidgetSize('XL');
     }
     return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
   }
@@ -1021,6 +1018,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   } else {
                     _lightingWidgetSize = v;
                   }
+                  final List<String> order = _deviceOrderFor(section);
+                  _selectedEditDeviceId = order.isEmpty ? null : order.first;
                 }),
               ),
             ),
@@ -1070,7 +1069,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (!mounted || next == null) return;
     setState(() {
-      section.deviceOrder = next;
+      section.deviceOrder = List<String>.from(next);
       _selectedAddedDeviceId = next.isEmpty ? null : next.last;
     });
   }
@@ -1274,7 +1273,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return _lightingLargeRowHeightForWidgetSize(section.widgetSize);
     }
     if (_isLightingDevice(deviceId)) {
-      return _lightingSmallCardHeight(compact: section.horizontalScrolling);
+      if (section.widgetSize == 'S') {
+        return _lightingLargeRowHeightForWidgetSize(section.widgetSize);
+      }
+      return _lightCardHeightForWidgetSize(section.widgetSize);
     }
     return _lightCardHeightForWidgetSize(section.widgetSize);
   }
@@ -1283,18 +1285,28 @@ class _HomeScreenState extends State<HomeScreen> {
       _kDefaultLightingDeviceOrder.contains(deviceId);
 
   Widget _buildAddedDevice(_AddedDashboardSection section, String deviceId) {
-    if (_isLightingDevice(deviceId)) {
-      if (section.widgetSize == 'S')
-        return _buildLightingLargeRowById(deviceId);
-      return _buildLightingSmallCardById(deviceId, uniformControlSlot: true);
+    final String size = section.widgetSize;
+    final double cardHeight = _lightCardHeightForWidgetSize(size);
+
+    if (size == 'S') {
+      return _isLightingDevice(deviceId)
+          ? _buildLightingLargeRowById(deviceId)
+          : _buildLightLargeRowById(deviceId);
     }
-    return section.widgetSize == 'S'
-        ? _buildLightLargeRowById(deviceId)
-        : _buildLightDeviceCard(
-            deviceId,
-            widgetSize: section.widgetSize,
-            uniformControls: true,
-          );
+
+    if (_isLightingDevice(deviceId)) {
+      return _buildLightingSmallCardById(
+        deviceId,
+        uniformControlSlot: true,
+        cardHeightOverride: cardHeight,
+        compactOverride: size == 'M',
+      );
+    }
+    return _buildLightDeviceCard(
+      deviceId,
+      widgetSize: size,
+      uniformControls: true,
+    );
   }
 
   Widget _buildAddedSectionDevices(_AddedDashboardSection section) {
@@ -2159,7 +2171,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightSectionDevices() {
-    final List<String> ids = _lightDeviceOrder;
+    final List<String> ids = _deviceOrderFor(_DashboardEditSection.light);
     if (ids.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -2460,7 +2472,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _editingSection == _DashboardEditSection.light ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
-    final bool compact = effectiveSize == 'L';
+    final bool compact = effectiveSize == 'M';
     final bool xlLayout = effectiveSize == 'XL';
     final double cardHeight = _lightCardHeightForWidgetSize(effectiveSize);
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
@@ -2468,7 +2480,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'Bathroom heating thermostat',
     );
 
-    if (effectiveSize == 'L') {
+    if (effectiveSize == 'M') {
       Widget lightSmallCard({
         required String deviceName,
         required String status,
@@ -2986,16 +2998,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightingSectionCardsSmall({int columns = 3}) {
-    final List<String> ids = _lightingDeviceOrder;
+    final List<String> ids = _deviceOrderFor(_DashboardEditSection.lighting);
     if (ids.isEmpty) return const SizedBox.shrink();
 
-    final double cardWidth =
-        (MediaQuery.sizeOf(context).width - 32.w - (columns - 1) * 12.w) /
-        columns;
+    final String size = _lightingWidgetSize;
+    final bool xlLayout = size == 'XL';
+    final double cardHeight = _lightCardHeightForWidgetSize(size);
+
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double gridCardWidth =
+        (screenWidth - 32.w - (columns - 1) * 12.w) / columns;
+
+    Widget buildCard(String id) {
+      return _buildLightingSmallCardById(
+        id,
+        uniformControlSlot: xlLayout,
+        cardHeightOverride: xlLayout ? cardHeight : null,
+        compactOverride: xlLayout ? false : null,
+      );
+    }
 
     if (_lightingHorizontalScroll) {
-      final double cardHeight = _lightingSmallCardHeight(compact: true);
-      final double listHeight = cardHeight;
+      final double listHeight = xlLayout
+          ? cardHeight
+          : _lightingSmallCardHeight(compact: true);
+      final double itemWidth =
+          xlLayout ? _lightHorizontalItemWidth(size) : gridCardWidth;
       return SizedBox(
         height: listHeight,
         child: ListView.separated(
@@ -3009,11 +3037,11 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: cardWidth,
+              width: itemWidth,
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.lighting,
                 deviceId: id,
-                child: _buildLightingSmallCardById(id),
+                child: buildCard(id),
               ),
             );
           },
@@ -3035,7 +3063,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? _wrapDashboardDeviceCell(
                         section: _DashboardEditSection.lighting,
                         deviceId: ids[i + col],
-                        child: _buildLightingSmallCardById(ids[i + col]),
+                        child: buildCard(ids[i + col]),
                       )
                     : const SizedBox.shrink(),
               ),
@@ -3484,7 +3512,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLightingSectionCardsLarge() {
-    final List<String> ids = _lightingDeviceOrder;
+    final List<String> ids = _deviceOrderFor(_DashboardEditSection.lighting);
     if (ids.isEmpty) return const SizedBox.shrink();
 
     final List<Widget> children = <Widget>[];
@@ -7564,7 +7592,7 @@ class _HomeBlindSlatsIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final double side = kDashboardLightingIconSide;
     final double pad = softInterior ? 0 : 3.w;
-    final double outerR = 12.r;
+    final double outerR = 6.r;
     final double innerR = math.max(0.0, outerR - pad);
     final Color interiorColor = softInterior
         ? const Color(0xFFF3F4F6)
