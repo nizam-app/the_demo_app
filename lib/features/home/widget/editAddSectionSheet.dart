@@ -67,6 +67,14 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
   }
 
   @override
+  void didUpdateWidget(EditAddSectionSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialSize != widget.initialSize) {
+      _selectedSize = widget.initialSize;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.only(
@@ -255,16 +263,10 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                               title: 'Widget size',
                               trailing: _SizeSegment(
                                 value: _selectedSize,
-                                onChanged: (v) => setState(() {
-                                  _selectedSize = v;
-                                  widget.onSizeChanged?.call(
-                                    v == 'M'
-                                        ? 'L'
-                                        : v == 'L'
-                                        ? 'M'
-                                        : v,
-                                  );
-                                }),
+                                onChanged: (v) {
+                                  setState(() => _selectedSize = v);
+                                  widget.onSizeChanged?.call(v);
+                                },
                               ),
                             ),
                           if (widget.showWidgetSize) SizedBox(height: 13.h),
@@ -533,7 +535,12 @@ class _SizeSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget item(String label, String img) {
-      final selected = label == value;
+      final bool selected = label == value;
+      // S asset is black by default — grey it out when another size is selected.
+      // M/L/XL keep their original asset colors when unselected; black when selected.
+      final Color? iconColor = selected
+          ? _textPrimary
+          : (label == 'S' ? _textSecondary : null);
 
       return GestureDetector(
         onTap: () => onChanged(label),
@@ -552,10 +559,17 @@ class _SizeSegment extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: _textPrimary,
+                  color: selected ? _textPrimary : _textSecondary,
                 ),
               ),
-              Image.asset(img, width: 26.w, height: 17.h, fit: BoxFit.contain),
+              Image.asset(
+                img,
+                width: 26.w,
+                height: 17.h,
+                fit: BoxFit.contain,
+                color: iconColor,
+                colorBlendMode: iconColor != null ? BlendMode.srcIn : null,
+              ),
             ],
           ),
         ),
