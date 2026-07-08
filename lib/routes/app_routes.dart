@@ -214,6 +214,24 @@ class AppRouter {
             controlMode = DeviceDetailsControlMode.rgbwPicker;
           } else if (mode == 'ledDimmer') {
             controlMode = DeviceDetailsControlMode.ledDimmer;
+          } else if (mode == 'tunableWhite') {
+            controlMode = DeviceDetailsControlMode.tunableWhite;
+          } else if (mode == 'heatingCooling') {
+            controlMode = DeviceDetailsControlMode.heatingCooling;
+          } else if (mode == 'fanLevel') {
+            controlMode = DeviceDetailsControlMode.fanLevel;
+          } else if (mode == 'ventilation') {
+            controlMode = DeviceDetailsControlMode.ventilation;
+          } else if (mode == 'blindControl') {
+            controlMode = DeviceDetailsControlMode.blindControl;
+          } else if (mode == 'awningControl') {
+            controlMode = DeviceDetailsControlMode.awningControl;
+          } else if (mode == 'thermostatRing') {
+            controlMode = DeviceDetailsControlMode.thermostatRing;
+          } else if (mode == 'presenceModes') {
+            controlMode = DeviceDetailsControlMode.presenceModes;
+          } else if (mode == 'multiValueSwitch') {
+            controlMode = DeviceDetailsControlMode.multiValueSwitch;
           }
           return DeviceDetailsScreen(
             deviceTitle: title,

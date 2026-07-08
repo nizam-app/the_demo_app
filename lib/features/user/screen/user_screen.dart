@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/utils/ui_tap_haptic.dart';
 import '../../../core/widget/global_back_button.dart';
 import '../widget/userAdd_popup.dart';
 import '../widget/user_edit.dart';
@@ -530,6 +531,7 @@ class _UserRowState extends State<_UserRow> {
                 InkWell(
                   borderRadius: BorderRadius.circular(26.r),
                   onTap: () {
+                    uiTapHaptic();
                     setState(() {
                       _isActive = !_isActive;
                     });
@@ -569,16 +571,19 @@ class _StatusChip extends StatelessWidget {
         color: isActive ? UsersScreen._activeBlue : UsersScreen._inactiveChipBg,
         borderRadius: BorderRadius.circular(26.r),
       ),
-      child: Transform.translate(
-       offset: Offset(0, -2.h),
-        child: Text(
-          isActive ? 'Active' : 'Inactive',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: isActive ? Colors.white : UsersScreen._textDark,
-          ),
+      child: Text(
+        isActive ? 'Active' : 'Inactive',
+        textAlign: TextAlign.center,
+        textHeightBehavior: const TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        ),
+        style: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+          height: 1.0,
+          color: isActive ? Colors.white : UsersScreen._textDark,
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
@@ -404,7 +405,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() => _selectedDeviceId = selectionId),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _selectedDeviceId = selectionId);
+              },
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -492,280 +496,249 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
   }
 
   /// Expanded strip under the Light list row: hero + stats + Off/On + warning (matches device detail reference).
-  Widget _buildLightOnOffDetailStrip() {
-    return Container(
-      width: double.infinity,
-      color: const Color(0xFFF3F4F6),
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Image.asset(
-              'assets/Mask group (5).png',
-              height: 88.h,
-              width: 88.w,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.lightbulb_outline_rounded,
-                size: 72.sp,
-                color: const Color(0xFF22D3EE),
-              ),
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: Text(
-                  'Light dinning room',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _primary,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Image.asset(
-                'assets/Group 63.png',
-                height: 13.h,
-                width: 13.w,
-                fit: BoxFit.cover,
-                color: _primary,
-                errorBuilder: (_, __, ___) =>
-                    Icon(Icons.edit_outlined, size: 14.sp, color: _primary),
-              ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'SWC 1326 39',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w400,
-              color: _muted,
-              fontFamily: 'Inter',
-            ),
-          ),
-          SizedBox(height: 14.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 28.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _lightStatCell(top: '12:57', bottom: 'On time'),
-                _lightStatCell(top: '5h 58m', bottom: '7 Days'),
-                _lightStatCell(top: '1257', bottom: 'Cycles'),
-              ],
-            ),
-          ),
-          SizedBox(height: 18.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 48.w),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _lightPowerOn = false),
-                    child: Container(
-                      height: 39.h,
-                      decoration: BoxDecoration(
-                        color: _lightPowerOn ? Colors.white : _blue,
-                        borderRadius: BorderRadius.circular(26.r),
-                        border: _lightPowerOn
-                            ? Border.all(color: const Color(0xFFE5E7EB))
-                            : null,
-                        boxShadow: _lightPowerOn
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.06),
-                                  blurRadius: 8.r,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.arrow_drop_down_rounded,
-                              size: 20.sp,
-                              color: _lightPowerOn ? _primary : Colors.white,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              'Off',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                color: _lightPowerOn ? _primary : Colors.white,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _lightPowerOn = true),
-                    child: Container(
-                      height: 39.h,
-                      decoration: BoxDecoration(
-                        color: _lightPowerOn
-                            ? _blue
-                            : const Color(0xFF6B7280),
-                        borderRadius: BorderRadius.circular(26.r),
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.power_settings_new_rounded,
-                              size: 17.sp,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              'On',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 14.h),
-          Center(
-            child: Container(
-              constraints: BoxConstraints(maxWidth: 340.w),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(26.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 6.r,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/message_icon.png',
-                    height: 15.h,
-                    width: 15.w,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        Icon(Icons.chat_bubble_outline_rounded,
-                            size: 15.sp, color: _muted),
-                  ),
-                  SizedBox(width: 8.w),
-                  Flexible(
-                    child: Text(
-                      'Don\'t ON this device while you sleeping',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        color: _muted,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildLightOnOffDetailStrip() {
+  //   return Container(
+  //     width: double.infinity,
+  //     color: const Color(0xFFF3F4F6),
+  //     padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.stretch,
+  //       children: [
+  //         // Center(
+  //         //   child: Image.asset(
+  //         //     'assets/Mask group (5).png',
+  //         //     height: 88.h,
+  //         //     width: 88.w,
+  //         //     fit: BoxFit.contain,
+  //         //     errorBuilder: (_, __, ___) => Icon(
+  //         //       Icons.lightbulb_outline_rounded,
+  //         //       size: 72.sp,
+  //         //       color: const Color(0xFF22D3EE),
+  //         //     ),
+  //         //   ),
+  //         // ),
+  //         // SizedBox(height: 10.h),
+  //         // Row(
+  //         //   mainAxisAlignment: MainAxisAlignment.center,
+  //         //   children: [
+  //         //     Flexible(
+  //         //       child: Text(
+  //         //         'Light dinning room',
+  //         //         textAlign: TextAlign.center,
+  //         //         style: TextStyle(
+  //         //           fontSize: 18.sp,
+  //         //           fontWeight: FontWeight.w600,
+  //         //           color: _primary,
+  //         //           fontFamily: 'Inter',
+  //         //         ),
+  //         //       ),
+  //         //     ),
+  //         //     SizedBox(width: 8.w),
+  //         //     Image.asset(
+  //         //       'assets/Group 63.png',
+  //         //       height: 13.h,
+  //         //       width: 13.w,
+  //         //       fit: BoxFit.cover,
+  //         //       color: _primary,
+  //         //       errorBuilder: (_, __, ___) =>
+  //         //           Icon(Icons.edit_outlined, size: 14.sp, color: _primary),
+  //         //     ),
+  //         //   ],
+  //         // ),
+  //         // SizedBox(height: 6.h),
+  //         // Text(
+  //         //   'SWC 1326 39',
+  //         //   textAlign: TextAlign.center,
+  //         //   style: TextStyle(
+  //         //     fontSize: 10.sp,
+  //         //     fontWeight: FontWeight.w400,
+  //         //     color: _muted,
+  //         //     fontFamily: 'Inter',
+  //         //   ),
+  //         // ),
+  //         // SizedBox(height: 14.h),
+  //         // Padding(
+  //         //   padding: EdgeInsets.symmetric(horizontal: 28.w),
+  //         //   child: Row(
+  //         //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //         //     children: [
+  //         //       _lightStatCell(top: '12:57', bottom: 'On time'),
+  //         //       _lightStatCell(top: '5h 58m', bottom: '7 Days'),
+  //         //       _lightStatCell(top: '1257', bottom: 'Cycles'),
+  //         //     ],
+  //         //   ),
+  //         // ),
+  //         SizedBox(height: 18.h),
+  //         Padding(
+  //           padding: EdgeInsets.symmetric(horizontal: 48.w),
+  //           child: Row(
+  //             children: [
+  //               Expanded(
+  //                 child: GestureDetector(
+  //                   onTap: () => setState(() => _lightPowerOn = false),
+  //                   child: Container(
+  //                     height: 39.h,
+  //                     decoration: BoxDecoration(
+  //                       color: _lightPowerOn ? Colors.white : _blue,
+  //                       borderRadius: BorderRadius.circular(26.r),
+  //                       border: _lightPowerOn
+  //                           ? Border.all(color: const Color(0xFFE5E7EB))
+  //                           : null,
+  //                       boxShadow: _lightPowerOn
+  //                           ? [
+  //                               BoxShadow(
+  //                                 color: Colors.black.withOpacity(0.06),
+  //                                 blurRadius: 8.r,
+  //                                 offset: const Offset(0, 2),
+  //                               ),
+  //                             ]
+  //                           : null,
+  //                     ),
+  //                     child: Center(
+  //                       child: Row(
+  //                         mainAxisAlignment: MainAxisAlignment.center,
+  //                         children: [
+  //                           Icon(
+  //                             Icons.arrow_drop_down_rounded,
+  //                             size: 20.sp,
+  //                             color: _lightPowerOn ? _primary : Colors.white,
+  //                           ),
+  //                           SizedBox(width: 4.w),
+  //                           Text(
+  //                             'Off',
+  //                             style: TextStyle(
+  //                               fontSize: 15.sp,
+  //                               fontWeight: FontWeight.w600,
+  //                               color: _lightPowerOn ? _primary : Colors.white,
+  //                               fontFamily: 'Inter',
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               SizedBox(width: 12.w),
+  //               Expanded(
+  //                 child: GestureDetector(
+  //                   onTap: () => setState(() => _lightPowerOn = true),
+  //                   child: Container(
+  //                     height: 39.h,
+  //                     decoration: BoxDecoration(
+  //                       color: _lightPowerOn
+  //                           ? _blue
+  //                           : const Color(0xFF6B7280),
+  //                       borderRadius: BorderRadius.circular(26.r),
+  //                     ),
+  //                     child: Center(
+  //                       child: Row(
+  //                         mainAxisAlignment: MainAxisAlignment.center,
+  //                         children: [
+  //                           Icon(
+  //                             Icons.power_settings_new_rounded,
+  //                             size: 17.sp,
+  //                             color: Colors.white,
+  //                           ),
+  //                           SizedBox(width: 6.w),
+  //                           Text(
+  //                             'On',
+  //                             style: TextStyle(
+  //                               fontSize: 15.sp,
+  //                               fontWeight: FontWeight.w600,
+  //                               color: Colors.white,
+  //                               fontFamily: 'Inter',
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         SizedBox(height: 14.h),
+  //         Center(
+  //           child: Container(
+  //             constraints: BoxConstraints(maxWidth: 340.w),
+  //             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+  //             decoration: BoxDecoration(
+  //               color: Colors.white,
+  //               borderRadius: BorderRadius.circular(26.r),
+  //               boxShadow: [
+  //                 BoxShadow(
+  //                   color: Colors.black.withOpacity(0.04),
+  //                   blurRadius: 6.r,
+  //                   offset: const Offset(0, 2),
+  //                 ),
+  //               ],
+  //             ),
+  //             child: Row(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Image.asset(
+  //                   'assets/message_icon.png',
+  //                   height: 15.h,
+  //                   width: 15.w,
+  //                   fit: BoxFit.cover,
+  //                   errorBuilder: (_, __, ___) =>
+  //                       Icon(Icons.chat_bubble_outline_rounded,
+  //                           size: 15.sp, color: _muted),
+  //                 ),
+  //                 SizedBox(width: 8.w),
+  //                 Flexible(
+  //                   child: Text(
+  //                     'Don\'t ON this device while you sleeping',
+  //                     style: TextStyle(
+  //                       fontSize: 11.sp,
+  //                       fontWeight: FontWeight.w400,
+  //                       color: _muted,
+  //                       fontFamily: 'Inter',
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _lightStatCell({required String top, required String bottom}) {
-    return Column(
-      children: [
-        Text(
-          top,
-          style: TextStyle(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w600,
-            color: _primary,
-            fontFamily: 'Inter',
-          ),
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          bottom,
-          style: TextStyle(
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w400,
-            color: _muted,
-            fontFamily: 'Inter',
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _lightStatCell({required String top, required String bottom}) {
+  //   return Column(
+  //     children: [
+  //       Text(
+  //         top,
+  //         style: TextStyle(
+  //           fontSize: 15.sp,
+  //           fontWeight: FontWeight.w600,
+  //           color: _primary,
+  //           fontFamily: 'Inter',
+  //         ),
+  //       ),
+  //       SizedBox(height: 2.h),
+  //       Text(
+  //         bottom,
+  //         style: TextStyle(
+  //           fontSize: 10.sp,
+  //           fontWeight: FontWeight.w400,
+  //           color: _muted,
+  //           fontFamily: 'Inter',
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   // ✅ Whole list (match screenshot)
   Widget _buildDeviceList() {
     return Column(
       children: [
-        // 0) Light — tap row to reveal Off / On controls (dashboard-style detail strip).
-        _buildDeviceRow(
-          selectionId: 'light',
-          leading: _leftIconAsset(
-            imagePath: 'assets/Mask group (5).png',
-            ringColor: _green,
-            fallbackIcon: Icons.lightbulb_outline_rounded,
-          ),
-          title: 'Light dinning room',
-          subtitle: Text(
-            'SWC 1326 39',
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: _muted,
-              fontFamily: 'Inter',
-            ),
-          ),
-          trailing: Text(
-            _lightPowerOn ? 'On' : 'Off',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: _lightPowerOn ? _blue : _muted,
-              fontFamily: 'Inter',
-            ),
-          ),
-        ),
-        if (_selectedDeviceId == 'light') _buildLightOnOffDetailStrip(),
-        _buildDivider(),
-
-        // 1) Alarm
+       
         _buildDeviceRow(
           selectionId: 'alarm',
           leading: _leftIconAsset(
@@ -834,7 +807,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 color: Colors.transparent,
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () => setState(() => _alarmPaused = !_alarmPaused),
+                  onTap: () {
+                    uiTapHaptic();
+                    setState(() => _alarmPaused = !_alarmPaused);
+                  },
                   child: Container(
                     width: 44.w,
                     height: 44.h,
@@ -904,7 +880,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: Colors.black,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   fontFamily: 'Inter',
                 ),
               ),
@@ -914,7 +890,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             percent: _bathroomDimmerPercent,
             comfortOn: _bathroomComfortOn,
             onChanged: (v) =>
-                setState(() => _bathroomDimmerPercent = v.clamp(0.5, 0.5)),
+                setState(() => _bathroomDimmerPercent = v.clamp(0.0, 1.0)),
             onSunTap: () =>
                 setState(() => _bathroomComfortOn = !_bathroomComfortOn),
           ),
@@ -943,8 +919,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               color: Colors.transparent,
               child: InkWell(
                 customBorder: const CircleBorder(),
-                onTap: () =>
-                    setState(() => _irrigationBoostOn = !_irrigationBoostOn),
+                onTap: () {
+                  uiTapHaptic();
+                  setState(() => _irrigationBoostOn = !_irrigationBoostOn);
+                },
                 child: Ink(
                   width: 42.w,
                   height: 42.w,
@@ -955,17 +933,11 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: _irrigationBoostOn
-                        ? Image.asset(
-                            'assets/images/charge.png',
-                            height: 22.h,
-                          )
-                        : Image.asset(
-                            'assets/images/charge.png',
-                            height: 22.h,
-                            color: _muted,
-                            colorBlendMode: BlendMode.srcIn,
-                          ),
+                    child: Icon(
+                      Icons.electric_bolt_rounded,
+                      size: 24.sp,
+                      color: _irrigationBoostOn ? Colors.white : _muted,
+                    ),
                   ),
                 ),
               ),
@@ -1286,7 +1258,10 @@ class _TagChip extends StatelessWidget {
     );
     if (onTap == null) return chip;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap!();
+      },
       behavior: HitTestBehavior.opaque,
       child: chip,
     );
@@ -1336,7 +1311,12 @@ class _SmallCircleText extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onTap!();
+              },
         splashColor: _softGrey,
         highlightColor: const Color(0xFFE5E7EB),
         child: badge,
@@ -1366,39 +1346,38 @@ class _DimmerPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = percent.clamp(0.0, 1.0);
     final w = 133.w;
+    final h = 35.h;
+    // Stadium capsule so both ends are true semicircles (avoids flat/clipped caps).
+    final r = h / 2;
 
-    final pill = Container(
-      height: 35.h,
-      width: w,
-      decoration: BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: FractionallySizedBox(
-              widthFactor: (1 - p),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE1E1E1),
-                  borderRadius: BorderRadius.horizontal(
-                    right: const Radius.circular(999),
-                    left: Radius.circular((1 - p) >= 0.98 ? 999 : 0),
-                  ),
-                ),
+    final pill = ClipRRect(
+      borderRadius: BorderRadius.circular(r),
+      child: SizedBox(
+        height: h,
+        width: w,
+        child: Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.hardEdge,
+          children: [
+            ColoredBox(color: Color(0xFFF3F4F6)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FractionallySizedBox(
+                widthFactor: (1 - p).clamp(0.0, 1.0),
+                heightFactor: 1,
+                alignment: Alignment.centerRight,
+                child: const ColoredBox(color: Color(0xFFE1E1E1)),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: EdgeInsets.only(left: 8.w),
-              child: _buildComfortLead(),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 8.w),
+                child: _buildComfortLead(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -1410,7 +1389,11 @@ class _DimmerPill extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onTapDown: (d) {
+        uiTapHaptic();
+        applyDx(d.localPosition.dx);
+      },
+      onHorizontalDragStart: (_) => uiTapHaptic(),
       onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
       child: pill,
     );
@@ -1444,7 +1427,12 @@ class _DimmerPill extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onSunTap,
+        onTap: onSunTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onSunTap!();
+              },
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFE5E7EB),
         child: padded,
@@ -1531,6 +1519,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
+        uiTapHaptic();
         widget.onTap!();
         _setPressed(false);
       },

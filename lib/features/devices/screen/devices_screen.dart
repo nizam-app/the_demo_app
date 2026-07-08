@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
@@ -66,6 +67,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
   }
 
   void _onNavItemTapped(int index) {
+    uiTapHaptic();
     final routes = [
       '/devices',
       '/analytics',
@@ -450,8 +452,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               const SizedBox(width: 6),
                               Text(
                                 '${_bathroomTemp.toStringAsFixed(1)}°C',
-                                style: const TextStyle(
-                                  fontSize: 16, // screenshot vibe
+                                style:  TextStyle(
+                                  fontSize: 16.sp, // screenshot vibe
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFF111827),
                                   fontFamily: 'Inter',
@@ -617,7 +619,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                               value: _brightnessPct / 100.0,
                               onChanged: (v) => setState(
                                 () => _brightnessPct =
-                                    (v * 100).round().clamp(0, 54),
+                                    (v * 100).round().clamp(0, 100),
                               ),
                             ),
                           ),
@@ -883,7 +885,12 @@ class _DeviceRow extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: onTap,
+                  onTap: onTap == null
+                      ? null
+                      : () {
+                          uiTapHaptic();
+                          onTap!();
+                        },
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -1066,7 +1073,12 @@ class _FilterChipPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap == null
+          ? null
+          : () {
+              uiTapHaptic();
+              onTap!();
+            },
       child: selected
           ? Container(
               height: 32.h,
@@ -1290,6 +1302,7 @@ class _CircleMiniBtnState extends State<_CircleMiniBtn> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
+        uiTapHaptic();
         widget.onTap!();
         _setPressed(false);
       },
@@ -1327,7 +1340,12 @@ class _CircleActionBlue extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onTap!();
+              },
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFD1D5DB),
         child: Ink(
@@ -1385,7 +1403,10 @@ class _ToggleSwitch extends StatelessWidget {
       width: 60.w,
       child: CupertinoSwitch(
         value: value,
-        onChanged: onChanged,
+        onChanged: (v) {
+          uiTapHaptic();
+          onChanged(v);
+        },
         activeColor: const Color(0xFF0088FE),
       ),
     );
@@ -1407,7 +1428,10 @@ class _ToggleColorswitch extends StatelessWidget {
       width: 60.w,
       child: CupertinoSwitch(
         value: value,
-        onChanged: onChanged,
+        onChanged: (v) {
+          uiTapHaptic();
+          onChanged(v);
+        },
         activeColor: const Color(0xFF0088FE),
       ),
     );
@@ -1537,7 +1561,10 @@ class _ModeDot extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: () {
+          uiTapHaptic();
+          onTap!();
+        },
         splashColor: _softGrey,
         highlightColor: const Color(0xFFE5E7EB),
         child: badge,
@@ -1612,7 +1639,10 @@ class _TagChip extends StatelessWidget {
     );
     if (onTap == null) return chip;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap!();
+      },
       behavior: HitTestBehavior.opaque,
       child: chip,
     );
@@ -1636,11 +1666,11 @@ class _TimeTag extends StatelessWidget {
           Image.asset(
             'assets/image 81 (1).png', // pin
             width: 16.sp,
-            height: 16.sp,
+            height: 16.sp,              
             filterQuality: FilterQuality.high,
             color: blueIcon ? const Color(0xFF0088FE) : const Color(0xFFF3F4F6),
             colorBlendMode: BlendMode.srcIn,
-          ),
+          ),                                                                                                                                                                                                                                
           SizedBox(width: 8.w),
           Text(
             text,
@@ -2136,7 +2166,11 @@ class _BrightnessPill extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (d) => applyFromDx(d.localPosition.dx),
+      onTapDown: (d) {
+        uiTapHaptic();
+        applyFromDx(d.localPosition.dx);
+      },
+      onHorizontalDragStart: (_) => uiTapHaptic(),
       onHorizontalDragUpdate: (d) => applyFromDx(d.localPosition.dx),
       child: pill,
     );
