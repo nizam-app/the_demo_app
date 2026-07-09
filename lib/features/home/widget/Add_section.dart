@@ -559,8 +559,9 @@ class _SizeSegment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget item(String label, String img) {
-      final selected = label == value;
-      final tintSelectedIcon = selected && label != 'S';
+      final bool selected = label == value;
+      // Selected icon is black; unselected (including S asset) stays soft grey.
+      final Color iconColor = selected ? _textPrimary : _textSecondary;
 
       return GestureDetector(
         onTap: () => onChanged(label),
@@ -568,30 +569,27 @@ class _SizeSegment extends StatelessWidget {
           width: 56.w,
           height: 35.h,
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
-            //Colors.transparent,
+            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
             borderRadius: BorderRadius.circular(26.r),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Label on top
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: _textPrimary,
+                  color: iconColor,
                 ),
               ),
-              // SizedBox(height: 4.h),
-              // Image below
               Image.asset(
                 img,
                 width: imageWidth.w,
                 height: imageHeight.h,
                 fit: BoxFit.contain,
-                color: tintSelectedIcon ? _textPrimary : null,
+                color: iconColor,
+                colorBlendMode: BlendMode.srcIn,
               ),
             ],
           ),

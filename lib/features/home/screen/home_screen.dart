@@ -169,6 +169,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ..._kDefaultLightingDeviceOrder,
   ];
 
+  static const int _kDefaultDashboardSectionId = 1;
+
   List<String> _lightDeviceOrder = List<String>.from(_kDefaultLightDeviceOrder);
   List<String> _lightingDeviceOrder = List<String>.from(
     _kDefaultLightingDeviceOrder,
@@ -184,18 +186,23 @@ class _HomeScreenState extends State<HomeScreen> {
   _DashboardEditSection? _editingSection;
   int? _editingAddedSectionId;
   String? _selectedAddedDeviceId;
-  int _nextAddedSectionId = 1;
+  int _nextAddedSectionId = 2;
   final List<_AddedDashboardSection> _addedSections =
-      <_AddedDashboardSection>[];
+      <_AddedDashboardSection>[
+        _AddedDashboardSection(
+          id: _kDefaultDashboardSectionId,
+          title: 'Lighting',
+          deviceOrder: _kAllDashboardDeviceOrder,
+          horizontalScrolling: false,
+          widgetSize: 'L',
+        ),
+      ];
   String? _selectedEditDeviceId;
   bool _showSectionEditButtons = false;
   bool _isAddDashboardSectionSheetOpen = false;
   String? _dashboardDraggingDeviceId;
   List<Object> _dashboardSectionOrder = <Object>[
-    _DashboardBlock.light,
-    _DashboardBlock.lighting,
-    _DashboardBlock.favorites,
-    _DashboardBlock.shading,
+    _kDefaultDashboardSectionId,
     _DashboardBlock.chart,
   ];
   final GlobalKey<CustomBottomNavBarState> _shellNavKey =
@@ -948,10 +955,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_lightingUsesLargeWidgets) {
       return _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize);
     }
-    if (_lightingWidgetSize == 'XL') {
-      return _lightCardHeightForWidgetSize('XL');
-    }
-    return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
+    return _lightCardHeightForWidgetSize(_lightingWidgetSize);
   }
 
   void _openDashboardSectionEdit(
@@ -1082,8 +1086,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _canMoveAddedSection(_AddedDashboardSection section, int delta) {
     final int index = _dashboardSectionOrder.indexOf(section.id);
+    if (index < 0) return false;
     final int target = index + delta;
-    return index >= 0 && target >= 0 && target < _dashboardSectionOrder.length;
+    if (target < 0) return false;
+    final int chartIndex = _dashboardSectionOrder.indexOf(
+      _DashboardBlock.chart,
+    );
+    if (chartIndex >= 0 && target >= chartIndex) return false;
+    return target < _dashboardSectionOrder.length;
   }
 
   void _moveAddedSection(_AddedDashboardSection section, int delta) {
@@ -2473,7 +2483,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
     final bool compact = effectiveSize == 'M';
-    final bool xlLayout = effectiveSize == 'XL';
     final double cardHeight = _lightCardHeightForWidgetSize(effectiveSize);
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
     final DeviceControlSnapshot bathroomHeat = _snap(
@@ -2591,7 +2600,7 @@ class _HomeScreenState extends State<HomeScreen> {
             iconImage: 'assets/Rectangle 823.png',
             iconWidget: DashboardAwningLevelIcon(
               level: _awningUp / 100.0,
-              softInterior: xlLayout,
+              softInterior: true,
             ),
             controls: _buildLightingStepButtons(
               markKey: 'awning',
@@ -2651,7 +2660,7 @@ class _HomeScreenState extends State<HomeScreen> {
             iconWidget: _HomeBlindSlatsIcon(
               level: _blindRoomLevel / 100.0,
               angle: _blindRoomAngle / 100.0,
-              softInterior: xlLayout,
+              softInterior: true,
             ),
             controls: _buildLightingStepButtons(
               markKey: 'blind_living',
@@ -2809,7 +2818,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
             uniformControls: uniformControls,
-            softPreviewInterior: xlLayout,
+            softPreviewInterior: true,
             downMarked: _awningMark == 1,
             upMarked: _awningMark == 2,
             onNavigate: editing
@@ -2903,13 +2912,13 @@ class _HomeScreenState extends State<HomeScreen> {
             slatsPreviewOverride: _HomeBlindSlatsIcon(
               level: _blindRoomLevel / 100.0,
               angle: _blindRoomAngle / 100.0,
-              softInterior: xlLayout,
+              softInterior: true,
             ),
             useBlindSlatsPreview: true,
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
             uniformControls: uniformControls,
-            softPreviewInterior: xlLayout,
+            softPreviewInterior: true,
             downMarked: _blindRoomMark == 1,
             upMarked: _blindRoomMark == 2,
             onNavigate: editing
@@ -3002,7 +3011,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (ids.isEmpty) return const SizedBox.shrink();
 
     final String size = _lightingWidgetSize;
-    final bool xlLayout = size == 'XL';
     final double cardHeight = _lightCardHeightForWidgetSize(size);
 
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -3012,20 +3020,15 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget buildCard(String id) {
       return _buildLightingSmallCardById(
         id,
-        uniformControlSlot: xlLayout,
-        cardHeightOverride: xlLayout ? cardHeight : null,
-        compactOverride: xlLayout ? false : null,
+        uniformControlSlot: true,
+        cardHeightOverride: cardHeight,
+        compactOverride: size == 'M',
       );
     }
 
     if (_lightingHorizontalScroll) {
-      final double listHeight = xlLayout
-          ? cardHeight
-          : _lightingSmallCardHeight(compact: true);
-      final double itemWidth =
-          xlLayout ? _lightHorizontalItemWidth(size) : gridCardWidth;
       return SizedBox(
-        height: listHeight,
+        height: cardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
@@ -3037,7 +3040,9 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: itemWidth,
+              width: size == 'XL'
+                  ? _lightHorizontalItemWidth(size)
+                  : gridCardWidth,
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.lighting,
                 deviceId: id,
@@ -4458,17 +4463,18 @@ class _DashboardSectionNameDialogState
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
       insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 18.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 36.h,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Center(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left:14.w, right: 14.w, top:2.h, bottom: 8.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 36.h,
+                  width: double.infinity,
+                  child: Center(
                     child: Text(
                       'Name section',
                       textAlign: TextAlign.center,
@@ -4480,94 +4486,94 @@ class _DashboardSectionNameDialogState
                       ),
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints.tightFor(
-                        width: 28.w,
-                        height: 28.w,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFFF3F4F6),
-                      ),
-                      icon: Icon(
-                        Icons.close_rounded,
-                        size: 17.sp,
-                        color: const Color(0xFF111827),
+                ),
+                SizedBox(height: 14.h),
+                TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _confirm(),
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontFamily: 'Inter',
+                    color: const Color(0xFF111827),
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Section name',
+                    hintStyle: TextStyle(
+                      color: const Color(0xFF9CA3AF),
+                      fontSize: 16.sp,
+                      fontFamily: 'Inter',
+                    ),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 18.w,
+                      vertical: 11.h,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF3F4F6),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF0088FE),
+                        width: 1.5,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 14.h),
+                GestureDetector(
+                  onTap: _confirm,
+                  child: Container(
+                    height: 52.h,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0088FE),
+                      borderRadius: BorderRadius.circular(26.r),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 14.h),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _confirm(),
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontFamily: 'Inter',
+          ),
+          Positioned(
+            right: 10.w,
+            top: 0.h,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tightFor(
+                width:30.w,
+                height: 30.w,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: const Color(0xFFF3F4F6),
+              ),
+              icon: Icon(
+                Icons.close_rounded,
+                size: 17.sp,
                 color: const Color(0xFF111827),
               ),
-              decoration: InputDecoration(
-                hintText: 'Section name',
-                hintStyle: TextStyle(
-                  color: const Color(0xFF9CA3AF),
-                  fontSize: 16.sp,
-                  fontFamily: 'Inter',
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 18.w,
-                  vertical: 11.h,
-                ),
-                filled: true,
-                fillColor: const Color(0xFFF3F4F6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28.r),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28.r),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28.r),
-                  borderSide: const BorderSide(
-                    color: Color(0xFF0088FE),
-                    width: 1.5,
-                  ),
-                ),
-              ),
             ),
-            SizedBox(height: 14.h),
-            GestureDetector(
-              onTap: _confirm,
-              child: Container(
-                height: 52.h,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0088FE),
-                  borderRadius: BorderRadius.circular(26.r),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
