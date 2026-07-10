@@ -73,6 +73,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
       _selectedSize = widget.initialSize;
     }
   }
+//new changes
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +88,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           padding: EdgeInsets.only(
             left: 16.w,
             right: 16.w,
-            top: 0.h,
+            top:0.h,
             bottom: 16.h,
           ),
           decoration: BoxDecoration(
@@ -536,11 +537,8 @@ class _SizeSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget item(String label, String img) {
       final bool selected = label == value;
-      // S asset is black by default — grey it out when another size is selected.
-      // M/L/XL keep their original asset colors when unselected; black when selected.
-      final Color? iconColor = selected
-          ? _textPrimary
-          : (label == 'S' ? _textSecondary : null);
+      // Selected icon is black; unselected (including S asset) stays soft grey.
+      final Color iconColor = selected ? _textPrimary : _textSecondary;
 
       return GestureDetector(
         onTap: () => onChanged(label),
@@ -548,7 +546,7 @@ class _SizeSegment extends StatelessWidget {
           width: 56.w,
           height: 35.h,
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
+            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
             borderRadius: BorderRadius.circular(26.r),
           ),
           child: Column(
@@ -559,7 +557,7 @@ class _SizeSegment extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
-                  color: selected ? _textPrimary : _textSecondary,
+                  color: iconColor,
                 ),
               ),
               Image.asset(
@@ -568,7 +566,7 @@ class _SizeSegment extends StatelessWidget {
                 height: 17.h,
                 fit: BoxFit.contain,
                 color: iconColor,
-                colorBlendMode: iconColor != null ? BlendMode.srcIn : null,
+                colorBlendMode: BlendMode.srcIn,
               ),
             ],
           ),
