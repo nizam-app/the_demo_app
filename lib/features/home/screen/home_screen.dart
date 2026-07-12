@@ -4235,15 +4235,17 @@ class _HomeScreenState extends State<HomeScreen> {
     bool uniformControlSlot = false,
   }) {
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
+    // Medium (compact) cards are ~3-col wide; keep controls narrow so the
+    // status value stays fully visible (no ellipsis).
     final double controlSlotWidth = uniformControlSlot
-        ? (compact ? 72.w : 96.w)
-        : (compact ? 58.w : 88.w);
+        ? (compact ? 48.w : 96.w)
+        : (compact ? 48.w : 88.w);
     final double controlMaxWidth = uniformControlSlot
         ? controlSlotWidth
-        : (compact ? 72.w : 96.w);
+        : (compact ? 56.w : 96.w);
     final double controlContentWidth = uniformControlSlot
-        ? (compact ? 72.w : 87.w)
-        : (compact ? 72.w : 96.w);
+        ? (compact ? 48.w : 87.w)
+        : (compact ? 56.w : 96.w);
     final double controlContentHeight = compact ? 30.h : 35.h;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
@@ -4320,25 +4322,29 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Flexible(
+                  Expanded(
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        status,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                          fontFamily: 'Inter',
-                          height: 1.0,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                            height: 1.0,
+                          ),
+                          maxLines: 1,
+                          softWrap: false,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
                   if (controls != null) ...[
-                    SizedBox(width: 6.w),
+                    SizedBox(width: compact ? 4.w : 6.w),
                     SizedBox(
                       width: controlSlotWidth,
                       height: statusH,
