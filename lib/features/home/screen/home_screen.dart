@@ -2560,6 +2560,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : 'assets/images/bathroom_off.png',
             controls: _buildLightingPlusMinusButtons(
               markKey: 'bathroom_heat',
+              dense: true,
               onMinus: () {
                 setState(() {
                   _bathroomThermostat = (_bathroomThermostat - 0.5).clamp(
@@ -2604,6 +2605,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             controls: _buildLightingStepButtons(
               markKey: 'awning',
+              dense: true,
               onDown: () => setState(() => _awningAdjustLevel(10)),
               onUp: () => setState(() => _awningAdjustLevel(-10)),
               onDownLong: () => setState(() => _awningSetLevel(100)),
@@ -2664,6 +2666,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             controls: _buildLightingStepButtons(
               markKey: 'blind_living',
+              dense: true,
               onDown: () => setState(() => _blindLivingRoomAdjustAngle(10)),
               onUp: () => setState(() => _blindLivingRoomAdjustAngle(-10)),
               onDownLong: () => setState(() => _blindLivingRoomSetLevel(100)),
@@ -3090,6 +3093,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _editingSection == _DashboardEditSection.lighting ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
+    final bool compact = compactOverride ?? _lightingHorizontalScroll;
+    // Match the L/XL control slot (136.w) / Medium slot (60.w) so pills keep
+    // full 35.h height instead of being uniformly scaled down.
+    final double sliderWidth = compact ? 60.w : 136.w;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -3118,6 +3125,7 @@ class _HomeScreenState extends State<HomeScreen> {
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
           controls: _buildLightingChevronButtons(
             markKey: 'scene',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Light Scene',
               (p) => p.copyWith(sceneIndex: (p.sceneIndex - 1).clamp(0, 2)),
@@ -3157,6 +3165,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingSliderControl(
             value: rgbw.rgbwIntensity,
+            width: sliderWidth,
             onChanged: (v) => _patchSnap(
               'RGBW room abc',
               (p) => p.copyWith(rgbwIntensity: v),
@@ -3195,6 +3204,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingSliderControl(
             value: led.ledDimmerPercent,
+            width: sliderWidth,
             onChanged: (v) => _patchSnap(
               'LED Dimmer living room',
               (p) => p.copyWith(ledDimmerPercent: v),
@@ -3265,6 +3275,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingSliderControl(
             value: tunable.tunableWhiteIntensity,
+            width: sliderWidth,
             onChanged: (v) => _patchSnap(
               'Tunable white light',
               (p) => p.copyWith(tunableWhiteIntensity: v),
@@ -3297,6 +3308,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingSliderControl(
             value: vent.ventilationPercent,
+            width: sliderWidth,
             onChanged: (v) => _patchSnap(
               'Ventilation',
               (p) => p.copyWith(ventilationPercent: v),
@@ -3329,6 +3341,7 @@ class _HomeScreenState extends State<HomeScreen> {
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
           controls: _buildLightingPlusMinusButtons(
             markKey: 'fan',
+            dense: compact,
             onMinus: () => _patchSnap(
               'Fan Level 3',
               (p) => p.copyWith(fanLevel: (p.fanLevel - 1).clamp(0, 3)),
@@ -3367,6 +3380,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingChevronButtons(
             markKey: 'presence',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Presence',
               (p) => p.copyWith(
@@ -3414,6 +3428,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingPlusMinusButtons(
             markKey: 'living',
+            dense: compact,
             onMinus: () => _patchSnap(
               'Living Room',
               (p) => p.copyWith(
@@ -3468,6 +3483,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           controls: _buildLightingChevronButtons(
             markKey: 'multi',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(
@@ -3931,12 +3947,16 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onUp,
     VoidCallback? onDownLong,
     VoidCallback? onUpLong,
+    bool dense = false,
   }) {
+    final double btnSize = dense ? 30 : 35;
+    final double gap = dense ? 6.w : 17.w;
+    final double iconSide = dense ? 11.w : 13.w;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 1,
           onTap: () => _flashMark(
             value: 1,
@@ -3954,15 +3974,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           child: Image.asset(
             'assets/Mask group (17).png',
-            width: 13.w,
-            height: 13.h,
+            width: iconSide,
+            height: iconSide,
             fit: BoxFit.contain,
             color: const Color(0xFF6B7280),
           ),
         ),
-        SizedBox(width: 17.w),
+        SizedBox(width: gap),
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 2,
           onTap: () => _flashMark(
             value: 2,
@@ -3982,8 +4002,8 @@ class _HomeScreenState extends State<HomeScreen> {
             angle: math.pi,
             child: Image.asset(
               'assets/Mask group (17).png',
-              width: 13.w,
-              height: 13.h,
+              width: iconSide,
+              height: iconSide,
               fit: BoxFit.contain,
               color: const Color(0xFF6B7280),
             ),
@@ -3997,12 +4017,15 @@ class _HomeScreenState extends State<HomeScreen> {
     required String markKey,
     required VoidCallback onMinus,
     required VoidCallback onPlus,
+    bool dense = false,
   }) {
+    final double btnSize = dense ? 30 : 35;
+    final double gap = dense ? 6.w : 17.w;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 1,
           onTap: () => _flashMark(
             value: 1,
@@ -4012,13 +4035,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Icon(
             Icons.remove_rounded,
-            size: 22.sp,
+            size: dense ? 18.sp : 22.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
-        SizedBox(width: 17.w),
+        SizedBox(width: gap),
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 2,
           onTap: () => _flashMark(
             value: 2,
@@ -4028,7 +4051,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Icon(
             Icons.add_rounded,
-            size: 22.sp,
+            size: dense ? 18.sp : 22.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4042,12 +4065,15 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onRight,
     VoidCallback? onLeftLong,
     VoidCallback? onRightLong,
+    bool dense = false,
   }) {
+    final double btnSize = dense ? 30 : 35;
+    final double gap = dense ? 6.w : 17.w;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 1,
           onTap: () => _flashMark(
             value: 1,
@@ -4065,13 +4091,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           child: Icon(
             Icons.chevron_left_rounded,
-            size: 26.sp,
+            size: dense ? 22.sp : 26.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
-        SizedBox(width: 17.w),
+        SizedBox(width: gap),
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 2,
           onTap: () => _flashMark(
             value: 2,
@@ -4089,7 +4115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           child: Icon(
             Icons.chevron_right_rounded,
-            size: 26.sp,
+            size: dense ? 22.sp : 26.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4118,9 +4144,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildLightingSliderControl({
     required double value,
     required ValueChanged<double> onChanged,
+    double? width,
   }) {
     return SizedBox(
-      width: 118.w,
+      width: width ?? 118.w,
+      height: 35.h,
       child: _DimmerPill(percent: value, onChanged: onChanged),
     );
   }
@@ -4235,22 +4263,14 @@ class _HomeScreenState extends State<HomeScreen> {
     bool uniformControlSlot = false,
   }) {
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
-    // Medium (compact) cards are ~3-col wide; keep controls narrow so the
-    // status value stays fully visible (no ellipsis).
-    final double controlSlotWidth = uniformControlSlot
-        ? (compact ? 48.w : 96.w)
-        : (compact ? 48.w : 88.w);
-    final double controlMaxWidth = uniformControlSlot
-        ? controlSlotWidth
-        : (compact ? 56.w : 96.w);
-    final double controlContentWidth = uniformControlSlot
-        ? (compact ? 48.w : 87.w)
-        : (compact ? 56.w : 96.w);
-    final double controlContentHeight = compact ? 30.h : 35.h;
+    // L/XL: longer control slot so dimmer pills stay full 35.h (not FittedBox-
+    // shrunk) and read wider next to the status value. Compact keeps a tighter slot.
+    final double controlSlotWidth = compact ? 64.w : 136.w;
+    final double controlContentHeight = 35.h;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
-    final double statusH = compact ? 18.h : 20.h;
+    final double statusH = compact ? 28.h : 32.h;
     final radius = BorderRadius.circular(26.r);
     final Widget iconArea = dashboardLightingIconFrame(
       iconWidget ??
@@ -4289,7 +4309,13 @@ class _HomeScreenState extends State<HomeScreen> {
           color: const Color(0xFFF3F4F6),
           borderRadius: radius,
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: vPad),
+        // Slightly less right padding so controls sit further right.
+        padding: EdgeInsets.fromLTRB(
+          12.w,
+          vPad,
+          compact ? 8.w : 10.w,
+          vPad,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -4344,20 +4370,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   if (controls != null) ...[
-                    SizedBox(width: compact ? 4.w : 6.w),
+                    SizedBox(width: 6.w),
                     SizedBox(
                       width: controlSlotWidth,
                       height: statusH,
-                      child: OverflowBox(
-                        maxWidth: controlMaxWidth,
-                        maxHeight: controlContentHeight,
+                      child: Align(
                         alignment: Alignment.centerRight,
-                        child: SizedBox(
-                          width: controlContentWidth,
-                          height: controlContentHeight,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerRight,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: SizedBox(
+                            height: controlContentHeight,
                             child: controls,
                           ),
                         ),
