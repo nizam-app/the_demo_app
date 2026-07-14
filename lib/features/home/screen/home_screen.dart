@@ -3094,9 +3094,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
-    // Match the L/XL control slot (136.w) / Medium slot (60.w) so pills keep
-    // full 35.h height instead of being uniformly scaled down.
-    final double sliderWidth = compact ? 60.w : 136.w;
+    // Medium: fixed narrow slider. L/XL: expand to fill remaining row width so
+    // status text can show in full at 16.sp.
+    final double? sliderWidth = compact ? 60.w : null;
+    final bool expandSlider = !compact;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -3166,6 +3167,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controls: _buildLightingSliderControl(
             value: rgbw.rgbwIntensity,
             width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'RGBW room abc',
               (p) => p.copyWith(rgbwIntensity: v),
@@ -3176,6 +3178,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: expandSlider,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3205,6 +3208,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controls: _buildLightingSliderControl(
             value: led.ledDimmerPercent,
             width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'LED Dimmer living room',
               (p) => p.copyWith(ledDimmerPercent: v),
@@ -3215,6 +3219,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: expandSlider,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3276,6 +3281,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controls: _buildLightingSliderControl(
             value: tunable.tunableWhiteIntensity,
             width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'Tunable white light',
               (p) => p.copyWith(tunableWhiteIntensity: v),
@@ -3284,6 +3290,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: expandSlider,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3309,6 +3316,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controls: _buildLightingSliderControl(
             value: vent.ventilationPercent,
             width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'Ventilation',
               (p) => p.copyWith(ventilationPercent: v),
@@ -3318,6 +3326,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: expandSlider,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -4145,7 +4154,23 @@ class _HomeScreenState extends State<HomeScreen> {
     required double value,
     required ValueChanged<double> onChanged,
     double? width,
+    bool expand = false,
   }) {
+    if (expand) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final double w =
+              constraints.maxWidth.isFinite && constraints.maxWidth > 0
+              ? constraints.maxWidth
+              : 118.w;
+          return SizedBox(
+            width: w,
+            height: 35.h,
+            child: _DimmerPill(percent: value, onChanged: onChanged),
+          );
+        },
+      );
+    }
     return SizedBox(
       width: width ?? 118.w,
       height: 35.h,
@@ -4261,10 +4286,11 @@ class _HomeScreenState extends State<HomeScreen> {
     bool? compactOverride,
     double? cardHeightOverride,
     bool uniformControlSlot = false,
+    bool controlFillsSlot = false,
   }) {
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
-    // L/XL: longer control slot so dimmer pills stay full 35.h (not FittedBox-
-    // shrunk) and read wider next to the status value. Compact keeps a tighter slot.
+    // Prefer full status text at Motion Sensor size (16.sp bold). Controls use
+    // the remaining width (up to controlSlotWidth) so they never clip the label.
     final double controlSlotWidth = compact ? 64.w : 136.w;
     final double controlContentHeight = 35.h;
     final double vPad = compact ? 8.h : 12.h;
@@ -4348,42 +4374,43 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          status,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                            fontFamily: 'Inter',
-                            height: 1.0,
-                          ),
-                          maxLines: 1,
-                          softWrap: false,
-                        ),
-                      ),
+                  // Full label at Motion Sensor size — never ellipsis / scale down.
+                  Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF111827),
+                      fontFamily: 'Inter',
+                      height: 1.0,
                     ),
+                    maxLines: 1,
+                    softWrap: false,
                   ),
                   if (controls != null) ...[
                     SizedBox(width: 6.w),
-                    SizedBox(
-                      width: controlSlotWidth,
-                      height: statusH,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerRight,
-                          child: SizedBox(
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double slotW = math.min(
+                            controlSlotWidth,
+                            constraints.maxWidth,
+                          );
+                          return SizedBox(
+                            width: slotW,
                             height: controlContentHeight,
-                            child: controls,
-                          ),
-                        ),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: controlFillsSlot
+                                  ? controls
+                                  : FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerRight,
+                                      child: controls,
+                                    ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
