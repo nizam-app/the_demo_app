@@ -261,7 +261,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                           if (widget.showWidgetSize)
                             _RowItem(
                               imagePath: 'assets/images/widget_size.png',
-                              title: 'Widget size',
+                              title: 'Layout',
                               trailing: _SizeSegment(
                                 value: _selectedSize,
                                 onChanged: (v) {
