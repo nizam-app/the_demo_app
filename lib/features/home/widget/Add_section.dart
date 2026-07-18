@@ -309,7 +309,6 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     /// REMOVE
                     Padding(
                       padding: EdgeInsets.only(
-                        left: 18.w,
                         right: 17.w,
                         bottom: 25.h,
                       ),

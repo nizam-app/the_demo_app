@@ -2134,6 +2134,20 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               Row(
                 children: [
+                  Expanded(
+                    child: Text(
+                      '${value.toStringAsFixed(1)}°c',
+                      textAlign: TextAlign.left,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
                   _CircleBtn(
                     marked: minusMarked,
                     onTap: onMinus,
@@ -2144,18 +2158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: const Color(0xFF6B7280),
                     ),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        '${value.toStringAsFixed(1)}°c',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF111827),
-                        ),
-                      ),
-                    ),
-                  ),
+                  SizedBox(width: 10.w),
                   _CircleBtn(
                     marked: plusMarked,
                     onTap: onPlus,
@@ -5681,8 +5684,23 @@ class _ThermostatCard extends StatelessWidget {
                       !uniformControls &&
                       (compact || constraints.maxWidth < 120);
                   final double btnSize = compactControls ? 22 : 35;
+                  // Value left, minus/plus grouped right (dashboard-wide rule).
                   return Row(
                     children: [
+                      Expanded(
+                        child: Text(
+                          '${value.toStringAsFixed(1)}° c',
+                          textAlign: TextAlign.left,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
                       _CircleBtn(
                         size: btnSize,
                         marked: minusMarked,
@@ -5693,19 +5711,7 @@ class _ThermostatCard extends StatelessWidget {
                           color: const Color(0xFF6B7280),
                         ),
                       ),
-                      Expanded(
-                        child: Text(
-                          '${value.toStringAsFixed(1)}° c',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF111827),
-                          ),
-                        ),
-                      ),
+                      SizedBox(width: compactControls ? 6.w : 10.w),
                       _CircleBtn(
                         size: btnSize,
                         marked: plusMarked,
@@ -5927,16 +5933,18 @@ class _BlindCard extends StatelessWidget {
                     );
 
                     if (levelPercent != null) {
+                      // Value left, down/up grouped right (dashboard-wide rule).
                       return SizedBox(
                         width: constraints.maxWidth,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            downBtn,
                             Expanded(
-                              child: Center(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
                                   child: Text(
                                     '$levelPercent%',
                                     style: TextStyle(
@@ -5948,6 +5956,9 @@ class _BlindCard extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            SizedBox(width: 6.w),
+                            downBtn,
+                            SizedBox(width: compactControls ? 6.w : 10.w),
                             Padding(
                               padding: EdgeInsets.only(right: 2.w),
                               child: upBtn,
@@ -6003,16 +6014,18 @@ class _BlindCard extends StatelessWidget {
                       );
                     }
 
+                    // Values left, down/up grouped right (dashboard-wide rule).
                     return SizedBox(
                       width: constraints.maxWidth,
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          downBtn,
                           Expanded(
-                            child: Center(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -6026,6 +6039,9 @@ class _BlindCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          SizedBox(width: 6.w),
+                          downBtn,
+                          SizedBox(width: compactControls ? 6.w : 10.w),
                           upBtn,
                         ],
                       ),
