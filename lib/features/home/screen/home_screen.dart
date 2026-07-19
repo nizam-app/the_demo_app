@@ -4693,6 +4693,9 @@ class _Header extends StatelessWidget {
           ),
         ),
 
+        //note: properly, 
+        //leftsdajlksdlksdaljksdjklsdklajkljsdljksadfkl;j
+
         // Right area
         SizedBox(
           width: rightWidth,
