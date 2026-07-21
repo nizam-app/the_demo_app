@@ -23,6 +23,8 @@ import '../../profile/screen/profile_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 import '../widget/Add_section.dart';
 import '../widget/add_dashboard_device_sheet.dart';
+import '../widget/dashboard_control_metrics.dart';
+import '../widget/dashboard_section_widget_size.dart';
 import '../widget/editAddSectionSheet.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -306,58 +308,59 @@ class _HomeScreenState extends State<HomeScreen> {
   DeviceControlSnapshot _snap(String title) =>
       DeviceDashboardSync.instance.snapshotFor(title);
 
-  bool _usesLargeWidgetRows(String size) => size == 'S';
+  bool _usesLargeWidgetRows(String size) => sectionLayoutUsesListRows(size);
 
   int _gridColumnsForWidgetSize(String size) {
-    switch (size) {
-      case 'M':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.small:
         return 3;
-      case 'L':
+      case SectionLayout.medium:
+      case SectionLayout.large:
+      case SectionLayout.extraLarge:
         return 2;
-      case 'XL':
-      default:
+      case SectionLayout.list:
         return 2;
     }
   }
 
   int _lightGridColumnsForWidgetSize(String size) {
-    switch (size) {
-      case 'S':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.list:
         return 1;
-      case 'M':
+      case SectionLayout.small:
         return 3;
-      case 'L':
-        return 2;
-      case 'XL':
-      default:
+      case SectionLayout.medium:
+      case SectionLayout.large:
+      case SectionLayout.extraLarge:
         return 2;
     }
   }
 
   double _lightCardHeightForWidgetSize(String size) {
-    switch (size) {
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.extraLarge:
         return 220.h;
-      case 'M':
-        return 150.h;
-      case 'L':
+      case SectionLayout.large:
         return 185.h;
-      case 'S':
-      default:
+      case SectionLayout.medium:
+        return 168.h;
+      case SectionLayout.small:
+        return 150.h;
+      case SectionLayout.list:
         return 150.h;
     }
   }
 
   double _lightHorizontalItemWidth(String size) {
-    switch (size) {
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.extraLarge:
         return 280.w;
-      case 'M':
+      case SectionLayout.small:
         return 120.w;
-      case 'L':
+      case SectionLayout.medium:
+      case SectionLayout.large:
         return 210.w;
-      case 'S':
-      default:
+      case SectionLayout.list:
         return 320.w;
     }
   }
@@ -366,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool get _lightingUsesLargeWidgets =>
       _usesLargeWidgetRows(_lightingWidgetSize);
-  // S → full-width rows; M → three columns; L → two columns; XL → two large columns.
+  // List → full-width rows; S → three columns; M/L/XL → two columns.
 
   double get _lightCardHeight =>
       _lightCardHeightForWidgetSize(_lightWidgetSize);
@@ -507,6 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showAddDashboardSectionSheet() {
+    _sanitizeDashboardEditState();
     if (_isAddDashboardSectionSheetOpen ||
         _editingSection != null ||
         _editingAddedSectionId != null) {
@@ -523,6 +527,57 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isAddDashboardSectionSheetOpen = false);
   }
 
+  void _sanitizeDashboardEditState() {
+    if (_editingAddedSectionId != null &&
+        _addedSectionById(_editingAddedSectionId) == null) {
+      _editingAddedSectionId = null;
+      _selectedAddedDeviceId = null;
+    }
+  }
+
+  void _pruneOrphanedDashboardSectionOrderEntries() {
+    _dashboardSectionOrder = _dashboardSectionOrder
+        .where(
+          (Object item) =>
+              item is! int || _addedSectionById(item) != null,
+        )
+        .toList();
+  }
+
+  void _addDashboardSectionFromConfiguration(
+    AddSectionConfiguration configuration,
+  ) {
+    final String trimmedName = configuration.name.trim();
+    if (trimmedName.isEmpty) return;
+
+    setState(() {
+      _pruneOrphanedDashboardSectionOrderEntries();
+      final int sectionId = _nextAddedSectionId++;
+      _addedSections.add(
+        _AddedDashboardSection(
+          id: sectionId,
+          title: trimmedName,
+          deviceOrder: List<String>.from(configuration.deviceIds),
+          horizontalScrolling: configuration.horizontalScrolling,
+          widgetSize: canonicalSectionLayoutStorage(configuration.widgetSize),
+          headerBackgroundPath: configuration.headerBackgroundPath,
+        ),
+      );
+      final int chartIndex = _dashboardSectionOrder.indexOf(
+        _DashboardBlock.chart,
+      );
+      _dashboardSectionOrder.insert(
+        chartIndex >= 0 ? chartIndex : _dashboardSectionOrder.length,
+        sectionId,
+      );
+      _editingAddedSectionId = null;
+      _selectedAddedDeviceId = configuration.deviceIds.isEmpty
+          ? null
+          : configuration.deviceIds.last;
+    });
+    _closeAddDashboardSectionSheet();
+  }
+
   Widget _buildAddDashboardSectionOverlay() {
     if (!_isAddDashboardSectionSheetOpen) return const SizedBox.shrink();
 
@@ -537,35 +592,9 @@ class _HomeScreenState extends State<HomeScreen> {
               top: false,
               child: AddSectionSheet(
                 onClose: _closeAddDashboardSectionSheet,
-                onNameRequested: _promptDashboardSectionName,
                 onDevicesRequested: _pickDevicesForNewSection,
                 onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
-                onAdd: (AddSectionConfiguration configuration) {
-                  setState(() {
-                    final int sectionId = _nextAddedSectionId++;
-                    _addedSections.add(
-                      _AddedDashboardSection(
-                        id: sectionId,
-                        title: configuration.name,
-                        deviceOrder: configuration.deviceIds,
-                        horizontalScrolling: configuration.horizontalScrolling,
-                        widgetSize: configuration.widgetSize,
-                        headerBackgroundPath:
-                            configuration.headerBackgroundPath,
-                      ),
-                    );
-                    final int chartIndex = _dashboardSectionOrder.indexOf(
-                      _DashboardBlock.chart,
-                    );
-                    _dashboardSectionOrder.insert(
-                      chartIndex >= 0
-                          ? chartIndex
-                          : _dashboardSectionOrder.length,
-                      sectionId,
-                    );
-                  });
-                  _closeAddDashboardSectionSheet();
-                },
+                onAdd: _addDashboardSectionFromConfiguration,
               ),
             ),
           ),
@@ -602,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _dashboardSectionOrder = _dashboardSectionOrder
           .where((Object item) => item != block)
-          .toList(growable: false);
+          .toList();
       _editingSection = null;
       _selectedEditDeviceId = null;
     });
@@ -730,6 +759,7 @@ class _HomeScreenState extends State<HomeScreen> {
               percent: 1.0,
               ringStyle: DashboardRingStyle.led,
               labelFontSize: 10,
+              transparentInner: true,
             ),
           ),
         );
@@ -763,7 +793,11 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Ventilation',
           imagePath: 'assets/images/ventilations.png',
           iconWidget: dashboardLightingIconFrame(
-            DashboardVentilationIcon(percent: 1.0, labelFontSize: 10),
+            DashboardVentilationIcon(
+              percent: 1.0,
+              labelFontSize: 10,
+              transparentInner: true,
+            ),
           ),
         );
       case 'fan_level_3':
@@ -796,7 +830,11 @@ class _HomeScreenState extends State<HomeScreen> {
           imagePath:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           iconWidget: dashboardLightingIconFrame(
-            DashboardThermostatRingIcon(percent: 1.0, labelFontSize: 10),
+            DashboardThermostatRingIcon(
+              percent: 1.0,
+              labelFontSize: 10,
+              transparentInner: true,
+            ),
           ),
         );
       case 'multi_value_switch':
@@ -873,18 +911,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _renameDashboardSection(_DashboardEditSection section) async {
-    final String? next = await _promptDashboardSectionName(
-      _sectionRenameLabel(section),
-    );
-    if (!mounted || next == null || next.isEmpty) return;
-    setState(() {
-      if (section == _DashboardEditSection.light) {
-        _lightSectionTitle = next;
-      }
-    });
-  }
-
   void _closeDashboardSectionEdit() {
     if (!mounted) return;
     _setShellBottomBarVisible(true);
@@ -932,7 +958,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     if (section == _DashboardEditSection.light) {
-      if (_lightWidgetSize == 'S') return screenWidth - 32.w;
+      if (sectionLayoutUsesListRows(_lightWidgetSize)) {
+        return screenWidth - 32.w;
+      }
       if (_lightHorizontalScroll) {
         return _lightHorizontalItemWidth(_lightWidgetSize);
       }
@@ -949,7 +977,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
-      if (_lightWidgetSize == 'S') return 90.h;
+      if (sectionLayoutUsesListRows(_lightWidgetSize)) return 90.h;
       return _lightCardHeight;
     }
     if (_lightingUsesLargeWidgets) {
@@ -993,7 +1021,13 @@ class _HomeScreenState extends State<HomeScreen> {
               child: EditAddSectionSheet(
                 onClose: _closeDashboardSectionEdit,
                 sectionRenameLabel: _sectionRenameLabel(section),
-                onRenameTap: () => _renameDashboardSection(section),
+                onRenameChanged: (String next) {
+                  setState(() {
+                    if (section == _DashboardEditSection.light) {
+                      _lightSectionTitle = next;
+                    }
+                  });
+                },
                 onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
                 onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
                 headerBackgroundImagePath: _sectionHeaderImagePath(section),
@@ -1017,10 +1051,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? _lightWidgetSize
                     : _lightingWidgetSize,
                 onSizeChanged: (v) => setState(() {
+                  final String stored = canonicalSectionLayoutStorage(v);
                   if (section == _DashboardEditSection.light) {
-                    _lightWidgetSize = v;
+                    _lightWidgetSize = stored;
                   } else {
-                    _lightingWidgetSize = v;
+                    _lightingWidgetSize = stored;
                   }
                   final List<String> order = _deviceOrderFor(section);
                   _selectedEditDeviceId = order.isEmpty ? null : order.first;
@@ -1048,6 +1083,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openAddedSectionEdit(_AddedDashboardSection section) {
+    if (section.title.trim().isEmpty) return;
     if (_isAddDashboardSectionSheetOpen || _editingSection != null) {
       return;
     }
@@ -1059,12 +1095,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ? null
           : section.deviceOrder.first;
     });
-  }
-
-  Future<void> _renameAddedSection(_AddedDashboardSection section) async {
-    final String? next = await _promptDashboardSectionName(section.title);
-    if (!mounted || next == null || next.isEmpty) return;
-    setState(() => section.title = next);
   }
 
   Future<void> _addDevicesToAddedSection(_AddedDashboardSection section) async {
@@ -1114,9 +1144,14 @@ class _HomeScreenState extends State<HomeScreen> {
       _addedSections.remove(section);
       _dashboardSectionOrder = _dashboardSectionOrder
           .where((Object item) => item != section.id)
-          .toList(growable: false);
+          .toList();
+      _pruneOrphanedDashboardSectionOrderEntries();
       _editingAddedSectionId = null;
       _selectedAddedDeviceId = null;
+      if (_addedSections.isEmpty) {
+        _showSectionEditButtons = false;
+        _dashboardDraggingDeviceId = null;
+      }
     });
     _setShellBottomBarVisible(true);
   }
@@ -1125,7 +1160,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final _AddedDashboardSection? section = _addedSectionById(
       _editingAddedSectionId,
     );
-    if (section == null) return const SizedBox.shrink();
+    if (section == null || section.title.trim().isEmpty) {
+      if (_editingAddedSectionId != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _closeDashboardSectionEdit();
+        });
+      }
+      return const SizedBox.shrink();
+    }
 
     return Positioned.fill(
       child: Stack(
@@ -1139,7 +1181,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: EditAddSectionSheet(
                 onClose: _closeDashboardSectionEdit,
                 sectionRenameLabel: section.title,
-                onRenameTap: () => _renameAddedSection(section),
+                onRenameChanged: (String next) {
+                  if (next.trim().isEmpty) return;
+                  setState(() => section.title = next.trim());
+                },
                 onAddDeviceTap: () => _addDevicesToAddedSection(section),
                 addDeviceCountLabel: section.deviceOrder.isEmpty
                     ? null
@@ -1156,7 +1201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() => section.horizontalScrolling = value),
                 initialSize: section.widgetSize,
                 onSizeChanged: (value) => setState(() {
-                  section.widgetSize = value;
+                  section.widgetSize = canonicalSectionLayoutStorage(value);
                   _selectedAddedDeviceId = section.deviceOrder.isEmpty
                       ? null
                       : section.deviceOrder.first;
@@ -1205,8 +1250,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String deviceId,
     Widget child,
   ) {
+    final bool sectionIsEditable = section.title.trim().isNotEmpty;
     Widget result = child;
-    if (_editingAddedSectionId == section.id) {
+    if (sectionIsEditable && _editingAddedSectionId == section.id) {
       final bool selected = _selectedAddedDeviceId == deviceId;
       result = Stack(
         clipBehavior: Clip.none,
@@ -1245,9 +1291,11 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    final bool isEditingThisAddedSection = _editingAddedSectionId == section.id;
+    final bool isEditingThisAddedSection =
+        sectionIsEditable && _editingAddedSectionId == section.id;
     final bool shouldAnimateEdit =
-        _showSectionEditButtons || isEditingThisAddedSection;
+        sectionIsEditable &&
+        (_showSectionEditButtons || isEditingThisAddedSection);
     if (!shouldAnimateEdit) return result;
     return _DashboardShakeWrapper(
       shaking: _dashboardDraggingDeviceId != deviceId,
@@ -1267,7 +1315,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double _addedSectionItemWidth(_AddedDashboardSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    if (section.widgetSize == 'S') return screenWidth - 32.w;
+    if (sectionLayoutUsesListRows(section.widgetSize)) {
+      return screenWidth - 32.w;
+    }
     if (section.horizontalScrolling) {
       return _lightHorizontalItemWidth(section.widgetSize);
     }
@@ -1279,13 +1329,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _AddedDashboardSection section,
     String deviceId,
   ) {
-    if (section.widgetSize == 'S') {
+    if (sectionLayoutUsesListRows(section.widgetSize)) {
       return _lightingLargeRowHeightForWidgetSize(section.widgetSize);
     }
     if (_isLightingDevice(deviceId)) {
-      if (section.widgetSize == 'S') {
-        return _lightingLargeRowHeightForWidgetSize(section.widgetSize);
-      }
       return _lightCardHeightForWidgetSize(section.widgetSize);
     }
     return _lightCardHeightForWidgetSize(section.widgetSize);
@@ -1295,10 +1342,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _kDefaultLightingDeviceOrder.contains(deviceId);
 
   Widget _buildAddedDevice(_AddedDashboardSection section, String deviceId) {
-    final String size = section.widgetSize;
-    final double cardHeight = _lightCardHeightForWidgetSize(size);
+    final SectionLayout layout = parseSectionLayout(section.widgetSize);
+    final double cardHeight = _lightCardHeightForWidgetSize(section.widgetSize);
 
-    if (size == 'S') {
+    if (layout == SectionLayout.list) {
       return _isLightingDevice(deviceId)
           ? _buildLightingLargeRowById(deviceId)
           : _buildLightLargeRowById(deviceId);
@@ -1309,12 +1356,13 @@ class _HomeScreenState extends State<HomeScreen> {
         deviceId,
         uniformControlSlot: true,
         cardHeightOverride: cardHeight,
-        compactOverride: size == 'M',
+        compactOverride: layout == SectionLayout.small,
+        sectionLayout: layout,
       );
     }
     return _buildLightDeviceCard(
       deviceId,
-      widgetSize: size,
+      widgetSize: section.widgetSize,
       uniformControls: true,
     );
   }
@@ -1333,7 +1381,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    if (section.widgetSize == 'S') {
+    if (sectionLayoutUsesListRows(section.widgetSize)) {
       return Column(
         children: [
           for (int i = 0; i < ids.length; i++) ...[
@@ -1399,11 +1447,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> _buildAddedSectionWidgets(_AddedDashboardSection section) {
+    final bool hasSectionName = section.title.trim().isNotEmpty;
     return <Widget>[
       _SectionTitle(
         section.title,
-        showEditButton: _showSectionEditButtons,
-        onEditTap: () => _openAddedSectionEdit(section),
+        showEditButton: _showSectionEditButtons && hasSectionName,
+        onEditTap: hasSectionName ? () => _openAddedSectionEdit(section) : null,
         headerBackgroundImagePath: section.headerBackgroundPath,
       ),
       SizedBox(height: 12.h),
@@ -2189,7 +2238,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
-    if (_lightWidgetSize == 'S') {
+    if (sectionLayoutUsesListRows(_lightWidgetSize)) {
       return Column(
         children: [
           for (int i = 0; i < ids.length; i++) ...[
@@ -2261,6 +2310,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final bool editing =
         _editingSection == _DashboardEditSection.light ||
         _showSectionEditButtons;
+    // List rows use default control sizing, not L-layout metrics.
+    final DashboardControlMetrics? lControlMetrics = null;
     VoidCallback? detailsTap(VoidCallback action) => editing ? null : action;
 
     switch (deviceId) {
@@ -2281,6 +2332,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _bedroomManual = !_bedroomManual),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: _bedroomDimmer > 0.001,
             onChanged: (v) {
               setState(() {
@@ -2317,6 +2369,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _bathroomManual = !_bathroomManual),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'bathroom_heat_s',
             onMinus: () {
               setState(() {
@@ -2392,6 +2445,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _irrigationManual = !_irrigationManual),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: _irrigationOn,
             onChanged: (v) {
               setState(() => _irrigationOn = v);
@@ -2455,6 +2509,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : () =>
                     setState(() => _motionSensorManual = !_motionSensorManual),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: _motionSensorOn,
             onChanged: (v) {
               setState(() => _motionSensorOn = v);
@@ -2480,19 +2535,25 @@ class _HomeScreenState extends State<HomeScreen> {
     String? widgetSize,
     bool uniformControls = false,
   }) {
-    final String effectiveSize = widgetSize ?? _lightWidgetSize;
+    final SectionLayout layout = parseSectionLayout(
+      widgetSize ?? _lightWidgetSize,
+    );
+    final DashboardControlMetrics? lControlMetrics =
+        _homeControlMetricsForLayout(layout);
     final bool editing =
         _editingSection == _DashboardEditSection.light ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
-    final bool compact = effectiveSize == 'M';
-    final double cardHeight = _lightCardHeightForWidgetSize(effectiveSize);
+    final bool compact = layout == SectionLayout.small;
+    final double cardHeight = _lightCardHeightForWidgetSize(
+      widgetSize ?? _lightWidgetSize,
+    );
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
     final DeviceControlSnapshot bathroomHeat = _snap(
       'Bathroom heating thermostat',
     );
 
-    if (effectiveSize == 'M') {
+    if (layout == SectionLayout.small) {
       Widget lightSmallCard({
         required String deviceName,
         required String status,
@@ -2517,6 +2578,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compact,
           cardHeightOverride: cardHeight,
           uniformControlSlot: uniformControls,
+          lControlMetrics: lControlMetrics,
         );
       }
 
@@ -2534,6 +2596,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'assets/Mask group (5).png'
                 : 'assets/images/light_of.png',
             controls: _buildLightingSwitchControl(
+              lControlMetrics: lControlMetrics,
               value: _bedroomDimmer > 0.001,
               onChanged: (v) {
                 setState(() => _bedroomDimmer = v ? 1.0 : 0.0);
@@ -2562,6 +2625,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'assets/Mask group (6).png'
                 : 'assets/images/bathroom_off.png',
             controls: _buildLightingPlusMinusButtons(
+              lControlMetrics: lControlMetrics,
               markKey: 'bathroom_heat',
               dense: true,
               onMinus: () {
@@ -2593,36 +2657,69 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           );
         case 'awning':
-          return lightSmallCard(
-            deviceName: 'Awning garden 123',
-            status: '$_awningUp%',
-            mode: _awningManual ? 'M' : 'A',
-            modeFilled: _awningManual,
-            onModeTap: editing
-                ? null
-                : () => setState(() => _awningManual = !_awningManual),
-            iconImage: 'assets/Rectangle 823.png',
-            iconWidget: DashboardAwningLevelIcon(
-              level: _awningUp / 100.0,
-              softInterior: true,
+          return SizedBox(
+            height: cardHeight,
+            child: _BlindCard(
+              title: 'Awning garden 123',
+              downPercent: _awningDown,
+              upPercent: _awningUp,
+              levelPercent: _awningUp,
+              mode: _awningManual ? 'M' : 'A',
+              modeFilled: _awningManual,
+              previewLevel: _awningUp / 100.0,
+              useAwningPreview: true,
+              imagePath: 'assets/Rectangle 823.png',
+              compact: true,
+              uniformControls: uniformControls,
+              lControlMetrics: lControlMetrics,
+              softPreviewInterior: true,
+              downMarked: _awningMark == 1,
+              upMarked: _awningMark == 2,
+              onNavigate: editing
+                  ? null
+                  : () => DeviceDetailsScreen.go(
+                      context,
+                      deviceTitle: 'Awning garden 123',
+                      imageAssetPath: 'assets/Rectangle 823.png',
+                      controlButtonCount: 1,
+                      controlMode: DeviceDetailsControlMode.awningControl,
+                    ),
+              onModeTap: editing
+                  ? null
+                  : () => setState(() => _awningManual = !_awningManual),
+              onDown: editing
+                  ? () {}
+                  : () => _flashMark(
+                      value: 1,
+                      getCurrent: () => _awningMark,
+                      set: (v) => _awningMark = v,
+                      action: () => _awningAdjustLevel(10),
+                    ),
+              onDownLong: editing
+                  ? null
+                  : () => _flashMark(
+                      value: 1,
+                      getCurrent: () => _awningMark,
+                      set: (v) => _awningMark = v,
+                      action: () => _awningSetLevel(100),
+                    ),
+              onUp: editing
+                  ? () {}
+                  : () => _flashMark(
+                      value: 2,
+                      getCurrent: () => _awningMark,
+                      set: (v) => _awningMark = v,
+                      action: () => _awningAdjustLevel(-10),
+                    ),
+              onUpLong: editing
+                  ? null
+                  : () => _flashMark(
+                      value: 2,
+                      getCurrent: () => _awningMark,
+                      set: (v) => _awningMark = v,
+                      action: () => _awningSetLevel(0),
+                    ),
             ),
-            controls: _buildLightingStepButtons(
-              markKey: 'awning',
-              dense: true,
-              onDown: () => setState(() => _awningAdjustLevel(10)),
-              onUp: () => setState(() => _awningAdjustLevel(-10)),
-              onDownLong: () => setState(() => _awningSetLevel(100)),
-              onUpLong: () => setState(() => _awningSetLevel(0)),
-            ),
-            onTap: editing
-                ? null
-                : () => DeviceDetailsScreen.go(
-                    context,
-                    deviceTitle: 'Awning garden 123',
-                    imageAssetPath: 'assets/Rectangle 823.png',
-                    controlButtonCount: 1,
-                    controlMode: DeviceDetailsControlMode.awningControl,
-                  ),
           );
         case 'irrigation':
           return lightSmallCard(
@@ -2637,6 +2734,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'assets/Mask group (7).png'
                 : 'assets/images/irrigation_of.png',
             controls: _buildLightingSwitchControl(
+              lControlMetrics: lControlMetrics,
               value: _irrigationOn,
               onChanged: (v) {
                 setState(() => _irrigationOn = v);
@@ -2653,37 +2751,68 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
           );
         case 'blind_living':
-          return lightSmallCard(
-            deviceName: 'Blind Living Room',
-            status: '$_blindRoomLevel%  $_blindRoomAngle%',
-            mode: _blindManual ? 'M' : 'A',
-            modeFilled: _blindManual,
-            onModeTap: editing
-                ? null
-                : () => setState(() => _blindManual = !_blindManual),
-            iconImage: 'assets/Rectangle 823.png',
-            iconWidget: _HomeBlindSlatsIcon(
-              level: _blindRoomLevel / 100.0,
-              angle: _blindRoomAngle / 100.0,
-              softInterior: true,
+          return SizedBox(
+            height: cardHeight,
+            child: _BlindCard(
+              title: 'Blind Living Room',
+              downPercent: _blindRoomLevel,
+              upPercent: _blindRoomAngle,
+              mode: _blindManual ? 'M' : 'A',
+              modeFilled: _blindManual,
+              previewLevel: _blindRoomLevel / 100.0,
+              blindAngle: _blindRoomAngle / 100.0,
+              slatsPreviewOverride: _HomeBlindSlatsIcon(
+                level: _blindRoomLevel / 100.0,
+                angle: _blindRoomAngle / 100.0,
+                softInterior: true,
+              ),
+              useBlindSlatsPreview: true,
+              imagePath: 'assets/Rectangle 823.png',
+              compact: true,
+              uniformControls: uniformControls,
+              lControlMetrics: lControlMetrics,
+              softPreviewInterior: true,
+              downMarked: _blindRoomMark == 1,
+              upMarked: _blindRoomMark == 2,
+              onNavigate: editing
+                  ? null
+                  : () => DeviceDetailsScreen.go(
+                      context,
+                      deviceTitle: 'Blind Living Room',
+                      imageAssetPath: 'assets/Rectangle 823.png',
+                      controlButtonCount: 1,
+                      controlMode: DeviceDetailsControlMode.blindControl,
+                    ),
+              onModeTap: editing
+                  ? null
+                  : () => setState(() => _blindManual = !_blindManual),
+              onDown: editing
+                  ? () {}
+                  : () => _flashMark(
+                      value: 1,
+                      getCurrent: () => _blindRoomMark,
+                      set: (v) => _blindRoomMark = v,
+                      action: () => _blindLivingRoomAdjustAngle(10),
+                    ),
+              onDownLong: editing ? null : null,
+              onDownLongStart: editing
+                  ? null
+                  : () => _startBlindLevelChange(true),
+              onDownLongEnd: editing ? null : () => _stopBlindLevelChange(),
+              onUp: editing
+                  ? () {}
+                  : () => _flashMark(
+                      value: 2,
+                      getCurrent: () => _blindRoomMark,
+                      set: (v) => _blindRoomMark = v,
+                      action: () => _blindLivingRoomAdjustAngle(-10),
+                    ),
+              onUpLong: editing ? null : null,
+              onUpLongStart: editing
+                  ? null
+                  : () => _startBlindLevelChange(false),
+              onUpLongEnd: editing ? null : () => _stopBlindLevelChange(),
             ),
-            controls: _buildLightingStepButtons(
-              markKey: 'blind_living',
-              dense: true,
-              onDown: () => setState(() => _blindLivingRoomAdjustAngle(10)),
-              onUp: () => setState(() => _blindLivingRoomAdjustAngle(-10)),
-              onDownLong: () => setState(() => _blindLivingRoomSetLevel(100)),
-              onUpLong: () => setState(() => _blindLivingRoomSetLevel(0)),
-            ),
-            onTap: editing
-                ? null
-                : () => DeviceDetailsScreen.go(
-                    context,
-                    deviceTitle: 'Blind Living Room',
-                    imageAssetPath: 'assets/Rectangle 823.png',
-                    controlButtonCount: 1,
-                    controlMode: DeviceDetailsControlMode.blindControl,
-                  ),
           );
         case 'motion':
           return lightSmallCard(
@@ -2700,6 +2829,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? 'assets/images/update_sensor.png'
                 : 'assets/images/motion_sensor_off.png',
             controls: _buildLightingSwitchControl(
+              lControlMetrics: lControlMetrics,
               value: _motionSensorOn,
               onChanged: (v) {
                 setState(() => _motionSensorOn = v);
@@ -2734,6 +2864,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePathOff: 'assets/images/light_of.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             onModeTap: editing
                 ? null
                 : () => setState(() => _bedroomManual = !_bedroomManual),
@@ -2766,6 +2897,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePathOff: 'assets/images/bathroom_off.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             minusMarked: _bathroomThermoMark == 1,
             plusMarked: _bathroomThermoMark == 2,
             onNavigate: editing
@@ -2824,6 +2956,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             softPreviewInterior: true,
             downMarked: _awningMark == 1,
             upMarked: _awningMark == 2,
@@ -2888,6 +3021,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePathOff: 'assets/images/irrigation_of.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -2924,6 +3058,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             softPreviewInterior: true,
             downMarked: _blindRoomMark == 1,
             upMarked: _blindRoomMark == 2,
@@ -2982,6 +3117,7 @@ class _HomeScreenState extends State<HomeScreen> {
             imagePathOff: 'assets/images/motion_sensor_off.png',
             compact: compact,
             uniformControls: uniformControls,
+            lControlMetrics: lControlMetrics,
             onIsOnChanged: editing
                 ? null
                 : (v) {
@@ -3016,8 +3152,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<String> ids = _deviceOrderFor(_DashboardEditSection.lighting);
     if (ids.isEmpty) return const SizedBox.shrink();
 
-    final String size = _lightingWidgetSize;
-    final double cardHeight = _lightCardHeightForWidgetSize(size);
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final double cardHeight = _lightCardHeightForWidgetSize(_lightingWidgetSize);
 
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final double gridCardWidth =
@@ -3028,7 +3164,8 @@ class _HomeScreenState extends State<HomeScreen> {
         id,
         uniformControlSlot: true,
         cardHeightOverride: cardHeight,
-        compactOverride: size == 'M',
+        compactOverride: layout == SectionLayout.small,
+        sectionLayout: layout,
       );
     }
 
@@ -3046,8 +3183,8 @@ class _HomeScreenState extends State<HomeScreen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: size == 'XL'
-                  ? _lightHorizontalItemWidth(size)
+              width: layout == SectionLayout.extraLarge
+                  ? _lightHorizontalItemWidth(_lightingWidgetSize)
                   : gridCardWidth,
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.lighting,
@@ -3091,16 +3228,25 @@ class _HomeScreenState extends State<HomeScreen> {
     bool? compactOverride,
     double? cardHeightOverride,
     bool uniformControlSlot = false,
+    SectionLayout? sectionLayout,
   }) {
     final bool editing =
         _editingSection == _DashboardEditSection.lighting ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
+    final SectionLayout resolvedLayout =
+        sectionLayout ?? parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? lControlMetrics =
+        _homeControlMetricsForLayout(resolvedLayout);
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
     // Medium: fixed narrow slider. L/XL: expand to fill remaining row width so
     // status text can show in full at 16.sp.
-    final double? sliderWidth = compact ? 60.w : null;
-    final bool expandSlider = !compact;
+    final double? sliderWidth = lControlMetrics != null
+        ? lControlMetrics.sliderWidth.w
+        : (compact ? 60.w : null);
+    final bool expandSlider = lControlMetrics?.expandSlider ?? !compact;
+    final bool controlFillsSlot =
+        lControlMetrics?.controlFillsSlot ?? expandSlider;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -3128,6 +3274,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'scene',
             dense: compact,
             onLeft: () => _patchSnap(
@@ -3142,6 +3289,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3168,6 +3316,7 @@ class _HomeScreenState extends State<HomeScreen> {
             intensity: rgbw.rgbwIntensity,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: rgbw.rgbwIntensity,
             width: sliderWidth,
             expand: expandSlider,
@@ -3181,7 +3330,8 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
-          controlFillsSlot: expandSlider,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3209,6 +3359,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ringStyle: DashboardRingStyle.led,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: led.ledDimmerPercent,
             width: sliderWidth,
             expand: expandSlider,
@@ -3222,7 +3373,8 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
-          controlFillsSlot: expandSlider,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3248,6 +3400,7 @@ class _HomeScreenState extends State<HomeScreen> {
           iconImage: 'assets/images/heating_cooling.png',
           iconWidget: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: hvac.isOn,
             onChanged: (v) =>
                 _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
@@ -3255,6 +3408,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3282,6 +3436,7 @@ class _HomeScreenState extends State<HomeScreen> {
             intensity: tunable.tunableWhiteIntensity,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: tunable.tunableWhiteIntensity,
             width: sliderWidth,
             expand: expandSlider,
@@ -3293,7 +3448,8 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
-          controlFillsSlot: expandSlider,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3317,6 +3473,7 @@ class _HomeScreenState extends State<HomeScreen> {
             percent: vent.ventilationPercent,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: vent.ventilationPercent,
             width: sliderWidth,
             expand: expandSlider,
@@ -3329,7 +3486,8 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
-          controlFillsSlot: expandSlider,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3352,6 +3510,7 @@ class _HomeScreenState extends State<HomeScreen> {
           iconImage: 'assets/images/Fun_level3.png',
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'fan',
             dense: compact,
             onMinus: () => _patchSnap(
@@ -3366,6 +3525,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3391,6 +3551,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: presence.isOn,
           ),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'presence',
             dense: compact,
             onLeft: () => _patchSnap(
@@ -3415,6 +3576,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3439,6 +3601,7 @@ class _HomeScreenState extends State<HomeScreen> {
             currentTempCelsius: living.thermostatCelsius,
           ),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'living',
             dense: compact,
             onMinus: () => _patchSnap(
@@ -3465,6 +3628,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3494,6 +3658,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isOn: multi.isOn,
           ),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'multi',
             dense: compact,
             onLeft: () => _patchSnap(
@@ -3528,6 +3693,7 @@ class _HomeScreenState extends State<HomeScreen> {
           compactOverride: compactOverride,
           cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3574,6 +3740,8 @@ class _HomeScreenState extends State<HomeScreen> {
         _editingSection == _DashboardEditSection.lighting ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
+    // List rows use default control sizing, not L-layout metrics.
+    final DashboardControlMetrics? lControlMetrics = null;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -3599,6 +3767,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _lightSceneManual = !_lightSceneManual),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'scene',
             onLeft: () => _patchSnap(
               'Light Scene',
@@ -3635,6 +3804,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _rgbwManual = !_rgbwManual),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: rgbw.rgbwIntensity,
             onChanged: (v) => _patchSnap(
               'RGBW room abc',
@@ -3668,6 +3838,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   () => _lightingLedBadge1Manual = !_lightingLedBadge1Manual,
                 ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: led.ledDimmerPercent,
             onChanged: (v) => _patchSnap(
               'LED Dimmer living room',
@@ -3698,6 +3869,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   () => _heatingCoolingManual = !_heatingCoolingManual,
                 ),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: hvac.isOn,
             onChanged: (v) =>
                 _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
@@ -3728,6 +3900,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : () =>
                     setState(() => _tunableWhiteManual = !_tunableWhiteManual),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: tunable.tunableWhiteIntensity,
             onChanged: (v) => _patchSnap(
               'Tunable white light',
@@ -3755,6 +3928,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _ventilationManual = !_ventilationManual),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: vent.ventilationPercent,
             onChanged: (v) => _patchSnap(
               'Ventilation',
@@ -3782,6 +3956,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _fanLevelManual = !_fanLevelManual),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'fan',
             onMinus: () => _patchSnap(
               'Fan Level 3',
@@ -3816,6 +3991,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _presenceManual = !_presenceManual),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'presence',
             onLeft: () => _patchSnap(
               'Presence',
@@ -3860,6 +4036,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ? null
               : () => setState(() => _livingRoomManual = !_livingRoomManual),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'living',
             onMinus: () => _patchSnap(
               'Living Room',
@@ -3907,6 +4084,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   () => _multiValueSwitchManual = !_multiValueSwitchManual,
                 ),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'multi',
             onLeft: () => _patchSnap(
               'Multi-Value Switch',
@@ -3960,10 +4138,15 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? onDownLong,
     VoidCallback? onUpLong,
     bool dense = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
-    final double btnSize = dense ? 30 : 35;
-    final double gap = dense ? 6.w : 17.w;
-    final double iconSide = dense ? 11.w : 13.w;
+    final double btnSize =
+        lControlMetrics?.circularButtonSize ?? (dense ? 30 : 35);
+    final double gap =
+        lControlMetrics?.circularButtonGap.w ?? (dense ? 6.w : 17.w);
+    final double iconSide = lControlMetrics != null
+        ? (btnSize * 0.36).w
+        : (dense ? 11.w : 13.w);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -4030,9 +4213,15 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onMinus,
     required VoidCallback onPlus,
     bool dense = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
-    final double btnSize = dense ? 30 : 35;
-    final double gap = dense ? 6.w : 17.w;
+    final double btnSize =
+        lControlMetrics?.circularButtonSize ?? (dense ? 30 : 35);
+    final double gap =
+        lControlMetrics?.circularButtonGap.w ?? (dense ? 6.w : 17.w);
+    final double iconSize = lControlMetrics != null
+        ? btnSize * 0.58
+        : (dense ? 18.sp : 22.sp);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -4047,7 +4236,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Icon(
             Icons.remove_rounded,
-            size: dense ? 18.sp : 22.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4063,7 +4252,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Icon(
             Icons.add_rounded,
-            size: dense ? 18.sp : 22.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4078,9 +4267,15 @@ class _HomeScreenState extends State<HomeScreen> {
     VoidCallback? onLeftLong,
     VoidCallback? onRightLong,
     bool dense = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
-    final double btnSize = dense ? 30 : 35;
-    final double gap = dense ? 6.w : 17.w;
+    final double btnSize =
+        lControlMetrics?.circularButtonSize ?? (dense ? 30 : 35);
+    final double gap =
+        lControlMetrics?.circularButtonGap.w ?? (dense ? 6.w : 17.w);
+    final double iconSize = lControlMetrics != null
+        ? btnSize * 0.68
+        : (dense ? 22.sp : 26.sp);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -4103,7 +4298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           child: Icon(
             Icons.chevron_left_rounded,
-            size: dense ? 22.sp : 26.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4127,7 +4322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           child: Icon(
             Icons.chevron_right_rounded,
-            size: dense ? 22.sp : 26.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -4138,18 +4333,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildLightingSwitchControl({
     required bool value,
     required ValueChanged<bool> onChanged,
+    DashboardControlMetrics? lControlMetrics,
   }) {
-    return SizedBox(
-      height: 35.h,
-      width: 60.w,
-      child: CupertinoSwitch(
-        value: value,
-        onChanged: (v) {
-          uiTapHaptic();
-          onChanged(v);
-        },
-        activeColor: const Color(0xFF0088FE),
-      ),
+    final double width = lControlMetrics?.toggleWidth.w ?? 60.w;
+    final double height = lControlMetrics?.toggleHeight.h ?? 35.h;
+    return _dashboardCupertinoSwitch(
+      value: value,
+      onChanged: onChanged,
+      width: width,
+      height: height,
     );
   }
 
@@ -4158,7 +4350,19 @@ class _HomeScreenState extends State<HomeScreen> {
     required ValueChanged<double> onChanged,
     double? width,
     bool expand = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
+    if (lControlMetrics != null) {
+      return SizedBox(
+        width: lControlMetrics.sliderWidth.w,
+        height: lControlMetrics.sliderHeight.h,
+        child: _DimmerPill(
+          percent: value,
+          onChanged: onChanged,
+          fixedWidth: lControlMetrics.sliderWidth.w,
+        ),
+      );
+    }
     if (expand) {
       return LayoutBuilder(
         builder: (context, constraints) {
@@ -4290,12 +4494,15 @@ class _HomeScreenState extends State<HomeScreen> {
     double? cardHeightOverride,
     bool uniformControlSlot = false,
     bool controlFillsSlot = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
     final bool compact = compactOverride ?? _lightingHorizontalScroll;
     // Prefer full status text at Motion Sensor size (16.sp bold). Controls use
     // the remaining width (up to controlSlotWidth) so they never clip the label.
-    final double controlSlotWidth = compact ? 64.w : 136.w;
-    final double controlContentHeight = 35.h;
+    final double controlSlotWidth = lControlMetrics?.controlSlotWidth.w ??
+        (compact ? 64.w : 136.w);
+    final double controlContentHeight =
+        lControlMetrics?.sliderHeight.h ?? 35.h;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
@@ -4374,51 +4581,64 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: gap),
             SizedBox(
               height: statusH,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Full label at Motion Sensor size — never ellipsis / scale down.
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
-                      fontFamily: 'Inter',
-                      height: 1.0,
-                    ),
-                    maxLines: 1,
-                    softWrap: false,
-                  ),
-                  if (controls != null) ...[
-                    SizedBox(width: 6.w),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double slotW = math.min(
-                            controlSlotWidth,
-                            constraints.maxWidth,
-                          );
-                          return SizedBox(
-                            width: slotW,
-                            height: controlContentHeight,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: controlFillsSlot
-                                  ? controls
-                                  : FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      alignment: Alignment.centerRight,
-                                      child: controls,
-                                    ),
+              child: lControlMetrics != null
+                  ? (controls == null
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: _lDashboardCardStatusText(status),
+                        )
+                      : _dashboardMetricsControlRow(
+                          status: status,
+                          controls: controls,
+                          metrics: lControlMetrics,
+                          controlContentHeight: controlContentHeight,
+                          gap: compact ? 4 : 6,
+                        ))
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Full label at Motion Sensor size — never ellipsis / scale down.
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                            height: 1.0,
+                          ),
+                          maxLines: 1,
+                          softWrap: false,
+                        ),
+                        if (controls != null) ...[
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final double slotW = math.min(
+                                  controlSlotWidth,
+                                  constraints.maxWidth,
+                                );
+                                return SizedBox(
+                                  width: slotW,
+                                  height: controlContentHeight,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: controlFillsSlot
+                                        ? controls
+                                        : FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerRight,
+                                            child: controls,
+                                          ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
             ),
           ],
         ),
@@ -4896,21 +5116,26 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget titleRow = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF111827),
-            fontFamily: 'Inter',
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF111827),
+              fontFamily: 'Inter',
+            ),
           ),
         ),
-        if (showEditButton && onEditTap != null)
+        if (showEditButton && onEditTap != null) ...[
+          SizedBox(width: 8.w),
           GestureDetector(
             onTap: onEditTap,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Edit',
@@ -4932,6 +5157,7 @@ class _SectionTitle extends StatelessWidget {
               ],
             ),
           ),
+        ],
       ],
     );
 
@@ -5309,6 +5535,264 @@ class _CircleBtn extends StatelessWidget {
 // ---------------------------
 // Light Cards
 // ---------------------------
+
+/// Dashboard card bottom status/value — bold; ellipsis when space is tight.
+Widget _lDashboardCardStatusText(
+  String text, {
+  int maxLines = 1,
+  double? fontSize,
+}) {
+  return Text(
+    text,
+    maxLines: maxLines,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(
+      fontSize: fontSize ?? 16.sp,
+      fontWeight: FontWeight.bold,
+      color: const Color(0xFF111827),
+      fontFamily: 'Inter',
+      height: 1.0,
+    ),
+  );
+}
+
+bool _isSDashboardMetrics(DashboardControlMetrics metrics) =>
+    metrics.circularButtonSize == DashboardControlMetrics.s.circularButtonSize;
+
+/// Lighting cards pin controls in a 32.h status row — Blind/Thermostat must
+/// use the same circle diameter so they match Fan / Light Scene / Living room.
+const double _kDashboardLightingStatusButtonSize = 32;
+
+/// Home-screen control metrics. XL keeps XL card/slider metrics but uses
+/// L fixed sizes for circular buttons and toggles (no stretch/shrink).
+DashboardControlMetrics? _homeControlMetricsForLayout(SectionLayout layout) {
+  final DashboardControlMetrics? metrics =
+      DashboardControlMetrics.forLayout(layout);
+  if (metrics == null || layout != SectionLayout.extraLarge) {
+    return metrics;
+  }
+  return DashboardControlMetrics(
+    circularButtonSize: DashboardControlMetrics.l.circularButtonSize,
+    circularButtonGap: DashboardControlMetrics.l.circularButtonGap,
+    toggleWidth: DashboardControlMetrics.l.toggleWidth,
+    toggleHeight: DashboardControlMetrics.l.toggleHeight,
+    sliderWidth: metrics.sliderWidth,
+    sliderHeight: metrics.sliderHeight,
+    controlSlotWidth: metrics.controlSlotWidth,
+    expandSlider: metrics.expandSlider,
+    controlFillsSlot: metrics.controlFillsSlot,
+  );
+}
+
+/// Circle diameter for `_BlindCard` / `_ThermostatCard` — never larger than
+/// Lighting status-row buttons (tick-marked Fan / Light Scene / Living room).
+double _blindThermostatCircularButtonSize({
+  required DashboardControlMetrics? metrics,
+  required double fallback,
+}) {
+  final double raw = metrics?.circularButtonSize ?? fallback;
+  if (metrics == null) return raw;
+  return math.min(raw, _kDashboardLightingStatusButtonSize);
+}
+
+const double _kDashboardCupertinoSwitchHeight = 31;
+
+double _deviceCardIconSide(bool compact) =>
+    compact ? 34.w : kDashboardLightingIconSide;
+
+double _deviceCardLayoutGap(bool compact) => compact ? 6.h : 8.h;
+
+double _deviceCardTitleHeight(bool compact) => compact ? 30.h : 38.h;
+
+Widget _deviceCardTitleSlot(String title, {required bool compact}) {
+  return SizedBox(
+    height: _deviceCardTitleHeight(compact),
+    width: double.infinity,
+    child: Align(
+      alignment: Alignment.topLeft,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xFF111827),
+          height: 1.15,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+  );
+}
+
+/// S-only title for Awning / Blind Living Room (_BlindCard).
+/// Default 30.h + 16.sp clips the 2nd line into the control row.
+Widget _blindCardTitleSlot(String title, {required bool compact}) {
+  if (!compact) {
+    return _deviceCardTitleSlot(title, compact: false);
+  }
+  return SizedBox(
+    height: 34.h,
+    width: double.infinity,
+    child: ClipRect(
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: const Color(0xFF111827),
+            height: 1.15,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _dashboardCupertinoSwitch({
+  required bool value,
+  required ValueChanged<bool>? onChanged,
+  required double width,
+  required double height,
+  Alignment alignment = Alignment.centerRight,
+}) {
+  return SizedBox(
+    width: width,
+    height: height,
+    child: Align(
+      alignment: alignment,
+      child: Transform.scale(
+        scale: height / _kDashboardCupertinoSwitchHeight,
+        child: CupertinoSwitch(
+          value: value,
+          onChanged: onChanged == null
+              ? null
+              : (bool v) {
+                  uiTapHaptic();
+                  onChanged(v);
+                },
+          activeColor: const Color(0xFF0088FE),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _dashboardMetricsControlRow({
+  required String status,
+  required Widget controls,
+  required DashboardControlMetrics metrics,
+  required double controlContentHeight,
+  double gap = 6,
+}) {
+  // S only: show full status text (like M/L/XL) via FittedBox — no ellipsis.
+  // Controls keep their natural width so values such as "24.6° c" / "All On" fit.
+  if (_isSDashboardMetrics(metrics)) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                status,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF111827),
+                  fontFamily: 'Inter',
+                  height: 1.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 4.w),
+        SizedBox(
+          height: controlContentHeight,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: controls,
+          ),
+        ),
+      ],
+    );
+  }
+
+  final double controlSlotWidth = metrics.controlSlotWidth.w;
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      _lDashboardCardStatusText(status),
+      SizedBox(width: gap.w),
+      Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double slotW = math.min(
+              controlSlotWidth,
+              constraints.maxWidth,
+            );
+            return SizedBox(
+              width: slotW,
+              height: controlContentHeight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: controls,
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  );
+}
+
+/// Blind Living Room dual-stat row: stats expand left, fixed button slot right.
+/// Status scales down only when L/XL space is tight (e.g. "100 100"); M is unchanged.
+Widget _blindDualMetricsControlRow({
+  required Widget status,
+  required Widget controls,
+  required DashboardControlMetrics metrics,
+  required double controlContentHeight,
+  double gap = 4,
+}) {
+  final double controlSlotWidth =
+      (metrics.circularButtonSize * 2 + metrics.circularButtonGap).w;
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Expanded(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: status,
+          ),
+        ),
+      ),
+      SizedBox(width: gap.w),
+      SizedBox(
+        width: controlSlotWidth,
+        height: controlContentHeight,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: controls,
+        ),
+      ),
+    ],
+  );
+}
+
 class _LightDimmerCard extends StatelessWidget {
   const _LightDimmerCard({
     required this.title,
@@ -5324,6 +5808,7 @@ class _LightDimmerCard extends StatelessWidget {
     this.showModeBadge = true,
     this.compact = false,
     this.uniformControls = false,
+    this.lControlMetrics,
   });
 
   final String title;
@@ -5333,6 +5818,7 @@ class _LightDimmerCard extends StatelessWidget {
   final bool showModeBadge;
   final bool compact;
   final bool uniformControls;
+  final DashboardControlMetrics? lControlMetrics;
   final bool isOn;
   final String? imagePath;
   final String? imagePathOff;
@@ -5349,35 +5835,35 @@ class _LightDimmerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final top = Column(
+    final double iconSide = _deviceCardIconSide(compact);
+    final double gap = _deviceCardLayoutGap(compact);
+    final Widget iconWidget = _displayImagePath != null
+        ? Image.asset(
+            _displayImagePath!,
+            width: iconSide,
+            height: iconSide,
+            fit: BoxFit.contain,
+          )
+        : Icon(
+            Icons.lightbulb_outline,
+            size: iconSide,
+            color: percent <= 0.001
+                ? const Color(0xFF9CA3AF)
+                : const Color(0xFF15DFFE),
+          );
+    final Widget header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _displayImagePath != null
-            ? Image.asset(
-                _displayImagePath!,
-                width: compact ? 34.w : 52.w,
-                height: compact ? 34.w : 52.w,
-                fit: BoxFit.contain,
-              )
-            : Icon(
-                Icons.lightbulb_outline,
-                size: 52.sp,
-                color: percent <= 0.001
-                    ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF15DFFE),
-              ),
-        SizedBox(height: compact ? 3.h : 10.h),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF111827),
-            height: 1.18,
+        SizedBox(
+          height: iconSide,
+          width: double.infinity,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: iconWidget,
           ),
-          maxLines: compact ? 4 : 2,
-          overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
         ),
+        SizedBox(height: gap),
+        _deviceCardTitleSlot(title, compact: compact),
       ],
     );
 
@@ -5397,54 +5883,66 @@ class _LightDimmerCard extends StatelessWidget {
                       onNavigate!();
                     },
                     borderRadius: BorderRadius.circular(18.r),
-                    child: top,
+                    child: header,
                   ),
                 )
               else
-                top,
+                header,
               const Spacer(),
-              Row(
-                children: [
-                  SizedBox(
-                    width: uniformControls ? 52.w : (compact ? 32.w : 52.w),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '${(percent * 100).round()}%',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF111827),
-                        ),
-                        textAlign: TextAlign.left,
-                        // maxLines: 1,
-                        softWrap: false,
+              lControlMetrics != null
+                  ? _dashboardMetricsControlRow(
+                      status: '${(percent * 100).round()}%',
+                      controls: _dashboardCupertinoSwitch(
+                        value: percent > 0.001,
+                        onChanged: onPercentChanged == null
+                            ? null
+                            : (v) => onPercentChanged!(v ? 1.0 : 0.0),
+                        width: lControlMetrics!.toggleWidth.w,
+                        height: lControlMetrics!.toggleHeight.h,
                       ),
-                    ),
-                  ),
-                  //SizedBox(width: 10.w),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        height: 35.h,
-                        width: 60.w,
-                        child: CupertinoSwitch(
-                          value: percent > 0.001,
-                          onChanged: onPercentChanged == null
-                              ? null
-                              : (v) {
-                                  uiTapHaptic();
-                                  onPercentChanged!(v ? 1.0 : 0.0);
-                                },
-                          activeColor: const Color(0xFF0088FE),
+                      metrics: lControlMetrics!,
+                      controlContentHeight: lControlMetrics!.toggleHeight.h,
+                    )
+                  : Row(
+                      children: [
+                        SizedBox(
+                          width: uniformControls ? 52.w : (compact ? 32.w : 52.w),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '${(percent * 100).round()}%',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF111827),
+                              ),
+                              textAlign: TextAlign.left,
+                              softWrap: false,
+                            ),
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              height: 35.h,
+                              width: 60.w,
+                              child: CupertinoSwitch(
+                                value: percent > 0.001,
+                                onChanged: onPercentChanged == null
+                                    ? null
+                                    : (v) {
+                                        uiTapHaptic();
+                                        onPercentChanged!(v ? 1.0 : 0.0);
+                                      },
+                                activeColor: const Color(0xFF0088FE),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -5460,10 +5958,15 @@ class _LightDimmerCard extends StatelessWidget {
 }
 
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent, this.onChanged});
+  const _DimmerPill({
+    required this.percent,
+    this.onChanged,
+    this.fixedWidth,
+  });
 
   final double percent;
   final ValueChanged<double>? onChanged;
+  final double? fixedWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -5476,10 +5979,10 @@ class _DimmerPill extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double w =
-            constraints.maxWidth.isFinite && constraints.maxWidth > 0
-            ? constraints.maxWidth
-            : 133.w;
+        final double w = fixedWidth ??
+            (constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                ? constraints.maxWidth
+                : 133.w);
 
         final Widget pill = Container(
           width: w,
@@ -5571,6 +6074,7 @@ class _ThermostatCard extends StatelessWidget {
     this.showModeBadge = true,
     this.compact = false,
     this.uniformControls = false,
+    this.lControlMetrics,
   });
 
   final String title;
@@ -5589,6 +6093,7 @@ class _ThermostatCard extends StatelessWidget {
   final bool plusMarked;
   final bool compact;
   final bool uniformControls;
+  final DashboardControlMetrics? lControlMetrics;
 
   String? get _displayImagePath {
     if (!isOn && imagePathOff != null) {
@@ -5599,62 +6104,33 @@ class _ThermostatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget headerColumn = Column(
+    final double iconSide = _deviceCardIconSide(compact);
+    final double gap = _deviceCardLayoutGap(compact);
+    final Widget iconWidget = _displayImagePath != null
+        ? Image.asset(
+            _displayImagePath!,
+            width: iconSide,
+            height: iconSide,
+            fit: BoxFit.contain,
+          )
+        : Icon(
+            Icons.thermostat_outlined,
+            size: iconSide,
+            color: const Color(0xFF0088FE),
+          );
+    final Widget header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _displayImagePath != null
-            ? Image.asset(
-                _displayImagePath!,
-                width: compact ? 34.w : 52.w,
-                height: compact ? 34.w : 52.w,
-                fit: BoxFit.contain,
-              )
-            : Icon(
-                Icons.thermostat_outlined,
-                size: 44.sp,
-                color: const Color(0xFF0088FE),
-              ),
-        SizedBox(height: compact ? 3.h : 10.h),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title.split('\n').isNotEmpty ? title.split('\n')[0] : title,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF111827),
-                    height: 1.15,
-                  ),
-                  maxLines: compact ? 4 : 2,
-                  overflow: compact
-                      ? TextOverflow.visible
-                      : TextOverflow.ellipsis,
-                ),
-              ),
-              if (title.contains('\n')) ...[
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    title.split('\n').length > 1 ? title.split('\n')[1] : '',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: const Color(0xFF111827),
-                      height: 1.15,
-                      //fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: compact ? 4 : 2,
-                    overflow: compact
-                        ? TextOverflow.visible
-                        : TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ],
+        SizedBox(
+          height: iconSide,
+          width: double.infinity,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: iconWidget,
           ),
         ),
+        SizedBox(height: gap),
+        _deviceCardTitleSlot(title, compact: compact),
       ],
     );
 
@@ -5665,30 +6141,77 @@ class _ThermostatCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: onNavigate != null
-                    ? Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            uiTapHaptic();
-                            onNavigate!();
-                          },
-                          borderRadius: BorderRadius.circular(18.r),
-                          child: headerColumn,
-                        ),
-                      )
-                    : headerColumn,
-              ),
-              SizedBox(height: compact ? 2.h : 10.h),
+              if (onNavigate != null)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      uiTapHaptic();
+                      onNavigate!();
+                    },
+                    borderRadius: BorderRadius.circular(18.r),
+                    child: header,
+                  ),
+                )
+              else
+                header,
+              const Spacer(),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final bool compactControls =
+                      lControlMetrics == null &&
                       !uniformControls &&
                       (compact || constraints.maxWidth < 120);
-                  final double btnSize = compactControls ? 22 : 35;
+                  final double btnSize = _blindThermostatCircularButtonSize(
+                    metrics: lControlMetrics,
+                    fallback: compactControls ? 22 : 35,
+                  );
+                  final double btnGap = lControlMetrics?.circularButtonGap.w ??
+                      (compactControls ? 6.w : 10.w);
+                  // Fixed button-row height (do not inflate with XL sliderHeight).
+                  final double controlRowHeight = btnSize.w;
+                  final double iconSize = lControlMetrics != null
+                      ? btnSize * 0.58
+                      : (compactControls ? 15.sp : 23.sp);
                   // Value left, minus/plus grouped right (dashboard-wide rule).
+                  if (lControlMetrics != null) {
+                    return SizedBox(
+                      height: controlRowHeight,
+                      child: _dashboardMetricsControlRow(
+                        status: '${value.toStringAsFixed(1)}° c',
+                        controls: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _CircleBtn(
+                              size: btnSize,
+                              marked: minusMarked,
+                              onTap: onMinus,
+                              child: Icon(
+                                Icons.remove,
+                                size: iconSize,
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
+                            SizedBox(width: btnGap),
+                            _CircleBtn(
+                              size: btnSize,
+                              marked: plusMarked,
+                              onTap: onPlus,
+                              child: Icon(
+                                Icons.add,
+                                size: iconSize,
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ],
+                        ),
+                        metrics: lControlMetrics!,
+                        controlContentHeight: controlRowHeight,
+                      ),
+                    );
+                  }
                   return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Text(
@@ -5710,18 +6233,22 @@ class _ThermostatCard extends StatelessWidget {
                         onTap: onMinus,
                         child: Icon(
                           Icons.remove,
-                          size: compactControls ? 15.sp : 23.sp,
+                          size: lControlMetrics != null
+                              ? (btnSize * 0.58).sp
+                              : (compactControls ? 15.sp : 23.sp),
                           color: const Color(0xFF6B7280),
                         ),
                       ),
-                      SizedBox(width: compactControls ? 6.w : 10.w),
+                      SizedBox(width: btnGap),
                       _CircleBtn(
                         size: btnSize,
                         marked: plusMarked,
                         onTap: onPlus,
                         child: Icon(
                           Icons.add,
-                          size: compactControls ? 15.sp : 23.sp,
+                          size: lControlMetrics != null
+                              ? (btnSize * 0.58).sp
+                              : (compactControls ? 15.sp : 23.sp),
                           color: const Color(0xFF6B7280),
                         ),
                       ),
@@ -5774,6 +6301,7 @@ class _BlindCard extends StatelessWidget {
     this.onNavigate,
     this.showModeBadge = true,
     this.uniformControls = false,
+    this.lControlMetrics,
   });
 
   final String title;
@@ -5795,6 +6323,7 @@ class _BlindCard extends StatelessWidget {
   final bool compact;
   final bool softPreviewInterior;
   final bool uniformControls;
+  final DashboardControlMetrics? lControlMetrics;
   final VoidCallback onDown;
   final VoidCallback onUp;
   final VoidCallback? onDownLong;
@@ -5810,6 +6339,12 @@ class _BlindCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // S (compact): match neighboring _buildLightingCard icons (52.w), not 34.w —
+    // a smaller slot shrinks the blind preview and pushes the title up.
+    // M/L/XL already use kDashboardLightingIconSide; keep that unchanged.
+    final double iconSide = kDashboardLightingIconSide;
+    final double gap = _deviceCardLayoutGap(compact);
+
     Widget titleInkWell(Widget child) {
       if (onNavigate == null) return child;
       return Material(
@@ -5825,6 +6360,57 @@ class _BlindCard extends StatelessWidget {
       );
     }
 
+    Widget buildIcon() {
+      if (slatsPreviewOverride != null) {
+        return dashboardLightingIconFrame(slatsPreviewOverride!);
+      }
+      if (previewLevel != null) {
+        return dashboardLightingIconFrame(
+          useBlindSlatsPreview
+              ? DashboardBlindSlatsIcon(
+                  level: previewLevel!,
+                  angle: blindAngle ?? 1.0,
+                )
+              : useAwningPreview
+              ? DashboardAwningLevelIcon(
+                  level: previewLevel!,
+                  softInterior: softPreviewInterior,
+                )
+              : DashboardBlindSlatsIcon(
+                  level: previewLevel!,
+                  angle: 1.0,
+                ),
+        );
+      }
+      if (imagePath != null) {
+        return Image.asset(
+          imagePath!,
+          width: iconSide,
+          height: iconSide,
+          fit: BoxFit.contain,
+        );
+      }
+      return SizedBox(width: iconSide, height: iconSide);
+    }
+
+    final Widget header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleInkWell(
+          SizedBox(
+            height: iconSide,
+            width: double.infinity,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: buildIcon(),
+            ),
+          ),
+        ),
+        SizedBox(height: gap),
+        titleInkWell(_blindCardTitleSlot(title, compact: compact)),
+      ],
+    );
+
     return Stack(
       children: [
         _CardShell(
@@ -5832,81 +6418,50 @@ class _BlindCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (slatsPreviewOverride != null)
-                titleInkWell(
-                  compact
-                      ? SizedBox(
-                          width: 36.w,
-                          height: 36.w,
-                          child: FittedBox(child: slatsPreviewOverride!),
-                        )
-                      : slatsPreviewOverride!,
-                )
-              else if (previewLevel != null)
-                titleInkWell(
-                  useBlindSlatsPreview
-                      ? DashboardBlindSlatsIcon(
-                          level: previewLevel!,
-                          angle: blindAngle ?? 1.0,
-                        )
-                      : useAwningPreview
-                      ? DashboardAwningLevelIcon(
-                          level: previewLevel!,
-                          softInterior: softPreviewInterior,
-                        )
-                      : DashboardBlindSlatsIcon(
-                          level: previewLevel!,
-                          angle: 1.0,
-                        ),
-                )
-              else if (imagePath != null)
-                titleInkWell(
-                  Image.asset(
-                    imagePath!,
-                    width: compact ? 36.w : 65.w,
-                    height: compact ? 36.w : 65.w,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              SizedBox(height: compact ? 3.h : 17.h),
-              Expanded(
-                child: titleInkWell(
-                  SizedBox.expand(
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF111827),
-                          height: 1.18,
-                        ),
-                        maxLines: compact ? 4 : 2,
-                        overflow: compact
-                            ? TextOverflow.visible
-                            : TextOverflow.ellipsis,
-                      ),
+              header,
+              const Spacer(),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final bool compactControls = lControlMetrics == null &&
+                      !uniformControls &&
+                      (compact || compactControlButtons);
+                  final double controlSize = _blindThermostatCircularButtonSize(
+                    metrics: lControlMetrics,
+                    fallback: compactControls ? 22 : 35,
+                  );
+                  final double btnGap = lControlMetrics?.circularButtonGap.w ??
+                      (compactControls ? 6.w : 10.w);
+                  // Fixed button-row height (do not inflate with XL sliderHeight).
+                  final double controlRowHeight = controlSize.w;
+                  final double iconSize = lControlMetrics != null
+                      ? (controlSize * 0.36).w
+                      : (compactControls ? 9.sp : 13.sp);
+                  final Widget downBtn = _CircleBtn(
+                    marked: downMarked,
+                    onTap: onDown,
+                    onLongPress: onDownLong,
+                    onLongPressStart: onDownLongStart,
+                    onLongPressEnd: onDownLongEnd,
+                    size: controlSize,
+                    idleTransparent: false,
+                    child: Image.asset(
+                      'assets/Mask group (17).png',
+                      width: iconSize,
+                      height: iconSize,
+                      fit: BoxFit.contain,
+                      color: const Color(0xFF6B7280),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: compact ? 2.h : 8.h),
-              Flexible(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final bool compactControls =
-                        !uniformControls && (compact || compactControlButtons);
-                    final double controlSize = compactControls ? 22 : 35;
-                    final double iconSize = compactControls ? 9.sp : 13.sp;
-                    final Widget downBtn = _CircleBtn(
-                      marked: downMarked,
-                      onTap: onDown,
-                      onLongPress: onDownLong,
-                      onLongPressStart: onDownLongStart,
-                      onLongPressEnd: onDownLongEnd,
-                      size: controlSize,
-                      idleTransparent: false,
+                  );
+                  final Widget upBtn = _CircleBtn(
+                    marked: upMarked,
+                    onTap: onUp,
+                    onLongPress: onUpLong,
+                    onLongPressStart: onUpLongStart,
+                    onLongPressEnd: onUpLongEnd,
+                    size: controlSize,
+                    idleTransparent: false,
+                    child: Transform.rotate(
+                      angle: math.pi,
                       child: Image.asset(
                         'assets/Mask group (17).png',
                         width: iconSize,
@@ -5914,143 +6469,147 @@ class _BlindCard extends StatelessWidget {
                         fit: BoxFit.contain,
                         color: const Color(0xFF6B7280),
                       ),
-                    );
-                    final Widget upBtn = _CircleBtn(
-                      marked: upMarked,
-                      onTap: onUp,
-                      onLongPress: onUpLong,
-                      onLongPressStart: onUpLongStart,
-                      onLongPressEnd: onUpLongEnd,
-                      size: controlSize,
-                      idleTransparent: false,
-                      child: Transform.rotate(
-                        angle: math.pi,
-                        child: Image.asset(
-                          'assets/Mask group (17).png',
-                          width: iconSize,
-                          height: iconSize,
+                    ),
+                  );
+                  final Widget buttonGroup = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      downBtn,
+                      SizedBox(width: btnGap),
+                      upBtn,
+                    ],
+                  );
+
+                  final bool isSLayout = compact ||
+                      (lControlMetrics != null &&
+                          _isSDashboardMetrics(lControlMetrics!));
+                  final double statusFontSize = isSLayout ? 14.sp : 16.sp;
+                  final double levelIconW = isSLayout ? 8.w : 10.w;
+                  final double angleIconW = isSLayout ? 7.w : 8.w;
+                  final double levelIconH = isSLayout ? 14.h : 17.h;
+
+                  Widget levelStat() {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/Group 32.jpg',
+                          width: levelIconW,
+                          height: levelIconH,
                           fit: BoxFit.contain,
-                          color: const Color(0xFF6B7280),
                         ),
-                      ),
+                        SizedBox(width: 2.w),
+                        Text(
+                          '$downPercent',
+                          style: TextStyle(
+                            fontSize: statusFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                      ],
                     );
+                  }
 
-                    if (levelPercent != null) {
-                      // Value left, down/up grouped right (dashboard-wide rule).
-                      return SizedBox(
-                        width: constraints.maxWidth,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    '$levelPercent%',
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF111827),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 6.w),
-                            downBtn,
-                            SizedBox(width: compactControls ? 6.w : 10.w),
-                            Padding(
-                              padding: EdgeInsets.only(right: 2.w),
-                              child: upBtn,
-                            ),
-                          ],
+                  Widget angleStat() {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/Vector 4.jpg',
+                          width: angleIconW,
+                          height: levelIconH,
+                          fit: BoxFit.contain,
                         ),
-                      );
-                    }
+                        SizedBox(width: 2.w),
+                        Text(
+                          '$upPercent',
+                          style: TextStyle(
+                            fontSize: statusFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
-                    Widget levelStat() {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/Group 32.jpg',
-                            width: 10.w,
-                            height: 17.h,
-                            fit: BoxFit.contain,
-                          ),
-                          SizedBox(width: 2.w),
-                          Text(
-                            '$downPercent%',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF111827),
-                            ),
-                          ),
-                        ],
-                      );
-                    }
+                  Widget dualStatusRow({required double statGap}) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        levelStat(),
+                        SizedBox(width: statGap),
+                        angleStat(),
+                      ],
+                    );
+                  }
 
-                    Widget angleStat() {
-                      return Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            'assets/Vector 4.jpg',
-                            width: 8.w,
-                            height: 17.h,
-                            fit: BoxFit.contain,
-                          ),
-                          SizedBox(width: 2.w),
-                          Text(
-                            '$upPercent%',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF111827),
-                            ),
-                          ),
-                        ],
+                  Widget controlChild;
+                  if (levelPercent != null) {
+                    if (lControlMetrics != null) {
+                      controlChild = _dashboardMetricsControlRow(
+                        status: '$levelPercent%',
+                        controls: buttonGroup,
+                        metrics: lControlMetrics!,
+                        controlContentHeight: controlRowHeight,
+                        gap: 4,
                       );
-                    }
-
-                    // Values left, down/up grouped right (dashboard-wide rule).
-                    return SizedBox(
-                      width: constraints.maxWidth,
-                      child: Row(
+                    } else {
+                      controlChild = Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    levelStat(),
-                                    SizedBox(
-                                      width: compactControls ? 3.w : 10.w,
-                                    ),
-                                    angleStat(),
-                                  ],
-                                ),
+                            child: Text(
+                              '$levelPercent%',
+                              style: TextStyle(
+                                fontSize: statusFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF111827),
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           SizedBox(width: 6.w),
-                          downBtn,
-                          SizedBox(width: compactControls ? 6.w : 10.w),
-                          upBtn,
+                          buttonGroup,
                         ],
-                      ),
+                      );
+                    }
+                  } else if (lControlMetrics != null && !compact) {
+                    // Blind Living Room — M/L/XL: fixed button slot (matches awning).
+                    controlChild = _blindDualMetricsControlRow(
+                      status: dualStatusRow(statGap: 6.w),
+                      controls: buttonGroup,
+                      metrics: lControlMetrics!,
+                      controlContentHeight: controlRowHeight,
                     );
-                  },
-                ),
+                  } else {
+                    // Blind Living Room — S only: scale dual values, keep button size.
+                    controlChild = Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: dualStatusRow(statGap: 3.w),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        buttonGroup,
+                      ],
+                    );
+                  }
+
+                  return SizedBox(
+                    height: controlRowHeight,
+                    child: controlChild,
+                  );
+                },
               ),
             ],
           ),
@@ -6079,6 +6638,7 @@ class _ToggleCard extends StatefulWidget {
     this.onModeTap,
     this.compact = false,
     this.uniformControls = false,
+    this.lControlMetrics,
   });
 
   final String title;
@@ -6092,6 +6652,7 @@ class _ToggleCard extends StatefulWidget {
   final VoidCallback? onModeTap;
   final bool compact;
   final bool uniformControls;
+  final DashboardControlMetrics? lControlMetrics;
 
   @override
   State<_ToggleCard> createState() => _ToggleCardState();
@@ -6123,100 +6684,113 @@ class _ToggleCardState extends State<_ToggleCard> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget headerColumn = Column(
+    final bool compact = widget.compact;
+    final double iconSide = _deviceCardIconSide(compact);
+    final double gap = _deviceCardLayoutGap(compact);
+    final Widget iconWidget = _heroImagePath != null
+        ? Image.asset(
+            _heroImagePath!,
+            width: iconSide,
+            height: iconSide,
+            fit: BoxFit.contain,
+          )
+        : Icon(
+            Icons.water_drop_outlined,
+            size: iconSide,
+            color: const Color(0xFF00C2FF),
+          );
+    final Widget header = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _heroImagePath != null
-            ? Image.asset(
-                _heroImagePath!,
-                width: widget.compact ? 34.w : 52.w,
-                height: widget.compact ? 34.w : 52.w,
-                fit: BoxFit.contain,
-              )
-            : Icon(
-                Icons.water_drop_outlined,
-                size: 42.sp,
-                color: const Color(0xFF00C2FF),
-              ),
-        SizedBox(height: widget.compact ? 3.h : 17.h),
-        Expanded(
-          child: Text(
-            widget.title,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF111827),
-              height: 1.15,
-            ),
-            maxLines: widget.compact ? 4 : 2,
-            overflow: widget.compact
-                ? TextOverflow.visible
-                : TextOverflow.ellipsis,
+        SizedBox(
+          height: iconSide,
+          width: double.infinity,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: iconWidget,
           ),
         ),
+        SizedBox(height: gap),
+        _deviceCardTitleSlot(widget.title, compact: compact),
       ],
     );
 
     return Stack(
       children: [
         _CardShell(
-          compact: widget.compact,
+          compact: compact,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: widget.onNavigate != null
-                    ? Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            uiTapHaptic();
-                            widget.onNavigate!();
-                          },
-                          borderRadius: BorderRadius.circular(18.r),
-                          child: headerColumn,
-                        ),
-                      )
-                    : headerColumn,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _on ? 'On' : 'Off',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
-                    ),
+              if (widget.onNavigate != null)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      uiTapHaptic();
+                      widget.onNavigate!();
+                    },
+                    borderRadius: BorderRadius.circular(18.r),
+                    child: header,
                   ),
-                  Transform.translate(
-                    offset: Offset(
-                      0,
-                      widget.compact && !widget.uniformControls ? -5.h : 0,
-                    ),
-                    child: SizedBox(
-                      height: widget.compact && !widget.uniformControls
-                          ? 24.h
-                          : 35.h,
-                      width: widget.compact && !widget.uniformControls
-                          ? 40.w
-                          : 60.w,
-                      child: CupertinoSwitch(
+                )
+              else
+                header,
+              const Spacer(),
+              widget.lControlMetrics != null
+                  ? _dashboardMetricsControlRow(
+                      status: _on ? 'On' : 'Off',
+                      controls: _dashboardCupertinoSwitch(
                         value: _on,
                         onChanged: (v) {
-                          uiTapHaptic();
                           setState(() => _on = v);
                           widget.onIsOnChanged?.call(v);
                         },
-                        activeColor: const Color(0xFF0088FE),
+                        width: widget.lControlMetrics!.toggleWidth.w,
+                        height: widget.lControlMetrics!.toggleHeight.h,
                       ),
+                      metrics: widget.lControlMetrics!,
+                      controlContentHeight:
+                          widget.lControlMetrics!.toggleHeight.h,
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _on ? 'On' : 'Off',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                        Transform.translate(
+                          offset: Offset(
+                            0,
+                            widget.compact && !widget.uniformControls ? -5.h : 0,
+                          ),
+                          child: SizedBox(
+                            height: widget.compact && !widget.uniformControls
+                                ? 24.h
+                                : 35.h,
+                            width: widget.compact && !widget.uniformControls
+                                ? 40.w
+                                : 60.w,
+                            child: CupertinoSwitch(
+                              value: _on,
+                              onChanged: (v) {
+                                uiTapHaptic();
+                                setState(() => _on = v);
+                                widget.onIsOnChanged?.call(v);
+                              },
+                              activeColor: const Color(0xFF0088FE),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),

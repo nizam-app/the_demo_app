@@ -220,6 +220,30 @@ class _AddDashboardDeviceRow extends StatelessWidget {
   static const _textSecondary = Color(0xFF6B7280);
   static const _selectedBg = Color(0xFFEAF1FF);
   static const _badgeBlue = Color(0xFF0088FE);
+  static const double _iconBox = 32;
+
+  Widget _buildLeadingIcon() {
+    return SizedBox(
+      width: _iconBox.w,
+      height: _iconBox.h,
+      child: iconWidget != null
+          ? FittedBox(
+              fit: BoxFit.contain,
+              child: iconWidget,
+            )
+          : Image.asset(
+              imagePath,
+              width: _iconBox.w,
+              height: _iconBox.h,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.device_hub,
+                size: 24.sp,
+                color: _textSecondary,
+              ),
+            ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -240,25 +264,7 @@ class _AddDashboardDeviceRow extends StatelessWidget {
                 padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 16.h),
                 child: Row(
                   children: [
-                    Container(
-                      width: 32.w,
-                      height: 32.h,
-                      color: selected ? _selectedBg : null,
-                      alignment: Alignment.center,
-                      child: iconWidget != null
-                          ? FittedBox(fit: BoxFit.contain, child: iconWidget)
-                          : Image.asset(
-                              imagePath,
-                              width: 26.w,
-                              height: 26.h,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.device_hub,
-                                size: 24.sp,
-                                color: _textSecondary,
-                              ),
-                            ),
-                    ),
+                    _buildLeadingIcon(),
                     SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
