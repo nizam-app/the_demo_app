@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'dashboard_section_widget_size.dart';
+
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _danger = Color(0xFFFE019A);
@@ -14,11 +16,12 @@ const _blue = Color(0xFF007AFF);
 class EditAddSectionSheet extends StatefulWidget {
   const EditAddSectionSheet({
     super.key,
-    this.initialSize = 'S',
+    this.initialSize = kSectionLayoutStorageList,
     this.onSizeChanged,
     this.sectionRenameLabel,
     this.addDeviceCountLabel,
     this.onRenameTap,
+    this.onRenameChanged,
     this.onAddDeviceTap,
     this.onHeaderBackgroundTap,
     this.headerBackgroundImagePath,
@@ -38,6 +41,7 @@ class EditAddSectionSheet extends StatefulWidget {
   final String? sectionRenameLabel;
   final String? addDeviceCountLabel;
   final VoidCallback? onRenameTap;
+  final ValueChanged<String>? onRenameChanged;
   final VoidCallback? onAddDeviceTap;
   final VoidCallback? onHeaderBackgroundTap;
   final String? headerBackgroundImagePath;
@@ -58,20 +62,164 @@ class EditAddSectionSheet extends StatefulWidget {
 class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
   late String _selectedSize;
   bool _sliderWidget = true;
+  bool _isRenaming = false;
+  late final TextEditingController _renameController;
+  late final FocusNode _renameFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _selectedSize = widget.initialSize;
+    _selectedSize = canonicalSectionLayoutStorage(widget.initialSize);
     _sliderWidget = widget.initialHorizontalScroll ?? _sliderWidget;
+    _renameController = TextEditingController(
+      text: widget.sectionRenameLabel ?? 'Light',
+    );
+    _renameFocusNode = FocusNode();
+    _renameFocusNode.addListener(() {
+      if (!_renameFocusNode.hasFocus && _isRenaming) {
+        _commitRename();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _renameController.dispose();
+    _renameFocusNode.dispose();
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(EditAddSectionSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialSize != widget.initialSize) {
-      _selectedSize = widget.initialSize;
+      _selectedSize = canonicalSectionLayoutStorage(widget.initialSize);
     }
+    if (!_isRenaming &&
+        oldWidget.sectionRenameLabel != widget.sectionRenameLabel) {
+      _renameController.text = widget.sectionRenameLabel ?? 'Light';
+    }
+  }
+
+  void _startRename() {
+    if (widget.onRenameChanged == null) {
+      widget.onRenameTap?.call();
+      return;
+    }
+    setState(() {
+      _isRenaming = true;
+      _renameController.text = widget.sectionRenameLabel ?? 'Light';
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _renameFocusNode.requestFocus();
+      _renameController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _renameController.text.length,
+      );
+    });
+  }
+
+  void _commitRename() {
+    if (!_isRenaming) return;
+    final String trimmed = _renameController.text.trim();
+    if (trimmed.isNotEmpty) {
+      widget.onRenameChanged?.call(trimmed);
+    } else {
+      _renameController.text = widget.sectionRenameLabel ?? 'Light';
+    }
+    setState(() => _isRenaming = false);
+    _renameFocusNode.unfocus();
+  }
+
+  Widget _buildRenameRow() {
+    final String displayName = widget.sectionRenameLabel ?? 'Light';
+    final TextStyle valueStyle = TextStyle(
+      color: _textSecondary,
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w400,
+      fontFamily: 'Inter',
+    );
+
+    return GestureDetector(
+      onTap: _isRenaming ? null : _startRename,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 55.h,
+        padding: EdgeInsets.only(left: 12.w, right: 17.w),
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/images/rename.png',
+              width: 26.w,
+              height: 26.h,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(width: 10.w),
+            Text(
+              'Rename',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'Inter',
+                color: _textPrimary,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            if (_isRenaming && widget.onRenameChanged != null)
+              Expanded(
+                child: TextField(
+                  controller: _renameController,
+                  focusNode: _renameFocusNode,
+                  textAlign: TextAlign.right,
+                  maxLines: 1,
+                  showCursor: true,
+                  cursorColor: _blue,
+                  cursorWidth: 2,
+                  cursorHeight: 18.sp,
+                  style: valueStyle,
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _commitRename(),
+                  onTapOutside: (_) => _commitRename(),
+                ),
+              )
+            else
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: valueStyle,
+                      ),
+                    ),
+                    SizedBox(width: 5.w),
+                    Image.asset(
+                      'assets/images/edit_image.png',
+                      width: 14.w,
+                      height: 13.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 //new changes
 
@@ -180,17 +328,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                           //   imageWidth: 23.w,
                           //   imageHeight: 23.h,
                           // ),
-                          _SimpleRow(
-                            imagePath: 'assets/images/rename.png',
-                            title: 'Rename',
-                            trailingText: widget.sectionRenameLabel ?? 'Light',
-                            iconPath: 'assets/images/edit_image.png',
-                            imageWidth: 26.w,
-                            imageHeight: 26.h,
-                            iconHeight: 13.h,
-                            iconWidth: 14.w,
-                            onTap: widget.onRenameTap,
-                          ),
+                          _buildRenameRow(),
 
                           _SimpleRow(
                             imagePath: 'assets/images/add_device.png',
@@ -262,7 +400,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                             _RowItem(
                               imagePath: 'assets/images/widget_size.png',
                               title: 'Layout',
-                              trailing: _SizeSegment(
+                              trailing: DashboardSectionSizeSegment(
                                 value: _selectedSize,
                                 onChanged: (v) {
                                   setState(() => _selectedSize = v);
@@ -270,7 +408,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                                 },
                               ),
                             ),
-                          if (widget.showWidgetSize) SizedBox(height: 13.h),
+                          if (widget.showWidgetSize) SizedBox(height: 12.h),
                         ],
                       ),
                     ),
@@ -521,73 +659,6 @@ class _SimpleRow extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// SIZE SEGMENT
-class _SizeSegment extends StatelessWidget {
-  final String value;
-  final ValueChanged<String> onChanged;
-
-  const _SizeSegment({required this.value, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    Widget item(String label, String img) {
-      final bool selected = label == value;
-      // Selected icon is black; unselected (including S asset) stays soft grey.
-      final Color iconColor = selected ? _textPrimary : _textSecondary;
-
-      return GestureDetector(
-        onTap: () => onChanged(label),
-        child: Container(
-          width: 56.w,
-          height: 35.h,
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
-            borderRadius: BorderRadius.circular(26.r),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: iconColor,
-                ),
-              ),
-              Image.asset(
-                img,
-                width: 26.w,
-                height: 17.h,
-                fit: BoxFit.contain,
-                color: iconColor,
-                colorBlendMode: BlendMode.srcIn,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          item('S', 'assets/images/size_S.png'),
-          item('M', 'assets/images/size_M.png'),
-          item('L', 'assets/images/size_L.png'),
-          item('XL', 'assets/images/size_XL.png'),
-        ],
       ),
     );
   }

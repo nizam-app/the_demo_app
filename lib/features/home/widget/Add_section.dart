@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'dashboard_section_widget_size.dart';
+
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _blue = Color(0xFF0088FE);
@@ -31,7 +33,7 @@ class AddSectionSheet extends StatefulWidget {
     this.initialName = '',
     this.initialDeviceIds = const <String>[],
     this.initialHorizontalScrolling = true,
-    this.initialWidgetSize = 'S',
+    this.initialWidgetSize = kSectionLayoutStorageList,
     this.initialHeaderBackgroundPath,
     this.onNameRequested,
     this.onDevicesRequested,
@@ -62,21 +64,156 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
   late String _selectedSize;
   late bool _sliderWidget;
   String? _headerBackgroundPath;
+  bool _isNaming = false;
+  late final TextEditingController _nameController;
+  late final FocusNode _nameFocusNode;
 
   @override
   void initState() {
     super.initState();
     _name = widget.initialName;
     _deviceIds = List<String>.from(widget.initialDeviceIds);
-    _selectedSize = widget.initialWidgetSize;
+    _selectedSize = canonicalSectionLayoutStorage(widget.initialWidgetSize);
     _sliderWidget = widget.initialHorizontalScrolling;
     _headerBackgroundPath = widget.initialHeaderBackgroundPath;
+    _nameController = TextEditingController(text: _name);
+    _nameFocusNode = FocusNode();
+    _nameFocusNode.addListener(() {
+      if (!_nameFocusNode.hasFocus && _isNaming) {
+        _commitName();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nameFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _rename() async {
-    final String? next = await widget.onNameRequested?.call(_name);
-    if (!mounted || next == null || next.trim().isEmpty) return;
-    setState(() => _name = next.trim());
+    if (widget.onNameRequested != null) {
+      final String? next = await widget.onNameRequested!.call(_name);
+      if (!mounted || next == null || next.trim().isEmpty) return;
+      setState(() => _name = next.trim());
+      return;
+    }
+    _startNameEdit();
+  }
+
+  void _startNameEdit() {
+    setState(() {
+      _isNaming = true;
+      _nameController.text = _name;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _nameFocusNode.requestFocus();
+      _nameController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _nameController.text.length,
+      );
+    });
+  }
+
+  void _commitName() {
+    if (!_isNaming) return;
+    final String trimmed = _nameController.text.trim();
+    if (trimmed.isNotEmpty) {
+      _name = trimmed;
+    } else {
+      _nameController.text = _name;
+    }
+    setState(() => _isNaming = false);
+    _nameFocusNode.unfocus();
+  }
+
+  Widget _buildNameRow() {
+    return GestureDetector(
+      onTap: _rename,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 55.h,
+        child: Padding(
+          padding: EdgeInsets.only(left: 12.w, right: 17.w),
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/rename.png',
+                width: 26.w,
+                height: 26.h,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'Name',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _textPrimary,
+                  ),
+                ),
+              ),
+              if (_isNaming && widget.onNameRequested == null)
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: 'Section name',
+                      hintStyle: TextStyle(color: _textSecondary),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _commitName(),
+                  ),
+                )
+              else
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_name.isNotEmpty)
+                      Text(
+                        _name,
+                        style: TextStyle(
+                          color: _textSecondary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    SizedBox(width: 5.w),
+                    Image.asset(
+                      'assets/images/edit_image.png',
+                      width: 14.w,
+                      height: 13.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _addDevices() async {
@@ -93,13 +230,38 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
     setState(() => _headerBackgroundPath = path);
   }
 
+  String _effectiveSectionName() {
+    if (_isNaming) {
+      return _nameController.text.trim();
+    }
+    return _name.trim();
+  }
+
+  void _commitPendingName() {
+    if (!_isNaming) return;
+    final String trimmed = _nameController.text.trim();
+    if (trimmed.isNotEmpty) {
+      _name = trimmed;
+    } else {
+      _nameController.text = _name;
+    }
+    _isNaming = false;
+    _nameFocusNode.unfocus();
+  }
+
   void _submit() {
+    _commitPendingName();
+    final String trimmedName = _name.trim();
+    if (trimmedName.isEmpty) {
+      setState(() {});
+      return;
+    }
     widget.onAdd?.call(
       AddSectionConfiguration(
-        name: _name,
+        name: trimmedName,
         deviceIds: List<String>.from(_deviceIds),
         horizontalScrolling: _sliderWidget,
-        widgetSize: _selectedSize,
+        widgetSize: canonicalSectionLayoutStorage(_selectedSize),
         headerBackgroundPath: _headerBackgroundPath,
       ),
     );
@@ -205,17 +367,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                           //   imageWidth: 23.w,
                           //   imageHeight: 23.h,
                           // ),
-                          _SimpleRow(
-                            imagePath: 'assets/images/rename.png',
-                            title: 'Name',
-                            trailingText: _name,
-                            iconPath: 'assets/images/edit_image.png',
-                            imageWidth: 26.w,
-                            imageHeight: 26.h,
-                            iconHeight: 13.h,
-                            iconWidth: 14.w,
-                            onTap: _rename,
-                          ),
+                          _buildNameRow(),
 
                           _SimpleRow(
                             imagePath: 'assets/images/add_device.png',
@@ -291,12 +443,10 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                           _RowItem(
                             imagePath: 'assets/images/widget_size.png',
                             title: 'Layout',
-                            trailing: _SizeSegment(
+                            trailing: DashboardSectionSizeSegment(
                               value: _selectedSize,
                               onChanged: (v) =>
                                   setState(() => _selectedSize = v),
-                              imageWidth: 22.w, // custom image width
-                              imageHeight: 22.h, // custom image height
                             ),
                           ),
                           SizedBox(height: 13.h),
@@ -313,8 +463,10 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                         bottom: 25.h,
                       ),
                       child: GestureDetector(
-                        onTap: _submit,
-                        child: Container(
+                        onTap: _effectiveSectionName().isEmpty ? null : _submit,
+                        child: Opacity(
+                          opacity: _effectiveSectionName().isEmpty ? 0.45 : 1,
+                          child: Container(
                           height: 52.h,
                           width: double.infinity,
 
@@ -357,6 +509,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                               ),
                             ],
                           ),
+                        ),
                         ),
                       ),
                     ),
@@ -542,76 +695,3 @@ class _SimpleRow extends StatelessWidget {
   }
 }
 
-/// SIZE SEGMENT
-class _SizeSegment extends StatelessWidget {
-  final String value;
-  final ValueChanged<String> onChanged;
-  final double imageWidth;
-  final double imageHeight;
-
-  const _SizeSegment({
-    required this.value,
-    required this.onChanged,
-    this.imageWidth = 26,
-    this.imageHeight = 17,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget item(String label, String img) {
-      final bool selected = label == value;
-      // Selected icon is black; unselected (including S asset) stays soft grey.
-      final Color iconColor = selected ? _textPrimary : _textSecondary;
-
-      return GestureDetector(
-        onTap: () => onChanged(label),
-        child: Container(
-          width: 56.w,
-          height: 35.h,
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFFF3F4F6) : Colors.transparent,
-            borderRadius: BorderRadius.circular(26.r),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: iconColor,
-                ),
-              ),
-              Image.asset(
-                img,
-                width: imageWidth.w,
-                height: imageHeight.h,
-                fit: BoxFit.contain,
-                color: iconColor,
-                colorBlendMode: BlendMode.srcIn,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          item('S', 'assets/images/size_S.png'),
-          item('M', 'assets/images/size_M.png'),
-          item('L', 'assets/images/size_L.png'),
-          item('XL', 'assets/images/size_XL.png'),
-        ],
-      ),
-    );
-  }
-}

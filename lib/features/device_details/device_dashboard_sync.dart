@@ -166,9 +166,9 @@ class DeviceControlSnapshot {
   }
 
   static const List<String> multiValueSwitchRowLabels = <String>[
-    'On Light',
-    'On Irrigation',
-    'On Alarm',
+    'Light',
+    'Irrigation',
+    'Alarm',
   ];
 
   String get multiValueSwitchCaption {
@@ -422,11 +422,13 @@ class DashboardRingProgressIcon extends StatelessWidget {
     required this.percent,
     required this.ringStyle,
     this.labelFontSize = 12,
+    this.transparentInner = false,
   });
 
   final double percent;
   final DashboardRingStyle ringStyle;
   final double labelFontSize;
+  final bool transparentInner;
 
   @override
   Widget build(BuildContext context) {
@@ -448,9 +450,9 @@ class DashboardRingProgressIcon extends StatelessWidget {
           Container(
             width: side - _dashProgressRingInnerInset,
             height: side - _dashProgressRingInnerInset,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _dashboardBubbleGray,
+              color: transparentInner ? Colors.transparent : _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
             child: _dashboardRingInnerLabel('$pct%', fontSize: labelFontSize),
@@ -524,10 +526,12 @@ class DashboardVentilationIcon extends StatelessWidget {
     super.key,
     required this.percent,
     this.labelFontSize = 12,
+    this.transparentInner = false,
   });
 
   final double percent;
   final double labelFontSize;
+  final bool transparentInner;
 
   @override
   Widget build(BuildContext context) {
@@ -535,6 +539,7 @@ class DashboardVentilationIcon extends StatelessWidget {
       percent: percent,
       ringStyle: DashboardRingStyle.ventilation,
       labelFontSize: labelFontSize,
+      transparentInner: transparentInner,
     );
   }
 }
@@ -547,12 +552,14 @@ class DashboardThermostatRingIcon extends StatelessWidget {
     this.currentTempCelsius = 24.6,
     this.humidityPercent = 21,
     this.labelFontSize = 11,
+    this.transparentInner = false,
   });
 
   final double percent;
   final double currentTempCelsius;
   final int humidityPercent;
   final double labelFontSize;
+  final bool transparentInner;
 
   @override
   Widget build(BuildContext context) {
@@ -574,9 +581,9 @@ class DashboardThermostatRingIcon extends StatelessWidget {
           Container(
             width: side - _dashProgressRingInnerInset,
             height: side - _dashProgressRingInnerInset,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _dashboardBubbleGray,
+              color: transparentInner ? Colors.transparent : _dashboardBubbleGray,
             ),
             alignment: Alignment.center,
             child: _dashboardRingInnerLabel(
