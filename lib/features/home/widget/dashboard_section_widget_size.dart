@@ -286,11 +286,11 @@ class _DashboardSizeMediumGridIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget cell() {
       return Container(
-        width: 10.w,
+        width: 11.w,
         height: 7.h,
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(1.5.r),
+          borderRadius: BorderRadius.circular(0.r),
         ),
       );
     }
@@ -305,16 +305,16 @@ class _DashboardSizeMediumGridIcon extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               cell(),
-              SizedBox(width: 3.w),
+              SizedBox(width: 1.w),
               cell(),
             ],
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 1.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               cell(),
-              SizedBox(width: 3.w),
+              SizedBox(width: 1.w),
               cell(),
             ],
           ),

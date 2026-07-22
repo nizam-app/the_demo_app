@@ -161,6 +161,8 @@ class _SettingScreenState extends State<SettingScreen> {
                         height: 19.h,
                         //imageColor: _deletePink,
                       ),
+
+                      SizedBox(height: 50.h),
                     ],
                   ),
                 ),
@@ -215,10 +217,10 @@ class _SettingScreenState extends State<SettingScreen> {
               color: _cardBg,
               child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
               onTap: () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
+                if (context.canPop()) {
+                  context.pop();
                 } else {
-                  context.go('/menu');
+                  context.go('/devices');
                 }
               },
             ),

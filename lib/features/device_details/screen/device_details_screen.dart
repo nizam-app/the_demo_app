@@ -9,7 +9,7 @@ import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
-import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
@@ -679,7 +679,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
         RepaintBoundary(child: _buildBody(context)),
         const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
-        const RepaintBoundary(child: SettingsScreen()),
+        const RepaintBoundary(child: SettingScreen()),
       ],
     );
   }
@@ -827,10 +827,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       color: const Color(0xFFFFFFFF),
       child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
       onTap: () {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
+        if (context.canPop()) {
+          context.pop();
         } else {
-          context.go('/setting-device');
+          context.go('/devices');
         }
       },
     );

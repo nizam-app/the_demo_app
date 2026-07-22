@@ -87,7 +87,7 @@ class _AddedDashboardSection {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  /// Dashboard category pills (0 Light … 3 Security).
+  /// Dashboard category pills (0 Light … 5 Irrigation).
   int _homeCategoryIndex = 0;
   int _brightnessPct = 50;
 
@@ -1741,12 +1741,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               SizedBox(width: 12.w),
                               _CategoryPill(
-                                label: 'Security',
+                                label: 'Ventilation',
                                 isSelected: _homeCategoryIndex == 3,
+                                icon: Icons.air_outlined,
+                                imagePath: 'assets/make.png',
+                                onTap: () =>
+                                    setState(() => _homeCategoryIndex = 3),
+                              ),
+                              SizedBox(width: 12.w),
+                              _CategoryPill(
+                                label: 'Security',
+                                isSelected: _homeCategoryIndex == 4,
                                 icon: Icons.ac_unit_outlined,
                                 imagePath: 'assets/securety.png',
                                 onTap: () =>
-                                    setState(() => _homeCategoryIndex = 3),
+                                    setState(() => _homeCategoryIndex = 4),
+                              ),
+                              SizedBox(width: 12.w),
+                              _CategoryPill(
+                                label: 'Irrigation',
+                                isSelected: _homeCategoryIndex == 5,
+                                icon: Icons.water_drop_outlined,
+                                imagePath: 'assets/Mask group (5) copy.png',
+                                onTap: () =>
+                                    setState(() => _homeCategoryIndex = 5),
                               ),
                             ],
                           ),
@@ -1893,12 +1911,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   deviceName,
                   style: TextStyle(
-                    fontSize: 16.sp, // ✅ bigger like image
+                    fontSize: 16.sp, 
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF111827),
                     height: 1.08,
                   ),
-                  maxLines: 2, // ✅ 2 lines
+                  maxLines: 2, 
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 8.h),
@@ -2200,7 +2218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _CircleBtn(
                     marked: minusMarked,
                     onTap: onMinus,
-                    size: 35,
+                    size: 32,
                     child: Icon(
                       Icons.remove,
                       size: 20.sp,
@@ -2211,7 +2229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _CircleBtn(
                     marked: plusMarked,
                     onTap: onPlus,
-                    size: 35,
+                    size: 32,
                     child: Icon(
                       Icons.add,
                       size: 20.sp,
@@ -4449,16 +4467,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(width: 10.w),
                       Flexible(
-                        child: Text(
-                          statusText,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF111827),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        // Same bold status style as grid cards (Inter 16.sp bold).
+                        child: _lDashboardCardStatusText(statusText),
                       ),
                     ],
                   ),
@@ -4980,6 +4990,7 @@ class _CategoryPill extends StatelessWidget {
       'HVAC' => const <Color>[Color(0xFF0088FE), Color(0xFFFE019A)],
       'Ventilation' => const <Color>[Color(0xFF00D1FF), Color(0xFF2AA8FF)],
       'Security' => const <Color>[Color(0xFF0088FE), Color(0xFFEB0FFD)],
+      'Irrigation' => const <Color>[Color(0xFF3399FF), Color(0xFF33CC99)],
       _ => const <Color>[Color(0xFFFDD720), Color(0xFF00D1FF)],
     };
 
@@ -4998,12 +5009,7 @@ class _CategoryPill extends StatelessWidget {
 
     Widget innerRow({required bool selected}) {
       const iconBgColor = Color(0xFFF3F4F6);
-      const iconActiveOnWhite = Color(0xFFFAB300);
-      const iconActiveOnGray = Color(0xFF6B7280);
-      const iconInactive = Color(0xFF111827);
-      final iconActiveColor = (iconBgColor == Colors.white)
-          ? iconActiveOnWhite
-          : iconActiveOnGray;
+      const Color categoryIconColor = Color(0xFF111827);
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w), // ✅ compact padding
@@ -5025,11 +5031,12 @@ class _CategoryPill extends StatelessWidget {
                       width: 22.w,
                       height: 22.w,
                       fit: BoxFit.contain,
+                      color: categoryIconColor,
                     )
                   : Icon(
                       icon,
                       size: 20.sp,
-                      color: selected ? iconActiveColor : iconInactive,
+                      color: categoryIconColor,
                     ),
             ),
             SizedBox(width: 10.w),

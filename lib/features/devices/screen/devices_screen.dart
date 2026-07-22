@@ -73,7 +73,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       '/analytics',
       '/home', // Voice points to home
       '/notifications',
-      '/settings',
+      SettingScreen.routeName,
     ];
     if (index < routes.length) {
       context.go(routes[index]);
