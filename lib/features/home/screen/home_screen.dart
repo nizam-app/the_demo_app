@@ -2225,6 +2225,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: const Color(0xFF6B7280),
                     ),
                   ),
+
+                  //Plus button 
+                
                   SizedBox(width: 10.w),
                   _CircleBtn(
                     marked: plusMarked,
@@ -3541,7 +3544,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           compactOverride: compactOverride,
-          cardHeightOverride: cardHeightOverride,
+          cardH
+          eightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
           lControlMetrics: lControlMetrics,
           onTap: detailsTap(
