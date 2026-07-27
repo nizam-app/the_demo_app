@@ -222,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
 
-                        // Connect Section
+                        // Connect Section new design. 
                         _Section(
                           title: 'Connect',
                           horizontalPad: _pageHorizontalPad.w,
