@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 
 import '../widget/select_interface.dart';
 
@@ -218,6 +219,7 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                           item: _items[i],
                           status: _itemStatuses[i],
                           onStatusTap: () {
+                            uiTapHaptic();
                             setState(() {
                               _itemStatuses[i] =
                                   _itemStatuses[i] == _InterfaceStatus.ok
@@ -226,6 +228,7 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                             });
                           },
                           onTap: () {
+                            uiTapHaptic();
                             setState(() {
                               _itemStatuses[i] =
                                   _itemStatuses[i] == _InterfaceStatus.ok

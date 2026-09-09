@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workpleis/features/auth/screens/login_scren.dart';
+import 'package:workpleis/features/home/screen/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,9 +28,17 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 2000),
     )..repeat();
 
-    Future.delayed(const Duration(seconds: 3), () {
+    Future<void>.delayed(const Duration(seconds: 3), () async {
       if (!mounted) return;
-      context.go(LoginScreen.routeName);
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? email = prefs.getString('email');
+      final String? token = prefs.getString('token');
+      final bool isLoggedIn =
+          email != null && email.isNotEmpty && token != null && token.isNotEmpty;
+
+      if (!mounted) return;
+      context.go(isLoggedIn ? HomeScreen.routeName : LoginScreen.routeName);
     });
   }
 

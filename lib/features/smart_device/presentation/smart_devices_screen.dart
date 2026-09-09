@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
@@ -404,7 +405,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() => _selectedDeviceId = selectionId),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _selectedDeviceId = selectionId);
+              },
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -803,7 +807,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 color: Colors.transparent,
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () => setState(() => _alarmPaused = !_alarmPaused),
+                  onTap: () {
+                    uiTapHaptic();
+                    setState(() => _alarmPaused = !_alarmPaused);
+                  },
                   child: Container(
                     width: 44.w,
                     height: 44.h,
@@ -912,8 +919,10 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
               color: Colors.transparent,
               child: InkWell(
                 customBorder: const CircleBorder(),
-                onTap: () =>
-                    setState(() => _irrigationBoostOn = !_irrigationBoostOn),
+                onTap: () {
+                  uiTapHaptic();
+                  setState(() => _irrigationBoostOn = !_irrigationBoostOn);
+                },
                 child: Ink(
                   width: 42.w,
                   height: 42.w,
@@ -1249,7 +1258,10 @@ class _TagChip extends StatelessWidget {
     );
     if (onTap == null) return chip;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap!();
+      },
       behavior: HitTestBehavior.opaque,
       child: chip,
     );
@@ -1299,7 +1311,12 @@ class _SmallCircleText extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onTap!();
+              },
         splashColor: _softGrey,
         highlightColor: const Color(0xFFE5E7EB),
         child: badge,
@@ -1372,7 +1389,11 @@ class _DimmerPill extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (d) => applyDx(d.localPosition.dx),
+      onTapDown: (d) {
+        uiTapHaptic();
+        applyDx(d.localPosition.dx);
+      },
+      onHorizontalDragStart: (_) => uiTapHaptic(),
       onHorizontalDragUpdate: (d) => applyDx(d.localPosition.dx),
       child: pill,
     );
@@ -1406,7 +1427,12 @@ class _DimmerPill extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onSunTap,
+        onTap: onSunTap == null
+            ? null
+            : () {
+                uiTapHaptic();
+                onSunTap!();
+              },
         splashColor: const Color(0xFFE5E7EB),
         highlightColor: const Color(0xFFE5E7EB),
         child: padded,
@@ -1493,6 +1519,7 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
       onTapUp: (_) => _setPressed(false),
       onTapCancel: () => _setPressed(false),
       onTap: () {
+        uiTapHaptic();
         widget.onTap!();
         _setPressed(false);
       },

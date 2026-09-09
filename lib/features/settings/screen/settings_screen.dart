@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/features/auth/screens/login_scren.dart';
 import 'package:workpleis/features/core/screen/core_screen.dart';
 import 'package:workpleis/features/integrations/screen/Integrations_screen.dart';
 import 'package:workpleis/features/interfaces/screen/interfaces_screen.dart';
@@ -68,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
                       SizedBox(height: 30.h),
                       _buildAssistanceCard(),
                       SizedBox(height: 30.h),
-                      _buildSignOutCard(),
+                      _buildSignOutCard(context),
                        SizedBox(height: 200.h),
                         
                     ],
@@ -341,7 +343,15 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSignOutCard() {
+  Future<void> _handleSignOut(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('email');
+    if (!context.mounted) return;
+    context.go(LoginScreen.routeName);
+  }
+
+  Widget _buildSignOutCard(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 18.w),
       decoration: BoxDecoration(
@@ -355,9 +365,7 @@ class SettingsScreen extends StatelessWidget {
         showTrailingIcon: false,
         iconWidth: 25.w,
         iconHeight: 25.h,
-        onTap: () {
-          // Handle sign out
-        },
+        onTap: () => _handleSignOut(context),
       ),
     );
   }

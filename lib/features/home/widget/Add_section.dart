@@ -1,23 +1,271 @@
+import 'dart:io' show File;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'dashboard_section_widget_size.dart';
+
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
 const _blue = Color(0xFF0088FE);
-                          //0xFF1D9BF0
-class AddSectionSheet extends StatefulWidget {
-  const AddSectionSheet({super.key});
 
-  @override                         
+class AddSectionConfiguration {
+  const AddSectionConfiguration({
+    required this.name,
+    required this.deviceIds,
+    required this.horizontalScrolling,
+    required this.widgetSize,
+    this.headerBackgroundPath,
+  });
+
+  final String name;
+  final List<String> deviceIds;
+  final bool horizontalScrolling;
+  final String widgetSize;
+  final String? headerBackgroundPath;
+}
+
+class AddSectionSheet extends StatefulWidget {
+  const AddSectionSheet({
+    super.key,
+    this.initialName = '',
+    this.initialDeviceIds = const <String>[],
+    this.initialHorizontalScrolling = true,
+    this.initialWidgetSize = kSectionLayoutStorageList,
+    this.initialHeaderBackgroundPath,
+    this.onNameRequested,
+    this.onDevicesRequested,
+    this.onHeaderBackgroundRequested,
+    this.onAdd,
+    this.onClose,
+  });
+
+  final String initialName;
+  final List<String> initialDeviceIds;
+  final bool initialHorizontalScrolling;
+  final String initialWidgetSize;
+  final String? initialHeaderBackgroundPath;
+  final Future<String?> Function(String currentName)? onNameRequested;
+  final Future<List<String>?> Function(List<String> currentDeviceIds)?
+  onDevicesRequested;
+  final Future<String?> Function()? onHeaderBackgroundRequested;
+  final ValueChanged<AddSectionConfiguration>? onAdd;
+  final VoidCallback? onClose;
+
+  @override
   State<AddSectionSheet> createState() => _AddSectionSheetState();
 }
 
 class _AddSectionSheetState extends State<AddSectionSheet> {
-  String _selectedSize = 'S';
-  bool _sliderWidget = true;
+  late String _name;
+  late List<String> _deviceIds;
+  late String _selectedSize;
+  late bool _sliderWidget;
+  String? _headerBackgroundPath;
+  bool _isNaming = false;
+  late final TextEditingController _nameController;
+  late final FocusNode _nameFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = widget.initialName;
+    _deviceIds = List<String>.from(widget.initialDeviceIds);
+    _selectedSize = canonicalSectionLayoutStorage(widget.initialWidgetSize);
+    _sliderWidget = widget.initialHorizontalScrolling;
+    _headerBackgroundPath = widget.initialHeaderBackgroundPath;
+    _nameController = TextEditingController(text: _name);
+    _nameFocusNode = FocusNode();
+    _nameFocusNode.addListener(() {
+      if (!_nameFocusNode.hasFocus && _isNaming) {
+        _commitName();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _nameFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _rename() async {
+    if (widget.onNameRequested != null) {
+      final String? next = await widget.onNameRequested!.call(_name);
+      if (!mounted || next == null || next.trim().isEmpty) return;
+      setState(() => _name = next.trim());
+      return;
+    }
+    _startNameEdit();
+  }
+
+  void _startNameEdit() {
+    setState(() {
+      _isNaming = true;
+      _nameController.text = _name;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _nameFocusNode.requestFocus();
+      _nameController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _nameController.text.length,
+      );
+    });
+  }
+
+  void _commitName() {
+    if (!_isNaming) return;
+    final String trimmed = _nameController.text.trim();
+    if (trimmed.isNotEmpty) {
+      _name = trimmed;
+    } else {
+      _nameController.text = _name;
+    }
+    setState(() => _isNaming = false);
+    _nameFocusNode.unfocus();
+  }
+
+  Widget _buildNameRow() {
+    return GestureDetector(
+      onTap: _rename,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 55.h,
+        child: Padding(
+          padding: EdgeInsets.only(left: 12.w, right: 17.w),
+          child: Row(
+            children: [
+              Image.asset(
+                'assets/images/rename.png',
+                width: 26.w,
+                height: 26.h,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'Name',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _textPrimary,
+                  ),
+                ),
+              ),
+              if (_isNaming && widget.onNameRequested == null)
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Inter',
+                    ),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: 'Section name',
+                      hintStyle: TextStyle(color: _textSecondary),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      focusedErrorBorder: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _commitName(),
+                  ),
+                )
+              else
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_name.isNotEmpty)
+                      Text(
+                        _name,
+                        style: TextStyle(
+                          color: _textSecondary,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    SizedBox(width: 5.w),
+                    Image.asset(
+                      'assets/images/edit_image.png',
+                      width: 14.w,
+                      height: 13.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addDevices() async {
+    final List<String>? next = await widget.onDevicesRequested?.call(
+      List<String>.from(_deviceIds),
+    );
+    if (!mounted || next == null) return;
+    setState(() => _deviceIds = List<String>.from(next));
+  }
+
+  Future<void> _pickHeaderBackground() async {
+    final String? path = await widget.onHeaderBackgroundRequested?.call();
+    if (!mounted || path == null || path.isEmpty) return;
+    setState(() => _headerBackgroundPath = path);
+  }
+
+  String _effectiveSectionName() {
+    if (_isNaming) {
+      return _nameController.text.trim();
+    }
+    return _name.trim();
+  }
+
+  void _commitPendingName() {
+    if (!_isNaming) return;
+    final String trimmed = _nameController.text.trim();
+    if (trimmed.isNotEmpty) {
+      _name = trimmed;
+    } else {
+      _nameController.text = _name;
+    }
+    _isNaming = false;
+    _nameFocusNode.unfocus();
+  }
+
+  void _submit() {
+    _commitPendingName();
+    final String trimmedName = _name.trim();
+    if (trimmedName.isEmpty) {
+      setState(() {});
+      return;
+    }
+    widget.onAdd?.call(
+      AddSectionConfiguration(
+        name: trimmedName,
+        deviceIds: List<String>.from(_deviceIds),
+        horizontalScrolling: _sliderWidget,
+        widgetSize: canonicalSectionLayoutStorage(_selectedSize),
+        headerBackgroundPath: _headerBackgroundPath,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,198 +293,229 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
           ),
           child: SafeArea(
             top: false,
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(left: 14.w, right: 0.w, bottom: 10.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Left spacer (same size as close button)
-                  SizedBox(width: 30.w, height: 30.w),
-
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        'Add Section',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _textPrimary,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Close button (right)
-                  Container(
-                    width: 30.w,
-                    height: 30.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: Icon(
-                        Icons.close_rounded,
-                        size: 20.sp,
-                        color: _textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * 0.72,
               ),
-            ),
-
-            /// CARD 1
-            _Card(
-              child: Column(
-                children: [
-                  // _SimpleRow(
-                  //   imagePath: 'assets/images/add_device.png',
-                  //   title: 'Add device',
-                  //   imageWidth: 23.w,
-                  //   imageHeight: 23.h,
-                  // ),
-
-                  _SimpleRow(
-                    imagePath: 'assets/images/rename.png',
-                    title: 'Rename',
-                    trailingText: 'Light',
-                    iconPath: 'assets/images/edit_image.png',
-                    imageWidth: 26.w,
-                    imageHeight: 26.h,
-                    iconHeight: 13.h,
-                    iconWidth: 14.w,
-                  ),
-
-                  _SimpleRow(
-                    imagePath: 'assets/images/add_device.png',
-                    title: 'Add device',
-                    imageWidth: 23.w,
-                    imageHeight: 23.h,
-                  ),
-
-                  // _SimpleRow(
-                  //   imagePath: 'assets/images/move_up.png',
-                  //   title: 'Move up',
-                  //   imageWidth: 22.w,
-                  //   imageHeight: 22.h,
-                  // ),
-                  //
-                  // _SimpleRow(
-                  //   title: 'Move down',
-                  //   imagePath: 'assets/images/move_down.png',
-                  //   imageWidth: 22.w,
-                  //   imageHeight: 22.h,
-                  // ),
-                ],
-              ),
-            ),
-            /// CARD 2
-             SizedBox(height: 10.h),
-            _Card(
-              child: Column(
-                children: [
-
-                  _RowItem(
-                    imagePath: 'assets/images/header_icon.png',
-                    title: 'Header background',
-                    imageHeight: 26.h,
-                    imageWidth: 26.w,
-                    trailing: Image.asset(
-                      "assets/images/header_image.png",
-                      height: 39.h,
-                      width: 39.w,
-                      fit: BoxFit.cover,),
-                  ),
-                  
-                  /// SLIDER WIDGET
-                  _RowItem(
-                    imagePath: 'assets/images/Slider.png',
-                    title: 'Horizontal scrolling',
-                    imageHeight: 22.h,
-                    imageWidth: 22.w,
-                    trailing: CupertinoSwitch(
-                      value: _sliderWidget,
-                      onChanged: (v) => setState(() => _sliderWidget = v),
-                      activeColor: _blue,
-                    ),
-                  ),
-
-                  _RowItem(
-                    imagePath: 'assets/images/widget_size.png',
-                    title: 'Widget size',
-                    trailing: _SizeSegment(
-                      value: _selectedSize,
-                      onChanged: (v) => setState(() => _selectedSize = v),
-                      imageWidth: 22.w, // custom image width
-                      imageHeight: 22.h, // custom image height
-                    ),
-                  ),
-                  SizedBox(height: 13.h,), 
-                ],
-              ),
-            ),
-
-            
-            SizedBox(height: 18.h),
-            /// REMOVE
-            Padding(
-              padding:  EdgeInsets.only(left: 18.w, right: 17.w, bottom: 25.h),
-              child: Container(
-                height: 52.h,
-                width: double.infinity,
-
-                decoration: BoxDecoration(
-                    color: Color(0xFF0088FE),
-                  borderRadius: BorderRadius.circular(26.r),
-                 // border: Border.all(color: Color(0xFF0088FE),width: 1.w)
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Image.asset(
-                    //   'assets/images/+ (1).png',
-                    //
-                    //   height: 14.h,
-                    //   color: Color(0xFFFFFFFF),
-                    // ),
                     Padding(
-                      padding:  EdgeInsets.only(bottom: 3.5.h),
-                      child: Text(
-                        '+',
-                        style: TextStyle(
-                          color: Color(0xFFFFFFFF),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 22.sp,
-                          fontFamily: 'Inter',
-                        ),
+                      padding: EdgeInsets.only(
+                        left: 14.w,
+                        right: 0.w,
+                        bottom: 10.h,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Left spacer (same size as close button)
+                          SizedBox(width: 30.w, height: 30.w),
+
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'Add Section',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: _textPrimary,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Close button (right)
+                          Container(
+                            width: 30.w,
+                            height: 30.w,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                if (widget.onClose != null) {
+                                  widget.onClose!();
+                                } else {
+                                  Navigator.of(context).pop();
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size: 20.sp,
+                                color: _textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(width: 4.w),
-                    Text(
-                      'Add',
-                      style: TextStyle(
-                        color: Color(0xFFFFFFFF),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16.sp,
-                        fontFamily: 'Inter',
+
+                    /// CARD 1
+                    _Card(
+                      child: Column(
+                        children: [
+                          // _SimpleRow(
+                          //   imagePath: 'assets/images/add_device.png',
+                          //   title: 'Add device',
+                          //   imageWidth: 23.w,
+                          //   imageHeight: 23.h,
+                          // ),
+                          _buildNameRow(),
+
+                          _SimpleRow(
+                            imagePath: 'assets/images/add_device.png',
+                            title: 'Add device',
+                            imageWidth: 23.w,
+                            imageHeight: 23.h,
+                            trailingText: _deviceIds.isEmpty
+                                ? null
+                                : '${_deviceIds.length}',
+                            onTap: _addDevices,
+                          ),
+
+                          // _SimpleRow(
+                          //   imagePath: 'assets/images/move_up.png',
+                          //   title: 'Move up',
+                          //   imageWidth: 22.w,
+                          //   imageHeight: 22.h,
+                          // ),
+                          //
+                          // _SimpleRow(
+                          //   title: 'Move down',
+                          //   imagePath: 'assets/images/move_down.png',
+                          //   imageWidth: 22.w,
+                          //   imageHeight: 22.h,
+                          // ),
+                        ],
+                      ),
+                    ),
+
+                    /// CARD 2
+                    SizedBox(height: 10.h),
+                    _Card(
+                      child: Column(
+                        children: [
+                          _RowItem(
+                            imagePath: 'assets/images/header_icon.png',
+                            title: 'Header background',
+                            imageHeight: 26.h,
+                            imageWidth: 26.w,
+                            onTap: _pickHeaderBackground,
+                            trailing: _headerBackgroundPath != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(6.r),
+                                    child: Image.file(
+                                      File(_headerBackgroundPath!),
+                                      height: 39.h,
+                                      width: 39.w,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Image.asset(
+                                    'assets/images/header_image.png',
+                                    height: 39.h,
+                                    width: 39.w,
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+
+                          /// SLIDER WIDGET
+                          _RowItem(
+                            imagePath: 'assets/images/Slider.png',
+                            title: 'Horizontal scrolling',
+                            imageHeight: 22.h,
+                            imageWidth: 22.w,
+                            trailing: CupertinoSwitch(
+                              value: _sliderWidget,
+                              onChanged: (v) =>
+                                  setState(() => _sliderWidget = v),
+                              activeColor: _blue,
+                            ),
+                          ),
+
+                          _RowItem(
+                            imagePath: 'assets/images/widget_size.png',
+                            title: 'Layout',
+                            trailing: DashboardSectionSizeSegment(
+                              value: _selectedSize,
+                              onChanged: (v) =>
+                                  setState(() => _selectedSize = v),
+                            ),
+                          ),
+                          SizedBox(height: 13.h),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 18.h),
+
+                    /// REMOVE
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: 17.w,
+                        bottom: 25.h,
+                      ),
+                      child: GestureDetector(
+                        onTap: _effectiveSectionName().isEmpty ? null : _submit,
+                        child: Opacity(
+                          opacity: _effectiveSectionName().isEmpty ? 0.45 : 1,
+                          child: Container(
+                          height: 52.h,
+                          width: double.infinity,
+
+                          decoration: BoxDecoration(
+                            color: Color(0xFF0088FE),
+                            borderRadius: BorderRadius.circular(26.r),
+                            // border: Border.all(color: Color(0xFF0088FE),width: 1.w)
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Image.asset(
+                              //   'assets/images/+ (1).png',
+                              //
+                              //   height: 14.h,
+                              //   color: Color(0xFFFFFFFF),
+                              // ),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: 3.5.h),
+                                child: Text(
+                                  '+',
+                                  style: TextStyle(
+                                    color: Color(0xFFFFFFFF),
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 22.sp,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add',
+                                style: TextStyle(
+                                  color: Color(0xFFFFFFFF),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16.sp,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            )
-
-          ],
             ),
           ),
         ),
@@ -246,6 +525,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
 }
 
 /// CARD CONTAINER
+ /// CARD CONTAINER 
 class _Card extends StatelessWidget {
   final Widget child;
   const _Card({required this.child});
@@ -270,6 +550,7 @@ class _RowItem extends StatelessWidget {
   final Widget trailing;
   final double imageWidth;
   final double imageHeight;
+  final VoidCallback? onTap;
 
   const _RowItem({
     this.imagePath,
@@ -278,40 +559,45 @@ class _RowItem extends StatelessWidget {
     required this.trailing,
     this.imageWidth = 20,
     this.imageHeight = 20,
+    this.onTap,
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
 
   @override
   Widget build(BuildContext context) {
     final Widget leading = imagePath != null
         ? Image.asset(
-      imagePath!,
-      width: imageWidth.w,
-      height: imageHeight.h,
-      fit: BoxFit.contain,
-    )
+            imagePath!,
+            width: imageWidth.w,
+            height: imageHeight.h,
+            fit: BoxFit.contain,
+          )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Container(
-      height: 55.h,
-      child: Padding(
-        padding: EdgeInsets.only(left: 12.w, right: 14.w),
-        child: Row(
-          children: [
-            leading,
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Inter',
-                  color: _textPrimary,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 55.h,
+        child: Padding(
+          padding: EdgeInsets.only(left: 12.w, right: 14.w),
+          child: Row(
+            children: [
+              leading,
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _textPrimary,
+                  ),
                 ),
               ),
-            ),
-           trailing,
-          ],
+              trailing,
+            ],
+          ),
         ),
       ),
     );
@@ -321,7 +607,7 @@ class _RowItem extends StatelessWidget {
 /// SIMPLE ROW
 class _SimpleRow extends StatelessWidget {
   final String? imagePath;
-  final String? iconPath; 
+  final String? iconPath;
   final IconData? icon;
   final String title;
   final String? trailingText;
@@ -329,151 +615,83 @@ class _SimpleRow extends StatelessWidget {
   final double imageHeight;
   final double iconWidth;
   final double iconHeight;
+  final VoidCallback? onTap;
 
   const _SimpleRow({
     this.imagePath,
     this.icon,
-    this.iconPath, 
+    this.iconPath,
     required this.title,
     this.trailingText,
     this.imageWidth = 20,
     this.imageHeight = 20,
-    this.iconWidth =12,
-    this.iconHeight =12,
+    this.iconWidth = 12,
+    this.iconHeight = 12,
+    this.onTap,
   }) : assert(imagePath != null || icon != null, 'Provide imagePath or icon');
 
   @override
   Widget build(BuildContext context) {
     final Widget leading = imagePath != null
         ? Image.asset(
-      imagePath!,
-      width: imageWidth.w,
-      height: imageHeight.h,
-      fit: BoxFit.contain,
-    )
+            imagePath!,
+            width: imageWidth.w,
+            height: imageHeight.h,
+            fit: BoxFit.contain,
+          )
         : Icon(icon!, size: 20.sp, color: _textSecondary);
 
-    return Container(
-      height: 55.h,
-      child: Padding(
-        // padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-        padding: EdgeInsets.only(left: 12.w, right: 17.w, ),
-        child: Row(
-          children: [
-            leading,
-           SizedBox(width: 10.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Inter',
-                  color: _textPrimary,
-                ),
-              ),
-            ),
-            if (trailingText != null)
-              Row(
-                children: [
-                  Text(
-                    trailingText!,
-                    style: TextStyle(
-                      color: _textSecondary,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                  SizedBox(width: 5.w,),
-                  Image.asset(
-                    iconPath!,
-                    width: iconWidth.w,
-                    height: iconHeight.h,
-                    fit: BoxFit.contain,
-                  )
-
-
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// SIZE SEGMENT
-class _SizeSegment extends StatelessWidget {
-  final String value;
-  final ValueChanged<String> onChanged;
-  final double imageWidth;
-  final double imageHeight;
-
-  const _SizeSegment({
-    required this.value,
-    required this.onChanged,
-    this.imageWidth = 26,
-    this.imageHeight = 17,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget item(String label, String img) {
-      final selected = label == value;
-
-      return GestureDetector(
-        onTap: () => onChanged(label),
-        child: Container(
-  
-          width: 56.w,
-          height: 35.h,
-          decoration: BoxDecoration(
-            color: selected ? Colors.white :  Colors.transparent,
-            //Colors.transparent,
-            borderRadius: BorderRadius.circular(26.r),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 55.h,
+        child: Padding(
+          // padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          padding: EdgeInsets.only(left: 12.w, right: 17.w),
+          child: Row(
             children: [
-              // Label on top
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _textPrimary,
+              leading,
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Inter',
+                    color: _textPrimary,
+                  ),
                 ),
               ),
-              // SizedBox(height: 4.h),
-              // Image below
-              Image.asset(
-                img,
-                width: imageWidth.w,
-                height: imageHeight.h,
-                fit: BoxFit.contain,
-              ),
+              if (trailingText != null)
+                Row(
+                  children: [
+                    Text(
+                      trailingText!,
+                      style: TextStyle(
+                        color: _textSecondary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    if (iconPath != null) ...[
+                      SizedBox(width: 5.w),
+                      Image.asset(
+                        iconPath!,
+                        width: iconWidth.w,
+                        height: iconHeight.h,
+                        fit: BoxFit.contain,
+                      ),
+                    ],
+                  ],
+                ),
             ],
           ),
         ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(8.w),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          item('S', 'assets/images/size_S.png'),
-          item('M', 'assets/images/size_M.png'),
-          item('L', 'assets/images/size_L.png'),
-          item('XL', 'assets/images/size_XL.png'),
-        ],
       ),
     );
   }
 }
+

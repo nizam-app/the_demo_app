@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 
 import '../widget/add_protocol.dart';
@@ -198,6 +199,7 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
                 ),
                 currentState: _cardStates[0],
                 onStateTap: () {
+                  uiTapHaptic();
                   setState(() {
                     _cardStates[0] = _cardStates[0] == IntegrationState.enabled
                         ? IntegrationState.disabled
@@ -218,6 +220,7 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
                 ),
                 currentState: _cardStates[1],
                 onStateTap: () {
+                  uiTapHaptic();
                   setState(() {
                     _cardStates[1] = _cardStates[1] == IntegrationState.enabled
                         ? IntegrationState.disabled

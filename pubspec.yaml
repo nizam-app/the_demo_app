@@ -52,6 +52,9 @@ dependencies:
   shimmer: ^3.0.0
   cached_network_image: ^3.4.1
   flutter_svg: ^2.2.2
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^8.1.0
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:
@@ -83,8 +86,8 @@ flutter_native_splash:
 flutter_launcher_icons:
     android: true
     ios: true
-    image_path: "assets/image 66.png"
-    adaptive_icon_foreground: "assets/image 66.png"
+    image_path: "assets/app_icon_aican.png"
+    adaptive_icon_foreground: "assets/app_icon_aican.png"
     adaptive_icon_background: "#ffffff"
     remove_alpha_ios: true
 

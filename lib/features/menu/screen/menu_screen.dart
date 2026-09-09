@@ -10,12 +10,10 @@ import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/categories/screen/categories_screen.dart';
 import 'package:workpleis/features/cores/screen/cores_screen.dart';
 import 'package:workpleis/features/home/screen/home_screen.dart';
-import 'package:workpleis/features/settings/screen/setting_screen.dart';
 import 'package:workpleis/features/weather/screen/weather_screen.dart';
 import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
-import '../../profile/screen/profile_screen.dart';
 
 /// Single source of truth for all menu section card icon dimensions.
 /// Ensures every icon has the same container size, alignment, and fit.
@@ -177,7 +175,8 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/Mask group copy.png',
                           title: 'Dashboard',
                           iconSize: 17.5,
-                          onTap: () => context.go(SettingScreen.routeName),
+                         // onTap: () => context.go(SettingScreen.routeName),
+                          onTap: () => context.go(HomeScreen.routeName),
                         ),
                         const _InnerDivider(),
                         _MenuItemRow(
@@ -469,7 +468,13 @@ class MenuScreen extends StatelessWidget {
                                 width: 16.w,
                                 height: 16.h,
                               ),
-                              onTap: () => context.pop(),
+                              onTap: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/home');
+                                }
+                              },
                             ),
                             Expanded(
                               child: Center(

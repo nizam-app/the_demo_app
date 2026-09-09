@@ -3,11 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/utils/ui_tap_haptic.dart';
+import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
 import 'package:workpleis/features/analytics/screen/analytics_screen.dart';
 import 'package:workpleis/features/devices/screen/devices_screen.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/notifications/screen/notifications_screen.dart';
-import 'package:workpleis/features/settings/screen/settings_screen.dart';
+import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
 
@@ -29,6 +31,7 @@ void _paintGradientFullRing(
   required double strokeWidth,
   required List<Color> gradientColors,
   List<double>? gradientStops,
+  Color trackColor = kDeviceOffGreyFill,
 }) {
   final Offset center = Offset(size.width / 2, size.height / 2);
   final double midRadius = size.shortestSide / 2 - strokeWidth / 2 - 2;
@@ -42,7 +45,7 @@ void _paintGradientFullRing(
 
   if (clamped <= 0.001) {
     final Paint emptyTrack = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -90,7 +93,7 @@ void _paintGradientFullRing(
   }
 
   final Paint inactivePaint = Paint()
-    ..color = const Color(0xFFE1E1E1)
+    ..color = trackColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
     ..strokeCap = StrokeCap.butt;
@@ -141,6 +144,9 @@ double _fullRingPercentFromLocal(Offset local, Size size, double prevPercent) {
   return _snapRingPercentOneStep(next);
 }
 
+/// Flat circular press halo (matches blind angle slider overlay, no shadow).
+const Color _controlPressHaloColor = Color(0x220088FE);
+
 /// Hollow selector ring (RGBW wheel / tunable-white disk).
 Widget _hollowRingSelectorThumb({
   required bool pressed,
@@ -148,22 +154,42 @@ Widget _hollowRingSelectorThumb({
   required double strokeWidth,
   Color idleStrokeColor = const Color(0xFF6488EA),
   required Color pressGlowColor,
+  double pressHaloPadding = 14,
 }) {
-  return Container(
-    width: diameter,
-    height: diameter,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: Colors.transparent,
-      border: Border.all(
-        color: pressed ? pressGlowColor : idleStrokeColor,
-        width: strokeWidth,
-      ),
+  final double outer = diameter + pressHaloPadding * 2;
+  return SizedBox(
+    width: outer,
+    height: outer,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: _controlPressHaloColor,
+            ),
+          ),
+        Container(
+          width: diameter,
+          height: diameter,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.transparent,
+            border: Border.all(
+              color: pressed ? pressGlowColor : idleStrokeColor,
+              width: strokeWidth,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
 
-/// Ring / dial thumb — no outer glow or drop shadow.
+/// Ring / dial thumb with flat press halo only (no drop shadow).
 Widget _ringControlThumb({
   required Widget thumb,
   required bool pressed,
@@ -171,10 +197,30 @@ Widget _ringControlThumb({
   Color? haloColor,
   double haloPadding = 14,
 }) {
+  final Color halo = haloColor ?? _controlPressHaloColor;
+  final double outer = thumbDiameter + haloPadding * 2;
   return SizedBox(
-    width: thumbDiameter,
-    height: thumbDiameter,
-    child: thumb,
+    width: outer,
+    height: outer,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        if (pressed)
+          Container(
+            width: outer,
+            height: outer,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: halo,
+            ),
+          ),
+        SizedBox(
+          width: thumbDiameter,
+          height: thumbDiameter,
+          child: thumb,
+        ),
+      ],
+    ),
   );
 }
 
@@ -410,9 +456,12 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   /// Presence screen: selected circular mode (0 Comfort … 4 Individual).
   int _selectedPresenceModeIndex = 0;
+  int? _presenceOffModeIndex;
 
   /// Multi-value switch grid: selected tile index 0 … 11 (displayed as 1 … 12).
   int _selectedMultiValueSwitchIndex = 0;
+
+  bool _suppressDashboardSync = false;
 
   static const List<String> _sceneLabels = <String>[
     'All On',
@@ -428,6 +477,126 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       vsync: this,
     );
     _tabController.addListener(() => setState(() {}));
+    _loadDashboardSnapshot(
+      DeviceDashboardSync.instance.snapshotFor(widget.deviceTitle),
+    );
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    if (!_suppressDashboardSync) {
+      _publishDashboardSnapshot();
+    }
+  }
+
+  void _publishDashboardSnapshot() {
+    DeviceDashboardSync.instance.update(
+      widget.deviceTitle,
+      _buildDashboardSnapshot(),
+    );
+  }
+
+  DeviceControlSnapshot _buildDashboardSnapshot() {
+    final DeviceControlSnapshot prev =
+        DeviceDashboardSync.instance.snapshotFor(widget.deviceTitle);
+
+    int blindDown = prev.blindDownPercent;
+    int blindUp = prev.blindUpPercent;
+    if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
+      blindDown = ((1 - _blindLevel) * 100).round();
+      blindUp = (_blindLevel * 100).round();
+    } else if (widget.controlMode == DeviceDetailsControlMode.blindControl) {
+      blindDown = (_blindLevel * 100).round();
+      blindUp = (_blindAngle * 100).round();
+    }
+
+    double dimmer = prev.dimmerPercent;
+    if (widget.controlMode == DeviceDetailsControlMode.ledDimmer) {
+      dimmer = _ledDimmerPercent;
+    } else if (widget.controlMode == DeviceDetailsControlMode.standard) {
+      dimmer = _isOn ? prev.dimmerPercent : 0.0;
+    } else if (widget.controlMode == DeviceDetailsControlMode.tunableWhite) {
+      dimmer = _tunableWhiteIntensity;
+    } else if (widget.controlMode == DeviceDetailsControlMode.rgbwPicker) {
+      dimmer = _rgbwIntensity;
+    }
+
+    final double thermostatC = widget.controlMode ==
+            DeviceDetailsControlMode.thermostatRing
+        ? 19.0 + _thermostatSetPercent.clamp(0.0, 1.0) * 16.0
+        : prev.thermostatCelsius;
+
+    return DeviceControlSnapshot(
+      isOn: _resolveDashboardIsOn(),
+      dimmerPercent: dimmer,
+      thermostatCelsius: thermostatC,
+      blindDownPercent: blindDown,
+      blindUpPercent: blindUp,
+      ledDimmerPercent: _ledDimmerPercent,
+      ventilationPercent: _ventilationPercent,
+      rgbwHue: _rgbwHue,
+      rgbwSaturation: _rgbwSaturation,
+      rgbwIntensity: _rgbwIntensity,
+      sceneIndex: _selectedSceneIndex,
+      fanLevel: _selectedFanLevel,
+      heatingCoolingMode: _heatingCoolingMode,
+      tunableWhiteIntensity: _tunableWhiteIntensity,
+      tunableWhiteDotDx: _tunableWhiteDotDx,
+      tunableWhiteDotDy: _tunableWhiteDotDy,
+      presenceModeIndex: _selectedPresenceModeIndex,
+      thermostatRingPercent: _thermostatSetPercent,
+      multiValueSwitchIndex: _selectedMultiValueSwitchIndex,
+    );
+  }
+
+  bool _resolveDashboardIsOn() {
+    switch (widget.controlMode) {
+      case DeviceDetailsControlMode.fanLevel:
+        return _selectedFanLevel > 0;
+      case DeviceDetailsControlMode.lightSceneValues:
+        return _selectedSceneIndex != 2;
+      case DeviceDetailsControlMode.heatingCooling:
+        return _isOn;
+      case DeviceDetailsControlMode.standard:
+        return _isOn;
+      case DeviceDetailsControlMode.presenceModes:
+        return _isOn;
+      case DeviceDetailsControlMode.multiValueSwitch:
+        return _isOn;
+      default:
+        return true;
+    }
+  }
+
+  void _loadDashboardSnapshot(DeviceControlSnapshot snap) {
+    _isOn = snap.isOn;
+    _ledDimmerPercent = snap.ledDimmerPercent;
+    _ventilationPercent = snap.ventilationPercent;
+    _rgbwHue = snap.rgbwHue;
+    _rgbwSaturation = snap.rgbwSaturation;
+    _rgbwIntensity = snap.rgbwIntensity;
+    _selectedSceneIndex = snap.sceneIndex;
+    _selectedFanLevel = snap.fanLevel;
+    _heatingCoolingMode = snap.heatingCoolingMode;
+    _tunableWhiteIntensity = snap.tunableWhiteIntensity;
+    _tunableWhiteDotDx = snap.tunableWhiteDotDx;
+    _tunableWhiteDotDy = snap.tunableWhiteDotDy;
+    _selectedPresenceModeIndex = snap.presenceModeIndex;
+    _presenceOffModeIndex =
+        widget.controlMode == DeviceDetailsControlMode.presenceModes &&
+                !snap.isOn
+            ? snap.presenceModeIndex
+            : null;
+    _thermostatSetPercent = snap.thermostatRingPercent;
+    _selectedMultiValueSwitchIndex = snap.multiValueSwitchIndex;
+
+    if (widget.controlMode == DeviceDetailsControlMode.awningControl) {
+      _blindLevel = snap.blindUpPercent / 100.0;
+    } else if (widget.controlMode == DeviceDetailsControlMode.blindControl) {
+      _blindLevel = snap.blindDownPercent / 100.0;
+      _blindAngle = snap.blindUpPercent / 100.0;
+    }
   }
 
   @override
@@ -471,6 +640,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
             path.contains('mask group (6)')) {
           return 'assets/images/bathroom_off.png';
         }
+        if (title.contains('motion sensor')) {
+          return 'assets/images/motion_sensor_off.png';
+        }
         return 'assets/images/light_of.png';
       default:
         return null;
@@ -478,6 +650,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   String get _heroImageAssetPath {
+    if (widget.deviceTitle == 'Motion Sensor' && !_isOn) {
+      return 'assets/images/motion_sensor_off.png';
+    }
     if (widget.controlMode == DeviceDetailsControlMode.lightSceneValues) {
       switch (_selectedSceneIndex.clamp(0, 2)) {
         case 2:
@@ -504,7 +679,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         const RepaintBoundary(child: AnalyticsScreen(showBottomNav: false)),
         RepaintBoundary(child: _buildBody(context)),
         const RepaintBoundary(child: NotificationsScreen(showBottomNav: false)),
-        const RepaintBoundary(child: SettingsScreen()),
+        const RepaintBoundary(child: SettingScreen()),
       ],
     );
   }
@@ -652,10 +827,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       color: const Color(0xFFFFFFFF),
       child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
       onTap: () {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
+        if (context.canPop()) {
+          context.pop();
         } else {
-          context.go('/setting-device');
+          context.go('/devices');
         }
       },
     );
@@ -683,46 +858,42 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     );
   }
 
-  /// Device title + edit icon (shared by header row and standard hero below image).
+  /// Device title + edit icon inline after the last line of text.
   Widget _buildTitleEditRow() {
     const Color textPrimary = Color(0xFF111827);
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double iconSlot = 13.w + 8.w;
-        final double maxTextW = math.max(0.0, constraints.maxWidth - iconSlot);
-        return Center(
-          child: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            alignment: WrapAlignment.center,
-            spacing: 8.w,
-            runSpacing: 4.h,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxTextW),
-                child: Text(
-                  widget.deviceTitle,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 23.sp,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
-                    height: 1.25,
-                  ),
+    final double iconW = 13.w;
+    final double gap = 8.w;
+    final TextStyle titleStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 23.sp,
+      fontWeight: FontWeight.w700,
+      color: textPrimary,
+      height: 1.25,
+    );
+
+    return Center(
+      child: Text.rich(
+        textAlign: TextAlign.center,
+        TextSpan(
+          style: titleStyle,
+          children: [
+            TextSpan(text: widget.deviceTitle),
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: EdgeInsets.only(left: gap),
+                child: Image.asset(
+                  'assets/Group 63.png',
+                  height: 13.h,
+                  width: iconW,
+                  fit: BoxFit.contain,
+                  color: textPrimary,
                 ),
               ),
-              Image.asset(
-                'assets/Group 63.png',
-                height: 13.h,
-                width: 13.w,
-                fit: BoxFit.cover,
-                color: textPrimary,
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -831,7 +1002,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   /// Hero for [DeviceDetailsControlMode.presenceModes]: five selectable modes.
   Widget _buildPresenceModesHeroContent() {
     const Color textPrimary = Color(0xFF111827);
-    const Color labelMuted = Color(0xFF111827);
     final double circleDm = 86.w;
     final double ringInset = 3.8.w;
 
@@ -841,9 +1011,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       required Widget iconChild,
     }) {
       final bool sel = _selectedPresenceModeIndex == index;
+      final bool showRing = sel && _isOn;
+      final bool showOffGrey = _presenceOffModeIndex == index && !_isOn;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _selectedPresenceModeIndex = index),
+        onTap: () {
+          uiTapHaptic();
+          setState(() {
+            _selectedPresenceModeIndex = index;
+            _presenceOffModeIndex = null;
+            _isOn = true;
+          });
+        },
+        onLongPress: () {
+          uiTapHaptic();
+          setState(() {
+            _selectedPresenceModeIndex = index;
+            _presenceOffModeIndex = index;
+            _isOn = false;
+          });
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -854,30 +1041,36 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               height: circleDm,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: sel
+                gradient: showRing
                     ? const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [Color(0xFF15DFFE), Color(0xFFAFFF54)],
                       )
                     : null,
-
-                border: sel
+                border: showRing
                     ? null
-                    : Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                    : Border.all(
+                        color: showOffGrey
+                            ? kDeviceOffGreyFill
+                            : const Color(0xFFE1E1E1),
+                        width: 1.5,
+                      ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(sel ? 0.10 : 0.05),
-                    blurRadius: sel ? 10 : 6,
+                    color: Colors.black.withOpacity(showRing ? 0.10 : 0.05),
+                    blurRadius: showRing ? 10 : 6,
                     offset: const Offset(0, 3),
                   ),
                 ],
               ),
-              padding: sel ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
+              padding: showRing ? EdgeInsets.all(ringInset) : EdgeInsets.zero,
               child: ClipOval(
                 clipBehavior: Clip.antiAlias,
                 child: ColoredBox(
-                  color: const Color(0xFFFFFFFF),
+                  color: showOffGrey
+                      ? const Color(0xFFF3F4F6)
+                      : const Color(0xFFFFFFFF),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final double inset = 10.w;
@@ -885,7 +1078,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         constraints.maxWidth,
                         constraints.maxHeight,
                       );
-                      final double side = math.max(0.0, rawSide - inset * 2);
+                      final double side =
+                          math.max(0.0, rawSide - inset * 2);
+                      final Widget icon = showOffGrey
+                          ? ColorFiltered(
+                              colorFilter: const ColorFilter.mode(
+                                Color(0xFFC7CAD6),
+                                BlendMode.srcIn,
+                              ),
+                              child: iconChild,
+                            )
+                          : iconChild;
                       return Padding(
                         padding: EdgeInsets.all(inset),
                         child: Center(
@@ -895,7 +1098,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             child: FittedBox(
                               fit: BoxFit.contain,
                               alignment: Alignment.center,
-                              child: iconChild,
+                              child: icon,
                             ),
                           ),
                         ),
@@ -912,7 +1115,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fontFamily: 'Inter',
                 fontSize: 14.sp,
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                color: sel ? textPrimary : textPrimary,
+                color: showOffGrey ? kDeviceOffGreyIcon : textPrimary,
               ),
             ),
           ],
@@ -1012,10 +1215,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       end: Alignment.bottomRight,
       colors: <Color>[Color(0xFF00E5FF), Color(0xFF00FF80)],
     );
+    const Color selectedFillColor = Color(0xFFF3F4F6);
 
     Widget valueTile(int index) {
       final int displayed = index + 1;
       final bool sel = _selectedMultiValueSwitchIndex == index;
+      final bool showSelected = sel && _isOn;
+      final bool showOffGrey = sel && !_isOn;
+      final Color checkColor =
+          showOffGrey ? kDeviceOffGreyIcon : const Color(0xFF22C55E);
       final String caption = rowLabels[index % 3];
       final double radiusOuter = 26.r;
       final double radiusInner = sel
@@ -1024,7 +1232,18 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _selectedMultiValueSwitchIndex = index),
+        onTap: () {
+          uiTapHaptic();
+          setState(() {
+            _selectedMultiValueSwitchIndex = index;
+            _isOn = true;
+          });
+        },
+        onLongPress: () {
+          if (!sel) return;
+          uiTapHaptic();
+          setState(() => _isOn = false);
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1032,16 +1251,22 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                gradient: sel ? selectedBorderGradient : null,
-                color: sel ? null : Colors.white,
+                gradient: showSelected ? selectedBorderGradient : null,
                 borderRadius: BorderRadius.circular(26.r),
-                border: sel
+                border: showSelected
                     ? null
-                    : Border.all(color: const Color(0xFFFFFFFF), width: 1),
+                    : Border.all(
+                        color: sel
+                            ? const Color(0xFFE1E1E1)
+                            : const Color(0xFFFFFFFF),
+                        width: sel ? 1.5 : 1,
+                      ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(sel ? 0.08 : 0.04),
-                    blurRadius: sel ? 10 : 5,
+                    color: Colors.black.withOpacity(
+                      showSelected ? 0.08 : (sel ? 0.05 : 0.04),
+                    ),
+                    blurRadius: showSelected ? 10 : 5,
                     offset: const Offset(0, 2),
                   ),
                 ],
@@ -1049,8 +1274,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               padding: sel ? EdgeInsets.all(3.w) : EdgeInsets.zero,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26.r),
+                  color: sel ? selectedFillColor : Colors.white,
+                  borderRadius: BorderRadius.circular(radiusInner),
                 ),
                 child: SizedBox(
                   height: 48.h,
@@ -1065,7 +1290,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             fontFamily: 'Inter',
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w700,
-                            color: sel ? textPrimary : textPrimary,
+                            color: textPrimary,
                           ),
                         ),
                       ),
@@ -1076,7 +1301,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           child: Icon(
                             Icons.check_circle,
                             size: 30.sp,
-                            color: const Color(0xFF22C55E),
+                            color: checkColor,
                           ),
                         ),
                     ],
@@ -1094,7 +1319,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 fontFamily: 'Inter',
                 fontSize: 12.sp,
                 fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
-                color: sel ? textPrimary : textPrimary,
+                color: showOffGrey ? kDeviceOffGreyIcon : textPrimary,
                 height: 1.15,
               ),
             ),
@@ -1169,6 +1394,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _ledDimmerRingDragging = true);
                     _ledDimmerUpdateFromLocal(d.localPosition, sz);
                   },
@@ -1212,14 +1438,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
-                          final double thumbSize = 44.r;
+                          final double thumbSize = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ledDimmerRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1325,6 +1554,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _ventilationRingDragging = true);
                     _ventilationUpdateFromLocal(d.localPosition, sz);
                   },
@@ -1378,13 +1608,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               _fullRingStart + (_fullRingSweep * p);
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
+                          final double haloPad = 8.r;
+                          final double thumbSize =38.r;
+                         final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _ventilationRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -1423,8 +1657,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final double t = _tunableWhiteTempT.clamp(0.0, 1.0);
     final int kelvin = (warmK + (coolK - warmK) * t).round();
 
-    final Color dialBorder = const Color(0xFFE5E7EB);
-    final Color dialShadow = Colors.black.withOpacity(0.08);
+    final double dialBorderWidth = 6.w;
     final Color textPrimary = const Color(0xFF111827);
     final Color textSecondary = const Color(0xFF6B7280);
     final Color accent = const Color(0xFF00D1FF);
@@ -1457,6 +1690,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return Listener(
                   behavior: HitTestBehavior.opaque,
                   onPointerDown: (PointerDownEvent e) {
+                    uiTapHaptic();
                     setState(() => _tunableWhiteDiskDragging = true);
                     _tunableWhiteUpdateFromLocal(e.localPosition, sz);
                   },
@@ -1473,50 +1707,51 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
+                        child: Container(
+                          width: sz.width,
+                          height: sz.height,
+                          padding: EdgeInsets.all(dialBorderWidth),
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: dialShadow,
-                            //     blurRadius: 24.r,
-                            //     offset: const Offset(0, 12),
-                            //   ),
-                            // ],
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: <Color>[
+                                Color(0xFFFEE481),
+                                Color(0xFFFFFFFF),
+                                Color(0xFF93E1E3),
+                              ],
+                              stops: <double>[0.0, 0.55, 1.0],
+                            ),
                           ),
                           child: ClipOval(
                             child: Stack(
+                              fit: StackFit.expand,
                               children: [
-                                Container(
-                                  width: sz.width,
-                                  height: sz.height,
-                                  decoration: const BoxDecoration(
+                                const DecoratedBox(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: <Color>[
-                                        Color(0xFFFFF1BF),
-                                        Color(0xFFFFFBF0),
-                                        Color(0xFFF2FDFF),
-                                        Color(0xFFBFF6FF),
+                                        Color(0xFFFEE481),
+                                        Color(0xFFFFFFFF),
+                                        Color(0xFF93E1E3),
                                       ],
-                                      stops: <double>[0.0, 0.38, 0.72, 1.0],
+                                      stops: <double>[0.0, 0.48, 1.0],
                                     ),
                                   ),
                                 ),
-                                // Soft vignette for depth.
-                                Positioned.fill(
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          Colors.white.withOpacity(0.0),
-                                          Colors.black.withOpacity(0.06),
-                                        ],
-                                        stops: const [0.65, 1.0],
-                                      ),
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.0),
+                                        Colors.black.withValues(alpha: 0.06),
+                                      ],
+                                      stops: const <double>[0.65, 1.0],
                                     ),
                                   ),
                                 ),
@@ -1525,32 +1760,15 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           ),
                         ),
                       ),
-                      // Outer stroke to match modern dial look.
-                      IgnorePointer(
-                        child: Container(
-                          width: sz.width,
-                          height: sz.height,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: dialBorder, width: 2),
-                          ),
-                        ),
-                      ),
-                      // White hollow ring + "Daylight" label. Sits exactly at
-                      // the user's tap point on the disk (clamped to the dial).
-
-                      //new update 
-                      
+                      // Selector + "Daylight" label at the user's tap point.
                       Builder(
                         builder: (context) {
                           final double x = _tunableWhiteDotDx * sz.width;
                           final double y = _tunableWhiteDotDy * sz.height;
-                          final double ringSize = 44.r;
-                          final double ringStroke = 4.r;
-                          final double labelGap = 6.h;
+                          final double ringSize = 40.r;
+                          final double labelGap = 8.h;
                           final double labelHeight = 16.h;
-                          // Anchor the ring's center on (x, y); place the label
-                          // just below the ring.
+                          // Anchor ring center on (x, y); label sits below with Figma gap.
                           return Positioned(
                             left: x - ringSize / 2,
                             top: y - ringSize / 2,
@@ -1558,11 +1776,17 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _hollowRingSelectorThumb(
-                                    pressed: _tunableWhiteDiskDragging,
-                                    diameter: ringSize,
-                                    strokeWidth: ringStroke,
-                                    pressGlowColor: accent,
+                                  Container(
+                                    width: ringSize,
+                                    height: ringSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                        color: kDeviceOffGreyBorder,
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   SizedBox(height: labelGap),
                                   SizedBox(
@@ -1657,11 +1881,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           trackHeight: 10.h,
                           trackShape: const _TunableWhiteIntensityGradientTrackShape(),
                           activeTrackColor: accent,
-                          inactiveTrackColor: dialBorder,
+                          inactiveTrackColor: const Color(0xFFE5E7EB),
                           thumbColor: accent,
-                          overlayColor: Colors.transparent,
+                          overlayColor: _controlPressHaloColor,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 22.r,
                           ),
                           thumbShape: _TunableWhiteThumbShape(
                             radius: thumbSize / 2,
@@ -1673,9 +1897,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           value: _tunableWhiteIntensity.clamp(0.0, 1.0),
                           min: 0,
                           max: 1,
-                          onChangeStart: (_) => setState(
-                            () => _tunableWhiteSliderDragging = true,
-                          ),
+                          onChangeStart: (_) {
+                            uiTapHaptic();
+                            setState(() => _tunableWhiteSliderDragging = true);
+                          },
                           onChangeEnd: (_) => setState(
                             () => _tunableWhiteSliderDragging = false,
                           ),
@@ -1756,6 +1981,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return Listener(
                   behavior: HitTestBehavior.opaque,
                   onPointerDown: (PointerDownEvent e) {
+                    uiTapHaptic();
                     setState(() => _rgbwWheelDragging = true);
                     _rgbwUpdateFromLocal(e.localPosition, layoutSize);
                   },
@@ -1773,9 +1999,42 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: CustomPaint(
-                          size: layoutSize,
-                          painter: _RgbHueWheelPainter(),
+                        child: Container(
+                          width: layoutSize.width,
+                          height: layoutSize.height,
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: SweepGradient(
+                              transform: const GradientRotation(-math.pi / 2),
+                              colors: <Color>[
+                                Color(0xFFBEEEDD), // top-left mint
+                                Color(0xFFF8F3A8), // top yellow
+                                Color(0xFFF8C8A0), // right-top orange
+                                Color(0xFFF6AFC8), // right-bottom pink
+                                Color(0xFFD2B6F1), // bottom purple
+                                Color(0xFF9FBEF2), // bottom-left blue
+                                Color(0xFF9EDFE9), // left cyan
+                                Color(0xFFBEEEDD), // close loop
+                              ],
+                              stops: <double>[
+                                0.00,
+                                0.16,
+                                0.30,
+                                0.48,
+                                0.64,
+                                0.79,
+                                0.92,
+                                1.00,
+                              ],
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: CustomPaint(
+                              size: layoutSize,
+                              painter: _RgbHueWheelPainter(),
+                            ),
+                          ),
                         ),
                       ),
                       Builder(
@@ -1790,16 +2049,20 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final double rad = _rgbwHue * math.pi / 180;
                           final Offset thumb =
                               c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
-                          final double thumbD = 44.r;
+                          final double thumbD = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerD = thumbD + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbD / 2,
-                            top: thumb.dy - thumbD / 2,
+                            left: thumb.dx - outerD / 2,
+                            top: thumb.dy - outerD / 2,
                             child: IgnorePointer(
                               child: _hollowRingSelectorThumb(
                                 pressed: _rgbwWheelDragging,
                                 diameter: thumbD,
                                 strokeWidth: 5,
-                                pressGlowColor: const Color(0xFFE91EAC),
+                                pressHaloPadding: haloPad,
+                                idleStrokeColor: Colors.white,
+                                pressGlowColor: Colors.white,
                               ),
                             ),
                           );
@@ -1873,9 +2136,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             enabledInnerRadius: 14.r,
                             dragging: _rgbwSliderDragging,
                           ),
-                          overlayColor: Colors.transparent,
+                          overlayColor: _controlPressHaloColor,
                           overlayShape: RoundSliderOverlayShape(
-                            overlayRadius: 20.r,
+                            overlayRadius: 22.r,
                           ),
                           activeTrackColor: const Color(0xFFE91EAC),
                           inactiveTrackColor: const Color(0xFFFFFFFF),
@@ -1890,8 +2153,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           max: 1,
                           activeColor: const Color(0xFFE91EAC),
                           inactiveColor: const Color(0xFFFFFFFF),
-                          onChangeStart: (_) =>
-                              setState(() => _rgbwSliderDragging = true),
+                          onChangeStart: (_) {
+                            uiTapHaptic();
+                            setState(() => _rgbwSliderDragging = true);
+                          },
                           onChangeEnd: (_) =>
                               setState(() => _rgbwSliderDragging = false),
                           onChanged: (v) =>
@@ -1931,7 +2196,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildHeatingCoolingHeroContent() {
     const Color pillBg = Colors.white;
     const Color pillBorder = Color(0xFFE5E7EB);
-    const Color offSelectedBg = Color(0xFFC7CCD7);
+    const Color offSelectedBg = kDeviceOffGreyFill;
 
     // Pills only show selected while device is on; Off clears both visually.
     final bool isHeating = _isOn && _heatingCoolingMode == 'heating';
@@ -1977,7 +2242,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
               children: [
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => setState(() => _isOn = false),
+                  onTap: () {
+                    uiTapHaptic();
+                    setState(() => _isOn = false);
+                  },
                   child: Container(
                     width: 36.w,
                     height: 36.w,
@@ -2111,7 +2379,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     final Color foreground = selected ? Colors.white : Colors.black;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       child: Container(
         height: 36.h,
         padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -2180,6 +2451,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onPanDown: (d) {
+                    uiTapHaptic();
                     setState(() => _thermostatRingDragging = true);
                     _thermostatUpdateFromLocal(d.localPosition, sz);
                   },
@@ -2311,13 +2583,16 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           final Offset thumb =
                               c + Offset(math.cos(ang), math.sin(ang)) * radius;
                           final double thumbSize = 38.r;
+                          final double haloPad = 8.r;
+                          final double outerSize = thumbSize + haloPad * 2;
                           return Positioned(
-                            left: thumb.dx - thumbSize / 2,
-                            top: thumb.dy - thumbSize / 2,
+                            left: thumb.dx - outerSize / 2,
+                            top: thumb.dy - outerSize / 2,
                             child: IgnorePointer(
                               child: _ringControlThumb(
                                 pressed: _thermostatRingDragging,
                                 thumbDiameter: thumbSize,
+                                haloPadding: haloPad,
                                 thumb: Container(
                                   width: thumbSize,
                                   height: thumbSize,
@@ -2409,10 +2684,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 child: _fanLevelOptionIcon(opt.value),
                 onTap: () => setState(() => _selectedFanLevel = opt.value),
                 selectedBackgroundOverride: opt.value == 0
-                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    ? (sel ? kDeviceOffGreyFill : null)
                     : (sel ? Colors.white : null),
                 selectedBorderOverride: opt.value == 0
-                    ? (sel ? const Color(0xFFC7CCD7) : null)
+                    ? (sel ? kDeviceOffGreyFill : null)
                     : (sel ? const Color(0xFF38A4FE) : null),
                 selectedBorderWidth: opt.value != 0 && sel ? 2.0 : 1.0,
               );
@@ -2470,7 +2745,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   Widget _buildOnOffRow() {
-    const Color offSelectedBg = Color(0xFFC7CCD7);
+    const Color offSelectedBg = kDeviceOffGreyFill;
     const Color onSelectedBg = Color(0xFF0088FE);
     const Color inactiveBg = Colors.white;
     const Color inactiveBorder = Color(0xFFE5E7EB);
@@ -2482,7 +2757,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _isOn = false),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _isOn = false);
+              },
               child: Container(
                 height: 39.h,
                 width: 78.w,
@@ -2524,7 +2802,10 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           SizedBox(width: 14.w),
           Expanded(
             child: GestureDetector(
-              onTap: () => setState(() => _isOn = true),
+              onTap: () {
+                uiTapHaptic();
+                setState(() => _isOn = true);
+              },
               child: Container(
                 height: 39.h,
                 width: 78.w,
@@ -2571,10 +2852,11 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     const Color noteColor = Color(0xFF6B7280);
 
     if (widget.deviceTitle == 'Motion Sensor') {
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(left:  85.w, right: 0),
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Center(
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -2588,22 +2870,19 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                 ),
               ),
-              //SizedBox(width: 12.w),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Here we will write instruction how to \n'
-                        'control and more information about that\n'
-                        'device',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12.sp,
-                      height: 1.45,
-                      fontWeight: FontWeight.w400,
-                      color: noteColor,
-                    ),
+              SizedBox(width: 12.w),
+              Flexible(
+                child: Text(
+                  'Here we will write instruction how to \n'
+                  'control and more information about that\n'
+                  'device',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.sp,
+                    height: 1.45,
+                    fontWeight: FontWeight.w400,
+                    color: noteColor,
                   ),
                 ),
               ),
@@ -2613,25 +2892,26 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       );
     }
 
-    return Center(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding:  EdgeInsets.only(left: 85.w, right: 0),
-            child: SizedBox(
-              height: 15.h,
-              width: 15.w,
-              child: Image.asset(
-                'assets/images/message_icon.png',
-                fit: BoxFit.contain,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 32.w),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 3.h),
+              child: SizedBox(
+                height: 15.h,
+                width: 15.w,
+                child: Image.asset(
+                  'assets/images/message_icon.png',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
+            SizedBox(width: 12.w),
+            Flexible(
               child: Text(
                 'Don\'t ON this device while you sleeping\n'
                 'Here we will write comments to user\n'
@@ -2647,8 +2927,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -2690,6 +2970,9 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                 selected: _selectedSceneIndex == i,
                 child: _sceneValueIcon(i),
                 onTap: () => setState(() => _selectedSceneIndex = i),
+                selectedBackgroundOverride: i == 2 ? Colors.white : null,
+                selectedBorderOverride:
+                    i == 2 ? const Color(0xFFE5E7EB) : null,
               );
               if (i == 0) return option;
               return Padding(
@@ -2706,7 +2989,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _sceneValueIcon(int sceneSlot) {
     const String onAsset = 'assets/light_image.png';
     const String nightAsset = 'assets/gray_image.png';
-    const String offAsset = 'assets/black_image.png';
+    const String offAsset = 'assets/images/light-scenc_off.png';
 
     switch (sceneSlot) {
       case 0:
@@ -2839,6 +3122,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             padding: EdgeInsets.all(cardPadding),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
+                              onVerticalDragStart: (_) => uiTapHaptic(),
                               onVerticalDragUpdate: updateBlindLevelByDrag,
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
@@ -2877,6 +3161,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       child: Center(
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
+                          onVerticalDragStart: (_) => uiTapHaptic(),
                           onVerticalDragUpdate: updateBlindLevelByDrag,
                           child: SizedBox(
                             width: handleSize,
@@ -2952,6 +3237,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                   ),
                   child: Slider(
                     value: _blindAngle.clamp(0.0, 1.0),
+                    onChangeStart: (_) => uiTapHaptic(),
                     onChanged: (v) => setState(() => _blindAngle = v),
                   ),
                 ),
@@ -3271,6 +3557,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             padding: EdgeInsets.all(cardPadding),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
+                              onVerticalDragStart: (_) => uiTapHaptic(),
                               onVerticalDragUpdate: updateAwningLevelByDrag,
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
@@ -3313,6 +3600,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                       child: Center(
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
+                          onVerticalDragStart: (_) => uiTapHaptic(),
                           onVerticalDragUpdate: updateAwningLevelByDrag,
                           child: SizedBox(
                             width: handleSize,
@@ -4494,7 +4782,12 @@ class _BlindHandle extends StatelessWidget {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: onUp,
+            onTap: onUp == null
+                ? null
+                : () {
+                    uiTapHaptic();
+                    onUp!();
+                  },
             child: SizedBox(
               width: triW,
               height: triH,
@@ -4504,7 +4797,12 @@ class _BlindHandle extends StatelessWidget {
           SizedBox(height: 5.h),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: onDown,
+            onTap: onDown == null
+                ? null
+                : () {
+                    uiTapHaptic();
+                    onDown!();
+                  },
             child: SizedBox(
               width: triW,
               height: triH,
@@ -4808,7 +5106,7 @@ class _SceneValueOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color fillColor = selected
-        ? (selectedBackgroundOverride ?? const Color(0xFFE1E1E1))
+        ? (selectedBackgroundOverride ?? const Color(0xFFE5E7EB))
         : Colors.white;
     final Color borderColor = selected
         ? (selectedBorderOverride ?? const Color(0xFFD1D5DB))
@@ -4816,7 +5114,10 @@ class _SceneValueOption extends StatelessWidget {
     final double borderW = selected ? selectedBorderWidth : 1.0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 84.w,
@@ -5189,8 +5490,13 @@ class _LedDimmerRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF00D1FF),
-    Color(0xFF00E52A),
+    Color(0xFF00D1FF), 
+    Color(0xFF00E52A), 
+    
+  ];
+  static const List<double> _gradientStops = <double>[
+    0.0,
+    0.80,
   ];
 
   @override
@@ -5201,6 +5507,7 @@ class _LedDimmerRingPainter extends CustomPainter {
       percent: percent,
       strokeWidth: strokeWidth,
       gradientColors: _gradientColors,
+      gradientStops: _gradientStops,
     );
   }
 
@@ -5256,7 +5563,7 @@ class _ThermostatRingPainter extends CustomPainter {
     const double startAngle = _fullRingStart;
 
     final Paint trackPaint = Paint()
-      ..color = const Color(0xFFE1E1E1)
+      ..color = kDeviceOffGreyFill
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -5306,8 +5613,13 @@ class _VentilationRingPainter extends CustomPainter {
   final double strokeWidth;
 
   static const List<Color> _gradientColors = <Color>[
-    Color(0xFF38A4FE),
     Color(0xFF15DFFE),
+    Color(0xFF38A4FE), 
+    
+  ];
+  static const List<double> _gradientStops = <double>[
+    0.0,
+    0.80,
   ];
 
   @override
@@ -5318,6 +5630,7 @@ class _VentilationRingPainter extends CustomPainter {
       percent: percent,
       strokeWidth: strokeWidth,
       gradientColors: _gradientColors,
+      gradientStops: _gradientStops,
     );
   }
 
@@ -5451,24 +5764,31 @@ class _ModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        uiTapHaptic();
+        onTap();
+      },
       child: Container(
-        padding: EdgeInsets.all(2.w),
         width: 30.w,
-        height: 30.w,
+        height: 30.h,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: active ? const Color(0xFFCBD5E1) : Colors.transparent,
           borderRadius: BorderRadius.circular(26.r),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: active ? const Color(0xFF111827) : const Color(0xFF6B7280),
-            ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          textHeightBehavior: const TextHeightBehavior(
+            applyHeightToFirstAscent: false,
+            applyHeightToLastDescent: false,
+          ),
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+            height: 1.0,
+            color: active ? const Color(0xFF111827) : const Color(0xFF6B7280),
           ),
         ),
       ),

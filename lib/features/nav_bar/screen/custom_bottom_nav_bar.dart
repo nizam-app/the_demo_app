@@ -140,6 +140,7 @@ class CustomBottomNavBar extends StatefulWidget {
 
 class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   late int _selectedIndex;
+  bool _bottomBarVisible = true;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   static const String _dashboardRoute = '/home';
 
@@ -159,6 +160,11 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         _selectedIndex = index;
       });
     }
+  }
+
+  void setBottomBarVisible(bool visible) {
+    if (_bottomBarVisible == visible) return;
+    setState(() => _bottomBarVisible = visible);
   }
 
   void _onItemTapped(int index) {
@@ -193,8 +199,9 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
       body: RepaintBoundary(
         child: IndexedStack(index: _selectedIndex, children: widget.children),
       ),
-      bottomNavigationBar: RepaintBoundary(
-        child: widget.translucentBottomBar
+      bottomNavigationBar: _bottomBarVisible
+          ? RepaintBoundary(
+              child: widget.translucentBottomBar
             ? ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
@@ -314,7 +321,8 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   ),
                 ),
               ),
-      ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
