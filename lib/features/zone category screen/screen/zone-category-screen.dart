@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -680,6 +680,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 TextField(
                   controller: controller,
                   autofocus: true,
+                  enableInteractiveSelection: true,
+                  selectionHeightStyle: BoxHeightStyle.strut,
+                  selectionWidthStyle: BoxWidthStyle.max,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontFamily: 'Inter',
@@ -2471,24 +2474,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           onModeTap: editing
               ? null
               : () => setState(() => _ventilationManual = !_ventilationManual),
-          controls: _buildLightingStepButtons(
-            markKey: 'vent',
-            onDown: () => _patchSnap(
-              'Ventilation',
-              (p) => p.copyWith(
-                ventilationPercent: (p.ventilationPercent - 0.10).clamp(
-                  0.0,
-                  1.0,
-                ),
-              ),
-            ),
-            onUp: () => _patchSnap(
-              'Ventilation',
-              (p) => p.copyWith(
-                ventilationPercent: (p.ventilationPercent + 0.10).clamp(
-                  0.0,
-                  1.0,
-                ),
+          controls: SizedBox(
+            width: 133.w,
+            height: 35.h,
+            child: _DimmerPill(
+              percent: vent.ventilationPercent,
+              iconAsset: 'assets/make.png',
+              onChanged: (v) => _patchSnap(
+                'Ventilation',
+                (p) => p.copyWith(ventilationPercent: v.clamp(0.0, 1.0)),
               ),
             ),
           ),
@@ -3713,10 +3707,12 @@ class _LightDimmerCard extends StatelessWidget {
 }
 
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent, this.onChanged});
+  const _DimmerPill({required this.percent, this.onChanged, this.icon, this.iconAsset});
 
   final double percent;
   final ValueChanged<double>? onChanged;
+  final IconData? icon;
+  final String? iconAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -3771,13 +3767,23 @@ class _DimmerPill extends StatelessWidget {
                   top: 0,
                   bottom: 0,
                   child: Center(
-                    child: Icon(
-                      Icons.wb_sunny_outlined,
-                      size: 18.sp,
-                      color: isOff
-                          ? const Color(0xFF111827)
-                          : const Color(0xFFFAB300),
-                    ),
+                    child: iconAsset != null
+                        ? Image.asset(
+                            iconAsset!,
+                            width: 18.sp,
+                            height: 18.sp,
+                            fit: BoxFit.contain,
+                            color: isOff ? const Color(0xFF111827) : null,
+                          )
+                        : Icon(
+                            icon ?? Icons.wb_sunny_outlined,
+                            size: 18.sp,
+                            color: isOff
+                                ? const Color(0xFF111827)
+                                : icon == null
+                                ? const Color(0xFFFAB300)
+                                : const Color(0xFF007AFF),
+                          ),
                   ),
                 ),
               ],

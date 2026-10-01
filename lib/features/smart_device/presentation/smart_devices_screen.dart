@@ -1,3 +1,5 @@
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
@@ -287,6 +289,9 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 child: TextField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
+                  enableInteractiveSelection: true,
+                  selectionHeightStyle: BoxHeightStyle.strut,
+                  selectionWidthStyle: BoxWidthStyle.max,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: TextStyle(

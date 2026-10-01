@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 class AppAssetIcon extends StatelessWidget {
   const AppAssetIcon(
@@ -274,40 +275,49 @@ class _RowField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding:  EdgeInsets.only(right: 20.w),
-      child: SizedBox(
-        height: 30.h,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                left,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _textDark,
-                ),
+    final TextStyle valueStyle = TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w400,
+      color: _textGrey,
+    );
+
+    return TapToEditSlot(
+      initialText: right,
+      style: valueStyle,
+      showPencil: false,
+      maxWidth: 180.w,
+      keyboardType: left == 'Email'
+          ? TextInputType.emailAddress
+          : TextInputType.text,
+      builder: (context, startEditing, value) {
+        return GestureDetector(
+          onTap: startEditing,
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: EdgeInsets.only(right: 20.w),
+            child: SizedBox(
+              height: 30.h,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      left,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: _textDark,
+                      ),
+                    ),
+                  ),
+                  value,
+                ],
               ),
             ),
-            Flexible(
-              child: Text(
-                right,
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: _textGrey,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

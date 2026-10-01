@@ -1,4 +1,4 @@
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -273,6 +273,9 @@ class _CoresScreenState extends State<CoresScreen> {
                 child: TextField(
                   controller: _searchController,
                   focusNode: _searchFocusNode,
+                  enableInteractiveSelection: true,
+                  selectionHeightStyle: BoxHeightStyle.strut,
+                  selectionWidthStyle: BoxWidthStyle.max,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: TextStyle(

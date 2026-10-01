@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -3498,6 +3498,7 @@ class _HomeScreenState extends State<HomeScreen> {
             value: vent.ventilationPercent,
             width: sliderWidth,
             expand: expandSlider,
+            iconAsset: 'assets/make.png',
             onChanged: (v) => _patchSnap(
               'Ventilation',
               (p) => p.copyWith(ventilationPercent: v),
@@ -3544,8 +3545,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           compactOverride: compactOverride,
-          cardH
-          eightOverride: cardHeightOverride,
+          cardHeightOverride: cardHeightOverride,
           uniformControlSlot: uniformControlSlot,
           lControlMetrics: lControlMetrics,
           onTap: detailsTap(
@@ -3952,6 +3952,7 @@ class _HomeScreenState extends State<HomeScreen> {
           controls: _buildLightingSliderControl(
             lControlMetrics: lControlMetrics,
             value: vent.ventilationPercent,
+            iconAsset: 'assets/make.png',
             onChanged: (v) => _patchSnap(
               'Ventilation',
               (p) => p.copyWith(ventilationPercent: v),
@@ -4373,6 +4374,8 @@ class _HomeScreenState extends State<HomeScreen> {
     double? width,
     bool expand = false,
     DashboardControlMetrics? lControlMetrics,
+    IconData? icon,
+    String? iconAsset,
   }) {
     if (lControlMetrics != null) {
       return SizedBox(
@@ -4382,6 +4385,8 @@ class _HomeScreenState extends State<HomeScreen> {
           percent: value,
           onChanged: onChanged,
           fixedWidth: lControlMetrics.sliderWidth.w,
+          icon: icon,
+          iconAsset: iconAsset,
         ),
       );
     }
@@ -4395,7 +4400,12 @@ class _HomeScreenState extends State<HomeScreen> {
           return SizedBox(
             width: w,
             height: 35.h,
-            child: _DimmerPill(percent: value, onChanged: onChanged),
+            child: _DimmerPill(
+              percent: value,
+              onChanged: onChanged,
+              icon: icon,
+              iconAsset: iconAsset,
+            ),
           );
         },
       );
@@ -4403,7 +4413,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return SizedBox(
       width: width ?? 118.w,
       height: 35.h,
-      child: _DimmerPill(percent: value, onChanged: onChanged),
+      child: _DimmerPill(
+        percent: value,
+        onChanged: onChanged,
+        icon: icon,
+        iconAsset: iconAsset,
+      ),
     );
   }
 
@@ -4784,6 +4799,9 @@ class _DashboardSectionNameDialogState
                 TextField(
                   controller: _controller,
                   autofocus: true,
+                  enableInteractiveSelection: true,
+                  selectionHeightStyle: BoxHeightStyle.strut,
+                  selectionWidthStyle: BoxWidthStyle.max,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _confirm(),
                   style: TextStyle(
@@ -5973,11 +5991,15 @@ class _DimmerPill extends StatelessWidget {
     required this.percent,
     this.onChanged,
     this.fixedWidth,
+    this.icon,
+    this.iconAsset,
   });
 
   final double percent;
   final ValueChanged<double>? onChanged;
   final double? fixedWidth;
+  final IconData? icon;
+  final String? iconAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -6032,13 +6054,23 @@ class _DimmerPill extends StatelessWidget {
                   top: 0,
                   bottom: 0,
                   child: Center(
-                    child: Icon(
-                      Icons.wb_sunny_outlined,
-                      size: 18.sp,
-                      color: isOff
-                          ? const Color(0xFF111827)
-                          : const Color(0xFFFAB300),
-                    ),
+                    child: iconAsset != null
+                        ? Image.asset(
+                            iconAsset!,
+                            width: 18.sp,
+                            height: 18.sp,
+                            fit: BoxFit.contain,
+                            color: isOff ? const Color(0xFF111827) : null,
+                          )
+                        : Icon(
+                            icon ?? Icons.wb_sunny_outlined,
+                            size: 18.sp,
+                            color: isOff
+                                ? const Color(0xFF111827)
+                                : icon == null
+                                ? const Color(0xFFFAB300)
+                                : const Color(0xFF007AFF),
+                          ),
                   ),
                 ),
               ],

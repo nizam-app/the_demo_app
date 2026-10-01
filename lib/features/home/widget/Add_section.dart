@@ -1,5 +1,5 @@
 import 'dart:io' show File;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -164,6 +164,9 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     controller: _nameController,
                     focusNode: _nameFocusNode,
                     textAlign: TextAlign.right,
+                    enableInteractiveSelection: true,
+                    selectionHeightStyle: BoxHeightStyle.strut,
+                    selectionWidthStyle: BoxWidthStyle.max,
                     style: TextStyle(
                       color: _textSecondary,
                       fontSize: 14.sp,

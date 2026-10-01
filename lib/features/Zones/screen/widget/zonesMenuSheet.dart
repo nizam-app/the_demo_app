@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 class ZonesMenuSheet extends StatelessWidget {
   const ZonesMenuSheet({super.key});
@@ -92,31 +93,24 @@ class ZonesMenuSheet extends StatelessWidget {
                 children: [
 
                   /// Rename
-                  _ItemRow(
-                    iconPath: 'assets/images/Erename.png',
-                    title: 'Rename',
-                    iconWidth: 22.w,
-                    iconHeight: 22.h,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Living room',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: _textSecondary,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        SizedBox(width: 6.w),
-                        Image.asset(
-                          'assets/Group 63.png',
-                          width: 14.w,
-                          height: 13.h,
-                          fit: BoxFit.contain,
-                        ),
-                      ],
+                  TapToEditSlot(
+                    initialText: 'Living room',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: _textSecondary,
+                      fontFamily: 'Inter',
                     ),
+                    builder: (context, startEditing, value) {
+                      return _ItemRow(
+                        iconPath: 'assets/images/Erename.png',
+                        title: 'Rename',
+                        iconWidth: 22.w,
+                        iconHeight: 22.h,
+                        onTap: startEditing,
+                        rowTappable: startEditing != null,
+                        trailing: value,
+                      );
+                    },
                   ),
 
                   /// Upload image
@@ -226,6 +220,8 @@ class _ItemRow extends StatelessWidget {
     this.iconColor,
     this.iconWidth,
     this.iconHeight,
+    this.onTap,
+    this.rowTappable = true,
   });
 
   final String iconPath;
@@ -235,13 +231,15 @@ class _ItemRow extends StatelessWidget {
   final Color? iconColor;
   final double? iconWidth;
   final double? iconHeight;
+  final VoidCallback? onTap;
+  final bool rowTappable;
 
   static const _textPrimary = Color(0xFF111827);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: rowTappable ? (onTap ?? () {}) : null,
       borderRadius: BorderRadius.circular(26.r),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),

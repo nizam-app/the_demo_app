@@ -12,6 +12,7 @@ import 'package:workpleis/features/notifications/screen/notifications_screen.dar
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../../../core/widget/global_back_button.dart';
+import '../../../core/widget/tap_to_edit_slot.dart';
 
 /// Closed 360° ring for thermostat, LED dimmer, and ventilation.
 const double _fullRingStart = math.pi / 2 + (52 * math.pi / 180) / 2;
@@ -871,29 +872,22 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       height: 1.25,
     );
 
-    return Center(
-      child: Text.rich(
-        textAlign: TextAlign.center,
-        TextSpan(
-          style: titleStyle,
-          children: [
-            TextSpan(text: widget.deviceTitle),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Padding(
-                padding: EdgeInsets.only(left: gap),
-                child: Image.asset(
-                  'assets/Group 63.png',
-                  height: 13.h,
-                  width: iconW,
-                  fit: BoxFit.contain,
-                  color: textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return TapToEditSlot(
+      initialText: widget.deviceTitle,
+      style: titleStyle,
+      maxWidth: 240.w,
+      textAlign: TextAlign.center,
+      pencilWidth: iconW,
+      pencilHeight: 13.h,
+      pencilGap: gap,
+      pencilColor: textPrimary,
+      builder: (context, startEditing, value) {
+        return GestureDetector(
+          onTap: startEditing,
+          behavior: HitTestBehavior.opaque,
+          child: Center(child: value),
+        );
+      },
     );
   }
 
@@ -1591,10 +1585,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           SizedBox(height: 6.h),
 
                           Image.asset(
-                             'assets/images/fan 2.png',
-                            height: 84.h,
-                            width: 84.w,
-                            fit: BoxFit.contain, 
+                            'assets/make.png',
+                            height: 72.sp,
+                            width: 72.sp,
+                            fit: BoxFit.contain,
+                            color: _ventilationPercent <= 0
+                                ? const Color(0xFF111827)
+                                : null,
                           ),
                         ],
                       ),

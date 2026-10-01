@@ -1,6 +1,6 @@
 import 'dart:io' show File;
 
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -174,9 +174,11 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   textAlign: TextAlign.right,
                   maxLines: 1,
                   showCursor: true,
+                  enableInteractiveSelection: true,
+                  selectionHeightStyle: BoxHeightStyle.strut,
+                  selectionWidthStyle: BoxWidthStyle.max,
                   cursorColor: _blue,
                   cursorWidth: 2,
-                  cursorHeight: 18.sp,
                   style: valueStyle,
                   decoration: const InputDecoration(
                     isDense: true,
@@ -190,7 +192,6 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                   ),
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _commitRename(),
-                  onTapOutside: (_) => _commitRename(),
                 ),
               )
             else

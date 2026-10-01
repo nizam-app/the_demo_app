@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1015,6 +1015,9 @@ class _SearchBarState extends State<_SearchBar> {
               child: TextField(
                 controller: _searchController,
                 focusNode: _searchFocusNode,
+                enableInteractiveSelection: true,
+                selectionHeightStyle: BoxHeightStyle.strut,
+                selectionWidthStyle: BoxWidthStyle.max,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(

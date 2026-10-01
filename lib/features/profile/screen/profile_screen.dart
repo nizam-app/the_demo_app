@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 // Optional (for exact svg icons)
 // import 'package:flutter_svg/flutter_svg.dart';
 
@@ -562,40 +563,42 @@ class _KeyValueRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      constraints: BoxConstraints(minHeight: 56.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xFF111827),
-              fontFamily: 'Inter',
+    final TextStyle valueStyle = TextStyle(
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w400,
+      color: const Color(0xFF6B7280),
+      fontFamily: 'Inter',
+    );
+
+    if (showChevron) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        constraints: BoxConstraints(minHeight: 56.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF111827),
+                fontFamily: 'Inter',
+              ),
             ),
-          ),
-          Flexible(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    value,
-                    textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF6B7280),
-                      fontFamily: 'Inter',
+            Flexible(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Text(
+                      value,
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                      style: valueStyle,
                     ),
                   ),
-                ),
-                if (showChevron) ...[
                   SizedBox(width: 4.w),
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
@@ -603,11 +606,48 @@ class _KeyValueRow extends StatelessWidget {
                     color: const Color(0xFF6B7280),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return TapToEditSlot(
+      initialText: value,
+      style: valueStyle,
+      showPencil: false,
+      maxWidth: 180.w,
+      keyboardType: label == 'Email'
+          ? TextInputType.emailAddress
+          : label == 'Phone'
+              ? TextInputType.phone
+              : TextInputType.text,
+      builder: (context, startEditing, field) {
+        return GestureDetector(
+          onTap: startEditing,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            constraints: BoxConstraints(minHeight: 56.h),
+            child: Row(
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF111827),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const Spacer(),
+                field,
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

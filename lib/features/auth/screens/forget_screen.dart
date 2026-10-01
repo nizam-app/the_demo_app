@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -460,6 +461,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             focusNode: focusNode,
             keyboardType: keyboardType,
             obscureText: obscureText,
+            enableInteractiveSelection: true,
+            selectionHeightStyle: BoxHeightStyle.strut,
+            selectionWidthStyle: BoxWidthStyle.max,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(

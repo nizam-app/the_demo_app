@@ -1,5 +1,5 @@
 
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +27,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   final TextEditingController _renameController = TextEditingController(
     text: 'Light living room',
   );
+  final FocusNode _renameFocusNode = FocusNode();
+  bool _isRenaming = false;
 
   bool _dashboardDropdownOpen = false;
   int _selectedDashboardIndex = 0;
@@ -53,7 +55,41 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
   static const Color _kBlue = Color(0xFF0088FE);
 
   @override
+  void initState() {
+    super.initState();
+    _renameFocusNode.addListener(() {
+      if (!_renameFocusNode.hasFocus && _isRenaming) {
+        _commitRename();
+      }
+    });
+  }
+
+  void _startRename() {
+    setState(() => _isRenaming = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_isRenaming) return;
+      _renameFocusNode.requestFocus();
+      _renameController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _renameController.text.length,
+      );
+    });
+  }
+
+  void _commitRename() {
+    final String text = _renameController.text.trim();
+    if (text.isEmpty) {
+      _renameController.text = 'Light living room';
+    } else {
+      _renameController.text = text;
+    }
+    if (!mounted) return;
+    setState(() => _isRenaming = false);
+  }
+
+  @override
   void dispose() {
+    _renameFocusNode.dispose();
     _renameController.dispose();
     super.dispose();
   }
@@ -126,35 +162,66 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                               iconWidth: 22.w,
                               iconHeight: 22.h,
                               label: 'Rename',
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(maxWidth: 155.w),
-                                    child: Text(
-                                      _renameController.text,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w400,
-                                        color: _kTextSecondary,
-                                        fontFamily: 'Inter',
+                              trailing: _isRenaming
+                                  ? SizedBox(
+                                      width: 155.w,
+                                      child: TextField(
+                                        controller: _renameController,
+                                        focusNode: _renameFocusNode,
+                                        textAlign: TextAlign.right,
+                                        maxLines: 1,
+                                        showCursor: true,
+                                        enableInteractiveSelection: true,
+                                        selectionHeightStyle:
+                                            BoxHeightStyle.strut,
+                                        selectionWidthStyle: BoxWidthStyle.max,
+                                        cursorColor: _kBlue,
+                                        cursorWidth: 2,
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w400,
+                                          color: _kTextSecondary,
+                                          fontFamily: 'Inter',
+                                        ),
+                                        decoration: const InputDecoration(
+                                          isDense: true,
+                                          isCollapsed: true,
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                        textInputAction: TextInputAction.done,
+                                        onSubmitted: (_) => _commitRename(),
                                       ),
+                                    )
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: 155.w,
+                                          ),
+                                          child: Text(
+                                            _renameController.text,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: _kTextSecondary,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        Image.asset(
+                                          'assets/Group 63.png',
+                                          width: 14.w,
+                                          height: 13.h,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(width: 6.w),
-                                  Image.asset(
-                                    'assets/Group 63.png',
-                                    width: 14.w,
-                                    height: 13.h,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                // TODO: open rename dialog if needed
-                              },
+                              onTap: _isRenaming ? null : _startRename,
                             ),
                           ),
 
