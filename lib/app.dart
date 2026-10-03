@@ -84,6 +84,12 @@ class App extends StatelessWidget {
           surface: AllColor.white,
           onSurface: AllColor.black,
         ),
+        // Primary is white, so the caret and selection wash were white too.
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFF0088FE),
+          selectionHandleColor: Color(0xFF0088FE),
+          selectionColor: Color(0x660088FE),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AllColor.white70,
