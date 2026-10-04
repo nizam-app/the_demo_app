@@ -118,7 +118,7 @@ class _TapToEditSlotState extends State<TapToEditSlot> {
               enableInteractiveSelection: true,
               selectionHeightStyle: BoxHeightStyle.strut,
               selectionWidthStyle: BoxWidthStyle.max,
-              cursorColor: const Color(0xFF007AFF),
+              cursorColor: const Color(0xFF0088FE),
               cursorWidth: 2,
               style: widget.style,
               decoration: const InputDecoration(

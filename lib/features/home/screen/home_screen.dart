@@ -26,6 +26,7 @@ import '../widget/add_dashboard_device_sheet.dart';
 import '../widget/dashboard_control_metrics.dart';
 import '../widget/dashboard_section_widget_size.dart';
 import '../widget/editAddSectionSheet.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1785,17 +1786,9 @@ class _HomeScreenState extends State<HomeScreen> {
               right: 0,
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border(
-                        bottom: BorderSide(
-                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                          width: 1,
-                        ),
-                      ),
-                    ),
+                    decoration: LiquidGlass.barDecoration(),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         15.w,
@@ -4802,6 +4795,7 @@ class _DashboardSectionNameDialogState
                   enableInteractiveSelection: true,
                   selectionHeightStyle: BoxHeightStyle.strut,
                   selectionWidthStyle: BoxWidthStyle.max,
+                  cursorColor: const Color(0xFF0088FE),
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _confirm(),
                   style: TextStyle(
@@ -6060,7 +6054,7 @@ class _DimmerPill extends StatelessWidget {
                             width: 18.sp,
                             height: 18.sp,
                             fit: BoxFit.contain,
-                            color: isOff ? const Color(0xFF111827) : null,
+                            color: isOff ? kDeviceOffGreyFill : null,
                           )
                         : Icon(
                             icon ?? Icons.wb_sunny_outlined,

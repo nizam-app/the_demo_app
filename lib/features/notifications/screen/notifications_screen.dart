@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// Design: light grey screen, circular back, "Notifications" title, filter chips,
 /// grouped lists (Errors, Security, Alerts, System) with Clear + cards.
@@ -241,17 +242,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 right: 0,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                            width: 1,
-                          ),
-                        ),
-                      ),
+                      decoration: LiquidGlass.barDecoration(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           15.w,

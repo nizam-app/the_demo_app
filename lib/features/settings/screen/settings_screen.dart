@@ -14,6 +14,7 @@ import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/user/screen/user_screen.dart';
 
 import '../../profile/screen/profile_screen.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
@@ -83,17 +84,9 @@ class SettingsScreen extends StatelessWidget {
                 right: 0,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                            width: 1,
-                          ),
-                        ),
-                      ),
+                      decoration: LiquidGlass.barDecoration(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           15.w,

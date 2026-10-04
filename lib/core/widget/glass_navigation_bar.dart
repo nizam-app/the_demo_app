@@ -1,6 +1,5 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// Frosted top chrome so scrolling content shows through (shared app look).
 class GlassNavigationBar extends StatelessWidget {
@@ -21,24 +20,11 @@ class GlassNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final top = topInset ?? MediaQuery.viewPaddingOf(context).top;
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.20),
-            border: Border(
-              bottom: BorderSide(
-                color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                width: 1,
-              ),
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(top: top),
-            child: child,
-          ),
-        ),
+    return LiquidGlass(
+      sigma: blurSigma,
+      child: Padding(
+        padding: EdgeInsets.only(top: top),
+        child: child,
       ),
     );
   }

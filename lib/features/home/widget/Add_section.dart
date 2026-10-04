@@ -1,6 +1,8 @@
 import 'dart:io' show File;
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
+import 'package:workpleis/core/widget/liquid_glass.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -167,6 +169,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     enableInteractiveSelection: true,
                     selectionHeightStyle: BoxHeightStyle.strut,
                     selectionWidthStyle: BoxWidthStyle.max,
+                    cursorColor: const Color(0xFF0088FE),
                     style: TextStyle(
                       color: _textSecondary,
                       fontSize: 14.sp,
@@ -286,9 +289,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             top: 10.h,
             bottom: 0.h,
           ),
-          decoration: BoxDecoration(
-            // Keep the sheet clearly transparent like the dashboard header/footer.
-            color: Color(0xFFFFFFFF).withOpacity(0.4),
+          decoration: LiquidGlass.sheetDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),

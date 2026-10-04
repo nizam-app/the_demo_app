@@ -1,5 +1,7 @@
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
+import 'package:workpleis/core/widget/liquid_glass.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -127,8 +129,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          decoration: BoxDecoration(
-            color: Color(0xFFFFFFFF).withOpacity(0.4),
+          decoration: LiquidGlass.sheetDecoration(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.r),
               topRight: Radius.circular(24.r),

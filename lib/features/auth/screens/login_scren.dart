@@ -616,6 +616,7 @@ Widget _pillField({
           enableInteractiveSelection: true,
           selectionHeightStyle: BoxHeightStyle.strut,
           selectionWidthStyle: BoxWidthStyle.max,
+          cursorColor: const Color(0xFF0088FE),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(

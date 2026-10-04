@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/utils/ui_tap_haptic.dart';
 import '../../../core/widget/global_back_button.dart';
+import '../../../core/widget/liquid_glass.dart';
 import '../widget/userAdd_popup.dart';
 import '../widget/user_edit.dart';
 
@@ -169,24 +170,9 @@ class UsersScreen extends StatelessWidget {
               right: 0,
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          _bg.withOpacity(0.28),
-                          _bg.withOpacity(0.90),
-                        ],
-                      ),
-                      border: Border(
-                        bottom: BorderSide(
-                          color: const Color(0xFFE5E7EB).withOpacity(0.55),
-                          width: 1,
-                        ),
-                      ),
-                    ),
+                    decoration: LiquidGlass.barDecoration(),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         15.w,
@@ -285,6 +271,7 @@ class _SearchBarState extends State<_SearchBar> {
               enableInteractiveSelection: true,
               selectionHeightStyle: BoxHeightStyle.strut,
               selectionWidthStyle: BoxWidthStyle.max,
+              cursorColor: const Color(0xFF0088FE),
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: TextStyle(

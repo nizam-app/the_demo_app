@@ -292,6 +292,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   enableInteractiveSelection: true,
                   selectionHeightStyle: BoxHeightStyle.strut,
                   selectionWidthStyle: BoxWidthStyle.max,
+                  cursorColor: const Color(0xFF0088FE),
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: TextStyle(

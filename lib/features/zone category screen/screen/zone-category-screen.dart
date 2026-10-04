@@ -23,6 +23,7 @@ import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
 import '../../settings/screen/settings_screen.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 class Zone_Category_Screen extends StatefulWidget {
   const Zone_Category_Screen({super.key, this.screenTitle = 'Zone/Categories'});
@@ -683,6 +684,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                   enableInteractiveSelection: true,
                   selectionHeightStyle: BoxHeightStyle.strut,
                   selectionWidthStyle: BoxWidthStyle.max,
+                  cursorColor: const Color(0xFF0088FE),
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontFamily: 'Inter',
@@ -1252,17 +1254,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               right: 0,
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border(
-                        bottom: BorderSide(
-                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                          width: 1,
-                        ),
-                      ),
-                    ),
+                    decoration: LiquidGlass.barDecoration(),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         15.w,
@@ -3773,7 +3767,7 @@ class _DimmerPill extends StatelessWidget {
                             width: 18.sp,
                             height: 18.sp,
                             fit: BoxFit.contain,
-                            color: isOff ? const Color(0xFF111827) : null,
+                            color: isOff ? kDeviceOffGreyFill : null,
                           )
                         : Icon(
                             icon ?? Icons.wb_sunny_outlined,

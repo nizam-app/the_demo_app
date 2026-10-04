@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 class CoresScreen extends StatefulWidget {
   const CoresScreen({super.key});
@@ -176,17 +177,9 @@ class _CoresScreenState extends State<CoresScreen> {
                 right: 0,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                            width: 1,
-                          ),
-                        ),
-                      ),
+                      decoration: LiquidGlass.barDecoration(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           15.w,
@@ -276,6 +269,7 @@ class _CoresScreenState extends State<CoresScreen> {
                   enableInteractiveSelection: true,
                   selectionHeightStyle: BoxHeightStyle.strut,
                   selectionWidthStyle: BoxWidthStyle.max,
+                  cursorColor: const Color(0xFF0088FE),
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: TextStyle(

@@ -2,13 +2,13 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 class CategoryMenuSheet extends StatelessWidget {
   const CategoryMenuSheet({super.key});
 
   // Keep the sheet clearly transparent like the dashboard header/footer.
-  static final _bgTransparent = Colors.white.withOpacity(0.4);
   static final _card = Colors.white.withOpacity(0.6);
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
@@ -27,8 +27,7 @@ class CategoryMenuSheet extends StatelessWidget {
           top: false,
           bottom: false,
           child: Container(
-            decoration: BoxDecoration(
-              color: _bgTransparent,
+            decoration: LiquidGlass.sheetDecoration(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24.r),
                 topRight: Radius.circular(24.r),

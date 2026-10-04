@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 
 import '../widget/select_interface.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// -------------------- Image Size Registry (ALL sizes here) --------------------
 @immutable
@@ -256,17 +257,9 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                 right: 0,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                            width: 1,
-                          ),
-                        ),
-                      ),
+                      decoration: LiquidGlass.barDecoration(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           15.w,

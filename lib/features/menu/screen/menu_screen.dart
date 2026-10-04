@@ -14,6 +14,7 @@ import 'package:workpleis/features/weather/screen/weather_screen.dart';
 import 'package:workpleis/features/zone%20category%20screen/screen/zone-category-screen.dart';
 
 import '../../notifications/screen/notifications_screen.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// Single source of truth for all menu section card icon dimensions.
 /// Ensures every icon has the same container size, alignment, and fit.
@@ -441,17 +442,9 @@ class MenuScreen extends StatelessWidget {
                 right: 0,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.20),
-                        border: Border(
-                          bottom: BorderSide(
-                            color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                            width: 1,
-                          ),
-                        ),
-                      ),
+                      decoration: LiquidGlass.barDecoration(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           16.w,

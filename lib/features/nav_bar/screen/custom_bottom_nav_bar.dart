@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 // Standalone bottom nav bar widget for individual screens (uses route navigation)
 class BottomNavBarWidget extends StatelessWidget {
@@ -41,16 +42,14 @@ class BottomNavBarWidget extends StatelessWidget {
       type: MaterialType.transparency,
       child: Container(
         height: 72.h,
-        decoration: BoxDecoration(
-          color: trackColor ??
-              Colors.white.withOpacity(backgroundOpacity.clamp(0.0, 1.0)),
-          border: const Border(
-            top: BorderSide(
-              color: Color(0xFFE1E1E1),
-              width: 1,
-            ),
-          ),
-        ),
+        decoration: trackColor != null
+            ? BoxDecoration(
+                color: trackColor,
+                border: const Border(
+                  top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
+                ),
+              )
+            : LiquidGlass.barDecoration(topEdge: true),
         child: LayoutBuilder(
           builder: (context, c) {
             final w = c.maxWidth / items.length;
@@ -98,7 +97,7 @@ class BottomNavBarWidget extends StatelessWidget {
       child: useBackdropBlur
           ? ClipRect(
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                 child: track,
               ),
             )
@@ -204,22 +203,12 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
               child: widget.translucentBottomBar
             ? ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                   child: Material(
                     type: MaterialType.transparency,
                     child: Container(
                     height: 72.h,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(
-                        widget.bottomBarBackgroundOpacity.clamp(0.0, 1.0),
-                      ),
-                      border: const Border(
-                        top: BorderSide(
-                          color: Color(0xFFE1E1E1),
-                          width: 1,
-                        ),
-                      ),
-                    ),
+                    decoration: LiquidGlass.barDecoration(topEdge: true),
                     child: LayoutBuilder(
                       builder: (context, c) {
                         final w = c.maxWidth / items.length;

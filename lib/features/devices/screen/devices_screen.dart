@@ -13,6 +13,7 @@ import 'package:workpleis/features/devices/widget/popup.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
 
 import '../widget/assign_category_zone.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key, this.showBottomNav = true});
@@ -697,17 +698,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
               right: 0,
               child: ClipRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.20),
-                      border: Border(
-                        bottom: BorderSide(
-                          color: const Color(0xFFE5E7EB).withOpacity(0.18),
-                          width: 1,
-                        ),
-                      ),
-                    ),
+                    decoration: LiquidGlass.barDecoration(),
                     child: Padding(
                       padding: EdgeInsets.only(
                         left: 14.w,
@@ -1018,6 +1011,7 @@ class _SearchBarState extends State<_SearchBar> {
                 enableInteractiveSelection: true,
                 selectionHeightStyle: BoxHeightStyle.strut,
                 selectionWidthStyle: BoxWidthStyle.max,
+                cursorColor: const Color(0xFF0088FE),
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(

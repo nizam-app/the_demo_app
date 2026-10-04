@@ -88,7 +88,7 @@ class App extends StatelessWidget {
         textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Color(0xFF0088FE),
           selectionHandleColor: Color(0xFF0088FE),
-          selectionColor: Color(0x660088FE),
+          selectionColor: Color(0x2E0088FE),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
