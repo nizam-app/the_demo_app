@@ -3,6 +3,35 @@ import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+const Color _kNameOutline = Color(0xFFD1D5DB);
+
+/// Name and rename fields: no fill, thin soft-grey stroke.
+InputDecoration popupNameOutlineDecoration({
+  String? hintText,
+  TextStyle? hintStyle,
+  EdgeInsetsGeometry? contentPadding,
+  double radius = 8,
+}) {
+  final OutlineInputBorder border = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(radius),
+    borderSide: const BorderSide(color: _kNameOutline, width: 0.8),
+  );
+  return InputDecoration(
+    isDense: true,
+    filled: false,
+    hintText: hintText,
+    hintStyle: hintStyle,
+    contentPadding: contentPadding ??
+        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    border: border,
+    enabledBorder: border,
+    focusedBorder: border,
+    disabledBorder: border,
+    errorBorder: border,
+    focusedErrorBorder: border,
+  );
+}
+
 /// Shows the current value, and turns that value into a text field on tap.
 /// The surrounding row is built by [builder] so layout and colors stay put.
 class TapToEditSlot extends StatefulWidget {
@@ -107,7 +136,15 @@ class _TapToEditSlotState extends State<TapToEditSlot> {
     final Widget value = _editing
         ? SizedBox(
             width: width,
-            child: TextField(
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: const TextSelectionThemeData(
+                  cursorColor: Color(0xFF0088FE),
+                  selectionHandleColor: Color(0xFF0088FE),
+                  selectionColor: Colors.transparent,
+                ),
+              ),
+              child: TextField(
               controller: _controller,
               focusNode: _focus,
               textAlign: widget.textAlign,
@@ -121,19 +158,10 @@ class _TapToEditSlotState extends State<TapToEditSlot> {
               cursorColor: const Color(0xFF0088FE),
               cursorWidth: 2,
               style: widget.style,
-              decoration: const InputDecoration(
-                isDense: true,
-                isCollapsed: true,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
+              decoration: popupNameOutlineDecoration(),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _commit(),
+            ),
             ),
           )
         : Row(

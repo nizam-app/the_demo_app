@@ -656,13 +656,61 @@ class DashboardTunableWhiteIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
       final double side = kDashboardLightingIconSide;
-      return Container(
+      const double heroDisk = 280;
+      final double scale = side / heroDisk;
+      final double ringSize = 40 * scale;
+      final double ringBorder = math.max(1.2, 2 * scale);
+      final double x = dotDx.clamp(0.0, 1.0) * side;
+      final double y = dotDy.clamp(0.0, 1.0) * side;
+      return SizedBox(
         width: side,
         height: side,
-        decoration: BoxDecoration(
-          color: kDeviceOffGreyFill,
-          shape: BoxShape.circle,
-          border: Border.all(color: kDeviceSoftGreyOutline),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: side,
+              height: side,
+              padding: EdgeInsets.all(3.5.w),
+              decoration: BoxDecoration(
+                color: kDeviceOffGreyFill,
+                shape: BoxShape.circle,
+                border: Border.all(color: kDeviceSoftGreyOutline),
+              ),
+              child: const ClipOval(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xFFFFFFFF),
+                        Color(0xFFF5F6F8),
+                        Color(0xFFE6E8EE),
+                      ],
+                      stops: <double>[0.0, 0.48, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: x - ringSize / 2,
+              top: y - ringSize / 2,
+              child: Container(
+                width: ringSize,
+                height: ringSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.transparent,
+                  border: Border.all(
+                    color: const Color(0xFF9CA3AF),
+                    width: ringBorder,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -787,13 +835,65 @@ class DashboardRgbwIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
       final double side = kDashboardLightingIconSide;
-      return Container(
+      final Size layoutSize = Size(side, side);
+      final Offset center = Offset(side / 2, side / 2);
+      final double maxR = layoutSize.shortestSide / 2 - (10 * side / 310);
+      final double thumbR = maxR * saturation.clamp(0.0, 1.0);
+      final double rad = hue.clamp(0.0, 359.99) * math.pi / 180;
+      final Offset thumbPos =
+          center + Offset(math.cos(rad) * thumbR, -math.sin(rad) * thumbR);
+      final double thumbD = 38 * side / 310;
+      final double strokeW = math.max(1.2, 5 * side / 310);
+      return SizedBox(
         width: side,
         height: side,
-        decoration: BoxDecoration(
-          color: kDeviceOffGreyFill,
-          shape: BoxShape.circle,
-          border: Border.all(color: kDeviceSoftGreyOutline),
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: side,
+              height: side,
+              padding: EdgeInsets.all(3.5.w),
+              decoration: BoxDecoration(
+                color: kDeviceOffGreyFill,
+                shape: BoxShape.circle,
+                border: Border.all(color: kDeviceSoftGreyOutline),
+              ),
+              child: const ClipOval(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color(0xFFFFFFFF),
+                        Color(0xFFF5F6F8),
+                        Color(0xFFE6E8EE),
+                      ],
+                      stops: <double>[0.0, 0.48, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: thumbPos.dx - thumbD / 2,
+              top: thumbPos.dy - thumbD / 2,
+              child: Container(
+                width: thumbD,
+                height: thumbD,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.transparent,
+                  border: Border.all(
+                    color: const Color(0xFF9CA3AF),
+                    width: strokeW,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }

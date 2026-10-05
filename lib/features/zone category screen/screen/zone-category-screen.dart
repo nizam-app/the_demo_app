@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:math' as math;
-import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -18,12 +18,31 @@ import 'package:workpleis/features/device_details/screen/device_details_screen.d
 import '../../devices/screen/devices_screen.dart';
 import '../../home/widget/Add_section.dart';
 import '../../home/widget/add_dashboard_device_sheet.dart';
+import '../../home/widget/dashboard_section_widget_size.dart';
 import '../../home/widget/editAddSectionSheet.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
+
+class _AddedZoneSection {
+  _AddedZoneSection({
+    required this.id,
+    required this.title,
+    required List<String> deviceOrder,
+    required this.horizontalScrolling,
+    required this.widgetSize,
+    this.headerBackgroundPath,
+  }) : deviceOrder = List<String>.from(deviceOrder);
+
+  final int id;
+  String title;
+  List<String> deviceOrder;
+  bool horizontalScrolling;
+  String widgetSize;
+  String? headerBackgroundPath;
+}
 
 class Zone_Category_Screen extends StatefulWidget {
   const Zone_Category_Screen({super.key, this.screenTitle = 'Zone/Categories'});
@@ -103,6 +122,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   int _favThermoAMark = 0;
   bool _ventilationManual = true;
   bool _livingRoomManual = true;
+  bool _lightSceneManual = false;
+  bool _rgbwManual = false;
+  bool _heatingCoolingManual = false;
+  bool _tunableWhiteManual = false;
+  bool _fanLevelManual = false;
+  bool _presenceManual = false;
+  bool _multiValueSwitchManual = false;
+  String _lightingSectionTitle = 'Lighting';
 
   /// Dashboard section widget size from Edit sheet.
   String _lightWidgetSize = 'S';
@@ -153,9 +180,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   bool _showSectionEditButtons = false;
   bool _isAddSectionSheetOpen = false;
   String? _dashboardDraggingDeviceId;
-  List<_DashboardBlock> _dashboardBlockOrder = const <_DashboardBlock>[
-    _DashboardBlock.lighting,
-  ];
+  int _nextAddedSectionId = 1;
+  int? _editingAddedSectionId;
+  String? _selectedAddedDeviceId;
+  final List<_AddedZoneSection> _addedSections = <_AddedZoneSection>[];
+  List<Object> _dashboardBlockOrder = <Object>[_DashboardBlock.lighting];
   final GlobalKey<CustomBottomNavBarState> _shellNavKey =
       GlobalKey<CustomBottomNavBarState>();
 
@@ -235,55 +264,58 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   DeviceControlSnapshot _snap(String title) =>
       DeviceDashboardSync.instance.snapshotFor(title);
 
-  bool _lightingUsesRowWidgets(String size) => size == 'S';
+  bool _lightingUsesRowWidgets(String size) => sectionLayoutUsesListRows(size);
 
   int _lightingGridColumnsForWidgetSize(String size) {
-    switch (size) {
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.small:
         return 3;
-      case 'L':
-      case 'M':
-      default:
+      case SectionLayout.medium:
+      case SectionLayout.large:
+      case SectionLayout.extraLarge:
+      case SectionLayout.list:
         return 2;
     }
   }
 
   int _lightGridColumnsForWidgetSize(String size) {
-    switch (size) {
-      case 'M':
-      case 'L':
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.list:
         return 1;
-      case 'S':
-      default:
+      case SectionLayout.small:
+        return 3;
+      case SectionLayout.medium:
+      case SectionLayout.large:
+      case SectionLayout.extraLarge:
         return 2;
     }
   }
 
   double _lightCardHeightForWidgetSize(String size) {
-    switch (size) {
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.extraLarge:
         return 220.h;
-      case 'L':
-        return 200.h;
-      case 'M':
-      case 'S':
-      default:
+      case SectionLayout.large:
         return 185.h;
+      case SectionLayout.medium:
+        return 168.h;
+      case SectionLayout.small:
+      case SectionLayout.list:
+        return 150.h;
     }
   }
 
   double _lightHorizontalItemWidth(String size) {
-    switch (size) {
-      case 'XL':
+    switch (parseSectionLayout(size)) {
+      case SectionLayout.extraLarge:
         return 280.w;
-      case 'L':
-        return 248.w;
-      case 'M':
+      case SectionLayout.small:
+        return 120.w;
+      case SectionLayout.medium:
+      case SectionLayout.large:
         return 210.w;
-      case 'S':
-      default:
-        return 168.w;
+      case SectionLayout.list:
+        return 320.w;
     }
   }
 
@@ -324,7 +356,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   }
 
   String _sectionRenameLabel(_DashboardEditSection section) =>
-      section == _DashboardEditSection.light ? _lightSectionTitle : 'Lighting';
+      section == _DashboardEditSection.light
+      ? _lightSectionTitle
+      : _lightingSectionTitle;
 
   String? _sectionHeaderImagePath(_DashboardEditSection section) =>
       section == _DashboardEditSection.light
@@ -339,7 +373,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     }
   }
 
-  Future<void> _pickSectionHeaderImage(_DashboardEditSection section) async {
+  Future<String?> _pickHeaderImagePath() async {
     final ImageSource? source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -391,16 +425,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         );
       },
     );
-    if (source == null || !mounted) return;
+    if (source == null || !mounted) return null;
 
     final XFile? file = await ImagePicker().pickImage(
       source: source,
       imageQuality: 85,
       maxWidth: 1920,
     );
-    if (file == null || !mounted) return;
+    if (file == null || !mounted) return null;
+    return file.path;
+  }
 
-    setState(() => _setSectionHeaderImagePath(section, file.path));
+  Future<void> _pickSectionHeaderImage(_DashboardEditSection section) async {
+    final String? path = await _pickHeaderImagePath();
+    if (path == null || !mounted) return;
+    setState(() => _setSectionHeaderImagePath(section, path));
   }
 
   _DashboardBlock _blockForEditSection(_DashboardEditSection section) =>
@@ -419,9 +458,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   void _moveDashboardSection(_DashboardEditSection section, int delta) {
     if (!_canMoveDashboardSection(section, delta)) return;
     final _DashboardBlock block = _blockForEditSection(section);
-    final List<_DashboardBlock> order = List<_DashboardBlock>.from(
-      _dashboardBlockOrder,
-    );
+    final List<Object> order = List<Object>.from(_dashboardBlockOrder);
     final int index = order.indexOf(block);
     final int target = index + delta;
     order[index] = order[target];
@@ -433,8 +470,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final _DashboardBlock block = _blockForEditSection(section);
     setState(() {
       _dashboardBlockOrder = _dashboardBlockOrder
-          .where((_DashboardBlock item) => item != block)
-          .toList(growable: false);
+          .where((Object item) => item != block)
+          .toList();
       _editingSection = null;
       _selectedEditDeviceId = null;
     });
@@ -619,146 +656,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     });
   }
 
-  Future<void> _renameDashboardSection(_DashboardEditSection section) async {
-    final TextEditingController controller = TextEditingController(
-      text: _sectionRenameLabel(section),
-    );
-    final String? next = await showDialog<String>(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.35),
-      builder: (ctx) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.r),
-          ),
-          insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 14.h, 14.w, 18.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 36.h,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Center(
-                        child: Text(
-                          'Rename section',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: GestureDetector(
-                          onTap: () => Navigator.of(ctx).pop(),
-                          child: Container(
-                            width: 28.w,
-                            height: 28.w,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF3F4F6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close_rounded,
-                              size: 17.sp,
-                              color: const Color(0xFF111827),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 14.h),
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  enableInteractiveSelection: true,
-                  selectionHeightStyle: BoxHeightStyle.strut,
-                  selectionWidthStyle: BoxWidthStyle.max,
-                  cursorColor: const Color(0xFF0088FE),
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontFamily: 'Inter',
-                    color: const Color(0xFF111827),
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Section name',
-                    hintStyle: TextStyle(
-                      color: const Color(0xFF9CA3AF),
-                      fontSize: 16.sp,
-                      fontFamily: 'Inter',
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 18.w,
-                      vertical: 11.h,
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFFF3F4F6),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(28.r),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(28.r),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(28.r),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF0088FE),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 14.h),
-                GestureDetector(
-                  onTap: () {
-                    final String val = controller.text.trim();
-                    if (val.isNotEmpty) Navigator.of(ctx).pop(val);
-                  },
-                  child: Container(
-                    height: 52.h,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0088FE),
-                      borderRadius: BorderRadius.circular(26.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Save',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (!mounted || next == null || next.isEmpty) return;
-    setState(() {
-      if (section == _DashboardEditSection.light) {
-        _lightSectionTitle = next;
-      }
-    });
-  }
-
   void _setShellBottomBarVisible(bool visible) {
     _shellNavKey.currentState?.setBottomBarVisible(visible);
   }
@@ -769,6 +666,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     setState(() {
       _editingSection = null;
       _selectedEditDeviceId = null;
+      _editingAddedSectionId = null;
+      _selectedAddedDeviceId = null;
     });
   }
 
@@ -779,6 +678,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
       if (!_showSectionEditButtons) {
         _editingSection = null;
         _selectedEditDeviceId = null;
+        _editingAddedSectionId = null;
+        _selectedAddedDeviceId = null;
         _dashboardDraggingDeviceId = null;
         _setShellBottomBarVisible(true);
       }
@@ -786,7 +687,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   }
 
   void _showAddSectionSheetOverlay() {
-    if (_isAddSectionSheetOpen || _editingSection != null) return;
+    if (_isAddSectionSheetOpen ||
+        _editingSection != null ||
+        _editingAddedSectionId != null) {
+      return;
+    }
     _setShellBottomBarVisible(false);
     setState(() => _isAddSectionSheetOpen = true);
   }
@@ -809,12 +714,364 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             bottom: 0.h,
             child: SafeArea(
               top: false,
-              child: AddSectionSheet(onClose: _closeAddSectionSheetOverlay),
+              child: AddSectionSheet(
+                onClose: _closeAddSectionSheetOverlay,
+                onDevicesRequested: _pickDevicesForNewSection,
+                onHeaderBackgroundRequested: _pickHeaderImagePath,
+                onAdd: _addSectionFromConfiguration,
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<List<String>?> _pickDevicesForNewSection(List<String> current) async {
+    final List<String>? picked = await showAddDashboardDeviceSheet(
+      context,
+      devices: _dashboardDeviceCatalog(),
+      initialSelectedDeviceIds: current,
+    );
+    if (picked == null) return null;
+    return picked;
+  }
+
+  _AddedZoneSection? _addedSectionById(int? id) {
+    if (id == null) return null;
+    for (final _AddedZoneSection section in _addedSections) {
+      if (section.id == id) return section;
+    }
+    return null;
+  }
+
+  void _addSectionFromConfiguration(AddSectionConfiguration configuration) {
+    final String trimmedName = configuration.name.trim();
+    if (trimmedName.isEmpty) return;
+    setState(() {
+      final int sectionId = _nextAddedSectionId++;
+      _addedSections.add(
+        _AddedZoneSection(
+          id: sectionId,
+          title: trimmedName,
+          deviceOrder: configuration.deviceIds,
+          horizontalScrolling: configuration.horizontalScrolling,
+          widgetSize: canonicalSectionLayoutStorage(configuration.widgetSize),
+          headerBackgroundPath: configuration.headerBackgroundPath,
+        ),
+      );
+      _dashboardBlockOrder = List<Object>.from(_dashboardBlockOrder)
+        ..add(sectionId);
+      _editingAddedSectionId = null;
+      _selectedAddedDeviceId = configuration.deviceIds.isEmpty
+          ? null
+          : configuration.deviceIds.last;
+    });
+    _closeAddSectionSheetOverlay();
+  }
+
+  void _openAddedSectionEdit(_AddedZoneSection section) {
+    if (section.title.trim().isEmpty) return;
+    if (_isAddSectionSheetOpen || _editingSection != null) return;
+    _setShellBottomBarVisible(false);
+    setState(() {
+      _editingSection = null;
+      _editingAddedSectionId = section.id;
+      _selectedAddedDeviceId = section.deviceOrder.isEmpty
+          ? null
+          : section.deviceOrder.first;
+    });
+  }
+
+  Future<void> _addDevicesToAddedSection(_AddedZoneSection section) async {
+    final List<String>? next = await _pickDevicesForNewSection(
+      section.deviceOrder,
+    );
+    if (!mounted || next == null) return;
+    setState(() {
+      section.deviceOrder = List<String>.from(next);
+      _selectedAddedDeviceId = next.isEmpty ? null : next.last;
+    });
+  }
+
+  Future<void> _pickAddedSectionHeader(_AddedZoneSection section) async {
+    final String? path = await _pickHeaderImagePath();
+    if (!mounted || path == null) return;
+    setState(() => section.headerBackgroundPath = path);
+  }
+
+  bool _canMoveAddedSection(_AddedZoneSection section, int delta) {
+    final int index = _dashboardBlockOrder.indexOf(section.id);
+    if (index < 0) return false;
+    final int target = index + delta;
+    return target >= 0 && target < _dashboardBlockOrder.length;
+  }
+
+  void _moveAddedSection(_AddedZoneSection section, int delta) {
+    if (!_canMoveAddedSection(section, delta)) return;
+    final List<Object> order = List<Object>.from(_dashboardBlockOrder);
+    final int index = order.indexOf(section.id);
+    final Object moved = order.removeAt(index);
+    order.insert(index + delta, moved);
+    setState(() {
+      _dashboardBlockOrder = order;
+      _editingAddedSectionId = section.id;
+    });
+  }
+
+  void _removeAddedSection(_AddedZoneSection section) {
+    setState(() {
+      _addedSections.remove(section);
+      _dashboardBlockOrder = _dashboardBlockOrder
+          .where((Object item) => item != section.id)
+          .toList();
+      _editingAddedSectionId = null;
+      _selectedAddedDeviceId = null;
+      if (_addedSections.isEmpty) {
+        _showSectionEditButtons = false;
+        _dashboardDraggingDeviceId = null;
+      }
+    });
+    _setShellBottomBarVisible(true);
+  }
+
+  void _removeAddedDevice(_AddedZoneSection section, String deviceId) {
+    setState(() {
+      section.deviceOrder = section.deviceOrder
+          .where((String id) => id != deviceId)
+          .toList();
+      if (section.deviceOrder.isEmpty) {
+        _selectedAddedDeviceId = null;
+      } else if (_selectedAddedDeviceId == deviceId) {
+        _selectedAddedDeviceId = section.deviceOrder.first;
+      }
+    });
+  }
+
+  void _reorderAddedDevice(
+    _AddedZoneSection section,
+    String draggedId,
+    String targetId,
+  ) {
+    if (draggedId == targetId) return;
+    final List<String> order = List<String>.from(section.deviceOrder);
+    final int from = order.indexOf(draggedId);
+    final int to = order.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    order.removeAt(from);
+    order.insert(to, draggedId);
+    setState(() {
+      section.deviceOrder = order;
+      _selectedAddedDeviceId = draggedId;
+    });
+  }
+
+  Widget _buildAddedSectionEditOverlay() {
+    final _AddedZoneSection? section = _addedSectionById(
+      _editingAddedSectionId,
+    );
+    if (section == null) return const SizedBox.shrink();
+
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0.h,
+            child: SafeArea(
+              top: false,
+              child: EditAddSectionSheet(
+                onClose: _closeDashboardSectionEdit,
+                sectionRenameLabel: section.title,
+                onRenameChanged: (String next) {
+                  if (next.trim().isEmpty) return;
+                  setState(() => section.title = next.trim());
+                },
+                onAddDeviceTap: () => _addDevicesToAddedSection(section),
+                addDeviceCountLabel: section.deviceOrder.isEmpty
+                    ? null
+                    : '${section.deviceOrder.length}',
+                onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
+                headerBackgroundImagePath: section.headerBackgroundPath,
+                onMoveUp: () => _moveAddedSection(section, -1),
+                onMoveDown: () => _moveAddedSection(section, 1),
+                canMoveUp: _canMoveAddedSection(section, -1),
+                canMoveDown: _canMoveAddedSection(section, 1),
+                onRemove: () => _removeAddedSection(section),
+                initialHorizontalScroll: section.horizontalScrolling,
+                onHorizontalScrollChanged: (bool value) =>
+                    setState(() => section.horizontalScrolling = value),
+                showWidgetSize: true,
+                initialSize: section.widgetSize,
+                onSizeChanged: (String value) => setState(() {
+                  section.widgetSize = canonicalSectionLayoutStorage(value);
+                  _selectedAddedDeviceId = section.deviceOrder.isEmpty
+                      ? null
+                      : section.deviceOrder.first;
+                }),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddedDevice(_AddedZoneSection section, String deviceId) {
+    final bool lighting = _kDefaultLightingDeviceOrder.contains(deviceId);
+    if (sectionLayoutUsesListRows(section.widgetSize) && lighting) {
+      return _buildLightingLargeRowById(deviceId);
+    }
+    if (lighting) return _buildLightingSmallCardById(deviceId);
+    return _buildLightDeviceCard(deviceId);
+  }
+
+  Widget _wrapAddedDeviceCell(
+    _AddedZoneSection section,
+    String deviceId,
+    Widget child,
+  ) {
+    Widget result = child;
+    if (_editingAddedSectionId == section.id) {
+      final bool selected = _selectedAddedDeviceId == deviceId;
+      result = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          GestureDetector(
+            onTap: () => setState(() => _selectedAddedDeviceId = deviceId),
+            child: child,
+          ),
+          if (selected)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26.r),
+                    border: Border.all(
+                      color: const Color(0xFF00E5FF),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          Positioned(
+            top: -6.h,
+            right: -6.w,
+            child: GestureDetector(
+              onTap: () => _removeAddedDevice(section, deviceId),
+              child: Image.asset(
+                'assets/images/cross.png',
+                width: 26.w,
+                height: 26.h,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (!_showSectionEditButtons && _editingAddedSectionId != section.id) {
+      return result;
+    }
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    return _DashboardShakeWrapper(
+      shaking: _dashboardDraggingDeviceId != deviceId,
+      child: _DashboardDraggableReorderSlot(
+        deviceId: deviceId,
+        feedbackWidth: screenWidth - 32.w,
+        feedbackHeight: sectionLayoutUsesListRows(section.widgetSize)
+            ? _lightingLargeRowHeightForWidgetSize(section.widgetSize)
+            : _lightCardHeightForWidgetSize(section.widgetSize),
+        onDragStarted: () =>
+            setState(() => _dashboardDraggingDeviceId = deviceId),
+        onDragEnded: () => setState(() => _dashboardDraggingDeviceId = null),
+        onReorder: (String draggedId) =>
+            _reorderAddedDevice(section, draggedId, deviceId),
+        child: result,
+      ),
+    );
+  }
+
+  Widget _buildAddedSectionDevices(_AddedZoneSection section) {
+    final List<String> ids = section.deviceOrder;
+    if (ids.isEmpty) {
+      return SizedBox(
+        height: 72.h,
+        child: Center(
+          child: Text(
+            'No devices',
+            style: TextStyle(fontSize: 15.sp, color: const Color(0xFF6B7280)),
+          ),
+        ),
+      );
+    }
+
+    if (sectionLayoutUsesListRows(section.widgetSize)) {
+      return Column(
+        children: [
+          for (int i = 0; i < ids.length; i++) ...[
+            if (i > 0) SizedBox(height: 12.h),
+            _wrapAddedDeviceCell(
+              section,
+              ids[i],
+              _buildAddedDevice(section, ids[i]),
+            ),
+          ],
+        ],
+      );
+    }
+
+    if (section.horizontalScrolling) {
+      return SizedBox(
+        height: _lightCardHeightForWidgetSize(section.widgetSize),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          itemCount: ids.length,
+          separatorBuilder: (_, __) => SizedBox(width: 12.w),
+          itemBuilder: (_, int index) {
+            final String id = ids[index];
+            return SizedBox(
+              width: _lightHorizontalItemWidth(section.widgetSize),
+              child: _wrapAddedDeviceCell(
+                section,
+                id,
+                _buildAddedDevice(section, id),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (int i = 0; i < ids.length; i++) ...[
+          if (i > 0) SizedBox(height: 12.h),
+          _wrapAddedDeviceCell(
+            section,
+            ids[i],
+            _buildAddedDevice(section, ids[i]),
+          ),
+        ],
+      ],
+    );
+  }
+
+  List<Widget> _buildAddedSectionWidgets(_AddedZoneSection section) {
+    final bool hasSectionName = section.title.trim().isNotEmpty;
+    return <Widget>[
+      _SectionTitle(
+        section.title,
+        showEditButton: _showSectionEditButtons && hasSectionName,
+        onEditTap: hasSectionName ? () => _openAddedSectionEdit(section) : null,
+        headerBackgroundImagePath: section.headerBackgroundPath,
+      ),
+      SizedBox(height: 12.h),
+      _buildAddedSectionDevices(section),
+    ];
   }
 
   void _reorderDeviceInSection(
@@ -838,6 +1095,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   double _dashboardDragFeedbackWidth(_DashboardEditSection section) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     if (section == _DashboardEditSection.light) {
+      if (sectionLayoutUsesListRows(_lightWidgetSize)) {
+        return screenWidth - 32.w;
+      }
       if (_lightHorizontalScroll) {
         return _lightHorizontalItemWidth(_lightWidgetSize);
       }
@@ -851,12 +1111,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
   double _dashboardDragFeedbackHeight(_DashboardEditSection section) {
     if (section == _DashboardEditSection.light) {
+      if (sectionLayoutUsesListRows(_lightWidgetSize)) return 90.h;
       return _lightCardHeight;
     }
     if (_lightingUsesLargeWidgets) {
       return _lightingLargeRowHeightForWidgetSize(_lightingWidgetSize);
     }
-    return _lightingSmallCardHeight(compact: _lightingHorizontalScroll);
+    return _lightCardHeightForWidgetSize(_lightingWidgetSize);
   }
 
   void _openDashboardSectionEdit(
@@ -882,11 +1143,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     return Positioned.fill(
       child: Stack(
         children: [
-          Positioned.fill(
-            child: IgnorePointer(
-              child: ColoredBox(color: Colors.black.withOpacity(0.25)),
-            ),
-          ),
           Positioned(
             left: 0,
             right: 0,
@@ -896,7 +1152,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               child: EditAddSectionSheet(
                 onClose: _closeDashboardSectionEdit,
                 sectionRenameLabel: _sectionRenameLabel(section),
-                onRenameTap: () => _renameDashboardSection(section),
+                onRenameChanged: (String next) {
+                  setState(() {
+                    if (section == _DashboardEditSection.light) {
+                      _lightSectionTitle = next;
+                    } else {
+                      _lightingSectionTitle = next;
+                    }
+                  });
+                },
                 onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
                 onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
                 headerBackgroundImagePath: _sectionHeaderImagePath(section),
@@ -920,11 +1184,14 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     ? _lightWidgetSize
                     : _lightingWidgetSize,
                 onSizeChanged: (v) => setState(() {
+                  final String stored = canonicalSectionLayoutStorage(v);
                   if (section == _DashboardEditSection.light) {
-                    _lightWidgetSize = v;
+                    _lightWidgetSize = stored;
                   } else {
-                    _lightingWidgetSize = v;
+                    _lightingWidgetSize = stored;
                   }
+                  final List<String> order = _deviceOrderFor(section);
+                  _selectedEditDeviceId = order.isEmpty ? null : order.first;
                 }),
               ),
             ),
@@ -942,13 +1209,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
 
   List<Widget> _buildOrderedDashboardBlocks(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    for (int i = 0; i < _dashboardBlockOrder.length; i++) {
-      if (i > 0) {
+    for (final Object entry in _dashboardBlockOrder) {
+      final List<Widget> entryWidgets;
+      if (entry is _DashboardBlock) {
+        entryWidgets = _widgetsForDashboardBlock(context, entry);
+      } else if (entry is int) {
+        final _AddedZoneSection? section = _addedSectionById(entry);
+        if (section == null) continue;
+        entryWidgets = _buildAddedSectionWidgets(section);
+      } else {
+        continue;
+      }
+      if (children.isNotEmpty) {
         children.add(SizedBox(height: 18.h));
       }
-      children.addAll(
-        _widgetsForDashboardBlock(context, _dashboardBlockOrder[i]),
-      );
+      children.addAll(entryWidgets);
     }
     children.add(SizedBox(height: 70.h));
     return children;
@@ -973,7 +1248,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
       case _DashboardBlock.lighting:
         return <Widget>[
           _SectionTitle(
-            'Lighting',
+            _lightingSectionTitle,
             showEditButton: _showSectionEditButtons,
             onEditTap: () => _showLightingSectionEdit(context),
             headerBackgroundImagePath: _lightingSectionHeaderImagePath,
@@ -1281,6 +1556,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ),
             if (_isAddSectionSheetOpen) _buildAddSectionOverlay(),
             if (_editingSection != null) _buildDashboardEditOverlay(),
+            if (_editingAddedSectionId != null) _buildAddedSectionEditOverlay(),
           ],
         ),
       ),
@@ -1692,6 +1968,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildLightDeviceCard(String deviceId) {
     final bool editing =
         _editingSection == _DashboardEditSection.light ||
+        _editingAddedSectionId != null ||
         _showSectionEditButtons;
     final DeviceControlSnapshot diningLight = _snap('Light dinning room');
     final DeviceControlSnapshot bathroomHeat = _snap(
@@ -1977,15 +2254,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final List<String> ids = _lightingDeviceOrder;
     if (ids.isEmpty) return const SizedBox.shrink();
 
-    final double cardWidth =
-        (MediaQuery.sizeOf(context).width - 32.w - (columns - 1) * 12.w) /
-        columns;
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final double cardHeight = _lightCardHeightForWidgetSize(_lightingWidgetSize);
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double gridCardWidth =
+        (screenWidth - 32.w - (columns - 1) * 12.w) / columns;
 
     if (_lightingHorizontalScroll) {
-      final double cardHeight = _lightingSmallCardHeight(compact: true);
-      final double listHeight = cardHeight;
       return SizedBox(
-        height: listHeight,
+        height: cardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
@@ -1997,7 +2274,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           itemBuilder: (context, index) {
             final String id = ids[index];
             return SizedBox(
-              width: cardWidth,
+              width: layout == SectionLayout.extraLarge
+                  ? _lightHorizontalItemWidth(_lightingWidgetSize)
+                  : gridCardWidth,
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.lighting,
                 deviceId: id,
@@ -2038,6 +2317,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildLightingSmallCardById(String deviceId) {
     final bool editing =
         _editingSection == _DashboardEditSection.lighting ||
+        _editingAddedSectionId != null ||
         _showSectionEditButtons;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
@@ -2278,6 +2558,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildLightingLargeRowById(String deviceId) {
     final bool editing =
         _editingSection == _DashboardEditSection.lighting ||
+        _editingAddedSectionId != null ||
         _showSectionEditButtons;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
@@ -2298,13 +2579,18 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           icon: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
           deviceName: 'Light Scene',
           statusText: scene.sceneLabel,
-          controls: _buildLightingStepButtons(
+          mode: _lightSceneManual ? 'M' : 'A',
+          modeFilled: _lightSceneManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _lightSceneManual = !_lightSceneManual),
+          controls: _buildLightingChevronButtons(
             markKey: 'scene',
-            onDown: () => _patchSnap(
+            onLeft: () => _patchSnap(
               'Light Scene',
               (p) => p.copyWith(sceneIndex: (p.sceneIndex - 1).clamp(0, 2)),
             ),
-            onUp: () => _patchSnap(
+            onRight: () => _patchSnap(
               'Light Scene',
               (p) => p.copyWith(sceneIndex: (p.sceneIndex + 1).clamp(0, 2)),
             ),
@@ -2329,19 +2615,16 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           deviceName: 'RGBW room abc',
           statusText: '${(rgbw.rgbwIntensity * 100).round()}%',
-          controls: _buildLightingStepButtons(
-            markKey: 'rgbw',
-            onDown: () => _patchSnap(
+          mode: _rgbwManual ? 'M' : 'A',
+          modeFilled: _rgbwManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _rgbwManual = !_rgbwManual),
+          controls: _buildLightingSliderControl(
+            value: rgbw.rgbwIntensity,
+            onChanged: (v) => _patchSnap(
               'RGBW room abc',
-              (p) => p.copyWith(
-                rgbwIntensity: (p.rgbwIntensity - 0.10).clamp(0.0, 1.0),
-              ),
-            ),
-            onUp: () => _patchSnap(
-              'RGBW room abc',
-              (p) => p.copyWith(
-                rgbwIntensity: (p.rgbwIntensity + 0.10).clamp(0.0, 1.0),
-              ),
+              (p) => p.copyWith(rgbwIntensity: v),
             ),
           ),
           onNavigate: detailsNav(
@@ -2370,19 +2653,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               : () => setState(
                   () => _lightingLedBadge1Manual = !_lightingLedBadge1Manual,
                 ),
-          controls: _buildLightingStepButtons(
-            markKey: 'led',
-            onDown: () => _patchSnap(
+          controls: _buildLightingSliderControl(
+            value: led.ledDimmerPercent,
+            onChanged: (v) => _patchSnap(
               'LED Dimmer living room',
-              (p) => p.copyWith(
-                ledDimmerPercent: (p.ledDimmerPercent - 0.10).clamp(0.0, 1.0),
-              ),
-            ),
-            onUp: () => _patchSnap(
-              'LED Dimmer living room',
-              (p) => p.copyWith(
-                ledDimmerPercent: (p.ledDimmerPercent + 0.10).clamp(0.0, 1.0),
-              ),
+              (p) => p.copyWith(ledDimmerPercent: v),
             ),
           ),
           onNavigate: detailsNav(
@@ -2401,12 +2676,17 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           icon: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
           deviceName: 'Heating & Cooling',
           statusText: hvac.heatingCoolingStatusLabel,
-          controls: _buildLightingStepButtons(
-            markKey: 'hvac',
-            onDown: () =>
-                _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: false)),
-            onUp: () =>
-                _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: true)),
+          mode: _heatingCoolingManual ? 'M' : 'A',
+          modeFilled: _heatingCoolingManual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                  () => _heatingCoolingManual = !_heatingCoolingManual,
+                ),
+          controls: _buildLightingSwitchControl(
+            value: hvac.isOn,
+            onChanged: (v) =>
+                _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
           ),
           onNavigate: detailsNav(
             () => DeviceDetailsScreen.go(
@@ -2427,25 +2707,17 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           deviceName: 'Tunable white light',
           statusText: '${(tunable.tunableWhiteIntensity * 100).round()}%',
-          controls: _buildLightingStepButtons(
-            markKey: 'tunable',
-            onDown: () => _patchSnap(
+          mode: _tunableWhiteManual ? 'M' : 'A',
+          modeFilled: _tunableWhiteManual,
+          onModeTap: editing
+              ? null
+              : () =>
+                    setState(() => _tunableWhiteManual = !_tunableWhiteManual),
+          controls: _buildLightingSliderControl(
+            value: tunable.tunableWhiteIntensity,
+            onChanged: (v) => _patchSnap(
               'Tunable white light',
-              (p) => p.copyWith(
-                tunableWhiteIntensity: (p.tunableWhiteIntensity - 0.10).clamp(
-                  0.0,
-                  1.0,
-                ),
-              ),
-            ),
-            onUp: () => _patchSnap(
-              'Tunable white light',
-              (p) => p.copyWith(
-                tunableWhiteIntensity: (p.tunableWhiteIntensity + 0.10).clamp(
-                  0.0,
-                  1.0,
-                ),
-              ),
+              (p) => p.copyWith(tunableWhiteIntensity: v),
             ),
           ),
           onNavigate: detailsNav(
@@ -2468,16 +2740,12 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           onModeTap: editing
               ? null
               : () => setState(() => _ventilationManual = !_ventilationManual),
-          controls: SizedBox(
-            width: 133.w,
-            height: 35.h,
-            child: _DimmerPill(
-              percent: vent.ventilationPercent,
-              iconAsset: 'assets/make.png',
-              onChanged: (v) => _patchSnap(
-                'Ventilation',
-                (p) => p.copyWith(ventilationPercent: v.clamp(0.0, 1.0)),
-              ),
+          controls: _buildLightingSliderControl(
+            value: vent.ventilationPercent,
+            iconAsset: 'assets/make.png',
+            onChanged: (v) => _patchSnap(
+              'Ventilation',
+              (p) => p.copyWith(ventilationPercent: v),
             ),
           ),
           onNavigate: detailsNav(
@@ -2495,13 +2763,18 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           icon: DashboardFanLevelIcon(level: fan.fanLevel),
           deviceName: 'Fan Level 3',
           statusText: fan.fanStatusLabel,
-          controls: _buildLightingStepButtons(
+          mode: _fanLevelManual ? 'M' : 'A',
+          modeFilled: _fanLevelManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _fanLevelManual = !_fanLevelManual),
+          controls: _buildLightingPlusMinusButtons(
             markKey: 'fan',
-            onDown: () => _patchSnap(
+            onMinus: () => _patchSnap(
               'Fan Level 3',
               (p) => p.copyWith(fanLevel: (p.fanLevel - 1).clamp(0, 3)),
             ),
-            onUp: () => _patchSnap(
+            onPlus: () => _patchSnap(
               'Fan Level 3',
               (p) => p.copyWith(fanLevel: (p.fanLevel + 1).clamp(0, 3)),
             ),
@@ -2524,25 +2797,30 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           deviceName: 'Presence',
           statusText: presence.presenceLabel,
-          controls: _buildLightingStepButtons(
+          mode: _presenceManual ? 'M' : 'A',
+          modeFilled: _presenceManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _presenceManual = !_presenceManual),
+          controls: _buildLightingChevronButtons(
             markKey: 'presence',
-            onDown: () => _patchSnap(
+            onLeft: () => _patchSnap(
               'Presence',
               (p) => p.copyWith(
                 isOn: true,
                 presenceModeIndex: (p.presenceModeIndex - 1).clamp(0, 4),
               ),
             ),
-            onDownLong: () =>
+            onLeftLong: () =>
                 _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
-            onUp: () => _patchSnap(
+            onRight: () => _patchSnap(
               'Presence',
               (p) => p.copyWith(
                 isOn: true,
                 presenceModeIndex: (p.presenceModeIndex + 1).clamp(0, 4),
               ),
             ),
-            onUpLong: () =>
+            onRightLong: () =>
                 _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
           ),
           onNavigate: detailsNav(
@@ -2568,9 +2846,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           onModeTap: editing
               ? null
               : () => setState(() => _livingRoomManual = !_livingRoomManual),
-          controls: _buildLightingStepButtons(
+          controls: _buildLightingPlusMinusButtons(
             markKey: 'living',
-            onDown: () => _patchSnap(
+            onMinus: () => _patchSnap(
               'Living Room',
               (p) => p.copyWith(
                 thermostatRingPercent: (p.thermostatRingPercent - 0.10).clamp(
@@ -2579,7 +2857,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ),
             ),
-            onUp: () => _patchSnap(
+            onPlus: () => _patchSnap(
               'Living Room',
               (p) => p.copyWith(
                 thermostatRingPercent: (p.thermostatRingPercent + 0.10).clamp(
@@ -2608,9 +2886,16 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           deviceName: 'Multi-Value Switch',
           statusText: multi.multiValueSwitchCaption,
-          controls: _buildLightingStepButtons(
+          mode: _multiValueSwitchManual ? 'M' : 'A',
+          modeFilled: _multiValueSwitchManual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                  () => _multiValueSwitchManual = !_multiValueSwitchManual,
+                ),
+          controls: _buildLightingChevronButtons(
             markKey: 'multi',
-            onDown: () => _patchSnap(
+            onLeft: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(
                 isOn: true,
@@ -2620,11 +2905,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ),
             ),
-            onDownLong: () => _patchSnap(
+            onLeftLong: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(isOn: false),
             ),
-            onUp: () => _patchSnap(
+            onRight: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(
                 isOn: true,
@@ -2634,7 +2919,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
               ),
             ),
-            onUpLong: () => _patchSnap(
+            onRightLong: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(isOn: false),
             ),
@@ -2655,12 +2940,12 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     }
   }
 
-  Widget _buildLightingStepButtons({
+  Widget _buildLightingChevronButtons({
     required String markKey,
-    required VoidCallback onDown,
-    required VoidCallback onUp,
-    VoidCallback? onDownLong,
-    VoidCallback? onUpLong,
+    required VoidCallback onLeft,
+    required VoidCallback onRight,
+    VoidCallback? onLeftLong,
+    VoidCallback? onRightLong,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -2672,21 +2957,19 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             value: 1,
             getCurrent: () => _lightingStepMark[markKey] ?? 0,
             set: (v) => _lightingStepMark[markKey] = v,
-            action: onDown,
+            action: onLeft,
           ),
-          onLongPress: onDownLong == null
+          onLongPress: onLeftLong == null
               ? null
               : () => _flashMark(
                   value: 1,
                   getCurrent: () => _lightingStepMark[markKey] ?? 0,
                   set: (v) => _lightingStepMark[markKey] = v,
-                  action: onDownLong,
+                  action: onLeftLong,
                 ),
-          child: Image.asset(
-            'assets/Mask group (17).png',
-            width: 13.w,
-            height: 13.h,
-            fit: BoxFit.contain,
+          child: Icon(
+            Icons.chevron_left_rounded,
+            size: 26.sp,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -2698,28 +2981,110 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             value: 2,
             getCurrent: () => _lightingStepMark[markKey] ?? 0,
             set: (v) => _lightingStepMark[markKey] = v,
-            action: onUp,
+            action: onRight,
           ),
-          onLongPress: onUpLong == null
+          onLongPress: onRightLong == null
               ? null
               : () => _flashMark(
                   value: 2,
                   getCurrent: () => _lightingStepMark[markKey] ?? 0,
                   set: (v) => _lightingStepMark[markKey] = v,
-                  action: onUpLong,
+                  action: onRightLong,
                 ),
-          child: Transform.rotate(
-            angle: math.pi,
-            child: Image.asset(
-              'assets/Mask group (17).png',
-              width: 13.w,
-              height: 13.h,
-              fit: BoxFit.contain,
-              color: const Color(0xFF6B7280),
-            ),
+          child: Icon(
+            Icons.chevron_right_rounded,
+            size: 26.sp,
+            color: const Color(0xFF6B7280),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLightingPlusMinusButtons({
+    required String markKey,
+    required VoidCallback onMinus,
+    required VoidCallback onPlus,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _CircleBtn(
+          size: 35,
+          marked: (_lightingStepMark[markKey] ?? 0) == 1,
+          onTap: () => _flashMark(
+            value: 1,
+            getCurrent: () => _lightingStepMark[markKey] ?? 0,
+            set: (v) => _lightingStepMark[markKey] = v,
+            action: onMinus,
+          ),
+          child: Icon(
+            Icons.remove_rounded,
+            size: 22.sp,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        SizedBox(width: 17.w),
+        _CircleBtn(
+          size: 35,
+          marked: (_lightingStepMark[markKey] ?? 0) == 2,
+          onTap: () => _flashMark(
+            value: 2,
+            getCurrent: () => _lightingStepMark[markKey] ?? 0,
+            set: (v) => _lightingStepMark[markKey] = v,
+            action: onPlus,
+          ),
+          child: Icon(
+            Icons.add_rounded,
+            size: 22.sp,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLightingSliderControl({
+    required double value,
+    required ValueChanged<double> onChanged,
+    IconData? icon,
+    String? iconAsset,
+  }) {
+    return SizedBox(
+      width: 118.w,
+      height: 35.h,
+      child: _DimmerPill(
+        percent: value,
+        onChanged: onChanged,
+        icon: icon,
+        iconAsset: iconAsset,
+      ),
+    );
+  }
+
+  Widget _buildLightingSwitchControl({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    const double cupertinoHeight = 31;
+    final double height = 35.h;
+    return SizedBox(
+      width: 60.w,
+      height: height,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Transform.scale(
+          scale: height / cupertinoHeight,
+          child: CupertinoSwitch(
+            value: value,
+            onChanged: (bool next) {
+              uiTapHaptic();
+              onChanged(next);
+            },
+            activeColor: const Color(0xFF0088FE),
+          ),
+        ),
+      ),
     );
   }
 
@@ -2812,13 +3177,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     );
   }
 
-  double _lightingSmallCardHeight({bool compact = false}) {
-    if (compact) {
-      return 8.h + kDashboardLightingIconSide + 6.h + 30.h + 6.h + 18.h + 8.h;
-    }
-    return 12.h + kDashboardLightingIconSide + 8.h + 38.h + 8.h + 20.h + 12.h;
-  }
-
   Widget _buildLightingCard({
     required String deviceName,
     required String status,
@@ -2827,7 +3185,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     VoidCallback? onTap,
   }) {
     // Small widget: icon + name + status only (tap opens details; no controls).
-    final bool compact = _lightingHorizontalScroll;
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final bool compact =
+        layout == SectionLayout.small || _lightingHorizontalScroll;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
@@ -2850,7 +3210,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ),
           ),
     );
-    final double cardHeight = _lightingSmallCardHeight(compact: compact);
+    final double cardHeight = _lightCardHeightForWidgetSize(_lightingWidgetSize);
     final card = SizedBox(
       height: cardHeight,
       width: double.infinity,
@@ -2998,44 +3358,26 @@ class _Header extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                InkWell(
+                _PressableCircleSurface(
+                  side: 32.w,
+                  enableHaptic: false,
                   onTap: onEditTap,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/image 89.png',
-                        width: 22.w,
-                        height: 22.w,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  child: Image.asset(
+                    'assets/image 89.png',
+                    width: 22.w,
+                    height: 22.w,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 SizedBox(width: 13.w),
-                InkWell(
+                _PressableCircleSurface(
+                  side: 32.w,
+                  enableHaptic: false,
                   onTap: onAddTap,
-                  borderRadius: BorderRadius.circular(999),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F4F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: const Color(0xFF111827),
-                        size: 23.sp,
-                      ),
-                    ),
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: const Color(0xFF111827),
+                    size: 23.sp,
                   ),
                 ),
               ],
@@ -3767,7 +4109,7 @@ class _DimmerPill extends StatelessWidget {
                             width: 18.sp,
                             height: 18.sp,
                             fit: BoxFit.contain,
-                            color: isOff ? kDeviceOffGreyFill : null,
+                            color: isOff ? const Color(0xFF111827) : null,
                           )
                         : Icon(
                             icon ?? Icons.wb_sunny_outlined,

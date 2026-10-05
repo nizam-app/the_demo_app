@@ -284,6 +284,7 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/make.png',
                           title: 'Ventilation',
                           iconSize: 20,
+                          iconColor: const Color(0xFF111827),
                           onTap: () => context.push(
                             Zone_Category_Screen.routeWithTitle('Ventilation'),
                           ),
@@ -559,6 +560,7 @@ class _MenuIcon extends StatelessWidget {
     this.isCircle = false,
     this.iconWidth,
     this.iconHeight,
+    this.color,
   });
 
   final String imagePath;
@@ -567,6 +569,7 @@ class _MenuIcon extends StatelessWidget {
   final bool isCircle;
   final double? iconWidth;
   final double? iconHeight;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -593,6 +596,7 @@ class _MenuIcon extends StatelessWidget {
         width: imgW,
         height: imgH,
         fit: BoxFit.contain,
+        color: color,
         filterQuality: FilterQuality.high,
         errorBuilder: (_, __, ___) => SizedBox(width: imgW, height: imgH),
       ),
@@ -815,6 +819,7 @@ class _MenuItemRow extends StatelessWidget {
     this.iconSize,
     this.iconWidth,
     this.iconHeight,
+    this.iconColor,
   }) : assert(imagePath != null);
 
   final String title;
@@ -834,6 +839,7 @@ class _MenuItemRow extends StatelessWidget {
   final double? iconSize;
   final double? iconWidth;
   final double? iconHeight;
+  final Color? iconColor;
 
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -848,6 +854,7 @@ class _MenuItemRow extends StatelessWidget {
       borderRadius: iconWrap ? BorderRadius.circular(10.r) : null,
       iconWidth: iconWidth ?? iconSize,
       iconHeight: iconHeight ?? iconSize,
+      color: iconColor,
     );
 
     return InkWell(

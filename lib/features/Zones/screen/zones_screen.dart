@@ -29,7 +29,10 @@ class _ZonesScreenState extends State<ZonesScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       barrierColor: Colors.black.withOpacity(0.25),
-      builder: (_) => const ZonesMenuSheet(),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: const ZonesMenuSheet(),
+      ),
     );
   }
 
@@ -39,7 +42,10 @@ class _ZonesScreenState extends State<ZonesScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       barrierColor: Colors.black.withOpacity(0.25),
-      builder: (_) => const ZoneAddMenu(),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: const ZoneAddMenu(),
+      ),
     );
   }
 

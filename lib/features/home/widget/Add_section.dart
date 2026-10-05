@@ -2,6 +2,7 @@ import 'dart:io' show File;
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -176,17 +177,9 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Inter',
                     ),
-                    decoration: const InputDecoration(
-                      isDense: true,
+                    decoration: popupNameOutlineDecoration(
                       hintText: 'Section name',
-                      hintStyle: TextStyle(color: _textSecondary),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                      hintStyle: const TextStyle(color: _textSecondary),
                     ),
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _commitName(),

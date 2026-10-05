@@ -4814,21 +4814,26 @@ class _DashboardSectionNameDialogState
                       horizontal: 18.w,
                       vertical: 11.h,
                     ),
-                    filled: true,
-                    fillColor: const Color(0xFFF3F4F6),
+                    filled: false,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(28.r),
-                      borderSide: BorderSide.none,
+                      borderSide: const BorderSide(
+                        color: Color(0xFFD1D5DB),
+                        width: 0.8,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(28.r),
-                      borderSide: BorderSide.none,
+                      borderSide: const BorderSide(
+                        color: Color(0xFFD1D5DB),
+                        width: 0.8,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(28.r),
                       borderSide: const BorderSide(
-                        color: Color(0xFF0088FE),
-                        width: 1.5,
+                        color: Color(0xFFD1D5DB),
+                        width: 0.8,
                       ),
                     ),
                   ),
@@ -6054,7 +6059,7 @@ class _DimmerPill extends StatelessWidget {
                             width: 18.sp,
                             height: 18.sp,
                             fit: BoxFit.contain,
-                            color: isOff ? kDeviceOffGreyFill : null,
+                            color: isOff ? const Color(0xFF111827) : null,
                           )
                         : Icon(
                             icon ?? Icons.wb_sunny_outlined,

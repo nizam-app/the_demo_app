@@ -1590,7 +1590,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             width: 72.sp,
                             fit: BoxFit.contain,
                             color: _ventilationPercent <= 0
-                                ? kDeviceOffGreyFill
+                                ? const Color(0xFF111827)
                                 : null,
                           ),
                         ],

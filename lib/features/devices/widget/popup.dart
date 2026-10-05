@@ -2,6 +2,7 @@
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -182,12 +183,8 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                                           color: _kTextSecondary,
                                           fontFamily: 'Inter',
                                         ),
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          isCollapsed: true,
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
+                                        decoration:
+                                            popupNameOutlineDecoration(),
                                         textInputAction: TextInputAction.done,
                                         onSubmitted: (_) => _commitRename(),
                                       ),

@@ -31,7 +31,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withOpacity(0.25),
       isScrollControlled: true,
-      builder: (_) => const CategoryMenuSheet(),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: const CategoryMenuSheet(),
+      ),
     );
   }
 
@@ -41,7 +44,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withOpacity(0.25),
       isScrollControlled: true,
-      builder: (_) => const CategoryAddMenu(),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+        child: const CategoryAddMenu(),
+      ),
     );
   }
 
