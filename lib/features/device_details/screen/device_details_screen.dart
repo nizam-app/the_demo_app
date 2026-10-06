@@ -1412,14 +1412,27 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         ),
                       ),
                       IgnorePointer(
-                        child: Text(
-                          '${(_ledDimmerPercent * 100).round()}%',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 52.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111827),
-                          ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${(_ledDimmerPercent * 100).round()}%',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 52.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF111827),
+                              ),
+                            ),
+                            SizedBox(height: 6.h),
+                            Icon(
+                              Icons.wb_sunny_outlined,
+                              size: 72.sp,
+                              color: _ledDimmerPercent <= 0
+                                  ? const Color(0xFF111827)
+                                  : const Color(0xFFFAB300),
+                            ),
+                          ],
                         ),
                       ),
                       Builder(

@@ -39,6 +39,52 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
+  /// Frosted circular control (header menu / edit / add on dashboard).
+  static BoxDecoration circleButtonDecoration({bool pressed = false}) {
+    return BoxDecoration(
+      color: Colors.white.withOpacity(pressed ? 0.62 : 0.46),
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: Colors.white.withOpacity(0.75),
+        width: 0.8,
+      ),
+    );
+  }
+
+  /// Horizontal category chips on the dashboard.
+  static BoxDecoration frostedPillDecoration() {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withOpacity(0.72),
+          Colors.white.withOpacity(0.42),
+        ],
+      ),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.70),
+        width: 0.8,
+      ),
+    );
+  }
+
+  /// Backdrop blur wrapper; caller supplies size/decoration on [child].
+  static Widget blurred({
+    required Widget child,
+    BorderRadius borderRadius = BorderRadius.zero,
+    double sigma = 12,
+  }) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+        child: child,
+      ),
+    );
+  }
+
   /// Sheets and menus. Radius is applied by the caller.
   static BoxDecoration sheetDecoration({BorderRadius? borderRadius}) {
     return BoxDecoration(

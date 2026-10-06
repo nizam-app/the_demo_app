@@ -1784,27 +1784,21 @@ class _HomeScreenState extends State<HomeScreen> {
               top: 0,
               left: 0,
               right: 0,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: DecoratedBox(
-                    decoration: LiquidGlass.barDecoration(),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        15.w,
-                        topInset + 10.h,
-                        15.w,
-                        8.h,
-                      ),
-                      child: Builder(
-                        builder: (ctx) => _Header(
-                          onMenuTap: () {
-                            ctx.push(MenuScreen.routeName);
-                          },
-                          onEditTap: _toggleDashboardEditMode,
-                          onAddTap: _showAddDashboardSectionSheet,
-                        ),
-                      ),
+              child: LiquidGlass(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: Builder(
+                    builder: (ctx) => _Header(
+                      onMenuTap: () {
+                        ctx.push(MenuScreen.routeName);
+                      },
+                      onEditTap: _toggleDashboardEditMode,
+                      onAddTap: _showAddDashboardSectionSheet,
                     ),
                   ),
                 ),
@@ -4917,6 +4911,7 @@ class _Header extends StatelessWidget {
             child: _PressableCircleSurface(
               side: 44.w,
               enableHaptic: false,
+              useLiquidGlass: true,
               onTap: onMenuTap,
               child: Image.asset(
                 'assets/Group 35 (1).png',
@@ -4958,6 +4953,7 @@ class _Header extends StatelessWidget {
                 _PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
+                  useLiquidGlass: true,
                   onTap: onEditTap,
                   child: Image.asset(
                     'assets/image 89.png',
@@ -4970,6 +4966,7 @@ class _Header extends StatelessWidget {
                 _PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
+                  useLiquidGlass: true,
                   onTap: onAddTap,
                   child: Icon(
                     Icons.add_rounded,
@@ -5029,7 +5026,6 @@ class _CategoryPill extends StatelessWidget {
     }
 
     Widget innerRow({required bool selected}) {
-      const iconBgColor = Color(0xFFF3F4F6);
       const Color categoryIconColor = Color(0xFF111827);
 
       return Padding(
@@ -5038,15 +5034,15 @@ class _CategoryPill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // ✅ icon circle
-            Container(
-              width: 44.w,
-              height: 44.w,
-              decoration: const BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: imagePath != null
+            LiquidGlass.blurred(
+              borderRadius: BorderRadius.circular(22.w),
+              sigma: 10,
+              child: Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: LiquidGlass.circleButtonDecoration(),
+                alignment: Alignment.center,
+                child: imagePath != null
                   ? Image.asset(
                       imagePath!,
                       width: 22.w,
@@ -5059,6 +5055,7 @@ class _CategoryPill extends StatelessWidget {
                       size: 20.sp,
                       color: categoryIconColor,
                     ),
+              ),
             ),
             SizedBox(width: 10.w),
 
@@ -5100,28 +5097,26 @@ class _CategoryPill extends StatelessWidget {
                   borderRadius: radius,
                 ),
                 padding: EdgeInsets.all(1.6.r),
-                child: Container(
-                  height: 63.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: radius,
+                child: LiquidGlass.blurred(
+                  borderRadius: radius,
+                  sigma: 14,
+                  child: Container(
+                    height: 63.h,
+                    decoration: LiquidGlass.frostedPillDecoration(),
+                    child: innerRow(selected: true),
                   ),
-                  child: innerRow(selected: true),
                 ),
               ),
             )
           : pillBody(
-              Container(
-                height: 63.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: const Color(0xFFE1E1E1),
-                    width: 1.5,
-                  ),
-                  borderRadius: radius,
+              LiquidGlass.blurred(
+                borderRadius: radius,
+                sigma: 14,
+                child: Container(
+                  height: 63.h,
+                  decoration: LiquidGlass.frostedPillDecoration(),
+                  child: innerRow(selected: false),
                 ),
-                child: innerRow(selected: false),
               ),
             ),
     );
@@ -5425,6 +5420,7 @@ class _PressableCircleSurface extends StatefulWidget {
     this.marked = false,
     this.enableHaptic = true,
     this.idleTransparent = false,
+    this.useLiquidGlass = false,
   });
 
   final double side;
@@ -5440,6 +5436,9 @@ class _PressableCircleSurface extends StatefulWidget {
 
   /// No white disk at rest — only show fill while pressed or marked.
   final bool idleTransparent;
+
+  /// Frosted circular chrome (dashboard header controls).
+  final bool useLiquidGlass;
 
   static const Color _pressedFill = Color(0xFFE5E7EB);
 
@@ -5458,18 +5457,35 @@ class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
 
   @override
   Widget build(BuildContext context) {
-    final Color fill = (widget.marked || _pressed)
-        ? _PressableCircleSurface._pressedFill
-        : widget.idleTransparent
-        ? Colors.transparent
-        : Colors.white;
-    final Widget circle = Container(
-      width: widget.side,
-      height: widget.side,
-      decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: widget.child,
-    );
+    final bool glass = widget.useLiquidGlass && !widget.idleTransparent;
+    final bool highlight = widget.marked || _pressed;
+    final Widget circle;
+    if (glass) {
+      circle = LiquidGlass.blurred(
+        borderRadius: BorderRadius.circular(widget.side / 2),
+        sigma: 16,
+        child: Container(
+          width: widget.side,
+          height: widget.side,
+          decoration: LiquidGlass.circleButtonDecoration(pressed: highlight),
+          alignment: Alignment.center,
+          child: widget.child,
+        ),
+      );
+    } else {
+      final Color fill = highlight
+          ? _PressableCircleSurface._pressedFill
+          : widget.idleTransparent
+          ? Colors.transparent
+          : Colors.white;
+      circle = Container(
+        width: widget.side,
+        height: widget.side,
+        decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
+        alignment: Alignment.center,
+        child: widget.child,
+      );
+    }
     if (widget.onTap == null && widget.onLongPress == null) return circle;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
