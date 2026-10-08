@@ -27,6 +27,7 @@ import '../widget/dashboard_control_metrics.dart';
 import '../widget/dashboard_section_widget_size.dart';
 import '../widget/editAddSectionSheet.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1010,61 +1011,53 @@ class _HomeScreenState extends State<HomeScreen> {
     final _DashboardEditSection? section = _editingSection;
     if (section == null) return const SizedBox.shrink();
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0.h,
-            child: SafeArea(
-              top: false,
-              child: EditAddSectionSheet(
-                onClose: _closeDashboardSectionEdit,
-                sectionRenameLabel: _sectionRenameLabel(section),
-                onRenameChanged: (String next) {
-                  setState(() {
-                    if (section == _DashboardEditSection.light) {
-                      _lightSectionTitle = next;
-                    }
-                  });
-                },
-                onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
-                onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
-                headerBackgroundImagePath: _sectionHeaderImagePath(section),
-                onMoveUp: () => _moveDashboardSection(section, -1),
-                onMoveDown: () => _moveDashboardSection(section, 1),
-                canMoveUp: _canMoveDashboardSection(section, -1),
-                canMoveDown: _canMoveDashboardSection(section, 1),
-                onRemove: () => _removeDashboardSection(section),
-                initialHorizontalScroll: section == _DashboardEditSection.light
-                    ? _lightHorizontalScroll
-                    : _lightingHorizontalScroll,
-                onHorizontalScrollChanged: (v) => setState(() {
-                  if (section == _DashboardEditSection.light) {
-                    _lightHorizontalScroll = v;
-                  } else {
-                    _lightingHorizontalScroll = v;
-                  }
-                }),
-                showWidgetSize: true,
-                initialSize: section == _DashboardEditSection.light
-                    ? _lightWidgetSize
-                    : _lightingWidgetSize,
-                onSizeChanged: (v) => setState(() {
-                  final String stored = canonicalSectionLayoutStorage(v);
-                  if (section == _DashboardEditSection.light) {
-                    _lightWidgetSize = stored;
-                  } else {
-                    _lightingWidgetSize = stored;
-                  }
-                  final List<String> order = _deviceOrderFor(section);
-                  _selectedEditDeviceId = order.isEmpty ? null : order.first;
-                }),
-              ),
-            ),
-          ),
-        ],
+    return _DashboardFloatingEditSectionPanel(
+      key: ValueKey<String>('dashboard-edit-${section.name}'),
+      sheetBuilder: (onDragStart, onDragUpdate) => EditAddSectionSheet(
+        floatingDrag: true,
+        onFloatingDragStart: onDragStart,
+        onFloatingDragUpdate: onDragUpdate,
+        onClose: _closeDashboardSectionEdit,
+        sectionRenameLabel: _sectionRenameLabel(section),
+        onRenameChanged: (String next) {
+          setState(() {
+            if (section == _DashboardEditSection.light) {
+              _lightSectionTitle = next;
+            }
+          });
+        },
+        onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
+        onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
+        headerBackgroundImagePath: _sectionHeaderImagePath(section),
+        onMoveUp: () => _moveDashboardSection(section, -1),
+        onMoveDown: () => _moveDashboardSection(section, 1),
+        canMoveUp: _canMoveDashboardSection(section, -1),
+        canMoveDown: _canMoveDashboardSection(section, 1),
+        onRemove: () => _removeDashboardSection(section),
+        initialHorizontalScroll: section == _DashboardEditSection.light
+            ? _lightHorizontalScroll
+            : _lightingHorizontalScroll,
+        onHorizontalScrollChanged: (v) => setState(() {
+          if (section == _DashboardEditSection.light) {
+            _lightHorizontalScroll = v;
+          } else {
+            _lightingHorizontalScroll = v;
+          }
+        }),
+        showWidgetSize: true,
+        initialSize: section == _DashboardEditSection.light
+            ? _lightWidgetSize
+            : _lightingWidgetSize,
+        onSizeChanged: (v) => setState(() {
+          final String stored = canonicalSectionLayoutStorage(v);
+          if (section == _DashboardEditSection.light) {
+            _lightWidgetSize = stored;
+          } else {
+            _lightingWidgetSize = stored;
+          }
+          final List<String> order = _deviceOrderFor(section);
+          _selectedEditDeviceId = order.isEmpty ? null : order.first;
+        }),
       ),
     );
   }
@@ -1170,47 +1163,39 @@ class _HomeScreenState extends State<HomeScreen> {
       return const SizedBox.shrink();
     }
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: EditAddSectionSheet(
-                onClose: _closeDashboardSectionEdit,
-                sectionRenameLabel: section.title,
-                onRenameChanged: (String next) {
-                  if (next.trim().isEmpty) return;
-                  setState(() => section.title = next.trim());
-                },
-                onAddDeviceTap: () => _addDevicesToAddedSection(section),
-                addDeviceCountLabel: section.deviceOrder.isEmpty
-                    ? null
-                    : '${section.deviceOrder.length}',
-                onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
-                headerBackgroundImagePath: section.headerBackgroundPath,
-                onMoveUp: () => _moveAddedSection(section, -1),
-                onMoveDown: () => _moveAddedSection(section, 1),
-                canMoveUp: _canMoveAddedSection(section, -1),
-                canMoveDown: _canMoveAddedSection(section, 1),
-                onRemove: () => _removeAddedSection(section),
-                initialHorizontalScroll: section.horizontalScrolling,
-                onHorizontalScrollChanged: (value) =>
-                    setState(() => section.horizontalScrolling = value),
-                initialSize: section.widgetSize,
-                onSizeChanged: (value) => setState(() {
-                  section.widgetSize = canonicalSectionLayoutStorage(value);
-                  _selectedAddedDeviceId = section.deviceOrder.isEmpty
-                      ? null
-                      : section.deviceOrder.first;
-                }),
-              ),
-            ),
-          ),
-        ],
+    return _DashboardFloatingEditSectionPanel(
+      key: ValueKey<String>('dashboard-edit-added-${section.id}'),
+      sheetBuilder: (onDragStart, onDragUpdate) => EditAddSectionSheet(
+        floatingDrag: true,
+        onFloatingDragStart: onDragStart,
+        onFloatingDragUpdate: onDragUpdate,
+        onClose: _closeDashboardSectionEdit,
+        sectionRenameLabel: section.title,
+        onRenameChanged: (String next) {
+          if (next.trim().isEmpty) return;
+          setState(() => section.title = next.trim());
+        },
+        onAddDeviceTap: () => _addDevicesToAddedSection(section),
+        addDeviceCountLabel: section.deviceOrder.isEmpty
+            ? null
+            : '${section.deviceOrder.length}',
+        onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
+        headerBackgroundImagePath: section.headerBackgroundPath,
+        onMoveUp: () => _moveAddedSection(section, -1),
+        onMoveDown: () => _moveAddedSection(section, 1),
+        canMoveUp: _canMoveAddedSection(section, -1),
+        canMoveDown: _canMoveAddedSection(section, 1),
+        onRemove: () => _removeAddedSection(section),
+        initialHorizontalScroll: section.horizontalScrolling,
+        onHorizontalScrollChanged: (value) =>
+            setState(() => section.horizontalScrolling = value),
+        initialSize: section.widgetSize,
+        onSizeChanged: (value) => setState(() {
+          section.widgetSize = canonicalSectionLayoutStorage(value);
+          _selectedAddedDeviceId = section.deviceOrder.isEmpty
+              ? null
+              : section.deviceOrder.first;
+        }),
       ),
     );
   }
@@ -1398,11 +1383,18 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (section.horizontalScrolling) {
+      final bool reorderEditActive =
+          _showSectionEditButtons || _editingAddedSectionId == section.id;
       return SizedBox(
         height: _lightCardHeightForWidgetSize(section.widgetSize),
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
+          physics: reorderEditActive
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
           itemCount: ids.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
           itemBuilder: (_, index) {
@@ -1528,7 +1520,9 @@ class _HomeScreenState extends State<HomeScreen> {
     required String deviceId,
     required Widget child,
   }) {
-    final Widget editSafeChild = _showSectionEditButtons
+    final bool reorderEditActive =
+        _showSectionEditButtons || _editingSection == section;
+    final Widget editSafeChild = reorderEditActive
         ? AbsorbPointer(child: child)
         : child;
     Widget cell = _wrapDashboardEditTarget(
@@ -1536,7 +1530,7 @@ class _HomeScreenState extends State<HomeScreen> {
       deviceId: deviceId,
       child: editSafeChild,
     );
-    if (!_showSectionEditButtons) return cell;
+    if (!reorderEditActive) return cell;
 
     return _DashboardShakeWrapper(
       shaking: _dashboardDraggingDeviceId != deviceId,
@@ -1678,8 +1672,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
-    final double editSheetInset =
-        (_editingSection != null || _editingAddedSectionId != null) ? 360.h : 0;
+    const double editSheetInset = 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -2262,14 +2255,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_lightHorizontalScroll) {
+      final bool reorderEditActive =
+          _showSectionEditButtons ||
+          _editingSection == _DashboardEditSection.light;
       return SizedBox(
         height: _lightCardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
+          physics: reorderEditActive
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
           itemCount: ids.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
           itemBuilder: (context, index) {
@@ -3178,14 +3176,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_lightingHorizontalScroll) {
+      final bool reorderEditActive =
+          _showSectionEditButtons ||
+          _editingSection == _DashboardEditSection.lighting;
       return SizedBox(
         height: cardHeight,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           clipBehavior: Clip.none,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
+          physics: reorderEditActive
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
           itemCount: ids.length,
           separatorBuilder: (_, __) => SizedBox(width: 12.w),
           itemBuilder: (context, index) {
@@ -4908,7 +4911,7 @@ class _Header extends StatelessWidget {
           width: rightWidth,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: _PressableCircleSurface(
+            child: PressableCircleSurface(
               side: 44.w,
               enableHaptic: false,
               useLiquidGlass: true,
@@ -4950,7 +4953,7 @@ class _Header extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PressableCircleSurface(
+                PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
                   useLiquidGlass: true,
@@ -4963,7 +4966,7 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 13.w),
-                _PressableCircleSurface(
+                PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
                   useLiquidGlass: true,
@@ -5026,6 +5029,7 @@ class _CategoryPill extends StatelessWidget {
     }
 
     Widget innerRow({required bool selected}) {
+      const iconBgColor = Color(0xFFF3F4F6);
       const Color categoryIconColor = Color(0xFF111827);
 
       return Padding(
@@ -5034,15 +5038,15 @@ class _CategoryPill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // ✅ icon circle
-            LiquidGlass.blurred(
-              borderRadius: BorderRadius.circular(22.w),
-              sigma: 10,
-              child: Container(
-                width: 44.w,
-                height: 44.w,
-                decoration: LiquidGlass.circleButtonDecoration(),
-                alignment: Alignment.center,
-                child: imagePath != null
+            Container(
+              width: 44.w,
+              height: 44.w,
+              decoration: const BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: imagePath != null
                   ? Image.asset(
                       imagePath!,
                       width: 22.w,
@@ -5055,7 +5059,6 @@ class _CategoryPill extends StatelessWidget {
                       size: 20.sp,
                       color: categoryIconColor,
                     ),
-              ),
             ),
             SizedBox(width: 10.w),
 
@@ -5097,26 +5100,28 @@ class _CategoryPill extends StatelessWidget {
                   borderRadius: radius,
                 ),
                 padding: EdgeInsets.all(1.6.r),
-                child: LiquidGlass.blurred(
-                  borderRadius: radius,
-                  sigma: 14,
-                  child: Container(
-                    height: 63.h,
-                    decoration: LiquidGlass.frostedPillDecoration(),
-                    child: innerRow(selected: true),
+                child: Container(
+                  height: 63.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: radius,
                   ),
+                  child: innerRow(selected: true),
                 ),
               ),
             )
           : pillBody(
-              LiquidGlass.blurred(
-                borderRadius: radius,
-                sigma: 14,
-                child: Container(
-                  height: 63.h,
-                  decoration: LiquidGlass.frostedPillDecoration(),
-                  child: innerRow(selected: false),
+              Container(
+                height: 63.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: const Color(0xFFE1E1E1),
+                    width: 1.5,
+                  ),
+                  borderRadius: radius,
                 ),
+                child: innerRow(selected: false),
               ),
             ),
     );
@@ -5204,6 +5209,131 @@ class _SectionTitle extends StatelessWidget {
         SizedBox(height: 12.h),
         titleRow,
       ],
+    );
+  }
+}
+
+/// Free-position overlay for Edit Section on the main dashboard only.
+class _DashboardFloatingEditSectionPanel extends StatefulWidget {
+  const _DashboardFloatingEditSectionPanel({
+    super.key,
+    required this.sheetBuilder,
+  });
+
+  final Widget Function(
+    GestureDragStartCallback onDragStart,
+    GestureDragUpdateCallback onDragUpdate,
+  ) sheetBuilder;
+
+  @override
+  State<_DashboardFloatingEditSectionPanel> createState() =>
+      _DashboardFloatingEditSectionPanelState();
+}
+
+class _DashboardFloatingEditSectionPanelState
+    extends State<_DashboardFloatingEditSectionPanel> {
+  final GlobalKey _sheetMeasureKey = GlobalKey();
+  Offset? _position;
+  bool _anchoredToBottom = true;
+
+  void _onDragStart(DragStartDetails details) {
+    setState(() {
+      _anchoredToBottom = false;
+      _position ??= _defaultPosition(context);
+    });
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _position = _clampPosition(
+        (_position ?? _defaultPosition(context)) + details.delta,
+      );
+    });
+  }
+
+  Offset _defaultPosition(BuildContext context) {
+    final Size screen = MediaQuery.sizeOf(context);
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
+    final RenderBox? box =
+        _sheetMeasureKey.currentContext?.findRenderObject() as RenderBox?;
+    final double sheetHeight =
+        box?.size.height ?? screen.height * 0.55;
+    return Offset(
+      0,
+      screen.height - sheetHeight - padding.bottom,
+    );
+  }
+
+  Offset _clampPosition(Offset position) {
+    final Size screen = MediaQuery.sizeOf(context);
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
+    final RenderBox? box =
+        _sheetMeasureKey.currentContext?.findRenderObject() as RenderBox?;
+    final double sheetWidth = box?.size.width ?? screen.width;
+    final double sheetHeight =
+        box?.size.height ?? screen.height * 0.55;
+    // Tuck off bottom edge; never draw above the status bar.
+    final double edgePeek = 52.h;
+    final double minTop = padding.top;
+    final double maxTop = screen.height - edgePeek;
+    return Offset(
+      position.dx.clamp(0.0, math.max(0.0, screen.width - sheetWidth)),
+      position.dy.clamp(minTop, maxTop),
+    );
+  }
+
+  void _syncBottomAnchor() {
+    if (!_anchoredToBottom || _position != null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_anchoredToBottom || _position != null) return;
+      final RenderBox? box =
+          _sheetMeasureKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null) return;
+      setState(() {
+        _position = _defaultPosition(context);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _syncBottomAnchor();
+    final Size screen = MediaQuery.sizeOf(context);
+    final Widget sheet = widget.sheetBuilder(_onDragStart, _onDragUpdate);
+
+    if (_position == null) {
+      return Positioned.fill(
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.bottomCenter,
+          children: [
+            SafeArea(
+              top: false,
+              child: KeyedSubtree(
+                key: _sheetMeasureKey,
+                child: sheet,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Positioned.fill(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: _position!.dx,
+            top: _position!.dy,
+            width: screen.width,
+            child: KeyedSubtree(
+              key: _sheetMeasureKey,
+              child: sheet,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -5302,6 +5432,7 @@ class _DashboardDraggableReorderSlot extends StatelessWidget {
         return LongPressDraggable<String>(
           data: deviceId,
           delay: const Duration(milliseconds: 250),
+          rootOverlay: true,
           onDragStarted: onDragStarted,
           onDragEnd: (_) => onDragEnded(),
           feedback: Material(
@@ -5407,138 +5538,6 @@ class _ModeBadge extends StatelessWidget {
   }
 }
 
-/// White at rest; gray fill only while the pointer is down (Material 3 ink
-/// does not reliably match that).
-class _PressableCircleSurface extends StatefulWidget {
-  const _PressableCircleSurface({
-    required this.side,
-    required this.child,
-    this.onTap,
-    this.onLongPress,
-    this.onLongPressStart,
-    this.onLongPressEnd,
-    this.marked = false,
-    this.enableHaptic = true,
-    this.idleTransparent = false,
-    this.useLiquidGlass = false,
-  });
-
-  final double side;
-  final Widget child;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-  final VoidCallback? onLongPressStart;
-  final VoidCallback? onLongPressEnd;
-
-  /// When true, fill stays gray (last-used / "marked" control).
-  final bool marked;
-  final bool enableHaptic;
-
-  /// No white disk at rest — only show fill while pressed or marked.
-  final bool idleTransparent;
-
-  /// Frosted circular chrome (dashboard header controls).
-  final bool useLiquidGlass;
-
-  static const Color _pressedFill = Color(0xFFE5E7EB);
-
-  @override
-  State<_PressableCircleSurface> createState() =>
-      _PressableCircleSurfaceState();
-}
-
-class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
-  bool _pressed = false;
-  bool _longPressHandled = false;
-
-  void _setPressed(bool v) {
-    if (_pressed != v) setState(() => _pressed = v);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool glass = widget.useLiquidGlass && !widget.idleTransparent;
-    final bool highlight = widget.marked || _pressed;
-    final Widget circle;
-    if (glass) {
-      circle = LiquidGlass.blurred(
-        borderRadius: BorderRadius.circular(widget.side / 2),
-        sigma: 16,
-        child: Container(
-          width: widget.side,
-          height: widget.side,
-          decoration: LiquidGlass.circleButtonDecoration(pressed: highlight),
-          alignment: Alignment.center,
-          child: widget.child,
-        ),
-      );
-    } else {
-      final Color fill = highlight
-          ? _PressableCircleSurface._pressedFill
-          : widget.idleTransparent
-          ? Colors.transparent
-          : Colors.white;
-      circle = Container(
-        width: widget.side,
-        height: widget.side,
-        decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: widget.child,
-      );
-    }
-    if (widget.onTap == null && widget.onLongPress == null) return circle;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        _longPressHandled = false;
-        _setPressed(true);
-      },
-      onTapUp: (_) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
-      onTap: widget.onTap == null
-          ? null
-          : () {
-              if (_longPressHandled) {
-                _longPressHandled = false;
-                _setPressed(false);
-                return;
-              }
-              if (widget.enableHaptic) uiTapHaptic();
-              widget.onTap!();
-              _setPressed(false);
-            },
-      onLongPressStart: widget.onLongPressStart == null
-          ? null
-          : (_) {
-              _longPressHandled = true;
-              if (widget.enableHaptic) uiTapHaptic();
-              widget.onLongPressStart!();
-              _setPressed(false);
-            },
-      onLongPressEnd: widget.onLongPressEnd == null
-          ? null
-          : (_) {
-              if (widget.enableHaptic) uiTapHaptic();
-              widget.onLongPressEnd!();
-              _setPressed(false);
-            },
-      onLongPress: widget.onLongPress == null && widget.onLongPressStart == null
-          ? null
-          : () {
-              // If caller only provided the old onLongPress, call it here.
-              if (widget.onLongPressStart == null &&
-                  widget.onLongPress != null) {
-                _longPressHandled = true;
-                if (widget.enableHaptic) uiTapHaptic();
-                widget.onLongPress!();
-                _setPressed(false);
-              }
-            },
-      child: circle,
-    );
-  }
-}
-
 class _CircleBtn extends StatelessWidget {
   const _CircleBtn({
     required this.child,
@@ -5563,7 +5562,7 @@ class _CircleBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double side = (size ?? 32).w;
-    return _PressableCircleSurface(
+    return PressableCircleSurface(
       side: side,
       onTap: onTap,
       onLongPress: onLongPress,

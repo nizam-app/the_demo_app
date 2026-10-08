@@ -1,5 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 /// Add Protocol bottom sheet — opened from Integrations screen FAB.
 /// Design: title "Add protocol", close (X), grid 5 + 3 protocol options.
@@ -95,21 +99,18 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
           alignment: Alignment.bottomCenter,
           child: Material(
             color: Colors.transparent,
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 30.r,
-                    offset: Offset(0, -8.h),
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
+                  decoration: LiquidGlass.sheetDecoration(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(28.r)),
                   ),
-                ],
-              ),
-              child: Column(
+                  child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header: "Add protocol" centered, close (X) on far right
@@ -129,25 +130,10 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                       ),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Container(
-                          width: 32.w,
-                          height: 32.h,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF3F4F6),
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: Center(
-                              child: Icon(
-                                Icons.close_rounded,
-                                size: 20.sp,
-                                color: AddProtocolBottomSheet._textDark,
-                              ),
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
+                        child: LiquidGlassCloseButton(
+                          size: 32.w,
+                          iconColor: AddProtocolBottomSheet._textDark,
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
                     ],
@@ -180,6 +166,8 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                     ],
                   ),
                 ],
+              ),
+                ),
               ),
             ),
           ),

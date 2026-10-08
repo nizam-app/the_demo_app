@@ -2,6 +2,7 @@ import 'dart:io' show File;
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -326,29 +327,16 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                           ),
 
                           // Close button (right)
-                          Container(
-                            width: 30.w,
-                            height: 30.w,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (widget.onClose != null) {
-                                  widget.onClose!();
-                                } else {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: Icon(
-                                Icons.close_rounded,
-                                size: 20.sp,
-                                color: _textPrimary,
-                              ),
-                            ),
+                          LiquidGlassCloseButton(
+                            size: 30.w,
+                            iconColor: _textPrimary,
+                            onPressed: () {
+                              if (widget.onClose != null) {
+                                widget.onClose!();
+                              } else {
+                                Navigator.of(context).pop();
+                              }
+                            },
                           ),
                         ],
                       ),

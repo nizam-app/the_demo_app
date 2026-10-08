@@ -2,6 +2,7 @@
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -400,29 +401,10 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           Positioned(
             right: 20.w,
             top: 14.h,
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                width: 30.w,
-                height: 30.h,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.6),
-                  shape: BoxShape.circle,
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //     color: const Color(0xFF111827).withOpacity(0.06),
-                  //     blurRadius: 12,
-                  //     offset: const Offset(0, 6),
-                  //   ),
-                  // ],
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  Icons.close_rounded,
-                  size: 20.sp,
-                  color: _kTextPrimary,
-                ),
-              ),
+            child: LiquidGlassCloseButton(
+              size: 30.w,
+              iconColor: _kTextPrimary,
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
         ],

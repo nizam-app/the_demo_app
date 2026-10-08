@@ -1,5 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 class DashboardAddDeviceOption {
   const DashboardAddDeviceOption({
@@ -65,10 +69,8 @@ class AddDashboardDeviceSheet extends StatefulWidget {
 }
 
 class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
-  static const _bg = Colors.white;
   static const _textPrimary = Color(0xFF111827);
   static const _divider = Color(0xFFE5E7EB);
-  static const _closeBg = Color(0xFFF3F4F6);
   static const _selectedBg = Color(0xFFEAF1FF);
 
   final List<String> _selectedIds = <String>[];
@@ -90,14 +92,17 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.only(
+      topLeft: Radius.circular(24.r),
+      topRight: Radius.circular(24.r),
+    );
     return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(24.r),
-        topRight: Radius.circular(24.r),
-      ),
-      child: Container(
-        color: _bg,
-        child: Column(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
+          child: Column(
           children: [
             SizedBox(
               height: 52.h,
@@ -117,22 +122,10 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                   ),
                   Positioned(
                     right: 10.w,
-                    child: GestureDetector(
-                      onTap: _closeWithSelection,
-                      child: Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: const BoxDecoration(
-                          color: _closeBg,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.close,
-                          size: 20.sp,
-                          color: _textPrimary,
-                        ),
-                      ),
+                    child: LiquidGlassCloseButton(
+                      size: 32.w,
+                      iconColor: _textPrimary,
+                      onPressed: _closeWithSelection,
                     ),
                   ),
                 ],
@@ -189,6 +182,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

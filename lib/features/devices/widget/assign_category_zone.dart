@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 
@@ -107,23 +108,10 @@ class _AssignCategoryZoneSheetState
                                   ),
                                 ),
                               ),
-                              // close
-                              Container(
-                                width: 30.w,
-                                height: 30.h,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFFFFFFF),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: IconButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  icon: Center(
-                                    child: Icon(Icons.close_rounded,
-                                        size: 20.sp, color: _textPrimary),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
+                              LiquidGlassCloseButton(
+                                size: 30.w,
+                                iconColor: _textPrimary,
+                                onPressed: () => Navigator.of(context).pop(),
                               ),
                             ],
                           ),

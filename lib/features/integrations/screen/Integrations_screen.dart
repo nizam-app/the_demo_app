@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
+import 'package:workpleis/core/widget/global_back_button.dart';
 import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 
 import '../widget/add_protocol.dart';
@@ -252,22 +253,11 @@ class _TopBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(26.r),
+          GlobalCircleIconBtn(
             onTap: onBack,
-            child: Container(
-              width: 32.w,
-              height: 32.h,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: AppAssetIcon(
-                  'assets/aro.png',
-                  color: _textDark,
-                ),
-              ),
+            child: AppAssetIcon(
+              'assets/aro.png',
+              color: _textDark,
             ),
           ),
           //SizedBox(width: 5.w,),

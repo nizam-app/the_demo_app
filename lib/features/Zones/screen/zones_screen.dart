@@ -223,24 +223,13 @@ class _TopBar extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  InkWell(
+                  GlobalCircleIconBtn(
                     onTap: onMenu,
-                    borderRadius: BorderRadius.circular(26.r),
-                    child: Container(
-                      width: 32.w,
-                      height: 32.w,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3F4F6),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/image 89.png',
-                          width: 22.w,
-                          height: 22.h,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
+                    child: Image.asset(
+                      'assets/image 89.png',
+                      width: 22.w,
+                      height: 22.h,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   // _CircleIconButton(
@@ -248,7 +237,14 @@ class _TopBar extends StatelessWidget {
                   //     onTap: onMenu,
                   // ),
                   SizedBox(width: 12.w),
-                  _CircleIconButton(icon: Icons.add, onTap: onAdd),
+                  GlobalCircleIconBtn(
+                    onTap: onAdd,
+                    child: Icon(
+                      Icons.add,
+                      size: 22.sp,
+                      color: const Color(0xFF111827),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -265,29 +261,6 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({required this.icon, required this.onTap});
-
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF3F4F6),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 22.sp, color: const Color(0xFF111827)),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:io' show File;
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
 
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -37,6 +38,9 @@ class EditAddSectionSheet extends StatefulWidget {
     this.onHorizontalScrollChanged,
     this.showWidgetSize = true,
     this.onClose,
+    this.floatingDrag = false,
+    this.onFloatingDragStart,
+    this.onFloatingDragUpdate,
   });
 
   final String initialSize;
@@ -57,6 +61,9 @@ class EditAddSectionSheet extends StatefulWidget {
   final ValueChanged<bool>? onHorizontalScrollChanged;
   final bool showWidgetSize;
   final VoidCallback? onClose;
+  final bool floatingDrag;
+  final GestureDragStartCallback? onFloatingDragStart;
+  final GestureDragUpdateCallback? onFloatingDragUpdate;
 
   @override
   State<EditAddSectionSheet> createState() => _EditAddSectionSheetState();
@@ -242,11 +249,15 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           ),
           child: SafeArea(
             top: false,
+            bottom: false,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.sizeOf(context).height * 0.72,
               ),
               child: SingleChildScrollView(
+                physics: widget.floatingDrag
+                    ? const ClampingScrollPhysics()
+                    : null,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -260,48 +271,59 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Left spacer (same size as close button)
-                          SizedBox(width: 30.w, height: 30.w),
-
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onPanStart: widget.floatingDrag
+                                ? widget.onFloatingDragStart
+                                : null,
+                            onPanUpdate: widget.floatingDrag
+                                ? widget.onFloatingDragUpdate
+                                : null,
+                            child: SizedBox(
+                              width: 30.w,
+                              height: 30.w,
+                              child: widget.floatingDrag
+                                  ? Icon(
+                                      Icons.drag_indicator_rounded,
+                                      size: 22.sp,
+                                      color: _textSecondary,
+                                    )
+                                  : null,
+                            ),
+                          ),
                           Expanded(
-                            child: Center(
-                              child: Text(
-                                'Edit Section',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: _textPrimary,
-                                  fontFamily: 'Inter',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onPanStart: widget.floatingDrag
+                                  ? widget.onFloatingDragStart
+                                  : null,
+                              onPanUpdate: widget.floatingDrag
+                                  ? widget.onFloatingDragUpdate
+                                  : null,
+                              child: Center(
+                                child: Text(
+                                  'Edit Section',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: _textPrimary,
+                                    fontFamily: 'Inter',
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-
-                          // Close button (right)
-                          Container(
-                            width: 30.w,
-                            height: 30.w,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              onPressed: () {
-                                if (widget.onClose != null) {
-                                  widget.onClose!();
-                                } else {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              icon: Icon(
-                                Icons.close_rounded,
-                                size: 20.sp,
-                                color: _textPrimary,
-                              ),
-                            ),
+                          LiquidGlassCloseButton(
+                            size: 30.w,
+                            iconColor: _textPrimary,
+                            onPressed: () {
+                              if (widget.onClose != null) {
+                                widget.onClose!();
+                              } else {
+                                Navigator.of(context).pop();
+                              }
+                            },
                           ),
                         ],
                       ),

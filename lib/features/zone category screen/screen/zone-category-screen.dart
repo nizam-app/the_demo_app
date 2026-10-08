@@ -25,6 +25,7 @@ import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
 import '../../notifications/screen/notifications_screen.dart';
 import '../../settings/screen/settings_screen.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 class _AddedZoneSection {
   _AddedZoneSection({
@@ -91,8 +92,6 @@ enum _DashboardEditSection { light, lighting }
 enum _DashboardBlock { light, lighting, favorites, shading, chart }
 
 class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
-  late int _categoryPillIndex;
-
   double _bedroomDimmer = 0.72;
   double _bathroomThermostat = 24.6;
   int _awningDown = 0;
@@ -1400,7 +1399,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   @override
   void initState() {
     super.initState();
-    _categoryPillIndex = _categoryPillIndexForTitle(widget.screenTitle);
     _pullFromDashboardSync();
     _dashboardSyncListener = () {
       if (mounted) _pullFromDashboardSync();
@@ -1413,22 +1411,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     _setShellBottomBarVisible(true);
     DeviceDashboardSync.instance.removeListener(_dashboardSyncListener);
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant Zone_Category_Screen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.screenTitle != widget.screenTitle) {
-      _categoryPillIndex = _categoryPillIndexForTitle(widget.screenTitle);
-    }
-  }
-
-  static int _categoryPillIndexForTitle(String title) {
-    final t = title.toLowerCase();
-    if (t.contains('security')) return 3;
-    if (t.contains('shading')) return 1;
-    if (t.contains('ventilation') || t.contains('hvac')) return 2;
-    return 0;
   }
 
   Widget _buildHomeBody(BuildContext context) {
@@ -1463,59 +1445,6 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 63.h,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              _CategoryPill(
-                                label: 'Light',
-                                isSelected: _categoryPillIndex == 0,
-                                icon: Icons.lightbulb_outline,
-                                imagePath: 'assets/Mask group (3).png',
-                                onTap: () {
-                                  setState(() => _categoryPillIndex = 0);
-                                  DeviceDetailsScreen.go(
-                                    context,
-                                    deviceTitle: 'Light dinning room',
-                                    imageAssetPath: 'assets/Mask group (5).png',
-                                    controlButtonCount: 3,
-                                  );
-                                },
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'Shading',
-                                isSelected: _categoryPillIndex == 1,
-                                icon: Icons.blinds_outlined,
-                                imagePath: 'assets/Mask group (2).png',
-                                onTap: () =>
-                                    setState(() => _categoryPillIndex = 1),
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'HVAC',
-                                isSelected: _categoryPillIndex == 2,
-                                icon: Icons.ac_unit_outlined,
-                                imagePath: 'assets/Mask group (4).png',
-                                onTap: () =>
-                                    setState(() => _categoryPillIndex = 2),
-                              ),
-                              SizedBox(width: 12.w),
-                              _CategoryPill(
-                                label: 'Security',
-                                isSelected: _categoryPillIndex == 3,
-                                icon: Icons.ac_unit_outlined,
-                                imagePath: 'assets/securety.png',
-                                onTap: () =>
-                                    setState(() => _categoryPillIndex = 3),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(height: 18.h),
-
                         ..._buildOrderedDashboardBlocks(context),
                       ],
                     ),
@@ -1527,28 +1456,22 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               top: 0,
               left: 0,
               right: 0,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: DecoratedBox(
-                    decoration: LiquidGlass.barDecoration(),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        15.w,
-                        topInset + 10.h,
-                        15.w,
-                        8.h,
-                      ),
-                      child: Builder(
-                        builder: (ctx) => _Header(
-                          title: widget.screenTitle,
-                          onMenuTap: () {
-                            ctx.push(MenuScreen.routeName);
-                          },
-                          onEditTap: _toggleDashboardEditMode,
-                          onAddTap: _showAddSectionSheetOverlay,
-                        ),
-                      ),
+              child: LiquidGlass(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: Builder(
+                    builder: (ctx) => _Header(
+                      title: widget.screenTitle,
+                      onMenuTap: () {
+                        ctx.push(MenuScreen.routeName);
+                      },
+                      onEditTap: _toggleDashboardEditMode,
+                      onAddTap: _showAddSectionSheetOverlay,
                     ),
                   ),
                 ),
@@ -3313,20 +3236,16 @@ class _Header extends StatelessWidget {
           width: rightWidth,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: InkWell(
+            child: PressableCircleSurface(
+              side: 44.w,
+              enableHaptic: false,
+              useLiquidGlass: true,
               onTap: onMenuTap,
-              borderRadius: BorderRadius.circular(12.r),
-              child: SizedBox(
-                width: 44.w,
-                height: 44.w,
-                child: Center(
-                  child: Image.asset(
-                    'assets/Group 35 (1).png',
-                    width: 26.w,
-                    height: 17.w,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+              child: Image.asset(
+                'assets/Group 35 (1).png',
+                width: 26.w,
+                height: 17.w,
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -3358,9 +3277,10 @@ class _Header extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PressableCircleSurface(
+                PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
+                  useLiquidGlass: true,
                   onTap: onEditTap,
                   child: Image.asset(
                     'assets/image 89.png',
@@ -3370,9 +3290,10 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 13.w),
-                _PressableCircleSurface(
+                PressableCircleSurface(
                   side: 32.w,
                   enableHaptic: false,
+                  useLiquidGlass: true,
                   onTap: onAddTap,
                   child: Icon(
                     Icons.add_rounded,
@@ -3385,139 +3306,6 @@ class _Header extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CategoryPill extends StatelessWidget {
-  const _CategoryPill({
-    required this.label,
-    required this.isSelected,
-    required this.icon,
-    required this.onTap,
-    this.imagePath,
-  });
-
-  final String label;
-  final bool isSelected;
-  final IconData icon;
-  final VoidCallback onTap;
-  final String? imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(999);
-    final List<Color> selectedBorderColors = switch (label) {
-      'Light' ||
-      'Lighting' => const <Color>[Color(0xFF8BCF4D), Color(0xFF00D1FF)],
-      'Shading' => const <Color>[Color(0xFF00D1FF), Color(0xFF2AA8FF)],
-      'HVAC' => const <Color>[Color(0xFFFF2D92), Color(0xFF6D5BFF)],
-      'Ventilation' => const <Color>[Color(0xFF00D1FF), Color(0xFF2AA8FF)],
-      'Security' => const <Color>[Color(0xFF2F80FF), Color(0xFF8B5CFF)],
-      _ => const <Color>[Color(0xFF8BCF4D), Color(0xFF00D1FF)],
-    };
-
-    // ✅ auto width based on content (text)
-    Widget pillBody(Widget child) {
-      return IntrinsicWidth(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: 0, // ✅ no extra forced width
-            maxWidth: 220.w, // ✅ prevent too wide pills
-          ),
-          child: child,
-        ),
-      );
-    }
-
-    Widget innerRow({required bool selected}) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.w), // ✅ compact padding
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ✅ icon circle
-            Container(
-              width: 44.w,
-              height: 44.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF3F4F6),
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: imagePath != null
-                  ? Image.asset(
-                      imagePath!,
-                      width: 22.w,
-                      height: 22.w,
-                      fit: BoxFit.contain,
-                    )
-                  : Icon(icon, size: 20.sp, color: const Color(0xFF111827)),
-            ),
-            SizedBox(width: 10.w),
-
-            // ✅ full text (no ellipsis)
-            Text(
-              label,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.clip,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                color: const Color(0xFF111827),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return InkWell(
-      onTap: onTap == null
-          ? null
-          : () {
-              uiTapHaptic();
-              onTap!();
-            },
-      borderRadius: radius,
-      child: isSelected
-          ? pillBody(
-              Container(
-                height: 63.h,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: selectedBorderColors,
-                  ),
-                  borderRadius: radius,
-                ),
-                padding: EdgeInsets.all(1.6.r), // ✅ border thickness
-                child: Container(
-                  height: 63.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: radius,
-                  ),
-                  child: innerRow(selected: true),
-                ),
-              ),
-            )
-          : pillBody(
-              Container(
-                height: 63.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(
-                    color: const Color(0xFFE1E1E1),
-                    width: 1.5,
-                  ),
-                  borderRadius: radius,
-                ),
-                child: innerRow(selected: false),
-              ),
-            ),
     );
   }
 }
@@ -3796,88 +3584,6 @@ class _ModeBadge extends StatelessWidget {
   }
 }
 
-class _PressableCircleSurface extends StatefulWidget {
-  const _PressableCircleSurface({
-    required this.side,
-    required this.child,
-    this.onTap,
-    this.onLongPress,
-    this.marked = false,
-    this.enableHaptic = true,
-    this.idleTransparent = false,
-  });
-
-  final double side;
-  final Widget child;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-  final bool marked;
-  final bool enableHaptic;
-  final bool idleTransparent;
-
-  static const Color _pressedFill = Color(0xFFE5E7EB);
-
-  @override
-  State<_PressableCircleSurface> createState() =>
-      _PressableCircleSurfaceState();
-}
-
-class _PressableCircleSurfaceState extends State<_PressableCircleSurface> {
-  bool _pressed = false;
-  bool _longPressHandled = false;
-
-  void _setPressed(bool v) {
-    if (_pressed != v) setState(() => _pressed = v);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Color fill = (widget.marked || _pressed)
-        ? _PressableCircleSurface._pressedFill
-        : widget.idleTransparent
-        ? Colors.transparent
-        : Colors.white;
-    final Widget circle = Container(
-      width: widget.side,
-      height: widget.side,
-      decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-      alignment: Alignment.center,
-      child: widget.child,
-    );
-    if (widget.onTap == null && widget.onLongPress == null) return circle;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        _longPressHandled = false;
-        _setPressed(true);
-      },
-      onTapUp: (_) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
-      onTap: widget.onTap == null
-          ? null
-          : () {
-              if (_longPressHandled) {
-                _longPressHandled = false;
-                _setPressed(false);
-                return;
-              }
-              if (widget.enableHaptic) uiTapHaptic();
-              widget.onTap!();
-              _setPressed(false);
-            },
-      onLongPress: widget.onLongPress == null
-          ? null
-          : () {
-              _longPressHandled = true;
-              if (widget.enableHaptic) uiTapHaptic();
-              widget.onLongPress!();
-              _setPressed(false);
-            },
-      child: circle,
-    );
-  }
-}
-
 class _CircleBtn extends StatelessWidget {
   const _CircleBtn({
     required this.child,
@@ -3898,7 +3604,7 @@ class _CircleBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double side = (size ?? 32).w;
-    return _PressableCircleSurface(
+    return PressableCircleSurface(
       side: side,
       onTap: onTap,
       onLongPress: onLongPress,

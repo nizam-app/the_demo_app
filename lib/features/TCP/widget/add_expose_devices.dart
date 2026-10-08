@@ -1,5 +1,9 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 /// Opens the "Add expose device" bottom sheet from the TCP/IP Integration screen.
 void showAddExposeDeviceBottomSheet(BuildContext context) {
@@ -31,10 +35,8 @@ class AddExposeDeviceSheet extends StatefulWidget {
 }
 
 class _AddExposeDeviceSheetState extends State<AddExposeDeviceSheet> {
-  static const _bg = Colors.white;
   static const _textPrimary = Color(0xFF111827);
   static const _divider = Color(0xFFE5E7EB);
-  static const _closeBg = Color(0xFFF3F4F6);
   static const _selectedBg = Color(0xFFEAF1FF);
 
   late final List<_AddDeviceItem> items;
@@ -108,14 +110,17 @@ class _AddExposeDeviceSheetState extends State<AddExposeDeviceSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.only(
+      topLeft: Radius.circular(24.r),
+      topRight: Radius.circular(24.r),
+    );
     return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(24.r),
-        topRight: Radius.circular(24.r),
-      ),
-      child: Container(
-        color: _bg,
-        child: Column(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
+          child: Column(
           children: [
             // Header: "Add expose device" centered, X on right
             SizedBox(
@@ -136,18 +141,10 @@ class _AddExposeDeviceSheetState extends State<AddExposeDeviceSheet> {
                   ),
                   Positioned(
                     right: 10.w,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: const BoxDecoration(
-                          color: _closeBg,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(Icons.close, size: 20.sp, color: _textPrimary),
-                      ),
+                    child: LiquidGlassCloseButton(
+                      size: 32.w,
+                      iconColor: _textPrimary,
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
                 ],
@@ -195,6 +192,7 @@ class _AddExposeDeviceSheetState extends State<AddExposeDeviceSheet> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

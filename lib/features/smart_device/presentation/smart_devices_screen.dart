@@ -186,31 +186,16 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                   height: 16.h,
                 ),
                 onTap: () => Navigator.maybePop(context),
-                color: Color(0xFFF3F4F6),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => showEditSmartDeviceSheet(context),
-                      customBorder: const CircleBorder(),
-                      splashColor: const Color(0xFFE5E7EB),
-                      highlightColor: const Color(0xFFE5E7EB),
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFF3F4F6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.more_horiz_rounded,
-                          size: 22.sp,
-                          color: _primary,
-                        ),
-                      ),
+                  GlobalCircleIconBtn(
+                    onTap: () => showEditSmartDeviceSheet(context),
+                    child: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 22.sp,
+                      color: _primary,
                     ),
                   ),
                   SizedBox(width: 12.w),

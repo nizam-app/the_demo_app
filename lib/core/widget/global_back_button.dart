@@ -22,7 +22,10 @@ class GlobalCircleIconBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double side = 36.w;
-    final bool useGlass = color == null || color == Colors.white;
+    final bool useGlass =
+        color == null ||
+        color == Colors.white ||
+        color == const Color(0xFFF3F4F6);
     final Widget face = Center(
       child: child ?? Icon(icon, size: 23.sp, color: const Color(0xFF111827)),
     );

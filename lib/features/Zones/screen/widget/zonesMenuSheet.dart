@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/core/widget/tap_to_edit_slot.dart';
 
 class ZonesMenuSheet extends StatelessWidget {
@@ -58,23 +59,10 @@ class ZonesMenuSheet extends StatelessWidget {
               ),
             ),
             // close
-            Container(
-              width: 30.w,
-              height: 30.h,
-              decoration: BoxDecoration(
-                //color: Colors.white.withOpacity(0.28),
-                color: Colors.white.withOpacity(0.6),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: Center(
-                  child: Icon(Icons.close_rounded,
-                      size: 20.sp, color: _textPrimary),
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
+            LiquidGlassCloseButton(
+              size: 30.w,
+              iconColor: _textPrimary,
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         ),
@@ -94,6 +82,7 @@ class ZonesMenuSheet extends StatelessWidget {
                   /// Rename
                   TapToEditSlot(
                     initialText: 'Living room',
+                    maxWidth: MediaQuery.sizeOf(context).width - 168.w,
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: _textSecondary,

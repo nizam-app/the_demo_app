@@ -872,10 +872,13 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
       height: 1.25,
     );
 
+    final double screenW = MediaQuery.sizeOf(context).width;
+    final double titleMaxWidth = screenW - 28.w - iconW - gap;
+
     return TapToEditSlot(
       initialText: widget.deviceTitle,
       style: titleStyle,
-      maxWidth: 240.w,
+      maxWidth: titleMaxWidth,
       textAlign: TextAlign.center,
       pencilWidth: iconW,
       pencilHeight: 13.h,
@@ -1429,7 +1432,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                               Icons.wb_sunny_outlined,
                               size: 72.sp,
                               color: _ledDimmerPercent <= 0
-                                  ? const Color(0xFF111827)
+                                  ? kDeviceOffGreyFill
                                   : const Color(0xFFFAB300),
                             ),
                           ],
@@ -1603,7 +1606,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             width: 72.sp,
                             fit: BoxFit.contain,
                             color: _ventilationPercent <= 0
-                                ? const Color(0xFF111827)
+                                ? kDeviceOffGreyFill
                                 : null,
                           ),
                         ],
