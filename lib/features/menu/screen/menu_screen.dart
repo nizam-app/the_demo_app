@@ -284,7 +284,6 @@ class MenuScreen extends StatelessWidget {
                           imagePath: 'assets/make.png',
                           title: 'Ventilation',
                           iconSize: 20,
-                          iconColor: const Color(0xFF111827),
                           onTap: () => context.push(
                             Zone_Category_Screen.routeWithTitle('Ventilation'),
                           ),
