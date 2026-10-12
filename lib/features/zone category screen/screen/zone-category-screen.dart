@@ -19,6 +19,7 @@ import '../../devices/screen/devices_screen.dart';
 import '../../home/widget/Add_section.dart';
 import '../../home/widget/add_dashboard_device_sheet.dart';
 import '../../home/widget/dashboard_section_widget_size.dart';
+import '../../home/widget/dashboard_floating_edit_section_panel.dart';
 import '../../home/widget/editAddSectionSheet.dart';
 import '../../menu/screen/menu_screen.dart';
 import '../../nav_bar/screen/custom_bottom_nav_bar.dart';
@@ -871,48 +872,40 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     );
     if (section == null) return const SizedBox.shrink();
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0.h,
-            child: SafeArea(
-              top: false,
-              child: EditAddSectionSheet(
-                onClose: _closeDashboardSectionEdit,
-                sectionRenameLabel: section.title,
-                onRenameChanged: (String next) {
-                  if (next.trim().isEmpty) return;
-                  setState(() => section.title = next.trim());
-                },
-                onAddDeviceTap: () => _addDevicesToAddedSection(section),
-                addDeviceCountLabel: section.deviceOrder.isEmpty
-                    ? null
-                    : '${section.deviceOrder.length}',
-                onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
-                headerBackgroundImagePath: section.headerBackgroundPath,
-                onMoveUp: () => _moveAddedSection(section, -1),
-                onMoveDown: () => _moveAddedSection(section, 1),
-                canMoveUp: _canMoveAddedSection(section, -1),
-                canMoveDown: _canMoveAddedSection(section, 1),
-                onRemove: () => _removeAddedSection(section),
-                initialHorizontalScroll: section.horizontalScrolling,
-                onHorizontalScrollChanged: (bool value) =>
-                    setState(() => section.horizontalScrolling = value),
-                showWidgetSize: true,
-                initialSize: section.widgetSize,
-                onSizeChanged: (String value) => setState(() {
-                  section.widgetSize = canonicalSectionLayoutStorage(value);
-                  _selectedAddedDeviceId = section.deviceOrder.isEmpty
-                      ? null
-                      : section.deviceOrder.first;
-                }),
-              ),
-            ),
-          ),
-        ],
+    return DashboardFloatingEditSectionPanel(
+      key: ValueKey<String>('zone-edit-added-${section.id}'),
+      sheetBuilder: (onDragStart, onDragUpdate) => EditAddSectionSheet(
+        floatingDrag: true,
+        onFloatingDragStart: onDragStart,
+        onFloatingDragUpdate: onDragUpdate,
+        onClose: _closeDashboardSectionEdit,
+        sectionRenameLabel: section.title,
+        onRenameChanged: (String next) {
+          if (next.trim().isEmpty) return;
+          setState(() => section.title = next.trim());
+        },
+        onAddDeviceTap: () => _addDevicesToAddedSection(section),
+        addDeviceCountLabel: section.deviceOrder.isEmpty
+            ? null
+            : '${section.deviceOrder.length}',
+        onHeaderBackgroundTap: () => _pickAddedSectionHeader(section),
+        headerBackgroundImagePath: section.headerBackgroundPath,
+        onMoveUp: () => _moveAddedSection(section, -1),
+        onMoveDown: () => _moveAddedSection(section, 1),
+        canMoveUp: _canMoveAddedSection(section, -1),
+        canMoveDown: _canMoveAddedSection(section, 1),
+        onRemove: () => _removeAddedSection(section),
+        initialHorizontalScroll: section.horizontalScrolling,
+        onHorizontalScrollChanged: (bool value) =>
+            setState(() => section.horizontalScrolling = value),
+        showWidgetSize: true,
+        initialSize: section.widgetSize,
+        onSizeChanged: (String value) => setState(() {
+          section.widgetSize = canonicalSectionLayoutStorage(value);
+          _selectedAddedDeviceId = section.deviceOrder.isEmpty
+              ? null
+              : section.deviceOrder.first;
+        }),
       ),
     );
   }
@@ -1139,63 +1132,55 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final _DashboardEditSection? section = _editingSection;
     if (section == null) return const SizedBox.shrink();
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0.h,
-            child: SafeArea(
-              top: false,
-              child: EditAddSectionSheet(
-                onClose: _closeDashboardSectionEdit,
-                sectionRenameLabel: _sectionRenameLabel(section),
-                onRenameChanged: (String next) {
-                  setState(() {
-                    if (section == _DashboardEditSection.light) {
-                      _lightSectionTitle = next;
-                    } else {
-                      _lightingSectionTitle = next;
-                    }
-                  });
-                },
-                onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
-                onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
-                headerBackgroundImagePath: _sectionHeaderImagePath(section),
-                onMoveUp: () => _moveDashboardSection(section, -1),
-                onMoveDown: () => _moveDashboardSection(section, 1),
-                canMoveUp: _canMoveDashboardSection(section, -1),
-                canMoveDown: _canMoveDashboardSection(section, 1),
-                onRemove: () => _removeDashboardSection(section),
-                initialHorizontalScroll: section == _DashboardEditSection.light
-                    ? _lightHorizontalScroll
-                    : _lightingHorizontalScroll,
-                onHorizontalScrollChanged: (v) => setState(() {
-                  if (section == _DashboardEditSection.light) {
-                    _lightHorizontalScroll = v;
-                  } else {
-                    _lightingHorizontalScroll = v;
-                  }
-                }),
-                showWidgetSize: true,
-                initialSize: section == _DashboardEditSection.light
-                    ? _lightWidgetSize
-                    : _lightingWidgetSize,
-                onSizeChanged: (v) => setState(() {
-                  final String stored = canonicalSectionLayoutStorage(v);
-                  if (section == _DashboardEditSection.light) {
-                    _lightWidgetSize = stored;
-                  } else {
-                    _lightingWidgetSize = stored;
-                  }
-                  final List<String> order = _deviceOrderFor(section);
-                  _selectedEditDeviceId = order.isEmpty ? null : order.first;
-                }),
-              ),
-            ),
-          ),
-        ],
+    return DashboardFloatingEditSectionPanel(
+      key: ValueKey<String>('zone-edit-${section.name}'),
+      sheetBuilder: (onDragStart, onDragUpdate) => EditAddSectionSheet(
+        floatingDrag: true,
+        onFloatingDragStart: onDragStart,
+        onFloatingDragUpdate: onDragUpdate,
+        onClose: _closeDashboardSectionEdit,
+        sectionRenameLabel: _sectionRenameLabel(section),
+        onRenameChanged: (String next) {
+          setState(() {
+            if (section == _DashboardEditSection.light) {
+              _lightSectionTitle = next;
+            } else {
+              _lightingSectionTitle = next;
+            }
+          });
+        },
+        onAddDeviceTap: () => _openAddDashboardDevicePicker(section),
+        onHeaderBackgroundTap: () => _pickSectionHeaderImage(section),
+        headerBackgroundImagePath: _sectionHeaderImagePath(section),
+        onMoveUp: () => _moveDashboardSection(section, -1),
+        onMoveDown: () => _moveDashboardSection(section, 1),
+        canMoveUp: _canMoveDashboardSection(section, -1),
+        canMoveDown: _canMoveDashboardSection(section, 1),
+        onRemove: () => _removeDashboardSection(section),
+        initialHorizontalScroll: section == _DashboardEditSection.light
+            ? _lightHorizontalScroll
+            : _lightingHorizontalScroll,
+        onHorizontalScrollChanged: (v) => setState(() {
+          if (section == _DashboardEditSection.light) {
+            _lightHorizontalScroll = v;
+          } else {
+            _lightingHorizontalScroll = v;
+          }
+        }),
+        showWidgetSize: true,
+        initialSize: section == _DashboardEditSection.light
+            ? _lightWidgetSize
+            : _lightingWidgetSize,
+        onSizeChanged: (v) => setState(() {
+          final String stored = canonicalSectionLayoutStorage(v);
+          if (section == _DashboardEditSection.light) {
+            _lightWidgetSize = stored;
+          } else {
+            _lightingWidgetSize = stored;
+          }
+          final List<String> order = _deviceOrderFor(section);
+          _selectedEditDeviceId = order.isEmpty ? null : order.first;
+        }),
       ),
     );
   }
@@ -1273,12 +1258,17 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     required String deviceId,
     required Widget child,
   }) {
+    final bool reorderEditActive =
+        _showSectionEditButtons || _editingSection == section;
+    final Widget editSafeChild = reorderEditActive
+        ? AbsorbPointer(child: child)
+        : child;
     Widget cell = _wrapDashboardEditTarget(
       section: section,
       deviceId: deviceId,
-      child: child,
+      child: editSafeChild,
     );
-    if (!_showSectionEditButtons) return cell;
+    if (!reorderEditActive) return cell;
 
     return _DashboardShakeWrapper(
       shaking: _dashboardDraggingDeviceId != deviceId,
@@ -1417,7 +1407,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
-    final double editSheetInset = _editingSection != null ? 360.h : 0;
+    const double editSheetInset = 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -2260,9 +2250,25 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Light Scene',
           status: scene.sceneLabel,
+          mode: _lightSceneManual ? 'M' : 'A',
+          modeFilled: _lightSceneManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _lightSceneManual = !_lightSceneManual),
           iconImage:
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
+          controls: _buildLightingChevronButtons(
+            markKey: 'scene',
+            onLeft: () => _patchSnap(
+              'Light Scene',
+              (p) => p.copyWith(sceneIndex: (p.sceneIndex - 1).clamp(0, 2)),
+            ),
+            onRight: () => _patchSnap(
+              'Light Scene',
+              (p) => p.copyWith(sceneIndex: (p.sceneIndex + 1).clamp(0, 2)),
+            ),
+          ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2278,10 +2284,22 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'RGBW room abc',
           status: '${(rgbw.rgbwIntensity * 100).round()}%',
+          mode: _rgbwManual ? 'M' : 'A',
+          modeFilled: _rgbwManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _rgbwManual = !_rgbwManual),
           iconWidget: DashboardRgbwIcon(
             hue: rgbw.rgbwHue,
             saturation: rgbw.rgbwSaturation,
             intensity: rgbw.rgbwIntensity,
+          ),
+          controls: _buildLightingSliderControl(
+            value: rgbw.rgbwIntensity,
+            onChanged: (v) => _patchSnap(
+              'RGBW room abc',
+              (p) => p.copyWith(rgbwIntensity: v),
+            ),
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -2300,9 +2318,23 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'LED Dimmer living room',
           status: '${(led.ledDimmerPercent * 100).round()}%',
+          mode: _lightingLedBadge1Manual ? 'M' : 'A',
+          modeFilled: _lightingLedBadge1Manual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                  () => _lightingLedBadge1Manual = !_lightingLedBadge1Manual,
+                ),
           iconWidget: DashboardRingProgressIcon(
             percent: led.ledDimmerPercent,
             ringStyle: DashboardRingStyle.led,
+          ),
+          controls: _buildLightingSliderControl(
+            value: led.ledDimmerPercent,
+            onChanged: (v) => _patchSnap(
+              'LED Dimmer living room',
+              (p) => p.copyWith(ledDimmerPercent: v),
+            ),
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -2321,8 +2353,20 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Heating & Cooling',
           status: hvac.heatingCoolingStatusLabel,
+          mode: _heatingCoolingManual ? 'M' : 'A',
+          modeFilled: _heatingCoolingManual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                  () => _heatingCoolingManual = !_heatingCoolingManual,
+                ),
           iconImage: 'assets/images/heating_cooling.png',
           iconWidget: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
+          controls: _buildLightingSwitchControl(
+            value: hvac.isOn,
+            onChanged: (v) =>
+                _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
+          ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2337,11 +2381,24 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Tunable white light',
           status: '${(tunable.tunableWhiteIntensity * 100).round()}%',
+          mode: _tunableWhiteManual ? 'M' : 'A',
+          modeFilled: _tunableWhiteManual,
+          onModeTap: editing
+              ? null
+              : () =>
+                    setState(() => _tunableWhiteManual = !_tunableWhiteManual),
           iconImage: 'assets/white_light.png',
           iconWidget: DashboardTunableWhiteIcon(
             dotDx: tunable.tunableWhiteDotDx,
             dotDy: tunable.tunableWhiteDotDy,
             intensity: tunable.tunableWhiteIntensity,
+          ),
+          controls: _buildLightingSliderControl(
+            value: tunable.tunableWhiteIntensity,
+            onChanged: (v) => _patchSnap(
+              'Tunable white light',
+              (p) => p.copyWith(tunableWhiteIntensity: v),
+            ),
           ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
@@ -2357,8 +2414,21 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Ventilation',
           status: '${(vent.ventilationPercent * 100).round()}%',
+          mode: _ventilationManual ? 'M' : 'A',
+          modeFilled: _ventilationManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _ventilationManual = !_ventilationManual),
           iconWidget: DashboardVentilationIcon(
             percent: vent.ventilationPercent,
+          ),
+          controls: _buildLightingSliderControl(
+            value: vent.ventilationPercent,
+            iconAsset: 'assets/make.png',
+            onChanged: (v) => _patchSnap(
+              'Ventilation',
+              (p) => p.copyWith(ventilationPercent: v),
+            ),
           ),
           iconImage: 'assets/images/ventilations.png',
           onTap: detailsTap(
@@ -2375,8 +2445,24 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Fan Level 3',
           status: fan.fanStatusLabel,
+          mode: _fanLevelManual ? 'M' : 'A',
+          modeFilled: _fanLevelManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _fanLevelManual = !_fanLevelManual),
           iconImage: 'assets/images/Fun_level3.png',
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
+          controls: _buildLightingPlusMinusButtons(
+            markKey: 'fan',
+            onMinus: () => _patchSnap(
+              'Fan Level 3',
+              (p) => p.copyWith(fanLevel: (p.fanLevel - 1).clamp(0, 3)),
+            ),
+            onPlus: () => _patchSnap(
+              'Fan Level 3',
+              (p) => p.copyWith(fanLevel: (p.fanLevel + 1).clamp(0, 3)),
+            ),
+          ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2391,10 +2477,36 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Presence',
           status: presence.presenceLabel,
+          mode: _presenceManual ? 'M' : 'A',
+          modeFilled: _presenceManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _presenceManual = !_presenceManual),
           iconImage: 'assets/images/comfort.png',
           iconWidget: DashboardPresenceModeIcon(
             modeIndex: presence.presenceModeIndex,
             isOn: presence.isOn,
+          ),
+          controls: _buildLightingChevronButtons(
+            markKey: 'presence',
+            onLeft: () => _patchSnap(
+              'Presence',
+              (p) => p.copyWith(
+                isOn: true,
+                presenceModeIndex: (p.presenceModeIndex - 1).clamp(0, 4),
+              ),
+            ),
+            onLeftLong: () =>
+                _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
+            onRight: () => _patchSnap(
+              'Presence',
+              (p) => p.copyWith(
+                isOn: true,
+                presenceModeIndex: (p.presenceModeIndex + 1).clamp(0, 4),
+              ),
+            ),
+            onRightLong: () =>
+                _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
           ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
@@ -2410,9 +2522,35 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Living room',
           status: '${living.thermostatRingCelsius.toStringAsFixed(1)}° c',
+          mode: _livingRoomManual ? 'M' : 'A',
+          modeFilled: _livingRoomManual,
+          onModeTap: editing
+              ? null
+              : () => setState(() => _livingRoomManual = !_livingRoomManual),
           iconWidget: DashboardThermostatRingIcon(
             percent: living.thermostatRingPercent,
             currentTempCelsius: living.thermostatCelsius,
+          ),
+          controls: _buildLightingPlusMinusButtons(
+            markKey: 'living',
+            onMinus: () => _patchSnap(
+              'Living Room',
+              (p) => p.copyWith(
+                thermostatRingPercent: (p.thermostatRingPercent - 0.10).clamp(
+                  0.0,
+                  1.0,
+                ),
+              ),
+            ),
+            onPlus: () => _patchSnap(
+              'Living Room',
+              (p) => p.copyWith(
+                thermostatRingPercent: (p.thermostatRingPercent + 0.10).clamp(
+                  0.0,
+                  1.0,
+                ),
+              ),
+            ),
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
@@ -2431,11 +2569,49 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingCard(
           deviceName: 'Multi-Value Switch',
           status: multi.multiValueSwitchCaption,
+          mode: _multiValueSwitchManual ? 'M' : 'A',
+          modeFilled: _multiValueSwitchManual,
+          onModeTap: editing
+              ? null
+              : () => setState(
+                  () => _multiValueSwitchManual = !_multiValueSwitchManual,
+                ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
           iconWidget: DashboardMultiValueSwitchIcon(
             selectedIndex: multi.multiValueSwitchIndex,
             isOn: multi.isOn,
+          ),
+          controls: _buildLightingChevronButtons(
+            markKey: 'multi',
+            onLeft: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(
+                isOn: true,
+                multiValueSwitchIndex: (p.multiValueSwitchIndex - 1).clamp(
+                  0,
+                  2,
+                ),
+              ),
+            ),
+            onLeftLong: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(isOn: false),
+            ),
+            onRight: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(
+                isOn: true,
+                multiValueSwitchIndex: (p.multiValueSwitchIndex + 1).clamp(
+                  0,
+                  2,
+                ),
+              ),
+            ),
+            onRightLong: () => _patchSnap(
+              'Multi-Value Switch',
+              (p) => p.copyWith(isOn: false),
+            ),
           ),
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
@@ -3104,17 +3280,22 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     required String deviceName,
     required String status,
     required String iconImage,
+    required String mode,
+    required bool modeFilled,
     Widget? iconWidget,
+    Widget? controls,
     VoidCallback? onTap,
+    VoidCallback? onModeTap,
   }) {
-    // Small widget: icon + name + status only (tap opens details; no controls).
     final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
     final bool compact =
         layout == SectionLayout.small || _lightingHorizontalScroll;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
-    final double statusH = compact ? 18.h : 20.h;
+    final double statusH = compact ? 28.h : 32.h;
+    final double controlSlotWidth = compact ? 64.w : 136.w;
+    final double controlContentHeight = 35.h;
     final radius = BorderRadius.circular(26.r);
     final Widget iconArea = dashboardLightingIconFrame(
       iconWidget ??
@@ -3134,7 +3315,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
     );
     final double cardHeight = _lightCardHeightForWidgetSize(_lightingWidgetSize);
-    final card = SizedBox(
+    final Widget cardBody = SizedBox(
       height: cardHeight,
       width: double.infinity,
       child: Container(
@@ -3142,7 +3323,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           color: const Color(0xFFF3F4F6),
           borderRadius: radius,
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: vPad),
+        padding: EdgeInsets.fromLTRB(12.w, vPad, compact ? 8.w : 10.w, vPad),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -3172,36 +3353,71 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             SizedBox(height: gap),
             SizedBox(
               height: statusH,
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                    fontFamily: 'Inter',
-                    height: 1.0,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF111827),
+                      fontFamily: 'Inter',
+                      height: 1.0,
+                    ),
+                    maxLines: 1,
+                    softWrap: false,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  if (controls != null) ...[
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final double slotW = math.min(
+                            controlSlotWidth,
+                            constraints.maxWidth,
+                          );
+                          return SizedBox(
+                            width: slotW,
+                            height: controlContentHeight,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: controls,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
         ),
       ),
     );
+    final Widget card = Stack(
+      children: [
+        cardBody,
+        Positioned(
+          right: 12.w,
+          top: 12.w,
+          child: _ModeBadge(mode: mode, filled: modeFilled, onTap: onModeTap),
+        ),
+      ],
+    );
     if (onTap == null) return card;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap == null
-            ? null
-            : () {
-                uiTapHaptic();
-                onTap!();
-              },
+        onTap: () {
+          uiTapHaptic();
+          onTap();
+        },
         borderRadius: radius,
         child: card,
       ),

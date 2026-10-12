@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/features/TCP/widget/add_expose_devices.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 
 /// -------------------- Models --------------------
 class ExposedDevice {
@@ -621,33 +622,14 @@ class _RoundFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(26.r),
-        child: Container(
-          width: 46.w,
-          height: 46.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0x10111827),
-                blurRadius: 22.r,
-                offset: Offset(0, 10.h),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              CupertinoIcons.plus,
-              size: 30.sp,
-              color: const Color(0xFF111827),
-            ),
-          ),
-        ),
+    return PressableCircleSurface(
+      side: 46.w,
+      useLiquidGlass: true,
+      onTap: onTap,
+      child: Icon(
+        CupertinoIcons.plus,
+        size: 30.sp,
+        color: const Color(0xFF111827),
       ),
     );
   }

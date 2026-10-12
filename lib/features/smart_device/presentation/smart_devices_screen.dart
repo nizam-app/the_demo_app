@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
 import '../widget/addSmartDevicesPopup.dart';
@@ -199,26 +200,14 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => showAddSmartDeviceBottomSheet(context),
-                      customBorder: const CircleBorder(),
-                      splashColor: Colors.white24,
-                      highlightColor: Colors.white10,
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF111827),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 23,
-                          color: Colors.white,
-                        ),
-                      ),
+                  PressableCircleSurface(
+                    side: 36.w,
+                    useLiquidGlass: true,
+                    onTap: () => showAddSmartDeviceBottomSheet(context),
+                    child: Icon(
+                      Icons.add_rounded,
+                      size: 23.sp,
+                      color: _primary,
                     ),
                   ),
                 ],

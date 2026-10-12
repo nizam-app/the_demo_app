@@ -34,6 +34,8 @@ class MenuScreen extends StatelessWidget {
 
   static const _bg = Colors.transparent;
   static const _pageTint = Color(0xFFF3F4F6);
+  /// Soft blue at top of menu page; fades into [_pageTint] by 30% height.
+  static const _menuTopGradientStart = Color(0xFFDDEBFF);
   static const _card = Color(0xFFF3F4F6);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -49,7 +51,7 @@ class MenuScreen extends StatelessWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF3F4F6),
+      backgroundColor: _pageTint,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -65,8 +67,17 @@ class MenuScreen extends StatelessWidget {
             children: [
               Positioned.fill(
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF3F4F6).withOpacity(0.64),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0.0, 0.3, 1.0],
+                      colors: [
+                        _menuTopGradientStart,
+                        _pageTint,
+                        _pageTint,
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/utils/ui_tap_haptic.dart';
 import '../../../core/widget/global_back_button.dart';
 import '../../../core/widget/liquid_glass.dart';
+import '../../../core/widget/pressable_circle_surface.dart';
 import '../widget/userAdd_popup.dart';
 import '../widget/user_edit.dart';
 
@@ -585,34 +586,14 @@ class _FabPlus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(26.r),
-        onTap: () => UsersScreen.showAddUserBottomSheet(context),
-
-        child: Container(
-          width: 46.w,
-          height: 46.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0x10111827),
-                blurRadius: 26.r,
-                offset: Offset(0, 10.h),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              CupertinoIcons.add,
-              size: 30.sp,
-              color: UsersScreen._textDark,
-            ),
-          ),
-        ),
+    return PressableCircleSurface(
+      side: 46.w,
+      useLiquidGlass: true,
+      onTap: () => UsersScreen.showAddUserBottomSheet(context),
+      child: Icon(
+        CupertinoIcons.add,
+        size: 30.sp,
+        color: UsersScreen._textDark,
       ),
     );
   }

@@ -115,10 +115,6 @@ class WeatherScreen extends ConsumerWidget {
   static const Color _textSecondary = Color(0xFFFFFFFF);
   static const Color _textMuted = Color(0xFFA7CAFE);
 
-  /// Footer bar tint: keeps `0xFFE1E1E1` with transparency over the gradient + blur.
-  static final Color _footerNavTrack =
-      const Color(0xFFE1E1E1).withValues(alpha: 0.58);
-
   void _onNavItemTapped(BuildContext context, int index) {
     const routes = [
       '/devices',
@@ -375,9 +371,6 @@ class WeatherScreen extends ConsumerWidget {
             ? BottomNavBarWidget(
                 selectedIndex: 2,
                 onItemTapped: (index) => _onNavItemTapped(context, index),
-                backgroundOpacity: 0,
-                useBackdropBlur: true,
-                trackColor: _footerNavTrack,
               )
             : null,
       ),

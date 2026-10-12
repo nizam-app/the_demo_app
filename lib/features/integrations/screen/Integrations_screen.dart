@@ -4,7 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
+import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 
 import '../widget/add_protocol.dart';
 
@@ -139,10 +141,9 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
         },
       ),
 
-      bottomNavigationBar: _BottomNav(
+      bottomNavigationBar: BottomNavBarWidget(
         selectedIndex: _selectedNavIndex,
-        notificationCount: 12,
-        onTap: _onNavItemTapped,
+        onItemTapped: _onNavItemTapped,
       ),
 
       body: SafeArea(
@@ -289,159 +290,17 @@ class _RoundFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(26.r),
-        child: Container(
-          width: 46.w,
-          height: 46.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0x10111827),
-                blurRadius: 22.r,
-                offset: Offset(0, 10.h),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              CupertinoIcons.plus,
-              size: 30.sp,
-              color: const Color(0xFF111827),
-            ),
-          ),
-        ),
+    return PressableCircleSurface(
+      side: 46.w,
+      useLiquidGlass: true,
+      onTap: onTap,
+      child: Icon(
+        CupertinoIcons.plus,
+        size: 30.sp,
+        color: const Color(0xFF111827),
       ),
     );
   }
-}
-
-/// -------------------- Bottom Nav --------------------
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({
-    required this.selectedIndex,
-    required this.onTap,
-    required this.notificationCount,
-  });
-
-  final int selectedIndex;
-  final void Function(int) onTap;
-  final int notificationCount;
-
-  static const Color _selected = Color(0xFF111827);
-  static const Color _unselected = Color(0xFF111827);
-  static const Color _badge = Color(0xFFFE019A);
-
-  @override
-  Widget build(BuildContext context) {
-    final items = const <_NavItem>[
-      _NavItem('Devices', 'assets/Group 28.png'),
-      _NavItem('Analytics', 'assets/bar 5.png'),
-      _NavItem('Dashboard', 'assets/Mask group copy 6.png'),
-      _NavItem('Notifications', 'assets/Group 43.png'),
-      _NavItem('Settings', 'assets/seting.png'),
-    ];
-
-    return Container(
-      height: 72.h,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.74),
-        border: const Border(top: BorderSide(color: Color(0xFFE1E1E1), width: 1)),
-      ),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth / items.length;
-          return Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: w * selectedIndex + (w - 46.w) / 2,
-                child: Container(
-                  width: 46.w,
-                  height: 3.h,
-                  decoration: BoxDecoration(
-                    color: _selected,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(2.r),
-                      bottomRight: Radius.circular(2.r),
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                children: List.generate(items.length, (i) {
-                  final item = items[i];
-                  final isSel = i == selectedIndex;
-                  final color = isSel ? _selected : _unselected;
-
-                  return Expanded(
-                    child: InkWell(
-                      onTap: () => onTap(i),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              AppAssetIcon(item.icon, color: color),
-                              if (item.label == 'Notifications' && notificationCount > 0)
-                                Positioned(
-                                  right: -10.w,
-                                  top: -6.h,
-                                  child: Container(
-                                    width: 19.w,
-                                    height: 15.h,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: _badge,
-                                      borderRadius: BorderRadius.circular(18.r),
-                                    ),
-                                    child: Text(
-                                      '$notificationCount',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 10.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w700,
-                              color: color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _NavItem {
-  final String label;
-  final String icon;
-  const _NavItem(this.label, this.icon);
 }
 
 enum IntegrationState { enabled, disabled }
