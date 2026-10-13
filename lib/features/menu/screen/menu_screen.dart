@@ -33,9 +33,8 @@ class MenuScreen extends StatelessWidget {
   static const String routeName = '/menu';
 
   static const _bg = Colors.transparent;
-  static const _pageTint = Color(0xFFF3F4F6);
-  /// Soft blue at top of menu page; fades into [_pageTint] by 30% height.
-  static const _menuTopGradientStart = Color(0xFFDDEBFF);
+  /// Full-page menu background — brand blue wash (same family as [_blue]).
+  static const _menuBrandBlue = Color(0xFFDDEBFF);
   static const _card = Color(0xFFF3F4F6);
   static const _primary = Color(0xFF111827);
   static const _secondary = Color(0xFF6B7280);
@@ -51,7 +50,7 @@ class MenuScreen extends StatelessWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageTint,
+      backgroundColor: _menuBrandBlue,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -65,21 +64,8 @@ class MenuScreen extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0.0, 0.3, 1.0],
-                      colors: [
-                        _menuTopGradientStart,
-                        _pageTint,
-                        _pageTint,
-                      ],
-                    ),
-                  ),
-                ),
+              const Positioned.fill(
+                child: _MenuAnimatedBackground(brandBlue: _menuBrandBlue),
               ),
               SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
@@ -913,6 +899,86 @@ class _MenuItemRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Menu-only: solid brand-blue page + RGB shift in the bottom 40% (from base blue).
+class _MenuAnimatedBackground extends StatefulWidget {
+  const _MenuAnimatedBackground({required this.brandBlue});
+
+  final Color brandBlue;
+
+  @override
+  State<_MenuAnimatedBackground> createState() =>
+      _MenuAnimatedBackgroundState();
+}
+
+class _MenuAnimatedBackgroundState extends State<_MenuAnimatedBackground>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  static const double _rgbBandFraction = 0.40;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Cycles hue; always blended from [brandBlue] so the band starts at background color.
+  Color _rgbFromBackground(Color brandBlue, double t, double hueOffset, double mix) {
+    final hue = (t * 360 + hueOffset) % 360;
+    final rgb = HSLColor.fromAHSL(1, hue, 0.62, 0.56).toColor();
+    return Color.lerp(brandBlue, rgb, mix.clamp(0.0, 1.0)) ?? brandBlue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bandHeight = MediaQuery.sizeOf(context).height * _rgbBandFraction;
+    final brandBlue = widget.brandBlue;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: brandBlue),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: bandHeight,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final t = _controller.value;
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    stops: const [0.0, 0.35, 0.68, 1.0],
+                    colors: [
+                      _rgbFromBackground(brandBlue, t, 0, 0.48),
+                      _rgbFromBackground(brandBlue, t, 120, 0.32),
+                      _rgbFromBackground(brandBlue, t, 240, 0.14),
+                      brandBlue,
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

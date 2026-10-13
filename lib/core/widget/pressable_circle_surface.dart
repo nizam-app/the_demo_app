@@ -49,15 +49,21 @@ class _PressableCircleSurfaceState extends State<PressableCircleSurface> {
     final bool highlight = widget.marked || _pressed;
     final Widget circle;
     if (glass) {
-      circle = LiquidGlass.blurred(
-        borderRadius: BorderRadius.circular(widget.side / 2),
-        sigma: 16,
-        child: Container(
-          width: widget.side,
-          height: widget.side,
-          decoration: LiquidGlass.circleButtonDecoration(pressed: highlight),
-          alignment: Alignment.center,
-          child: widget.child,
+      circle = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: LiquidGlass.floatingPillShadow(),
+        ),
+        child: LiquidGlass.blurred(
+          borderRadius: BorderRadius.circular(widget.side / 2),
+          sigma: 20,
+          child: Container(
+            width: widget.side,
+            height: widget.side,
+            decoration: LiquidGlass.circleButtonDecoration(pressed: highlight),
+            alignment: Alignment.center,
+            child: widget.child,
+          ),
         ),
       );
     } else {

@@ -70,6 +70,22 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
+  /// Soft drop shadow for a floating glass pill (tab bar, FAB host).
+  static List<BoxShadow> floatingPillShadow() {
+    return [
+      BoxShadow(
+        color: const Color(0xFF111827).withOpacity(0.10),
+        blurRadius: 28,
+        offset: const Offset(0, 10),
+      ),
+      BoxShadow(
+        color: Colors.white.withOpacity(0.45),
+        blurRadius: 0,
+        offset: const Offset(0, 0.5),
+      ),
+    ];
+  }
+
   /// Backdrop blur wrapper; caller supplies size/decoration on [child].
   static Widget blurred({
     required Widget child,

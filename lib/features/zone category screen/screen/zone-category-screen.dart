@@ -18,6 +18,7 @@ import 'package:workpleis/features/device_details/screen/device_details_screen.d
 import '../../devices/screen/devices_screen.dart';
 import '../../home/widget/Add_section.dart';
 import '../../home/widget/add_dashboard_device_sheet.dart';
+import '../../home/widget/dashboard_control_metrics.dart';
 import '../../home/widget/dashboard_section_widget_size.dart';
 import '../../home/widget/dashboard_floating_edit_section_panel.dart';
 import '../../home/widget/editAddSectionSheet.dart';
@@ -45,6 +46,117 @@ class _AddedZoneSection {
   String widgetSize;
   String? headerBackgroundPath;
 }
+
+DashboardControlMetrics? _zoneControlMetricsForLayout(SectionLayout layout) {
+  final DashboardControlMetrics? metrics =
+      DashboardControlMetrics.forLayout(layout);
+  if (metrics == null || layout != SectionLayout.extraLarge) {
+    return metrics;
+  }
+  return DashboardControlMetrics(
+    circularButtonSize: DashboardControlMetrics.l.circularButtonSize,
+    circularButtonGap: DashboardControlMetrics.l.circularButtonGap,
+    toggleWidth: DashboardControlMetrics.l.toggleWidth,
+    toggleHeight: DashboardControlMetrics.l.toggleHeight,
+    sliderWidth: metrics.sliderWidth,
+    sliderHeight: metrics.sliderHeight,
+    controlSlotWidth: metrics.controlSlotWidth,
+    expandSlider: metrics.expandSlider,
+    controlFillsSlot: metrics.controlFillsSlot,
+  );
+}
+
+bool _zoneIsSDashboardMetrics(DashboardControlMetrics metrics) =>
+    metrics.circularButtonSize == DashboardControlMetrics.s.circularButtonSize;
+
+Widget _zoneDashboardCardStatusText(String text) {
+  return Text(
+    text,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(
+      fontSize: 16.sp,
+      fontWeight: FontWeight.bold,
+      color: const Color(0xFF111827),
+      fontFamily: 'Inter',
+      height: 1.0,
+    ),
+  );
+}
+
+Widget _zoneDashboardMetricsControlRow({
+  required String status,
+  required Widget controls,
+  required DashboardControlMetrics metrics,
+  required double controlContentHeight,
+  double gap = 6,
+}) {
+  if (_zoneIsSDashboardMetrics(metrics)) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                status,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF111827),
+                  fontFamily: 'Inter',
+                  height: 1.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 4.w),
+        SizedBox(
+          height: controlContentHeight,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: controls,
+          ),
+        ),
+      ],
+    );
+  }
+
+  final double controlSlotWidth = metrics.controlSlotWidth.w;
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      _zoneDashboardCardStatusText(status),
+      SizedBox(width: gap.w),
+      Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double slotW = math.min(
+              controlSlotWidth,
+              constraints.maxWidth,
+            );
+            return SizedBox(
+              width: slotW,
+              height: controlContentHeight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: controls,
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  );
+}
+
+const double _kZoneCupertinoSwitchHeight = 31;
 
 class Zone_Category_Screen extends StatefulWidget {
   const Zone_Category_Screen({super.key, this.screenTitle = 'Zone/Categories'});
@@ -915,7 +1027,17 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     if (sectionLayoutUsesListRows(section.widgetSize) && lighting) {
       return _buildLightingLargeRowById(deviceId);
     }
-    if (lighting) return _buildLightingSmallCardById(deviceId);
+    if (lighting) {
+      final SectionLayout layout = parseSectionLayout(section.widgetSize);
+      final double cardHeight = _lightCardHeightForWidgetSize(section.widgetSize);
+      return _buildLightingSmallCardById(
+        deviceId,
+        uniformControlSlot: true,
+        cardHeightOverride: cardHeight,
+        compactOverride: layout == SectionLayout.small,
+        sectionLayout: layout,
+      );
+    }
     return _buildLightDeviceCard(deviceId);
   }
 
@@ -2173,6 +2295,16 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     final double gridCardWidth =
         (screenWidth - 32.w - (columns - 1) * 12.w) / columns;
 
+    Widget buildCard(String id) {
+      return _buildLightingSmallCardById(
+        id,
+        uniformControlSlot: true,
+        cardHeightOverride: cardHeight,
+        compactOverride: layout == SectionLayout.small,
+        sectionLayout: layout,
+      );
+    }
+
     if (_lightingHorizontalScroll) {
       return SizedBox(
         height: cardHeight,
@@ -2193,7 +2325,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               child: _wrapDashboardDeviceCell(
                 section: _DashboardEditSection.lighting,
                 deviceId: id,
-                child: _buildLightingSmallCardById(id),
+                child: buildCard(id),
               ),
             );
           },
@@ -2215,7 +2347,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                     ? _wrapDashboardDeviceCell(
                         section: _DashboardEditSection.lighting,
                         deviceId: ids[i + col],
-                        child: _buildLightingSmallCardById(ids[i + col]),
+                        child: buildCard(ids[i + col]),
                       )
                     : const SizedBox.shrink(),
               ),
@@ -2227,11 +2359,28 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     return Column(children: rows);
   }
 
-  Widget _buildLightingSmallCardById(String deviceId) {
+  Widget _buildLightingSmallCardById(
+    String deviceId, {
+    bool? compactOverride,
+    double? cardHeightOverride,
+    bool uniformControlSlot = false,
+    SectionLayout? sectionLayout,
+  }) {
     final bool editing =
         _editingSection == _DashboardEditSection.lighting ||
         _editingAddedSectionId != null ||
         _showSectionEditButtons;
+    final SectionLayout resolvedLayout =
+        sectionLayout ?? parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? lControlMetrics =
+        _zoneControlMetricsForLayout(resolvedLayout);
+    final bool compact = compactOverride ?? _lightingHorizontalScroll;
+    final double? sliderWidth = lControlMetrics != null
+        ? lControlMetrics.sliderWidth.w
+        : (compact ? 60.w : null);
+    final bool expandSlider = lControlMetrics?.expandSlider ?? !compact;
+    final bool controlFillsSlot =
+        lControlMetrics?.controlFillsSlot ?? expandSlider;
     final DeviceControlSnapshot scene = _snap('Light Scene');
     final DeviceControlSnapshot rgbw = _snap('RGBW room abc');
     final DeviceControlSnapshot led = _snap('LED Dimmer living room');
@@ -2259,7 +2408,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               'assets/images/dcdf1889f2f1df21a26d7013b207a1a5cb57f5e9.png',
           iconWidget: DashboardLightSceneIcon(sceneIndex: scene.sceneIndex),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'scene',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Light Scene',
               (p) => p.copyWith(sceneIndex: (p.sceneIndex - 1).clamp(0, 2)),
@@ -2269,6 +2420,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               (p) => p.copyWith(sceneIndex: (p.sceneIndex + 1).clamp(0, 2)),
             ),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2295,7 +2450,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             intensity: rgbw.rgbwIntensity,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: rgbw.rgbwIntensity,
+            width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'RGBW room abc',
               (p) => p.copyWith(rgbwIntensity: v),
@@ -2303,6 +2461,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2330,7 +2493,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ringStyle: DashboardRingStyle.led,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: led.ledDimmerPercent,
+            width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'LED Dimmer living room',
               (p) => p.copyWith(ledDimmerPercent: v),
@@ -2338,6 +2504,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2363,10 +2534,15 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           iconImage: 'assets/images/heating_cooling.png',
           iconWidget: DashboardHeatingCoolingIcon(isOn: hvac.isOn),
           controls: _buildLightingSwitchControl(
+            lControlMetrics: lControlMetrics,
             value: hvac.isOn,
             onChanged: (v) =>
                 _patchSnap('Heating & Cooling', (p) => p.copyWith(isOn: v)),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2394,12 +2570,20 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             intensity: tunable.tunableWhiteIntensity,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: tunable.tunableWhiteIntensity,
+            width: sliderWidth,
+            expand: expandSlider,
             onChanged: (v) => _patchSnap(
               'Tunable white light',
               (p) => p.copyWith(tunableWhiteIntensity: v),
             ),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2423,7 +2607,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             percent: vent.ventilationPercent,
           ),
           controls: _buildLightingSliderControl(
+            lControlMetrics: lControlMetrics,
             value: vent.ventilationPercent,
+            width: sliderWidth,
+            expand: expandSlider,
             iconAsset: 'assets/make.png',
             onChanged: (v) => _patchSnap(
               'Ventilation',
@@ -2431,6 +2618,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ),
           ),
           iconImage: 'assets/images/ventilations.png',
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          controlFillsSlot: controlFillsSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2453,7 +2645,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           iconImage: 'assets/images/Fun_level3.png',
           iconWidget: DashboardFanLevelIcon(level: fan.fanLevel),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'fan',
+            dense: compact,
             onMinus: () => _patchSnap(
               'Fan Level 3',
               (p) => p.copyWith(fanLevel: (p.fanLevel - 1).clamp(0, 3)),
@@ -2463,6 +2657,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               (p) => p.copyWith(fanLevel: (p.fanLevel + 1).clamp(0, 3)),
             ),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2488,7 +2686,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             isOn: presence.isOn,
           ),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'presence',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Presence',
               (p) => p.copyWith(
@@ -2508,6 +2708,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             onRightLong: () =>
                 _patchSnap('Presence', (p) => p.copyWith(isOn: false)),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2532,7 +2736,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             currentTempCelsius: living.thermostatCelsius,
           ),
           controls: _buildLightingPlusMinusButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'living',
+            dense: compact,
             onMinus: () => _patchSnap(
               'Living Room',
               (p) => p.copyWith(
@@ -2554,6 +2760,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           iconImage:
               'assets/images/934930601db8766eee59e9c047c0269d6dba1f55.png',
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -2583,7 +2793,9 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             isOn: multi.isOn,
           ),
           controls: _buildLightingChevronButtons(
+            lControlMetrics: lControlMetrics,
             markKey: 'multi',
+            dense: compact,
             onLeft: () => _patchSnap(
               'Multi-Value Switch',
               (p) => p.copyWith(
@@ -2613,6 +2825,10 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               (p) => p.copyWith(isOn: false),
             ),
           ),
+          compactOverride: compactOverride,
+          cardHeightOverride: cardHeightOverride,
+          uniformControlSlot: uniformControlSlot,
+          lControlMetrics: lControlMetrics,
           onTap: detailsTap(
             () => DeviceDetailsScreen.go(
               context,
@@ -3045,12 +3261,26 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     required VoidCallback onRight,
     VoidCallback? onLeftLong,
     VoidCallback? onRightLong,
+    bool? dense,
+    DashboardControlMetrics? lControlMetrics,
   }) {
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? metrics =
+        lControlMetrics ?? _zoneControlMetricsForLayout(layout);
+    final bool isDense = dense ??
+        (layout == SectionLayout.small || _lightingHorizontalScroll);
+    final double btnSize =
+        metrics?.circularButtonSize ?? (isDense ? 30 : 35);
+    final double gap =
+        metrics?.circularButtonGap.w ?? (isDense ? 6.w : 17.w);
+    final double iconSize = metrics != null
+        ? btnSize * 0.68
+        : (isDense ? 22.sp : 26.sp);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 1,
           onTap: () => _flashMark(
             value: 1,
@@ -3068,13 +3298,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
           child: Icon(
             Icons.chevron_left_rounded,
-            size: 26.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
-        SizedBox(width: 17.w),
+        SizedBox(width: gap),
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 2,
           onTap: () => _flashMark(
             value: 2,
@@ -3092,7 +3322,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
                 ),
           child: Icon(
             Icons.chevron_right_rounded,
-            size: 26.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -3104,12 +3334,26 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     required String markKey,
     required VoidCallback onMinus,
     required VoidCallback onPlus,
+    bool? dense,
+    DashboardControlMetrics? lControlMetrics,
   }) {
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? metrics =
+        lControlMetrics ?? _zoneControlMetricsForLayout(layout);
+    final bool isDense = dense ??
+        (layout == SectionLayout.small || _lightingHorizontalScroll);
+    final double btnSize =
+        metrics?.circularButtonSize ?? (isDense ? 30 : 35);
+    final double gap =
+        metrics?.circularButtonGap.w ?? (isDense ? 6.w : 17.w);
+    final double iconSize = metrics != null
+        ? btnSize * 0.58
+        : (isDense ? 18.sp : 22.sp);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 1,
           onTap: () => _flashMark(
             value: 1,
@@ -3119,13 +3363,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           child: Icon(
             Icons.remove_rounded,
-            size: 22.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
-        SizedBox(width: 17.w),
+        SizedBox(width: gap),
         _CircleBtn(
-          size: 35,
+          size: btnSize,
           marked: (_lightingStepMark[markKey] ?? 0) == 2,
           onTap: () => _flashMark(
             value: 2,
@@ -3135,7 +3379,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           ),
           child: Icon(
             Icons.add_rounded,
-            size: 22.sp,
+            size: iconSize,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -3146,11 +3390,50 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildLightingSliderControl({
     required double value,
     required ValueChanged<double> onChanged,
+    double? width,
+    bool expand = false,
+    DashboardControlMetrics? lControlMetrics,
     IconData? icon,
     String? iconAsset,
   }) {
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? metrics =
+        lControlMetrics ?? _zoneControlMetricsForLayout(layout);
+    if (metrics != null) {
+      return SizedBox(
+        width: metrics.sliderWidth.w,
+        height: metrics.sliderHeight.h,
+        child: _DimmerPill(
+          percent: value,
+          onChanged: onChanged,
+          fixedWidth: metrics.sliderWidth.w,
+          icon: icon,
+          iconAsset: iconAsset,
+        ),
+      );
+    }
+    if (expand) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final double w =
+              constraints.maxWidth.isFinite && constraints.maxWidth > 0
+              ? constraints.maxWidth
+              : 118.w;
+          return SizedBox(
+            width: w,
+            height: 35.h,
+            child: _DimmerPill(
+              percent: value,
+              onChanged: onChanged,
+              icon: icon,
+              iconAsset: iconAsset,
+            ),
+          );
+        },
+      );
+    }
     return SizedBox(
-      width: 118.w,
+      width: width ?? 118.w,
       height: 35.h,
       child: _DimmerPill(
         percent: value,
@@ -3164,16 +3447,20 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
   Widget _buildLightingSwitchControl({
     required bool value,
     required ValueChanged<bool> onChanged,
+    DashboardControlMetrics? lControlMetrics,
   }) {
-    const double cupertinoHeight = 31;
-    final double height = 35.h;
+    final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
+    final DashboardControlMetrics? metrics =
+        lControlMetrics ?? _zoneControlMetricsForLayout(layout);
+    final double switchWidth = metrics?.toggleWidth.w ?? 60.w;
+    final double height = metrics?.toggleHeight.h ?? 35.h;
     return SizedBox(
-      width: 60.w,
+      width: switchWidth,
       height: height,
       child: Align(
         alignment: Alignment.centerRight,
         child: Transform.scale(
-          scale: height / cupertinoHeight,
+          scale: height / _kZoneCupertinoSwitchHeight,
           child: CupertinoSwitch(
             value: value,
             onChanged: (bool next) {
@@ -3286,16 +3573,24 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
     Widget? controls,
     VoidCallback? onTap,
     VoidCallback? onModeTap,
+    bool? compactOverride,
+    double? cardHeightOverride,
+    bool uniformControlSlot = false,
+    bool controlFillsSlot = false,
+    DashboardControlMetrics? lControlMetrics,
   }) {
     final SectionLayout layout = parseSectionLayout(_lightingWidgetSize);
-    final bool compact =
-        layout == SectionLayout.small || _lightingHorizontalScroll;
+    final DashboardControlMetrics? metrics =
+        lControlMetrics ?? _zoneControlMetricsForLayout(layout);
+    final bool compact = compactOverride ?? _lightingHorizontalScroll;
     final double vPad = compact ? 8.h : 12.h;
     final double gap = compact ? 6.h : 8.h;
     final double titleH = compact ? 30.h : 38.h;
     final double statusH = compact ? 28.h : 32.h;
-    final double controlSlotWidth = compact ? 64.w : 136.w;
-    final double controlContentHeight = 35.h;
+    final double controlSlotWidth =
+        metrics?.controlSlotWidth.w ?? (compact ? 64.w : 136.w);
+    final double controlContentHeight =
+        metrics?.sliderHeight.h ?? 35.h;
     final radius = BorderRadius.circular(26.r);
     final Widget iconArea = dashboardLightingIconFrame(
       iconWidget ??
@@ -3314,7 +3609,18 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ),
           ),
     );
-    final double cardHeight = _lightCardHeightForWidgetSize(_lightingWidgetSize);
+    final double cardHeight = cardHeightOverride ??
+        _lightCardHeightForWidgetSize(_lightingWidgetSize);
+    final double resolvedTitleH = cardHeightOverride == null
+        ? titleH
+        : math.max(
+            titleH,
+            cardHeight -
+                (vPad * 2) -
+                kDashboardLightingIconSide -
+                (gap * 2) -
+                statusH,
+          );
     final Widget cardBody = SizedBox(
       height: cardHeight,
       width: double.infinity,
@@ -3323,7 +3629,12 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           color: const Color(0xFFF3F4F6),
           borderRadius: radius,
         ),
-        padding: EdgeInsets.fromLTRB(12.w, vPad, compact ? 8.w : 10.w, vPad),
+        padding: EdgeInsets.fromLTRB(
+          12.w,
+          vPad,
+          compact ? 8.w : 10.w,
+          vPad,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -3334,7 +3645,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             ),
             SizedBox(height: gap),
             SizedBox(
-              height: titleH,
+              height: resolvedTitleH,
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
@@ -3353,48 +3664,63 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             SizedBox(height: gap),
             SizedBox(
               height: statusH,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    status,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
-                      fontFamily: 'Inter',
-                      height: 1.0,
-                    ),
-                    maxLines: 1,
-                    softWrap: false,
-                  ),
-                  if (controls != null) ...[
-                    SizedBox(width: 6.w),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final double slotW = math.min(
-                            controlSlotWidth,
-                            constraints.maxWidth,
-                          );
-                          return SizedBox(
-                            width: slotW,
-                            height: controlContentHeight,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: controls,
-                              ),
+              child: metrics != null
+                  ? (controls == null
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: _zoneDashboardCardStatusText(status),
+                        )
+                      : _zoneDashboardMetricsControlRow(
+                          status: status,
+                          controls: controls,
+                          metrics: metrics,
+                          controlContentHeight: controlContentHeight,
+                          gap: compact ? 4 : 6,
+                        ))
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
+                            height: 1.0,
+                          ),
+                          maxLines: 1,
+                          softWrap: false,
+                        ),
+                        if (controls != null) ...[
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final double slotW = math.min(
+                                  controlSlotWidth,
+                                  constraints.maxWidth,
+                                );
+                                return SizedBox(
+                                  width: slotW,
+                                  height: controlContentHeight,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: controlFillsSlot
+                                        ? controls
+                                        : FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerRight,
+                                            child: controls,
+                                          ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
             ),
           ],
         ),
@@ -3965,10 +4291,17 @@ class _LightDimmerCard extends StatelessWidget {
 }
 
 class _DimmerPill extends StatelessWidget {
-  const _DimmerPill({required this.percent, this.onChanged, this.icon, this.iconAsset});
+  const _DimmerPill({
+    required this.percent,
+    this.onChanged,
+    this.fixedWidth,
+    this.icon,
+    this.iconAsset,
+  });
 
   final double percent;
   final ValueChanged<double>? onChanged;
+  final double? fixedWidth;
   final IconData? icon;
   final String? iconAsset;
 
@@ -3983,10 +4316,10 @@ class _DimmerPill extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double w =
-            constraints.maxWidth.isFinite && constraints.maxWidth > 0
-            ? constraints.maxWidth
-            : 133.w;
+        final double w = fixedWidth ??
+            (constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                ? constraints.maxWidth
+                : 133.w);
 
         final Widget pill = Container(
           width: w,

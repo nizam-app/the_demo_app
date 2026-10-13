@@ -212,7 +212,7 @@ class _CoreScreenState extends State<CoreScreen> {
           Align(
             alignment: Alignment.centerLeft,
             child: GlobalCircleIconBtn(
-              color: _cardBg,
+              color: const Color(0xFFF3F4F6),
               child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
               onTap: () {
                 if (Navigator.of(context).canPop()) {
@@ -235,7 +235,7 @@ class _CoreScreenState extends State<CoreScreen> {
           Align(
             alignment: Alignment.centerRight,
             child: GlobalCircleIconBtn(
-              color: _cardBg,
+              color: const Color(0xFFF3F4F6),
               child: Icon(Icons.more_horiz_rounded, color: Colors.black),
               onTap: () {},
             ),

@@ -5,6 +5,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
 
+/// Standard iOS tab bar: opaque white + hairline top separator.
+BoxDecoration iosTabBarDecoration() {
+  return const BoxDecoration(
+    color: Colors.white,
+    border: Border(
+      top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
+    ),
+  );
+}
+
 // Standalone bottom nav bar widget for individual screens (uses route navigation)
 class BottomNavBarWidget extends StatelessWidget {
   const BottomNavBarWidget({
@@ -38,6 +48,16 @@ class BottomNavBarWidget extends StatelessWidget {
       NavItemData('Settings', 'assets/seting.png'),
     ];
 
+    if (useBackdropBlur && trackColor == null) {
+      return RepaintBoundary(
+        child: LiquidGlassFloatingTabBar(
+          items: items,
+          selectedIndex: selectedIndex,
+          onTap: onItemTapped,
+        ),
+      );
+    }
+
     final track = Material(
       type: MaterialType.transparency,
       child: Container(
@@ -49,7 +69,7 @@ class BottomNavBarWidget extends StatelessWidget {
                   top: BorderSide(color: Color(0xFFE1E1E1), width: 1),
                 ),
               )
-            : LiquidGlass.barDecoration(topEdge: true),
+            : iosTabBarDecoration(),
         child: LayoutBuilder(
           builder: (context, c) {
             final w = c.maxWidth / items.length;
@@ -93,16 +113,7 @@ class BottomNavBarWidget extends StatelessWidget {
       ),
     );
 
-    return RepaintBoundary(
-      child: useBackdropBlur
-          ? ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: track,
-              ),
-            )
-          : track,
-    );
+    return RepaintBoundary(child: track);
   }
 }
 
@@ -199,119 +210,169 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: IndexedStack(index: _selectedIndex, children: widget.children),
       ),
       bottomNavigationBar: _bottomBarVisible
-          ? RepaintBoundary(
-              child: widget.translucentBottomBar
-            ? ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: Container(
-                    height: 72.h,
-                    decoration: LiquidGlass.barDecoration(topEdge: true),
-                    child: LayoutBuilder(
-                      builder: (context, c) {
-                        final w = c.maxWidth / items.length;
-                        return Stack(
-                          children: [
-                            Positioned(
-                              top: 0,
-                              left: w * _selectedIndex + (w - 46.w) / 2,
-                              child: Container(
-                                width: 46.w,
-                                height: 3.h,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF111827),
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(2.r),
-                                    bottomRight: Radius.circular(2.r),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Row(
-                              children: List.generate(items.length, (i) {
-                                return Expanded(
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () => _onItemTapped(i),
-                                    child: BottomNavItem(
-                                      label: items[i].label,
-                                      imagePath: items[i].imagePath,
-                                      isSelected: i == _selectedIndex,
-                                      showBadge:
-                                          items[i].label == 'Notifications',
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    ),
-                  ),
-                ),
-              )
-            : Material(
-                type: MaterialType.transparency,
+          ? RepaintBoundary(child: _buildShellBottomBar(items))
+          : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildShellBottomBar(List<NavItemData> items) {
+    if (widget.translucentBottomBar) {
+      return LiquidGlassFloatingTabBar(
+        items: items,
+        selectedIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      );
+    }
+    return Material(
+      type: MaterialType.transparency,
+      child: _FlatShellTabTrack(
+        items: items,
+        selectedIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+
+/// Full-width tab track with top selection line (Devices / Analytics / …).
+class _FlatShellTabTrack extends StatelessWidget {
+  const _FlatShellTabTrack({
+    required this.items,
+    required this.selectedIndex,
+    required this.onTap,
+  });
+
+  final List<NavItemData> items;
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 72.h,
+      decoration: iosTabBarDecoration(),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final w = c.maxWidth / items.length;
+          return Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: w * selectedIndex + (w - 46.w) / 2,
                 child: Container(
-                  height: 72.h,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      top: BorderSide(
-                        color: Color(0xFFE1E1E1),
-                        width: 1,
-                      ),
+                  width: 46.w,
+                  height: 3.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF111827),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(2.r),
+                      bottomRight: Radius.circular(2.r),
                     ),
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, c) {
-                      final w = c.maxWidth / items.length;
-                      return Stack(
-                        children: [
-                          Positioned(
-                            top: 0,
-                            left: w * _selectedIndex + (w - 46.w) / 2,
-                            child: Container(
-                              width: 46.w,
-                              height: 3.h,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF111827),
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(2.r),
-                                  bottomRight: Radius.circular(2.r),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            children: List.generate(items.length, (i) {
-                              return Expanded(
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () => _onItemTapped(i),
-                                  child: BottomNavItem(
-                                    label: items[i].label,
-                                    imagePath: items[i].imagePath,
-                                    isSelected: i == _selectedIndex,
-                                    showBadge:
-                                        items[i].label == 'Notifications',
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
-                      );
-                    },
                   ),
                 ),
               ),
-            )
-          : const SizedBox.shrink(),
+              Row(
+                children: List.generate(items.length, (i) {
+                  return Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onTap(i),
+                      child: BottomNavItem(
+                        label: items[i].label,
+                        imagePath: items[i].imagePath,
+                        isSelected: i == selectedIndex,
+                        showBadge: items[i].label == 'Notifications',
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Floating frosted pill tab bar (Liquid Glass — app-wide shell / standalone nav).
+class LiquidGlassFloatingTabBar extends StatelessWidget {
+  const LiquidGlassFloatingTabBar({
+    required this.items,
+    required this.selectedIndex,
+    required this.onTap,
+  });
+
+  final List<NavItemData> items;
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(18.w, 0, 18.w, 10.h + bottomInset * 0.35),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999.r),
+          boxShadow: LiquidGlass.floatingPillShadow(),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999.r),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+            child: Container(
+              height: 68.h,
+              decoration: LiquidGlass.frostedPillDecoration(),
+              child: LayoutBuilder(
+                builder: (context, c) {
+                  final tabWidth = c.maxWidth / items.length;
+                  final barHeight = 68.h;
+                  final capsuleInsetH = 3.w;
+                  final capsuleWidth = tabWidth - capsuleInsetH * 2;
+                  final capsuleHeight = 58.h;
+                  final capsuleTop = (barHeight - capsuleHeight) / 2;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 240),
+                        curve: Curves.easeOutCubic,
+                        left: tabWidth * selectedIndex + capsuleInsetH,
+                        top: capsuleTop,
+                        width: capsuleWidth,
+                        height: capsuleHeight,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF111827).withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(999.r),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: List.generate(items.length, (i) {
+                          return Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => onTap(i),
+                              child: BottomNavItem(
+                                label: items[i].label,
+                                imagePath: items[i].imagePath,
+                                isSelected: i == selectedIndex,
+                                showBadge: items[i].label == 'Notifications',
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

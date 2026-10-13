@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
-import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/features/devices/widget/assign_category_zone.dart';
 
 import '../widget/addSmartDevicesPopup.dart';
@@ -181,6 +180,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GlobalCircleIconBtn(
+                color: const Color(0xFFF3F4F6),
                 child: Image.asset(
                   'assets/aro.png',
                   width: 16.w,
@@ -192,6 +192,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   GlobalCircleIconBtn(
+                    color: const Color(0xFFF3F4F6),
                     onTap: () => showEditSmartDeviceSheet(context),
                     child: Icon(
                       Icons.more_horiz_rounded,
@@ -200,14 +201,13 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  PressableCircleSurface(
-                    side: 36.w,
-                    useLiquidGlass: true,
+                  GlobalCircleIconBtn(
+                    color: const Color(0xFF111827),
                     onTap: () => showAddSmartDeviceBottomSheet(context),
                     child: Icon(
                       Icons.add_rounded,
                       size: 23.sp,
-                      color: _primary,
+                      color: Colors.white,
                     ),
                   ),
                 ],
