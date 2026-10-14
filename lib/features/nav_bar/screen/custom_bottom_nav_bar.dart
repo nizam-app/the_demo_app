@@ -27,7 +27,8 @@ ThemeData liquidGlassBottomNavTheme(ThemeData base) {
 /// Scroll/list bottom padding when body extends under the floating glass tab bar.
 double floatingGlassTabBarScrollPadding(BuildContext context) {
   final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-  return 18.h + 68.h + 10.h + bottomInset + 8.h;
+  // Bar uses 6.h bottom margin + 68.h height (see [LiquidGlassFloatingTabBar]).
+  return 18.h + 68.h + 6.h + 10.h + 8.h + bottomInset;
 }
 
 /// WhatsApp-style shell: [extendBody] + floating frosted footer on every screen.
@@ -381,18 +382,12 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-    // Sit closer to the home indicator (WhatsApp-style), not floating high above it.
-    final double bottomGap = bottomInset > 0 ? 0.h : 6.h;
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: false,
-      minimum: EdgeInsets.zero,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, bottomGap + bottomInset),
-        child: DecoratedBox(
+    // Small gap above the home indicator. Do not add [viewPadding.bottom] here —
+    // the scaffold bottom slot is already above the unsafe area, so full inset
+    // padding pushed the pill too high (large empty band under the bar).
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 6.h),
+      child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999.r),
             boxShadow: LiquidGlass.floatingPillShadow(),
@@ -454,7 +449,6 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

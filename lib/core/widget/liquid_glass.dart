@@ -108,22 +108,22 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
-  /// Sheets and menus. Radius is applied by the caller.
+  /// Sheets and menus. Opaque white (Figma) — semi-transparent fill tints grey over #F3F4F6.
   static BoxDecoration sheetDecoration({BorderRadius? borderRadius}) {
     return BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.white.withValues(alpha: 0.88),
-          Colors.white.withValues(alpha: 0.76),
-        ],
-      ),
+      color: Colors.white,
       borderRadius: borderRadius,
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.72),
-        width: 0.8,
+        color: const Color(0xFFE5E7EB),
+        width: 0.6,
       ),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFF111827).withValues(alpha: 0.06),
+          blurRadius: 24,
+          offset: const Offset(0, -4),
+        ),
+      ],
     );
   }
 
@@ -147,7 +147,7 @@ class LiquidGlass extends StatelessWidget {
   }
 }
 
-/// Frosted panel for modal bottom sheets (blur + [LiquidGlass.sheetDecoration]).
+/// White modal bottom sheet panel ([LiquidGlass.sheetDecoration]).
 class LiquidGlassModalSheetPanel extends StatelessWidget {
   const LiquidGlassModalSheetPanel({
     super.key,
@@ -160,17 +160,16 @@ class LiquidGlassModalSheetPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return Material(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
       borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: LiquidGlass.modalSheetBlurSigma,
-          sigmaY: LiquidGlass.modalSheetBlurSigma,
-        ),
-        child: DecoratedBox(
-          decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
-          child: child,
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: DecoratedBox(
+        decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
+        child: child,
       ),
     );
   }
