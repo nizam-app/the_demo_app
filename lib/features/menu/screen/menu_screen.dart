@@ -27,13 +27,12 @@ const double _kMenuRowPaddingH = 16;
 const double _kMenuBadgeWidth = 39;
 const double _kMenuBadgeHeight = 30;
 
-class MenuScreen extends StatelessWidget {
+class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
 
   static const String routeName = '/menu';
 
   static const _bg = Colors.transparent;
-  /// Full-page menu background — brand blue wash (same family as [_blue]).
   static const _menuBrandBlue = Color(0xFFDDEBFF);
   static const _card = Color(0xFFF3F4F6);
   static const _primary = Color(0xFF111827);
@@ -44,13 +43,20 @@ class MenuScreen extends StatelessWidget {
   static const _green = Color(0xFF10B981);
 
   @override
+  State<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends State<MenuScreen> {
+  double _headerScrollOffset = 0;
+
+  @override
   Widget build(BuildContext context) {
     final headerBarHeight = 56.h;
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _menuBrandBlue,
+      backgroundColor: MenuScreen._menuBrandBlue,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -64,10 +70,18 @@ class MenuScreen extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const Positioned.fill(
-                child: _MenuAnimatedBackground(brandBlue: _menuBrandBlue),
+              Positioned.fill(
+                child: _MenuAnimatedBackground(
+                  brandBlue: MenuScreen._menuBrandBlue,
+                ),
               ),
-              SingleChildScrollView(
+              listenInnerScreenScroll(
+                onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                  current: _headerScrollOffset,
+                  next: px,
+                  apply: () => setState(() => _headerScrollOffset = px),
+                ),
+                child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   0,
                   topInset + headerBarHeight + 10.h,
@@ -85,7 +99,7 @@ class MenuScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(26.r),
                           border: Border.all(
-                            color: _divider.withValues(alpha: 0.35),
+                            color: MenuScreen._divider.withValues(alpha: 0.35),
                             width: 1,
                           ),
                         ),
@@ -110,7 +124,7 @@ class MenuScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w500,
-                                      color: _primary,
+                                      color: MenuScreen._primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -122,7 +136,7 @@ class MenuScreen extends StatelessWidget {
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w300,
                                       height: 1.3,
-                                      color: _primary,
+                                      color: MenuScreen._primary,
                                       fontFamily: 'Inter',
                                     ),
                                   ),
@@ -307,7 +321,7 @@ class MenuScreen extends StatelessWidget {
                         _MenuItemRow(
                           imagePath: 'assets/Mask group copy 3.png',
                           title: 'All Categories',
-                          titleColor: _blue,
+                          titleColor: MenuScreen._blue,
                           showChevron: false,
                           iconSize: 20,
                           onTap: () => context.push(CategoriesScreen.routeName),
@@ -381,7 +395,7 @@ class MenuScreen extends StatelessWidget {
                         _MenuItemRow(
                           imagePath: 'assets/Mask group copy 3.png',
                           title: 'All Zones',
-                          titleColor: _blue,
+                          titleColor: MenuScreen._blue,
                           showChevron: false,
                           iconSize: 20,
                           onTap: () {
@@ -433,57 +447,52 @@ class MenuScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          16.w,
-                          topInset + 10.h,
-                          16.w,
-                          10.h,
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: MenuScreen._menuBrandBlue,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    topInset + 10.h,
+                    16.w,
+                    10.h,
+                  ),
+                  child: Row(
+                    children: [
+                      GlobalCircleIconBtn(
+                        color: const Color(0xFFFFFFFF),
+                        child: Image.asset(
+                          'assets/aro.png',
+                          width: 16.w,
+                          height: 16.h,
                         ),
-                        child: Row(
-                          children: [
-                            GlobalCircleIconBtn(
-                              color: const Color(0xFFFFFFFF),
-                              child: Image.asset(
-                                'assets/aro.png',
-                                width: 16.w,
-                                height: 16.h,
-                              ),
-                              onTap: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go('/home');
-                                }
-                              },
+                        onTap: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/home');
+                          }
+                        },
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Menu',
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w600,
+                              color: MenuScreen._primary,
+                              fontFamily: 'Inter',
                             ),
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  'Menu',
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: _primary,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 36.w),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(width: 36.w),
+                    ],
                   ),
                 ),
               ),

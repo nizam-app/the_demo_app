@@ -65,18 +65,11 @@ class _UserEditState extends State<UserEdit> {
         onTap: () => Navigator.of(context).pop(),
         child: Align(
         alignment: Alignment.bottomCenter,
-        child: ClipRRect(
+        child: LiquidGlassModalSheetPanel(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(33.w, 16.h, 12.w, 22.h),
-              decoration: LiquidGlass.sheetDecoration(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28.r)),
-              ),
-              child: Column(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(33.w, 16.h, 12.w, 22.h),
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header (same style as Add user)
@@ -240,11 +233,10 @@ class _UserEditState extends State<UserEdit> {
               // Small bottom spacing so content isn't glued to the edge
               SizedBox(height: 40.h),
             ],
-              ),
-            ),
           ),
         ),
-        ),
+      ),
+      ),
       ),
     );
   }

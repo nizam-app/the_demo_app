@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +30,7 @@ class _SettingScreenState extends State<SettingScreen> {
   bool _negateOutput = true;
   bool _relativeLuminance = true;
   bool _acDimming = true;
+  double _headerScrollOffset = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +57,13 @@ class _SettingScreenState extends State<SettingScreen> {
               Positioned.fill(
                 child: Material(
                   color: _screenBg,
-                  child: SingleChildScrollView(
+                  child: listenInnerScreenScroll(
+                    onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                      current: _headerScrollOffset,
+                      next: px,
+                      apply: () => setState(() => _headerScrollOffset = px),
+                    ),
+                    child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     14.w,
                     scrollTopPadding,
@@ -167,28 +172,23 @@ class _SettingScreenState extends State<SettingScreen> {
                     ],
                   ),
                 ),
+                  ),
                 ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: _buildAppBar(context),
-                      ),
-                    ),
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _screenBg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
                   ),
+                  child: _buildAppBar(context),
                 ),
               ),
             ],

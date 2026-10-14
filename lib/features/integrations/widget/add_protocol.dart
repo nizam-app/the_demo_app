@@ -99,18 +99,11 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
           alignment: Alignment.bottomCenter,
           child: Material(
             color: Colors.transparent,
-            child: ClipRRect(
+            child: LiquidGlassModalSheetPanel(
               borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
-                  decoration: LiquidGlass.sheetDecoration(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(28.r)),
-                  ),
-                  child: Column(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Header: "Add protocol" centered, close (X) on far right
@@ -166,7 +159,6 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                     ],
                   ),
                 ],
-              ),
                 ),
               ),
             ),

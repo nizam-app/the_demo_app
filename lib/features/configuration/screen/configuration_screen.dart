@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +6,17 @@ import '../../../core/widget/global_back_button.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
 
 /// Device **Configuration** screen — Details + Properties cards, Replace / Delete actions.
-class ConfigurationScreen extends StatelessWidget {
+class ConfigurationScreen extends StatefulWidget {
   const ConfigurationScreen({super.key});
 
   static const String routeName = '/configuration';
+
+  @override
+  State<ConfigurationScreen> createState() => _ConfigurationScreenState();
+}
+
+class _ConfigurationScreenState extends State<ConfigurationScreen> {
+  double _headerScrollOffset = 0;
 
   static const Color _screenBg = Color(0xFFF3F4F6);
   static const Color _cardBg = Color(0xFFFFFFFF);
@@ -81,7 +86,13 @@ class ConfigurationScreen extends StatelessWidget {
             Positioned.fill(
               child: Material(
                 color: _screenBg,
-                child: SingleChildScrollView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     14.w,
                     scrollTopPadding,
@@ -147,6 +158,7 @@ class ConfigurationScreen extends StatelessWidget {
                   ],
                   ),
                 ),
+                ),
               ),
             ),
             Positioned(
@@ -166,21 +178,18 @@ class ConfigurationScreen extends StatelessWidget {
     double topInset,
     double headerRowHeight,
   ) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: DecoratedBox(
-          decoration: LiquidGlass.barDecoration(),
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 14.w,
-              right: 14.w,
-              top: topInset + 8.h,
-              bottom: 12.h,
-            ),
-            child: SizedBox(
-              height: headerRowHeight,
-              child: Stack(
+    return LiquidGlassInnerScreenHeader(
+      backgroundColor: _screenBg,
+      scrollOffset: _headerScrollOffset,
+      padding: EdgeInsets.only(
+        left: 14.w,
+        right: 14.w,
+        top: topInset + 8.h,
+        bottom: 12.h,
+      ),
+      child: SizedBox(
+        height: headerRowHeight,
+        child: Stack(
                 alignment: Alignment.center,
                 children: [
                   Align(
@@ -248,9 +257,6 @@ class ConfigurationScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ),
-      ),
     );
   }
 

@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -123,6 +121,7 @@ class TcpIpIntegrationScreen extends StatefulWidget {
 
 class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
   late final TcpIpIntegrationController controller;
+  double _headerScrollOffset = 0;
 
   // Colors (match your design language)
   static const Color _bg = Color(0xFFF3F4F6);
@@ -182,7 +181,13 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
                 ),
               ),
               Positioned.fill(
-                child: AnimatedBuilder(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: AnimatedBuilder(
                   animation: controller,
                   builder: (context, _) {
                     return ListView(
@@ -287,32 +292,27 @@ class _TcpIpIntegrationScreenState extends State<TcpIpIntegrationScreen> {
                     );
                   },
                 ),
+                ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: SizedBox(
-                          height: 36.h,
-                          child: _TopBar(
-                            title: 'TCP/IP Integration',
-                            onBack: () => Navigator.maybePop(context),
-                            onMenu: _openMenu,
-                          ),
-                        ),
-                      ),
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _bg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: SizedBox(
+                    height: 36.h,
+                    child: _TopBar(
+                      title: 'TCP/IP Integration',
+                      onBack: () => Navigator.maybePop(context),
+                      onMenu: _openMenu,
                     ),
                   ),
                 ),

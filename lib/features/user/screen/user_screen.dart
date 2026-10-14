@@ -1,4 +1,4 @@
-import 'dart:ui' show BoxHeightStyle, BoxWidthStyle, ImageFilter;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +11,7 @@ import '../../../core/widget/pressable_circle_surface.dart';
 import '../widget/userAdd_popup.dart';
 import '../widget/user_edit.dart';
 
-class UsersScreen extends StatelessWidget {
+class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
   static const routeName = "/UserScreen";
 
@@ -24,38 +24,26 @@ class UsersScreen extends StatelessWidget {
   static const _inactiveChipBg = Color(0xFFF2F3F5);
   static const _globeCyan = Color(0xFF00D1FF);
 
-
-
   static Future<void> showAddUserBottomSheet(BuildContext context) {
-    return showModalBottomSheet(
+    return showLiquidGlassModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent, // keep dim + rounded corners clean
-      barrierColor: Colors.black.withOpacity(0.25),
       builder: (_) => const AddUserBottomSheet(),
     );
   }
 
   static Future<void> showEditUserBottomSheet(BuildContext context) {
-    return showModalBottomSheet(
+    return showLiquidGlassModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.25),
       builder: (_) => const UserEdit(),
     );
   }
 
-  // void showZonesMenuSheet(BuildContext context) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     isScrollControlled: true,
-  //     barrierColor: Colors.black.withOpacity(0.25),
-  //     builder: (_) => const ZonesMenuSheet(),
-  //   );
-  // }
+  @override
+  State<UsersScreen> createState() => _UsersScreenState();
+}
 
+class _UsersScreenState extends State<UsersScreen> {
+  double _headerScrollOffset = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +51,7 @@ class UsersScreen extends StatelessWidget {
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final scrollTopPadding = topInset + headerBarHeight + 16.h;
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: UsersScreen._bg,
       //backgroundColor: Colors.white,
       floatingActionButton: const _FabPlus(),
       body: SafeArea(
@@ -76,7 +64,13 @@ class UsersScreen extends StatelessWidget {
               children: [
                 
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: listenInnerScreenScroll(
+                    onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                      current: _headerScrollOffset,
+                      next: px,
+                      apply: () => setState(() => _headerScrollOffset = px),
+                    ),
+                    child: SingleChildScrollView(
                     padding: EdgeInsets.only(
                       left: 15.w,
                       right: 15.w,
@@ -102,13 +96,13 @@ class UsersScreen extends StatelessWidget {
                                   'assets/images/setting.png',
                                   13.h,
                                   13.w,
-                                  color: _textDark,
+                                  color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
                                   'assets/images/glog.png',
                                   15.h,
                                   15.w,
-                                  color: _globeCyan,
+                                  color: UsersScreen._globeCyan,
                                 ),
                               ],
                             ),
@@ -126,13 +120,13 @@ class UsersScreen extends StatelessWidget {
                                   'assets/Mask group (1) copy 2.png',
                                   11.h,
                                   11.w,
-                                  color: _textDark,
+                                  color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
                                   'assets/images/glog.png',
                                   15.h,
                                   15.w,
-                                  color: _globeCyan,
+                                  color: UsersScreen._globeCyan,
                                 ),
                               ],
                             ),
@@ -146,7 +140,7 @@ class UsersScreen extends StatelessWidget {
                                   'assets/key.png',
                                   11.h,
                                   11.w,
-                                  color: _textDark,
+                                  color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
                                   'assets/images/Group 55.png',
@@ -160,7 +154,7 @@ class UsersScreen extends StatelessWidget {
 
                         ],
                       ),
-
+                    ),
                   ),
                 ),
               ],
@@ -169,22 +163,16 @@ class UsersScreen extends StatelessWidget {
               top: 0,
               left: 0,
               right: 0,
-              child: ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: DecoratedBox(
-                    decoration: LiquidGlass.barDecoration(),
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        15.w,
-                        topInset + 10.h,
-                        15.w,
-                        10.h,
-                      ),
-                      child: const _TopBar(),
-                    ),
-                  ),
+              child: LiquidGlassInnerScreenHeader(
+                backgroundColor: UsersScreen._bg,
+                scrollOffset: _headerScrollOffset,
+                padding: EdgeInsets.fromLTRB(
+                  15.w,
+                  topInset + 10.h,
+                  15.w,
+                  10.h,
                 ),
+                child: const _TopBar(),
               ),
             ),
           ],

@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +20,7 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   int _selectedNavIndex = 3; // Notifications is index 3
+  double _headerScrollOffset = 0;
 
   void _onNavItemTapped(int index) {
     final routes = [
@@ -125,7 +124,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
               Positioned.fill(
-                child: ListView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: ListView(
                   padding: EdgeInsets.fromLTRB(
                     18.w,
                     scrollTopPadding,
@@ -235,67 +240,62 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ],
                   ],
                 ),
+                ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: SizedBox(
-                          height: 36.h,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: GlobalCircleIconBtn(
-                                  color: const Color(0xFFF3F4F6),
-                                  child: Image.asset(
-                                    'assets/aro.png',
-                                    width: 16.w,
-                                    height: 16.h,
-                                  ),
-                                  onTap: () {
-                                    final shell = CustomBottomNavBar.of(
-                                      context,
-                                    );
-                                    if (shell != null) {
-                                      shell.setSelectedIndex(2);
-                                      return;
-                                    }
-                                    if (context.canPop()) {
-                                      context.pop();
-                                    } else {
-                                      context.go('/home');
-                                    }
-                                  },
-                                ),
-                              ),
-                              Text(
-                                'Notifications',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 22.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: _textPrimary,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _screenBg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: SizedBox(
+                    height: 36.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GlobalCircleIconBtn(
+                            color: const Color(0xFFF3F4F6),
+                            child: Image.asset(
+                              'assets/aro.png',
+                              width: 16.w,
+                              height: 16.h,
+                            ),
+                            onTap: () {
+                              final shell = CustomBottomNavBar.of(
+                                context,
+                              );
+                              if (shell != null) {
+                                shell.setSelectedIndex(2);
+                                return;
+                              }
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/home');
+                              }
+                            },
                           ),
                         ),
-                      ),
+                        Text(
+                          'Notifications',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w600,
+                            color: _textPrimary,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

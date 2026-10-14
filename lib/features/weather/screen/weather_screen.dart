@@ -101,7 +101,7 @@ final _weatherScreenProvider = Provider<_WeatherScreenData>((ref) {
   );
 });
 
-class WeatherScreen extends ConsumerWidget {
+class WeatherScreen extends ConsumerStatefulWidget {
   const WeatherScreen({super.key, this.showBottomNav = true});
 
   static const String routeName = '/weather';
@@ -114,6 +114,13 @@ class WeatherScreen extends ConsumerWidget {
   static const Color _textPrimary = Color(0xFF002172);
   static const Color _textSecondary = Color(0xFFFFFFFF);
   static const Color _textMuted = Color(0xFFA7CAFE);
+
+  @override
+  ConsumerState<WeatherScreen> createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends ConsumerState<WeatherScreen> {
+  double _headerScrollOffset = 0;
 
   void _onNavItemTapped(BuildContext context, int index) {
     const routes = [
@@ -129,20 +136,20 @@ class WeatherScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final weather = ref.watch(_weatherScreenProvider);
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final headerChrome = 56.h;
     final scrollTopPadding = topInset + headerChrome + 10.h;
     final scrollBottomPad =
-        24.h + bottomInset + (showBottomNav ? 18.h + 72.h : 0);
+        24.h + bottomInset + (widget.showBottomNav ? 18.h + 72.h : 0);
 
     const gradientDecoration = BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [_skyTop, _skyBottom],
+        colors: [WeatherScreen._skyTop, WeatherScreen._skyBottom],
       ),
     );
 
@@ -155,12 +162,12 @@ class WeatherScreen extends ConsumerWidget {
       ),
       child: Scaffold(
         extendBody: true,
-        backgroundColor: _skyBottom,
+        backgroundColor: WeatherScreen._skyBottom,
         body: Container(
           decoration: gradientDecoration,
           child: SafeArea(
             top: false,
-            bottom: !showBottomNav,
+            bottom: !widget.showBottomNav,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -168,7 +175,13 @@ class WeatherScreen extends ConsumerWidget {
                   child: DecoratedBox(decoration: gradientDecoration),
                 ),
                 Positioned.fill(
-                  child: SingleChildScrollView(
+                  child: listenInnerScreenScroll(
+                    onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                      current: _headerScrollOffset,
+                      next: px,
+                      apply: () => setState(() => _headerScrollOffset = px),
+                    ),
+                    child: SingleChildScrollView(
                     padding: EdgeInsets.fromLTRB(
                       15.w,
                       scrollTopPadding,
@@ -201,7 +214,7 @@ class WeatherScreen extends ConsumerWidget {
                                           fontFamily: 'Inter',
                                           fontSize: 22.sp,
                                           fontWeight: FontWeight.w600,
-                                          color: _textPrimary,
+                                          color: WeatherScreen._textPrimary,
                                           height: 1.5,
                                         ),
                                       ),
@@ -217,7 +230,7 @@ class WeatherScreen extends ConsumerWidget {
                                               fontFamily: 'Inter',
                                               fontSize: 60.sp,
                                               fontWeight: FontWeight.w300,
-                                              color: _textPrimary,
+                                              color: WeatherScreen._textPrimary,
                                               height: 0.95,
                                             ),
                                           ),
@@ -228,7 +241,7 @@ class WeatherScreen extends ConsumerWidget {
                                               fontFamily: 'Inter',
                                               fontSize: 50.sp,
                                               fontWeight: FontWeight.w400,
-                                              color: _textPrimary,
+                                              color: WeatherScreen._textPrimary,
                                               height: 0.80,
                                             ),
                                           ),
@@ -248,7 +261,7 @@ class WeatherScreen extends ConsumerWidget {
                                                 fontFamily: 'Inter',
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w500,
-                                                color: _textPrimary,
+                                                color: WeatherScreen._textPrimary,
                                               ),
                                             ),
                                             //SizedBox(height: 10.h),
@@ -258,7 +271,7 @@ class WeatherScreen extends ConsumerWidget {
                                                 fontFamily: 'Inter',
                                                 fontSize: 16.sp,
                                                 fontWeight: FontWeight.w600,
-                                                color: _textPrimary,
+                                                color: WeatherScreen._textPrimary,
                                               ),
                                             ),
                                           ],
@@ -301,64 +314,59 @@ class WeatherScreen extends ConsumerWidget {
                           latitude: weather.latitude,
                           longitude: weather.longitude,
                         ),
-                        SizedBox(height: showBottomNav ? 10.h : 0),
+                        SizedBox(height: widget.showBottomNav ? 10.h : 0),
                       ],
                     ),
+                  ),
                   ),
                 ),
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
-                  child: ClipRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                      child: DecoratedBox(
-                        decoration: LiquidGlass.barDecoration(),
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            15.w,
-                            topInset + 10.h,
-                            15.w,
-                            8.h,
-                          ),
-                          child: SizedBox(
-                            height: 32.h,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: GlobalCircleIconBtn(
-                                    color: const Color(0xFF205BB5),
-                                    child: Image.asset(
-                                      'assets/aro.png',
-                                      width: 16.w,
-                                      height: 16.h,
-                                      color: Colors.white,
-                                    ),
-                                    onTap: () {
-                                      if (context.canPop()) {
-                                        context.pop();
-                                      } else {
-                                        context.go('/menu');
-                                      }
-                                    },
-                                  ),
-                                ),
-                                Text(
-                                  'Weather',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF002172),
-                                  ),
-                                ),
-                              ],
+                  child: LiquidGlassInnerScreenHeader(
+                    backgroundColor: WeatherScreen._skyTop,
+                    scrollOffset: _headerScrollOffset,
+                    padding: EdgeInsets.fromLTRB(
+                      15.w,
+                      topInset + 10.h,
+                      15.w,
+                      8.h,
+                    ),
+                    child: SizedBox(
+                      height: 32.h,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: GlobalCircleIconBtn(
+                              color: const Color(0xFF205BB5),
+                              child: Image.asset(
+                                'assets/aro.png',
+                                width: 16.w,
+                                height: 16.h,
+                                color: Colors.white,
+                              ),
+                              onTap: () {
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/menu');
+                                }
+                              },
                             ),
                           ),
-                        ),
+                          Text(
+                            'Weather',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF002172),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -367,7 +375,7 @@ class WeatherScreen extends ConsumerWidget {
             ),
           ),
         ),
-        bottomNavigationBar: showBottomNav
+        bottomNavigationBar: widget.showBottomNav
             ? BottomNavBarWidget(
                 selectedIndex: 2,
                 onItemTapped: (index) => _onNavItemTapped(context, index),

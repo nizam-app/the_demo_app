@@ -25,6 +25,8 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+  double _headerScrollOffset = 0;
+
   void showCategoryMenuSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -150,56 +152,57 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             ),
           ),
           Positioned.fill(
-            child: GridView.builder(
-              padding: EdgeInsets.fromLTRB(
-                18.w,
-                scrollTopPad,
-                18.w,
-                scrollBottomPad,
+            child: listenInnerScreenScroll(
+              onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                current: _headerScrollOffset,
+                next: px,
+                apply: () => setState(() => _headerScrollOffset = px),
               ),
-              physics: const BouncingScrollPhysics(),
-              itemCount: zones.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14.w,
-                mainAxisSpacing: 14.h,
-                childAspectRatio: 1.13,
+              child: GridView.builder(
+                padding: EdgeInsets.fromLTRB(
+                  18.w,
+                  scrollTopPad,
+                  18.w,
+                  scrollBottomPad,
+                ),
+                physics: const BouncingScrollPhysics(),
+                itemCount: zones.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14.w,
+                  mainAxisSpacing: 14.h,
+                  childAspectRatio: 1.13,
+                ),
+                itemBuilder: (_, i) {
+                  return ZoneCard(
+                    item: zones[i],
+                    onTap: () => context.push(
+                      Zone_Category_Screen.routeWithTitle(zones[i].title),
+                    ),
+                  );
+                },
               ),
-              itemBuilder: (_, i) {
-                return ZoneCard(
-                  item: zones[i],
-                  onTap: () => context.push(
-                    Zone_Category_Screen.routeWithTitle(zones[i].title),
-                  ),
-                );
-              },
             ),
           ),
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: DecoratedBox(
-                  decoration: LiquidGlass.barDecoration(),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      18.w,
-                      topInset + 8.h,
-                      18.w,
-                      8.h,
-                    ),
-                    child: SizedBox(
-                      height: 44.h,
-                      child: _TopBar(
-                        onBack: () => Navigator.pop(context),
-                        onMenu: () => showCategoryMenuSheet(context),
-                        onAdd: () => showCategoryAddMenuSheet(context),
-                      ),
-                    ),
-                  ),
+            child: LiquidGlassInnerScreenHeader(
+              backgroundColor: screenBg,
+              scrollOffset: _headerScrollOffset,
+              padding: EdgeInsets.fromLTRB(
+                18.w,
+                topInset + 8.h,
+                18.w,
+                8.h,
+              ),
+              child: SizedBox(
+                height: 44.h,
+                child: _TopBar(
+                  onBack: () => Navigator.pop(context),
+                  onMenu: () => showCategoryMenuSheet(context),
+                  onAdd: () => showCategoryAddMenuSheet(context),
                 ),
               ),
             ),

@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -51,8 +49,11 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GlassBottomNavScaffold(
       backgroundColor: Colors.white,
+      selectedIndex: _selectedNavIndex,
+      onItemTapped: _onNavItemTapped,
+      showBottomNav: widget.showBottomNav,
       body: Stack(
         children: [
           Center(
@@ -69,52 +70,42 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
             top: 0,
             left: 0,
             right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: DecoratedBox(
-                  decoration: LiquidGlass.barDecoration(),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 12.h),
-                      child: SizedBox(
-                        height: 36.h,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: GlobalCircleIconBtn(
-                                icon: Icons.arrow_back,
-                                onTap: _onBack,
-                              ),
-                            ),
-                            Text(
-                              'Automations',
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF111827),
-                              ),
-                            ),
-                          ],
-                        ),
+            child: LiquidGlassInnerScreenHeader(
+              backgroundColor: Colors.white,
+              scrollOffset: 0,
+              padding: EdgeInsets.fromLTRB(
+                14.w,
+                MediaQuery.viewPaddingOf(context).top + 8.h,
+                14.w,
+                12.h,
+              ),
+              child: SizedBox(
+                height: 36.h,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: GlobalCircleIconBtn(
+                        icon: Icons.arrow_back,
+                        onTap: _onBack,
                       ),
                     ),
-                  ),
+                    Text(
+                      'Automations',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: widget.showBottomNav
-          ? BottomNavBarWidget(
-              selectedIndex: _selectedNavIndex,
-              onItemTapped: _onNavItemTapped,
-            )
-          : null,
     );
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +21,8 @@ class ZonesScreen extends StatefulWidget {
 }
 
 class _ZonesScreenState extends State<ZonesScreen> {
+  double _headerScrollOffset = 0;
+
   void showZonesMenuSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -136,25 +136,32 @@ class _ZonesScreenState extends State<ZonesScreen> {
             ),
           ),
           Positioned.fill(
-            child: GridView.builder(
-              padding: EdgeInsets.fromLTRB(
-                18.w,
-                scrollTopPad,
-                18.w,
-                scrollBottomPad,
+            child: listenInnerScreenScroll(
+              onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                current: _headerScrollOffset,
+                next: px,
+                apply: () => setState(() => _headerScrollOffset = px),
               ),
-              physics: const BouncingScrollPhysics(),
-              itemCount: zones.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 14.w,
-                mainAxisSpacing: 14.h,
-                childAspectRatio: 1.13,
-              ),
-              itemBuilder: (_, i) => ZoneCard(
-                item: zones[i],
-                onTap: () => context.push(
-                  Zone_Category_Screen.routeWithTitle(zones[i].title),
+              child: GridView.builder(
+                padding: EdgeInsets.fromLTRB(
+                  18.w,
+                  scrollTopPad,
+                  18.w,
+                  scrollBottomPad,
+                ),
+                physics: const BouncingScrollPhysics(),
+                itemCount: zones.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14.w,
+                  mainAxisSpacing: 14.h,
+                  childAspectRatio: 1.13,
+                ),
+                itemBuilder: (_, i) => ZoneCard(
+                  item: zones[i],
+                  onTap: () => context.push(
+                    Zone_Category_Screen.routeWithTitle(zones[i].title),
+                  ),
                 ),
               ),
             ),
@@ -163,27 +170,21 @@ class _ZonesScreenState extends State<ZonesScreen> {
             top: 0,
             left: 0,
             right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: DecoratedBox(
-                  decoration: LiquidGlass.barDecoration(),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      18.w,
-                      topInset + 8.h,
-                      18.w,
-                      8.h,
-                    ),
-                    child: SizedBox(
-                      height: 44.h,
-                      child: _TopBar(
-                        onBack: () => Navigator.pop(context),
-                        onMenu: () => showZonesMenuSheet(context),
-                        onAdd: () => showZonesAddMenuSheet(context),
-                      ),
-                    ),
-                  ),
+            child: LiquidGlassInnerScreenHeader(
+              backgroundColor: screenBg,
+              scrollOffset: _headerScrollOffset,
+              padding: EdgeInsets.fromLTRB(
+                18.w,
+                topInset + 8.h,
+                18.w,
+                8.h,
+              ),
+              child: SizedBox(
+                height: 44.h,
+                child: _TopBar(
+                  onBack: () => Navigator.pop(context),
+                  onMenu: () => showZonesMenuSheet(context),
+                  onAdd: () => showZonesAddMenuSheet(context),
                 ),
               ),
             ),

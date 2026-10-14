@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/features/TCP/screen/tcp_ip_integration.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
@@ -124,28 +125,19 @@ class _IntegrationsScreenState extends State<IntegrationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GlassBottomNavScaffold(
       backgroundColor: _bg,
-
+      selectedIndex: _selectedNavIndex,
+      onItemTapped: _onNavItemTapped,
       floatingActionButton: _RoundFab(
         onTap: () {
-          showModalBottomSheet<void>(
+          showLiquidGlassModalBottomSheet<void>(
             context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            useSafeArea: true,
             isDismissible: true,
-            barrierColor: Colors.black.withOpacity(0.25),
             builder: (_) => const AddProtocolBottomSheet(),
           );
         },
       ),
-
-      bottomNavigationBar: BottomNavBarWidget(
-        selectedIndex: _selectedNavIndex,
-        onItemTapped: _onNavItemTapped,
-      ),
-
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 10.h),

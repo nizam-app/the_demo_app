@@ -70,18 +70,25 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
+  /// Floating footer tab bar — blur-only glass (no opaque fill; WhatsApp-style).
+  static BoxDecoration floatingTabBarDecoration() {
+    return BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.04),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.38),
+        width: 0.65,
+      ),
+    );
+  }
+
   /// Soft drop shadow for a floating glass pill (tab bar, FAB host).
   static List<BoxShadow> floatingPillShadow() {
     return [
       BoxShadow(
-        color: const Color(0xFF111827).withOpacity(0.10),
-        blurRadius: 28,
-        offset: const Offset(0, 10),
-      ),
-      BoxShadow(
-        color: Colors.white.withOpacity(0.45),
-        blurRadius: 0,
-        offset: const Offset(0, 0.5),
+        color: const Color(0xFF111827).withValues(alpha: 0.08),
+        blurRadius: 22,
+        offset: const Offset(0, 8),
       ),
     ];
   }
@@ -108,17 +115,19 @@ class LiquidGlass extends StatelessWidget {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.white.withOpacity(0.72),
-          Colors.white.withOpacity(0.42),
+          Colors.white.withValues(alpha: 0.88),
+          Colors.white.withValues(alpha: 0.76),
         ],
       ),
       borderRadius: borderRadius,
       border: Border.all(
-        color: Colors.white.withOpacity(0.70),
+        color: Colors.white.withValues(alpha: 0.72),
         width: 0.8,
       ),
     );
   }
+
+  static const double modalSheetBlurSigma = 22;
 
   @override
   Widget build(BuildContext context) {
@@ -136,4 +145,119 @@ class LiquidGlass extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Frosted panel for modal bottom sheets (blur + [LiquidGlass.sheetDecoration]).
+class LiquidGlassModalSheetPanel extends StatelessWidget {
+  const LiquidGlassModalSheetPanel({
+    super.key,
+    required this.borderRadius,
+    required this.child,
+  });
+
+  final BorderRadius borderRadius;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: LiquidGlass.modalSheetBlurSigma,
+          sigmaY: LiquidGlass.modalSheetBlurSigma,
+        ),
+        child: DecoratedBox(
+          decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Modal bottom sheet with transparent route chrome (no M3 grey surface).
+/// Inner-screen top bar: solid [backgroundColor] at rest, frosted glass when scrolled.
+class LiquidGlassInnerScreenHeader extends StatelessWidget {
+  const LiquidGlassInnerScreenHeader({
+    super.key,
+    required this.backgroundColor,
+    required this.padding,
+    required this.child,
+    this.scrollOffset = 0,
+    this.glassAfterPixels = 8,
+  });
+
+  final Color backgroundColor;
+  final EdgeInsetsGeometry padding;
+  final Widget child;
+  final double scrollOffset;
+  final double glassAfterPixels;
+
+  bool get _scrolled => scrollOffset > glassAfterPixels;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_scrolled) {
+      return ColoredBox(
+        color: backgroundColor,
+        child: Padding(padding: padding, child: child),
+      );
+    }
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: DecoratedBox(
+          decoration: LiquidGlass.barDecoration(),
+          child: Padding(padding: padding, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// Listens to vertical scroll and reports offset for [LiquidGlassInnerScreenHeader].
+Widget listenInnerScreenScroll({
+  required Widget child,
+  required ValueChanged<double> onScrollOffset,
+}) {
+  return NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification n) {
+      if (n.metrics.axis != Axis.vertical) return false;
+      if (n is ScrollUpdateNotification ||
+          n is ScrollEndNotification ||
+          n is ScrollMetricsNotification) {
+        onScrollOffset(n.metrics.pixels);
+      }
+      return false;
+    },
+    child: child,
+  );
+}
+
+void updateInnerScreenHeaderScrollOffset({
+  required double current,
+  required double next,
+  required VoidCallback apply,
+}) {
+  if ((next - current).abs() >= 0.5) apply();
+}
+
+Future<T?> showLiquidGlassModalBottomSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool isScrollControlled = true,
+  bool useSafeArea = false,
+  bool isDismissible = true,
+}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: isScrollControlled,
+    useSafeArea: useSafeArea,
+    isDismissible: isDismissible,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.25),
+    elevation: 0,
+    builder: builder,
+  );
 }

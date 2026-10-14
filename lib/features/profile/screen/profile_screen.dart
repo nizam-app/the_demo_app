@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,6 +19,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool rolesEnabled = true;
   bool remoteAccessEnabled = true;
+  double _headerScrollOffset = 0;
 
   static const _pageBg = Color(0xFFF3F4F6);
   static const _cardRadius = 26.0;
@@ -55,7 +54,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               Positioned.fill(
-                child: SingleChildScrollView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.only(
                     top: scrollTopPadding,
                     bottom: 8.h,
@@ -313,60 +318,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
+                ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: screenBg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: SizedBox(
+                    height: 40.h,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GlobalCircleIconBtn(
+                          color: Color(0xFFFFFFFF),
+                          child: Image.asset(
+                            'assets/aro.png',
+                            width: 16.w,
+                            height: 16.h,
+                          ),
+                          onTap: () => Navigator.maybePop(context),
                         ),
-                        child: SizedBox(
-                          height: 40.h,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GlobalCircleIconBtn(
-                                color: Color(0xFFFFFFFF),
-                                child: Image.asset(
-                                  'assets/aro.png',
-                                  width: 16.w,
-                                  height: 16.h,
-                                ),
-                                onTap: () => Navigator.maybePop(context),
-                              ),
-                              Text(
-                                'Profile',
-                                style: TextStyle(
-                                  fontSize: 22.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF111827),
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                              GlobalCircleIconBtn(
-                              color: Color(0xFFFFFFFF),
-                                child: Image.asset(
-                                  'assets/image 89 (1).png',
-                                  width: 22.w,
-                                  height: 22.w,
-                                  fit: BoxFit.contain,
-                                ),
-                                onTap: () {},
-                              ),
-                            ],
+                        Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                            fontFamily: 'Inter',
                           ),
                         ),
-                      ),
+                        GlobalCircleIconBtn(
+                          color: Color(0xFFFFFFFF),
+                          child: Image.asset(
+                            'assets/image 89 (1).png',
+                            width: 22.w,
+                            height: 22.w,
+                            fit: BoxFit.contain,
+                          ),
+                          onTap: () {},
+                        ),
+                      ],
                     ),
                   ),
                 ),

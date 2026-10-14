@@ -22,6 +22,7 @@ class _CoresScreenState extends State<CoresScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   String? _selectedCoreId = 'aican_demo';
   static const int _bottomNavIndex = 2;
+  double _headerScrollOffset = 0;
 
   void _onNavItemTapped(int index) {
     const routes = [
@@ -82,7 +83,13 @@ class _CoresScreenState extends State<CoresScreen> {
                 child: DecoratedBox(decoration: BoxDecoration(color: _bg)),
               ),
               Positioned.fill(
-                child: SingleChildScrollView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.only(
                     top: scrollTopPadding,
                     bottom: scrollBottomPad,
@@ -170,27 +177,22 @@ class _CoresScreenState extends State<CoresScreen> {
                     ],
                   ),
                 ),
+                ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: _buildHeader(context),
-                      ),
-                    ),
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _bg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
                   ),
+                  child: _buildHeader(context),
                 ),
               ),
             ],

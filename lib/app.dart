@@ -122,6 +122,26 @@ class App extends StatelessWidget {
         ),
         useMaterial3: true,
         textTheme: appTextTheme,
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          indicatorColor: Colors.transparent,
+        ),
+        bottomAppBarTheme: const BottomAppBarThemeData(
+          color: Colors.transparent,
+          elevation: 0,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.transparent,
+          modalBackgroundColor: Colors.transparent,
+          elevation: 0,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
       ), // fixed theme
     );
   }

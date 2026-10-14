@@ -30,11 +30,14 @@ class _VoiceScreenState extends State<VoiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GlassBottomNavScaffold(
       backgroundColor: Colors.white,
+      selectedIndex: _selectedNavIndex,
+      onItemTapped: _onNavItemTapped,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF111827)),
           onPressed: () => context.go('/home'),
@@ -58,10 +61,6 @@ class _VoiceScreenState extends State<VoiceScreen> {
             color: const Color(0xFF111827),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBarWidget(
-        selectedIndex: _selectedNavIndex,
-        onItemTapped: _onNavItemTapped,
       ),
     );
   }

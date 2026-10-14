@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,7 +17,7 @@ import 'package:workpleis/core/widget/liquid_glass.dart';
 /// Single base size for all settings row icons (Profile, Core, Interfaces, etc.).
 const double _settingsIconSize = 20;
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
   static const String routeName = '/settings';
@@ -30,6 +28,14 @@ class SettingsScreen extends StatelessWidget {
   static const _secondary = Color(0xFF6B7280);
   static const _divider = Color(0xFFE5E7EB);
   static const _pink = Color(0xFFFE019A);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  static const _screenBg = Color(0xFFF3F4F6);
+  double _headerScrollOffset = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +55,7 @@ class SettingsScreen extends StatelessWidget {
         systemNavigationBarContrastEnforced: false,
       ),
       child: Scaffold(
-        backgroundColor: Color(0xFFF3F4F6),
+        backgroundColor: _screenBg,
         body: SafeArea(
           top: false,
           bottom: false,
@@ -57,24 +63,30 @@ class SettingsScreen extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Positioned.fill(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    top: scrollTopPadding,
-                    bottom: scrollBottomPad,
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
                   ),
-                  child: Column(
-                    children: [
-                      SizedBox(height: 16.h),
-                      _buildAccountCard(context),
-                      SizedBox(height: 30.h),
-                      _buildGeneralSettingsCard(context),
-                      SizedBox(height: 30.h),
-                      _buildAssistanceCard(),
-                      SizedBox(height: 30.h),
-                      _buildSignOutCard(context),
-                       SizedBox(height: 200.h),
-                        
-                    ],
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      top: scrollTopPadding,
+                      bottom: scrollBottomPad,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 16.h),
+                        _buildAccountCard(context),
+                        SizedBox(height: 30.h),
+                        _buildGeneralSettingsCard(context),
+                        SizedBox(height: 30.h),
+                        _buildAssistanceCard(),
+                        SizedBox(height: 30.h),
+                        _buildSignOutCard(context),
+                        SizedBox(height: 200.h),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -82,22 +94,16 @@ class SettingsScreen extends StatelessWidget {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: _buildHeader(context),
-                      ),
-                    ),
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _screenBg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
                   ),
+                  child: _buildHeader(context),
                 ),
               ),
             ],
@@ -111,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
     return Row(
       children: [
         GlobalCircleIconBtn(
-          color: _card,
+          color: SettingsScreen._card,
           child: Image.asset('assets/aro.png', width: 16.w, height: 16.h),
           onTap: () {
             if (Navigator.of(context).canPop()) {
@@ -128,7 +134,7 @@ class SettingsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w600,
-                color: _primary,
+                color: SettingsScreen._primary,
                 fontFamily: 'Inter',
               ),
             ),
@@ -143,7 +149,7 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: _card,
+        color: SettingsScreen._card,
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: Column(
@@ -171,7 +177,7 @@ class SettingsScreen extends StatelessWidget {
                         return Icon(
                           Icons.person,
                           size: 32.sp,
-                          color: _secondary,
+                          color: SettingsScreen._secondary,
                         );
                       },
                     ),
@@ -188,7 +194,7 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 21.sp,
                           fontWeight: FontWeight.w400,
-                          color: _primary,
+                          color: SettingsScreen._primary,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -198,13 +204,13 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: _secondary,
+                          color: SettingsScreen._secondary,
                           fontFamily: 'Inter',
                         ),
                       ),
                       SizedBox(height: 15),
 
-                      Container(height: 1.h, color: _divider),
+                      Container(height: 1.h, color: SettingsScreen._divider),
                     ],
                   ),
                 ),
@@ -240,7 +246,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w400,
-                        color: _primary,
+                        color: SettingsScreen._primary,
                         fontFamily: 'Inter',
                       ),
                     ),
@@ -265,7 +271,7 @@ class SettingsScreen extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       // padding: EdgeInsets.only(left: 22.w, top: 17.h, right: 22.w, bottom: 16.h),
       decoration: BoxDecoration(
-        color: _card,
+        color: SettingsScreen._card,
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: Column(
@@ -311,7 +317,7 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
-        color: _card,
+        color: SettingsScreen._card,
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: Column(
@@ -348,13 +354,13 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 18.w),
       decoration: BoxDecoration(
-        color: _card,
+        color: SettingsScreen._card,
         borderRadius: BorderRadius.circular(22.r),
       ),
       child: _SettingsRow(
         imagePath: 'assets/Mask group (2) copy.png',
         title: 'Sign Out',
-        titleColor: _pink,
+        titleColor: SettingsScreen._pink,
         showTrailingIcon: false,
         iconWidth: 25.w,
         iconHeight: 25.h,

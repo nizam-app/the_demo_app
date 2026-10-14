@@ -103,6 +103,7 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
 
   /// Bottom nav: Settings (4) is selected when this screen is opened from Settings.
   int _selectedNavIndex = 4;
+  double _headerScrollOffset = 0;
 
   void _onNavItemTapped(int index) {
     const routes = [
@@ -122,13 +123,9 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
   ];
 
   Future<void> showSelectInterfaceBottomSheet(BuildContext context) {
-    return showModalBottomSheet(
+    return showLiquidGlassModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useSafeArea: true,
       isDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.25),
       builder: (_) => const SelectInterfaceBottomSheet(),
     );
   }
@@ -175,14 +172,12 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
         statusBarBrightness: Brightness.light,
         systemNavigationBarContrastEnforced: false,
       ),
-      child: Scaffold(
+      child: GlassBottomNavScaffold(
         backgroundColor: _bg,
+        selectedIndex: _selectedNavIndex,
+        onItemTapped: _onNavItemTapped,
         floatingActionButton: _FabPlus(
           onTap: () => showSelectInterfaceBottomSheet(context),
-        ),
-        bottomNavigationBar: BottomNavBarWidget(
-          selectedIndex: _selectedNavIndex,
-          onItemTapped: _onNavItemTapped,
         ),
         body: SafeArea(
           top: false,
@@ -196,7 +191,13 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                 ),
               ),
               Positioned.fill(
-                child: SingleChildScrollView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     20.w,
                     scrollTopPadding,
@@ -252,30 +253,25 @@ class _InterfacesScreenState extends State<InterfacesScreen> {
                     ],
                   ),
                 ),
+                ),
               ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: SizedBox(
-                          height: 32.h,
-                          child: _TopBar(
-                            onBack: () => Navigator.maybePop(context),
-                          ),
-                        ),
-                      ),
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _bg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: SizedBox(
+                    height: 32.h,
+                    child: _TopBar(
+                      onBack: () => Navigator.maybePop(context),
                     ),
                   ),
                 ),

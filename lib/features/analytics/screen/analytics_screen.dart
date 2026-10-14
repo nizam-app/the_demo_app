@@ -1,6 +1,4 @@
 import 'dart:math' show min;
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +57,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   String _selectedAnalyticsCategory = 'Shading';
   final GlobalKey _categoriesMenuAnchorKey = GlobalKey();
+  double _headerScrollOffset = 0;
 
   Future<void> _openCategoryDropdown({
     required double menuOuterW,
@@ -258,7 +257,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
               Positioned.fill(
-                child: SingleChildScrollView(
+                child: listenInnerScreenScroll(
+                  onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                    current: _headerScrollOffset,
+                    next: px,
+                    apply: () => setState(() => _headerScrollOffset = px),
+                  ),
+                  child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     15.w,
                     scrollTopPadding,
@@ -365,6 +370,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ],
                   ),
                 ),
+                ),
               ),
               if (widget.showBottomNav)
                 Positioned(
@@ -382,65 +388,59 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          15.w,
-                          topInset + 10.h,
-                          15.w,
-                          8.h,
-                        ),
-                        child: SizedBox(
-                          height: 32.w,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: GlobalCircleIconBtn(
-                                  color: _AnalyticsColors.cardBg,
-                                  child: Image.asset(
-                                    'assets/aro.png',
-                                    width: 16.w,
-                                    height: 16.h,
-                                  ),
-                                  onTap: () {
-                                    if (!widget.showBottomNav) {
-                                      final shell = CustomBottomNavBar.of(
-                                        context,
-                                      );
-                                      if (shell != null) {
-                                        shell.setSelectedIndex(2);
-                                        return;
-                                      }
-                                    }
-                                    if (context.canPop()) {
-                                      context.pop();
-                                    } else {
-                                      context.go('/home');
-                                    }
-                                  },
-                                ),
-                              ),
-                              Center(
-                                child: Text(
-                                  'Analytics',
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: _AnalyticsColors.title,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                            ],
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: _AnalyticsColors.pageBg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.fromLTRB(
+                    15.w,
+                    topInset + 10.h,
+                    15.w,
+                    8.h,
+                  ),
+                  child: SizedBox(
+                    height: 32.w,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GlobalCircleIconBtn(
+                            color: _AnalyticsColors.cardBg,
+                            child: Image.asset(
+                              'assets/aro.png',
+                              width: 16.w,
+                              height: 16.h,
+                            ),
+                            onTap: () {
+                              if (!widget.showBottomNav) {
+                                final shell = CustomBottomNavBar.of(
+                                  context,
+                                );
+                                if (shell != null) {
+                                  shell.setSelectedIndex(2);
+                                  return;
+                                }
+                              }
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/home');
+                              }
+                            },
                           ),
                         ),
-                      ),
+                        Center(
+                          child: Text(
+                            'Analytics',
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _AnalyticsColors.title,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

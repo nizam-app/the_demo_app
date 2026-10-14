@@ -44,6 +44,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
   int _rgbwStepMark = 0;
   int _bathroomThermoMark = 0;
   int _blindStepMark = 0;
+  double _headerScrollOffset = 0;
   bool _irrigationPlaying = false;
   int _brightnessPct = 54;
   bool _cardReaderOn = false;
@@ -135,7 +136,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              SingleChildScrollView(
+              listenInnerScreenScroll(
+                onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
+                  current: _headerScrollOffset,
+                  next: px,
+                  apply: () => setState(() => _headerScrollOffset = px),
+                ),
+                child: SingleChildScrollView(
                 padding: EdgeInsets.only(
                   top: headerExtent,
                   bottom: scrollBottomPad,
@@ -692,103 +699,98 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   ],
                 ),
               ),
+              ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: LiquidGlass.barDecoration(),
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          left: 14.w,
-                          right: 14.w,
-                          top: topInset + 8.h,
-                          bottom: 12.h,
+                child: LiquidGlassInnerScreenHeader(
+                  backgroundColor: bg,
+                  scrollOffset: _headerScrollOffset,
+                  padding: EdgeInsets.only(
+                    left: 14.w,
+                    right: 14.w,
+                    top: topInset + 8.h,
+                    bottom: 12.h,
+                  ),
+                  child: SizedBox(
+                    height: headerRowHeight,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GlobalCircleIconBtn(
+                            color: const Color(0xFFF3F4F6),
+                            child: Image.asset(
+                              'assets/aro.png',
+                              width: 16.w,
+                              height: 16.h,
+                            ),
+                            onTap: () {
+                              if (!widget.showBottomNav) {
+                                final shell =
+                                    CustomBottomNavBar.of(context);
+                                if (shell != null) {
+                                  shell.setSelectedIndex(2);
+                                  return;
+                                }
+                              }
+                              if (context.canPop()) {
+                                context.pop();
+                              } else {
+                                context.go('/home');
+                              }
+                            },
+                          ),
                         ),
-                        child: SizedBox(
-                          height: headerRowHeight,
-                          child: Stack(
-                            alignment: Alignment.center,
+                        Center(
+                          child: Text(
+                            'Devices',
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF111827),
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: GlobalCircleIconBtn(
-                                  color: const Color(0xFFF3F4F6),
-                                  child: Image.asset(
-                                    'assets/aro.png',
-                                    width: 16.w,
-                                    height: 16.h,
-                                  ),
-                                  onTap: () {
-                                    if (!widget.showBottomNav) {
-                                      final shell =
-                                          CustomBottomNavBar.of(context);
-                                      if (shell != null) {
-                                        shell.setSelectedIndex(2);
-                                        return;
-                                      }
-                                    }
-                                    if (context.canPop()) {
-                                      context.pop();
-                                    } else {
-                                      context.go('/home');
-                                    }
-                                  },
+                              SizedBox(
+                                height: 36.h,
+                                width: 36.w,
+                                child: _CircleIconButton(
+                                  icon: Icons.more_horiz_rounded,
+                                  onTap: () =>
+                                      _showEditDeviceBottomSheet(context),
+                                  size: 22,
+                                  bg: const Color(0xFFF3F4F6),
+                                  iconColor: const Color(0xFF111827),
+                                  iconSize: 22,
                                 ),
                               ),
-                              Center(
-                                child: Text(
-                                  'Devices',
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF111827),
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: 36.h,
-                                      width: 36.w,
-                                      child: _CircleIconButton(
-                                        icon: Icons.more_horiz_rounded,
-                                        onTap: () =>
-                                            _showEditDeviceBottomSheet(context),
-                                        size: 22,
-                                        bg: const Color(0xFFF3F4F6),
-                                        iconColor: const Color(0xFF111827),
-                                        iconSize: 22,
-                                      ),
-                                    ),
-                                    SizedBox(width: 12.w),
-                                    SizedBox(
-                                      height: 36.h,
-                                      width: 36.w,
-                                      child: _CircleIconButton(
-                                        icon: Icons.add_rounded,
-                                        onTap: () =>
-                                            _showAssignCategoryPopup(context),
-                                        size: 23,
-                                        bg: const Color(0xFF111827),
-                                        iconColor: Colors.white,
-                                        iconSize: 23,
-                                      ),
-                                    ),
-                                  ],
+                              SizedBox(width: 12.w),
+                              SizedBox(
+                                height: 36.h,
+                                width: 36.w,
+                                child: _CircleIconButton(
+                                  icon: Icons.add_rounded,
+                                  onTap: () =>
+                                      _showAssignCategoryPopup(context),
+                                  size: 23,
+                                  bg: const Color(0xFF111827),
+                                  iconColor: Colors.white,
+                                  iconSize: 23,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ),
