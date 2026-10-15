@@ -22,11 +22,13 @@ ThemeData liquidGlassBottomNavTheme(ThemeData base) {
   );
 }
 
+/// Icon-only floating tab bar height (see [LiquidGlassFloatingTabBar]).
+double get kFloatingGlassTabBarHeight => 52.h;
+
 /// Scroll/list bottom padding when body extends under the floating glass tab bar.
 double floatingGlassTabBarScrollPadding(BuildContext context) {
   final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-  // Bar uses 6.h bottom margin + 68.h height (see [LiquidGlassFloatingTabBar]).
-  return 18.h + 68.h + 6.h + 10.h + 8.h + bottomInset;
+  return 18.h + kFloatingGlassTabBarHeight + 6.h + 10.h + 8.h + bottomInset;
 }
 
 /// WhatsApp-style shell: [extendBody] + floating frosted footer on every screen.
@@ -394,14 +396,14 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
         child: LiquidGlass.floatingTabBar(
           borderRadius: borderRadius,
           child: SizedBox(
-            height: 68.h,
+            height: kFloatingGlassTabBarHeight,
             child: LayoutBuilder(
               builder: (context, c) {
                 final tabWidth = c.maxWidth / items.length;
-                final barHeight = 68.h;
+                final barHeight = kFloatingGlassTabBarHeight;
                 final capsuleInsetH = 3.w;
                 final capsuleWidth = tabWidth - capsuleInsetH * 2;
-                final capsuleHeight = 58.h;
+                final capsuleHeight = 44.h;
                 final capsuleTop = (barHeight - capsuleHeight) / 2;
                 return Stack(
                   clipBehavior: Clip.none,
@@ -430,6 +432,7 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
                               imagePath: items[i].imagePath,
                               isSelected: i == selectedIndex,
                               showBadge: items[i].label == 'Notifications',
+                              showLabel: false,
                             ),
                           ),
                         );
@@ -459,52 +462,61 @@ class BottomNavItem extends StatelessWidget {
     required this.imagePath,
     required this.isSelected,
     required this.showBadge,
+    this.showLabel = true,
   });
 
   final String label;
   final String imagePath;
   final bool isSelected;
   final bool showBadge;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
+    final Widget icon = Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        Image.asset(
+          imagePath,
+          width: 26.sp,
+          height: 26.sp,
+          color: const Color(0xFF111827),
+        ),
+        if (showBadge)
+          Positioned(
+            right: -10.w,
+            top: -6.h,
+            child: Container(
+              width: 19.w,
+              height: 15.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFE019A),
+                borderRadius: BorderRadius.circular(18.r),
+              ),
+              child: Text(
+                '12',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+
+    if (!showLabel) {
+      return Center(child: icon);
+    }
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Image.asset(
-              imagePath,
-              width: 26.sp,
-              height: 26.sp,
-              color: const Color(0xFF111827),
-            ),
-            if (showBadge)
-              Positioned(
-                right: -10.w,
-                top: -6.h,
-                child: Container(
-                  width: 19.w,
-                  height: 15.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFE019A),
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  child: Text(
-                    '12',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        icon,
         SizedBox(height: 6.h),
         Text(
           label,
