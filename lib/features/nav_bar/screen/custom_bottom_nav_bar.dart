@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -385,70 +383,65 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
     // Small gap above the home indicator. Do not add [viewPadding.bottom] here —
     // the scaffold bottom slot is already above the unsafe area, so full inset
     // padding pushed the pill too high (large empty band under the bar).
+    final borderRadius = BorderRadius.circular(999.r);
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 6.h),
       child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999.r),
-            boxShadow: LiquidGlass.floatingPillShadow(),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(999.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 36, sigmaY: 36),
-              child: Container(
-                height: 68.h,
-                decoration: LiquidGlass.floatingTabBarDecoration(),
-                child: LayoutBuilder(
-                  builder: (context, c) {
-                    final tabWidth = c.maxWidth / items.length;
-                    final barHeight = 68.h;
-                    final capsuleInsetH = 3.w;
-                    final capsuleWidth = tabWidth - capsuleInsetH * 2;
-                    final capsuleHeight = 58.h;
-                    final capsuleTop = (barHeight - capsuleHeight) / 2;
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 240),
-                          curve: Curves.easeOutCubic,
-                          left: tabWidth * selectedIndex + capsuleInsetH,
-                          top: capsuleTop,
-                          width: capsuleWidth,
-                          height: capsuleHeight,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF111827)
-                                  .withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(999.r),
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          boxShadow: LiquidGlass.floatingPillShadow(),
+        ),
+        child: LiquidGlass.floatingTabBar(
+          borderRadius: borderRadius,
+          child: SizedBox(
+            height: 68.h,
+            child: LayoutBuilder(
+              builder: (context, c) {
+                final tabWidth = c.maxWidth / items.length;
+                final barHeight = 68.h;
+                final capsuleInsetH = 3.w;
+                final capsuleWidth = tabWidth - capsuleInsetH * 2;
+                final capsuleHeight = 58.h;
+                final capsuleTop = (barHeight - capsuleHeight) / 2;
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeOutCubic,
+                      left: tabWidth * selectedIndex + capsuleInsetH,
+                      top: capsuleTop,
+                      width: capsuleWidth,
+                      height: capsuleHeight,
+                      child: DecoratedBox(
+                        decoration: LiquidGlass
+                            .floatingTabBarSelectionDecoration()
+                            .copyWith(borderRadius: borderRadius),
+                      ),
+                    ),
+                    Row(
+                      children: List.generate(items.length, (i) {
+                        return Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onTap(i),
+                            child: BottomNavItem(
+                              label: items[i].label,
+                              imagePath: items[i].imagePath,
+                              isSelected: i == selectedIndex,
+                              showBadge: items[i].label == 'Notifications',
                             ),
                           ),
-                        ),
-                        Row(
-                          children: List.generate(items.length, (i) {
-                            return Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => onTap(i),
-                                child: BottomNavItem(
-                                  label: items[i].label,
-                                  imagePath: items[i].imagePath,
-                                  isSelected: i == selectedIndex,
-                                  showBadge: items[i].label == 'Notifications',
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
+      ),
     );
   }
 }

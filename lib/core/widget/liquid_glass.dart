@@ -39,14 +39,51 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
+  /// Backdrop strength for header circular controls (iOS Liquid Glass).
+  static const double circleButtonBlurSigma = 20;
+
   /// Frosted circular control (header menu / edit / add on dashboard).
   static BoxDecoration circleButtonDecoration({bool pressed = false}) {
     return BoxDecoration(
-      color: Colors.white.withOpacity(pressed ? 0.62 : 0.46),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: pressed ? 0.82 : 0.72),
+          Colors.white.withValues(alpha: pressed ? 0.58 : 0.42),
+        ],
+      ),
       shape: BoxShape.circle,
       border: Border.all(
-        color: Colors.white.withOpacity(0.75),
-        width: 0.8,
+        color: Colors.white.withValues(alpha: 0.78),
+        width: 0.85,
+      ),
+    );
+  }
+
+  /// Frosted circular header button — blur + [circleButtonDecoration].
+  static Widget circleButton({
+    required double size,
+    required Widget child,
+    double sigma = circleButtonBlurSigma,
+    bool pressed = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: floatingPillShadow(),
+      ),
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: Container(
+            width: size,
+            height: size,
+            decoration: circleButtonDecoration(pressed: pressed),
+            alignment: Alignment.center,
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -70,14 +107,55 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
-  /// Floating footer tab bar — blur-only glass (no opaque fill; WhatsApp-style).
+  /// Backdrop strength for the floating footer tab bar (iOS Liquid Glass).
+  static const double floatingTabBarBlurSigma = 28;
+
+  /// Floating footer tab bar — frosted white gradient + hairline (iOS Liquid Glass).
   static BoxDecoration floatingTabBarDecoration() {
     return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.04),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.78),
+          Colors.white.withValues(alpha: 0.52),
+        ],
+      ),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.38),
-        width: 0.65,
+        color: Colors.white.withValues(alpha: 0.72),
+        width: 0.85,
+      ),
+    );
+  }
+
+  /// Selected tab capsule inside [LiquidGlassFloatingTabBar].
+  static BoxDecoration floatingTabBarSelectionDecoration() {
+    return BoxDecoration(
+      color: Colors.white.withValues(alpha: 0.55),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.85),
+        width: 0.75,
+      ),
+    );
+  }
+
+  /// Frosted floating footer pill: blur + [floatingTabBarDecoration].
+  static Widget floatingTabBar({
+    required Widget child,
+    BorderRadius borderRadius = BorderRadius.zero,
+    double sigma = floatingTabBarBlurSigma,
+  }) {
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+        child: DecoratedBox(
+          decoration:
+              floatingTabBarDecoration().copyWith(borderRadius: borderRadius),
+          child: child,
+        ),
       ),
     );
   }

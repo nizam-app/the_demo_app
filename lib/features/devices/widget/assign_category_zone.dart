@@ -1,5 +1,8 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:workpleis/core/widget/liquid_glass.dart';
 import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/features/Zones/screen/zones_screen.dart';
@@ -7,7 +10,6 @@ import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 import '../../categories/screen/categories_screen.dart';
 
 const _bgOverlay = Color(0x99000000);
-const _sheetBg = Color(0xFFF2F3F5);
 const _cardBg = Colors.white;
 const _primaryBlue = Color(0xFF0088FE);
 const _textPrimary = Color(0xFF111827);
@@ -71,13 +73,17 @@ class _AssignCategoryZoneSheetState
             alignment: Alignment.bottomCenter,
             child: GestureDetector(
               onTap: () {},
-              child: Container(
+              child: ClipRRect(
+                borderRadius:
+                    BorderRadius.vertical(top: Radius.circular(26.r)),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                  child: Container(
                 constraints: BoxConstraints(
                   maxHeight: MediaQuery.of(context).size.height * 0.9,
                 ),
                 padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
-                decoration: BoxDecoration(
-                  color: _sheetBg,
+                decoration: LiquidGlass.sheetDecoration(
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(26.r)),
                 ),
@@ -178,6 +184,8 @@ class _AssignCategoryZoneSheetState
                 ),
                       ],
                     ),
+                  ),
+                ),
                   ),
                 ),
               ),

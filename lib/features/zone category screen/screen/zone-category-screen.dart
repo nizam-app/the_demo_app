@@ -672,7 +672,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           title: 'Blind Living Room',
           imagePath: 'assets/Rectangle 823.png',
           iconWidget: dashboardLightingIconFrame(
-            DashboardBlindSlatsIcon(level: 1.0, angle: 1.0),
+            DashboardBlindSlatsIcon(
+              level: 1.0,
+              angle: 1.0,
+              softInterior: true,
+            ),
           ),
         );
       case 'motion':
@@ -2358,7 +2362,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           icon: DashboardBlindSlatsIcon(
             level: _blindRoomLevel / 100.0,
             angle: _blindRoomAngle / 100.0,
-                      ),
+            softInterior: true,
+          ),
           deviceName: 'Blind Living Room',
           statusText: '$_blindRoomLevel%  $_blindRoomAngle%',
           mode: _blindManual ? 'M' : 'A',
@@ -2655,7 +2660,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               slatsPreviewOverride: DashboardBlindSlatsIcon(
                 level: _blindRoomLevel / 100.0,
                 angle: _blindRoomAngle / 100.0,
-                              ),
+                softInterior: true,
+              ),
               useBlindSlatsPreview: true,
               imagePath: 'assets/Rectangle 823.png',
               compact: true,
@@ -2942,7 +2948,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             slatsPreviewOverride: DashboardBlindSlatsIcon(
               level: _blindRoomLevel / 100.0,
               angle: _blindRoomAngle / 100.0,
-                          ),
+              softInterior: true,
+            ),
             useBlindSlatsPreview: true,
             imagePath: 'assets/Rectangle 823.png',
             compact: compact,
@@ -5738,6 +5745,7 @@ class _BlindCard extends StatelessWidget {
               ? DashboardBlindSlatsIcon(
                   level: previewLevel!,
                   angle: blindAngle ?? 1.0,
+                  softInterior: softPreviewInterior,
                 )
               : useAwningPreview
               ? DashboardAwningLevelIcon(

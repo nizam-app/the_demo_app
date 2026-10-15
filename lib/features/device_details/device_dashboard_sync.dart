@@ -1332,11 +1332,17 @@ class DashboardBlindSlatsPainter extends CustomPainter {
     required this.level,
     required this.angle,
     this.cornerRadius = 0,
+    this.backgroundColor = kDeviceOffGreyFill,
+    this.edgeToEdge = false,
+    this.softInterior = false,
   });
 
   final double level;
   final double angle;
   final double cornerRadius;
+  final Color backgroundColor;
+  final bool edgeToEdge;
+  final bool softInterior;
 
   static const int _slatCount = 11;
   static const Color _slatColor = Color(0xFF38A4FE);
@@ -1352,21 +1358,25 @@ class DashboardBlindSlatsPainter extends CustomPainter {
       ),
     );
 
-    canvas.drawRRect(clipRrect, Paint()..color = kDeviceOffGreyFill);
+    canvas.drawRRect(clipRrect, Paint()..color = backgroundColor);
 
     canvas.save();
     canvas.clipRRect(clipRrect);
 
+    final double horizontalInset = edgeToEdge ? 0 : size.width * 0.015;
     final double cx = size.width / 2;
-    final double usableW = size.width;
+    final double usableW = edgeToEdge ? size.width : size.width;
     final double bandH = size.height / _slatCount;
-    const double gap = 0.5;
+    final double gap = softInterior ? 0.8 : 0.5;
     final double maxSlatInBand = math.max(2.0, bandH - gap);
     final double a = angle.clamp(0.0, 1.0);
-    // Thicker slats at low angle; full band height when open — avoids side/vertical gaps.
-    final double slatH = maxSlatInBand * (0.72 + 0.28 * a);
-    final double topW = usableW;
-    final double taperT = (0.94 + 0.06 * a).clamp(0.94, 1.0);
+    final double slatH = softInterior
+        ? maxSlatInBand * a.clamp(0.14, 1.25)
+        : maxSlatInBand * (0.72 + 0.28 * a);
+    final double topW = softInterior ? (usableW - horizontalInset * 2) * 1.02 : usableW;
+    final double taperT = softInterior
+        ? ((0.74 + 0.16 * a) * (1 - a * a) + 1.0 * (a * a)).clamp(0.66, 1.0)
+        : (0.94 + 0.06 * a).clamp(0.94, 1.0);
     final double botW = topW * taperT;
     final int visible = (_slatCount * level.clamp(0.0, 1.0)).round().clamp(
       0,
@@ -1437,7 +1447,10 @@ class DashboardBlindSlatsPainter extends CustomPainter {
   bool shouldRepaint(covariant DashboardBlindSlatsPainter old) =>
       old.level != level ||
       old.angle != angle ||
-      old.cornerRadius != cornerRadius;
+      old.cornerRadius != cornerRadius ||
+      old.backgroundColor != backgroundColor ||
+      old.edgeToEdge != edgeToEdge ||
+      old.softInterior != softInterior;
 }
 
 /// Blind Living Room slat stack (level + angle — matches details hero).
@@ -1449,6 +1462,7 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
     this.outerCornerRadius,
     this.innerCornerRadius,
     this.showBorder = true,
+    this.softInterior = false,
   });
 
   final double level;
@@ -1456,22 +1470,30 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
   final double? outerCornerRadius;
   final double? innerCornerRadius;
   final bool showBorder;
+  /// Home dashboard Blind Living Room at 0% — soft [#F3F4F6] fill (not blue-grey).
+  final bool softInterior;
 
   @override
   Widget build(BuildContext context) {
     final double side = kDashboardLightingIconSide;
-    final double pad = 3.w;
-    final double outerR = outerCornerRadius ?? 12.r;
+    final double pad = softInterior ? 0 : 3.w;
+    final double outerR =
+        softInterior ? 6.r : (outerCornerRadius ?? 12.r);
     final double innerR = innerCornerRadius ?? math.max(0.0, outerR - pad);
+    final Color interiorColor =
+        softInterior ? _dashboardBubbleGray : kDeviceOffGreyFill;
 
     return Container(
       width: side,
       height: side,
       decoration: BoxDecoration(
-        color: kDeviceOffGreyFill,
+        color: interiorColor,
         borderRadius: BorderRadius.circular(outerR),
         border: showBorder
-            ? Border.all(color: kDeviceOffGreyBorder, width: 1)
+            ? Border.all(
+                color: kDeviceOffGreyBorder,
+                width: softInterior ? 2.w : 1,
+              )
             : null,
         boxShadow: [
           BoxShadow(
@@ -1492,6 +1514,9 @@ class DashboardBlindSlatsIcon extends StatelessWidget {
                 level: level.clamp(0.0, 1.0),
                 angle: angle.clamp(0.0, 1.0),
                 cornerRadius: innerR,
+                backgroundColor: interiorColor,
+                edgeToEdge: softInterior,
+                softInterior: softInterior,
               ),
               child: SizedBox.expand(),
             ),

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:workpleis/core/utils/ui_tap_haptic.dart';
 import 'package:workpleis/core/widget/global_back_button.dart';
+import 'package:workpleis/core/widget/pressable_circle_surface.dart';
 import 'package:workpleis/features/nav_bar/screen/custom_bottom_nav_bar.dart';
 import 'package:workpleis/features/devices/widget/popup.dart';
 import 'package:workpleis/features/settings/screen/setting_screen.dart';
@@ -721,7 +722,6 @@ class _DevicesScreenState extends State<DevicesScreen> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: GlobalCircleIconBtn(
-                            color: const Color(0xFFF3F4F6),
                             child: Image.asset(
                               'assets/aro.png',
                               width: 16.w,
@@ -760,31 +760,29 @@ class _DevicesScreenState extends State<DevicesScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SizedBox(
-                                height: 36.h,
-                                width: 36.w,
-                                child: _CircleIconButton(
-                                  icon: Icons.more_horiz_rounded,
-                                  onTap: () =>
-                                      _showEditDeviceBottomSheet(context),
-                                  size: 22,
-                                  bg: const Color(0xFFF3F4F6),
-                                  iconColor: const Color(0xFF111827),
-                                  iconSize: 22,
+                              PressableCircleSurface(
+                                side: 36.w,
+                                useLiquidGlass: true,
+                                enableHaptic: false,
+                                onTap: () =>
+                                    _showEditDeviceBottomSheet(context),
+                                child: Icon(
+                                  Icons.more_horiz_rounded,
+                                  size: 22.sp,
+                                  color: const Color(0xFF111827),
                                 ),
                               ),
                               SizedBox(width: 12.w),
-                              SizedBox(
-                                height: 36.h,
-                                width: 36.w,
-                                child: _CircleIconButton(
-                                  icon: Icons.add_rounded,
-                                  onTap: () =>
-                                      _showAssignCategoryPopup(context),
-                                  size: 23,
-                                  bg: const Color(0xFF111827),
-                                  iconColor: Colors.white,
-                                  iconSize: 23,
+                              PressableCircleSurface(
+                                side: 36.w,
+                                useLiquidGlass: true,
+                                enableHaptic: false,
+                                onTap: () =>
+                                    _showAssignCategoryPopup(context),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  size: 23.sp,
+                                  color: const Color(0xFF111827),
                                 ),
                               ),
                             ],
@@ -1134,57 +1132,6 @@ class _FilterChipPill extends StatelessWidget {
 }
 
 /* ---------------- Buttons / Toggles ---------------- */
-
-class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({
-    this.icon,
-    this.imagePath,
-    required this.onTap,
-    this.size = 44,
-    this.bg = const Color(0xFFF3F4F6),
-    this.iconColor = const Color(0xFF111827),
-    this.iconSize = 22,
-  }) : assert(
-         icon != null || imagePath != null,
-         'Either icon or imagePath must be provided',
-       );
-
-  final IconData? icon;
-  final String? imagePath;
-  final VoidCallback onTap;
-  final double size;
-  final Color bg;
-  final Color iconColor;
-  final double iconSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        splashColor: const Color(0xFFE5E7EB),
-        highlightColor: const Color(0xFFD1D5DB),
-        child: Ink(
-          width: size.w,
-          height: size.h,
-          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-          child: Center(
-            child: imagePath != null
-                ? Image.asset(
-                    imagePath!,
-                    width: iconSize.w,
-                    height: iconSize.h,
-                    fit: BoxFit.contain,
-                  )
-                : Icon(icon!, size: iconSize.sp, color: iconColor),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // class _CircleMiniBtn extends StatelessWidget {
 //   const _CircleMiniBtn({required this.icon, this.onTap});
