@@ -108,35 +108,35 @@ class LiquidGlass extends StatelessWidget {
   }
 
   /// Backdrop strength for the floating footer tab bar (iOS Liquid Glass).
-  static const double floatingTabBarBlurSigma = 28;
+  static const double floatingTabBarBlurSigma = 32;
 
-  /// Floating footer tab bar — frosted white gradient + hairline (iOS Liquid Glass).
+  /// Floating footer tab bar — low-opacity wash so [BackdropFilter] reads as glass.
   static BoxDecoration floatingTabBarDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.white.withValues(alpha: 0.78),
-          Colors.white.withValues(alpha: 0.52),
+          Colors.white.withValues(alpha: 0.32),
+          Colors.white.withValues(alpha: 0.14),
         ],
       ),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.72),
-        width: 0.85,
+        color: Colors.white.withValues(alpha: 0.48),
+        width: 0.75,
       ),
     );
   }
 
-  /// Selected tab capsule inside [LiquidGlassFloatingTabBar].
+  /// Selected tab capsule — ultra soft grey (visible on frosted white bar).
   static BoxDecoration floatingTabBarSelectionDecoration() {
     return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.55),
+      color: const Color(0xFF111827).withValues(alpha: 0.09),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.85),
-        width: 0.75,
+        color: const Color(0xFF111827).withValues(alpha: 0.04),
+        width: 0.5,
       ),
     );
   }
@@ -186,13 +186,20 @@ class LiquidGlass extends StatelessWidget {
     );
   }
 
-  /// Sheets and menus. Opaque white (Figma) — semi-transparent fill tints grey over #F3F4F6.
+  /// Modal sheet wash — frosted white gradient (blur shows through; inner bubbles stay visible).
   static BoxDecoration sheetDecoration({BorderRadius? borderRadius}) {
     return BoxDecoration(
-      color: Colors.white,
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.62),
+          Colors.white.withValues(alpha: 0.28),
+        ],
+      ),
       borderRadius: borderRadius,
       border: Border.all(
-        color: const Color(0xFFE5E7EB),
+        color: Colors.white.withValues(alpha: 0.72),
         width: 0.6,
       ),
       boxShadow: [
@@ -204,6 +211,19 @@ class LiquidGlass extends StatelessWidget {
       ],
     );
   }
+
+  /// Grouped rows inside a sheet (Rename, toggles, etc.) — matches legacy `white @ 60%` bubbles.
+  static Color get sheetGroupBubbleColor => Colors.white.withValues(alpha: 0.6);
+
+  static BoxDecoration sheetGroupBubbleDecoration({BorderRadius? borderRadius}) {
+    return BoxDecoration(
+      color: sheetGroupBubbleColor,
+      borderRadius: borderRadius ?? BorderRadius.circular(20),
+    );
+  }
+
+  /// Backdrop blur for dashboard-style section sheets (Add/Edit Section).
+  static const double dashboardModalSheetBlurSigma = 12;
 
   static const double modalSheetBlurSigma = 22;
 
@@ -225,7 +245,7 @@ class LiquidGlass extends StatelessWidget {
   }
 }
 
-/// White modal bottom sheet panel ([LiquidGlass.sheetDecoration]).
+/// Frosted modal panel — same clear wash + blur as dashboard section popups.
 class LiquidGlassModalSheetPanel extends StatelessWidget {
   const LiquidGlassModalSheetPanel({
     super.key,
@@ -238,23 +258,34 @@ class LiquidGlassModalSheetPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shadowColor: Colors.transparent,
+    return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: Clip.antiAlias,
-      child: DecoratedBox(
-        decoration: LiquidGlass.sheetDecoration(borderRadius: borderRadius),
-        child: child,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: LiquidGlass.dashboardModalSheetBlurSigma,
+          sigmaY: LiquidGlass.dashboardModalSheetBlurSigma,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          borderRadius: borderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: DecoratedBox(
+            decoration:
+                LiquidGlass.sheetDecoration(borderRadius: borderRadius),
+            child: child,
+          ),
+        ),
       ),
     );
   }
 }
 
 /// Modal bottom sheet with transparent route chrome (no M3 grey surface).
-/// Inner-screen top bar: solid [backgroundColor] at rest, frosted glass when scrolled.
+/// Inner-screen top bar: solid [backgroundColor] at rest; fades to light frosted glass while scrolling.
 class LiquidGlassInnerScreenHeader extends StatelessWidget {
   const LiquidGlassInnerScreenHeader({
     super.key,
@@ -271,11 +302,36 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
   final double scrollOffset;
   final double glassAfterPixels;
 
-  bool get _scrolled => scrollOffset > glassAfterPixels;
+  /// 0 at rest → 1 when fully frosted (content visible through the bar).
+  double get _glassStrength {
+    if (scrollOffset <= glassAfterPixels) return 0;
+    return ((scrollOffset - glassAfterPixels) / 28).clamp(0.0, 1.0);
+  }
+
+  BoxDecoration _scrolledDecoration(double strength) {
+    return BoxDecoration(
+      color: backgroundColor.withValues(alpha: (1 - strength) * 0.92),
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.30 * strength),
+          Colors.white.withValues(alpha: 0.10 * strength),
+        ],
+      ),
+      border: Border(
+        bottom: BorderSide(
+          color: Colors.white.withValues(alpha: 0.38 * strength),
+          width: 0.6,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (!_scrolled) {
+    final strength = _glassStrength;
+    if (strength <= 0) {
       return ColoredBox(
         color: backgroundColor,
         child: Padding(padding: padding, child: child),
@@ -283,9 +339,12 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
     }
     return ClipRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(
+          sigmaX: 8 + 18 * strength,
+          sigmaY: 8 + 18 * strength,
+        ),
         child: DecoratedBox(
-          decoration: LiquidGlass.barDecoration(),
+          decoration: _scrolledDecoration(strength),
           child: Padding(padding: padding, child: child),
         ),
       ),
@@ -330,7 +389,7 @@ Future<T?> showLiquidGlassModalBottomSheet<T>({
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
-    useSafeArea: useSafeArea,
+    useSafeArea: false,
     isDismissible: isDismissible,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.25),

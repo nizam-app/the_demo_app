@@ -45,7 +45,6 @@ class AddUserBottomSheet extends StatefulWidget {
   static const Color _textGrey = Color(0xFF6B7280);
   static const Color _line = Color(0xFFE5E7EB);
   static const Color _blue = Color(0xFF0088FE);
-  static const Color _chipBg = Color(0xFFF3F4F6);
 
   @override
   State<AddUserBottomSheet> createState() => _AddUserBottomSheetState();
@@ -111,7 +110,6 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
 
                     SizedBox(height: 15.h),
 
-                    // Fields
                     _RowField(
                       left: 'Email',
                       right: 'Aican@gmail.com',
@@ -120,7 +118,6 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                     _DividerLine(),
                     SizedBox(height: 13.h),
 
-                    // Roles row
                     Padding(
                       padding: EdgeInsets.only(right: 20.w),
                       child: SizedBox(
@@ -147,7 +144,6 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                     _DividerLine(),
                     SizedBox(height: 13.h),
 
-                    // Enable cloud control row
                     Padding(
                       padding: EdgeInsets.only(right: 20.w),
                       child: SizedBox(
@@ -309,7 +305,6 @@ class _RoleIcons extends StatefulWidget {
   const _RoleIcons();
 
   static const Color _textDark = Color(0xFF111827);
-  static const Color _chipBg = Color(0xFFF3F4F6);
   static const Color _iconColor = Color(0xFF6B7280);
 
   @override
@@ -367,7 +362,9 @@ class _RoleIconsState extends State<_RoleIcons> {
         width: 32.w,
         height: 31.w,
         decoration: BoxDecoration(
-          color: isSelected ? _RoleIcons._chipBg : Colors.transparent,
+          color: isSelected
+              ? LiquidGlass.sheetGroupBubbleColor
+              : Colors.transparent,
           shape: BoxShape.circle,
         ),
         child: Center(

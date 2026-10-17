@@ -773,16 +773,14 @@ class _DevicesScreenState extends State<DevicesScreen> {
                                 ),
                               ),
                               SizedBox(width: 12.w),
-                              PressableCircleSurface(
-                                side: 36.w,
-                                useLiquidGlass: true,
-                                enableHaptic: false,
+                              GlobalCircleIconBtn(
+                                color: const Color(0xFF111827),
                                 onTap: () =>
                                     _showAssignCategoryPopup(context),
                                 child: Icon(
                                   Icons.add_rounded,
                                   size: 23.sp,
-                                  color: const Color(0xFF111827),
+                                  color: Colors.white,
                                 ),
                               ),
                             ],

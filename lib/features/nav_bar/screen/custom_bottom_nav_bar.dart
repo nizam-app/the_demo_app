@@ -23,12 +23,21 @@ ThemeData liquidGlassBottomNavTheme(ThemeData base) {
 }
 
 /// Icon-only floating tab bar height (see [LiquidGlassFloatingTabBar]).
-double get kFloatingGlassTabBarHeight => 52.h;
+double get kFloatingGlassTabBarHeight => 55.h;
+
+/// Gap from the physical bottom (home indicator) to the floating pill.
+double floatingGlassTabBarBottomPadding(BuildContext context) {
+  final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+  return bottomInset > 0 ? bottomInset + 0.h :0.h;
+}
 
 /// Scroll/list bottom padding when body extends under the floating glass tab bar.
 double floatingGlassTabBarScrollPadding(BuildContext context) {
-  final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-  return 18.h + kFloatingGlassTabBarHeight + 6.h + 10.h + 8.h + bottomInset;
+  return 18.h +
+      kFloatingGlassTabBarHeight +
+      floatingGlassTabBarBottomPadding(context) +
+      10.h +
+      8.h;
 }
 
 /// WhatsApp-style shell: [extendBody] + floating frosted footer on every screen.
@@ -281,19 +290,26 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         extendBody: true,
         backgroundColor: widget.backgroundColor ?? Colors.white,
         //drawer: widget.drawer,
-        body: RepaintBoundary(
-          child: IndexedStack(index: _selectedIndex, children: widget.children),
-        ),
-        bottomNavigationBar: _bottomBarVisible
-            ? RepaintBoundary(
+        // Footer in [Stack] (not [bottomNavigationBar]) so [BackdropFilter]
+        // samples scrolling content — otherwise the bar reads as opaque white.
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            IndexedStack(index: _selectedIndex, children: widget.children),
+            if (_bottomBarVisible)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: Material(
                   type: MaterialType.transparency,
                   elevation: 0,
                   color: Colors.transparent,
                   child: _buildShellBottomBar(items),
                 ),
-              )
-            : const SizedBox.shrink(),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -382,12 +398,15 @@ class LiquidGlassFloatingTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Small gap above the home indicator. Do not add [viewPadding.bottom] here —
-    // the scaffold bottom slot is already above the unsafe area, so full inset
-    // padding pushed the pill too high (large empty band under the bar).
+    // Shell footer sits in a [Stack] at bottom: 0 — apply safe-area inset here.
     final borderRadius = BorderRadius.circular(999.r);
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 6.h),
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        0,
+        16.w,
+        floatingGlassTabBarBottomPadding(context),
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: borderRadius,

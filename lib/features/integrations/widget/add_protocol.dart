@@ -132,7 +132,6 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                     ],
                   ),
                   SizedBox(height: 13.h),
-                  // Row 1: 5 protocol options (TCP/IP, Modbus RTU, Modbus TCP, RS485, UDP)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: AddProtocolBottomSheet._row1
@@ -146,7 +145,6 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
                     color: const Color(0xFFE1E1E1),
                   ),
                   SizedBox(height: 14.h),
-                  // Row 2: 3 items in first 3 columns (same grid as row 1 — Zigbee under TCP/IP, BACnet under Modbus RTU, KNX under Modbus TCP)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,

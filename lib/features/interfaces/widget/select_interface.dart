@@ -154,17 +154,15 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 13.h),
-                      // First row: 5 icons (BUS, Modbus RTU, Modbus TCP, RS485, Wireless)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children:
-                            _topRow.map((it) => _ChoiceTile(choice: it)).toList(),
+                        children: _topRow
+                            .map((it) => _ChoiceTile(choice: it))
+                            .toList(),
                       ),
                       SizedBox(height: 14.h),
-                      // Divider: thin light gray line
                       Divider(height: 1.h, thickness: 1.h, color: _line),
                       SizedBox(height: 14.h),
-                      // Second row: 2 items in first 2 columns
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,

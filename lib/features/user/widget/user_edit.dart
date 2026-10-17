@@ -46,7 +46,6 @@ class UserEdit extends StatefulWidget {
   static const Color _textGrey = Color(0xFF6B7280);
   static const Color _line = Color(0xFFE5E7EB);
   static const Color _blue = Color(0xFF0088FE);
-  static const Color _chipBg = Color(0xFFF3F4F6);
 
   @override
   State<UserEdit> createState() => _UserEditState();
@@ -100,29 +99,26 @@ class _UserEditState extends State<UserEdit> {
 
               SizedBox(height: 15.h),
 
-              // Fields
               _RowField(
                 left: 'Name',
                 right: 'Demo Account',
               ),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
               _DividerLine(),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
               _RowField(
                 left: 'Email',
                 right: 'Aican@gmail.com',
               ),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
               _DividerLine(),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
 
-              // Roles row
               Padding(
-                padding:  EdgeInsets.only(right: 20.w),
+                padding: EdgeInsets.only(right: 20.w),
                 child: SizedBox(
                   height: 30.h,
                   child: Row(
-
                     children: [
                       Expanded(
                         child: Text(
@@ -140,13 +136,12 @@ class _UserEditState extends State<UserEdit> {
                   ),
                 ),
               ),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
               _DividerLine(),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
 
-              // Enable cloud control row
               Padding(
-                padding:  EdgeInsets.only(right: 20.w),
+                padding: EdgeInsets.only(right: 20.w),
                 child: SizedBox(
                   height: 30.h,
                   child: Row(
@@ -165,21 +160,21 @@ class _UserEditState extends State<UserEdit> {
                       CupertinoSwitch(
                         value: _sliderWidget,
                         onChanged: (v) => setState(() => _sliderWidget = v),
-                        activeColor: Color(0xFF0088FE),
+                        activeColor: const Color(0xFF0088FE),
                       ),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 13.h,),
+              SizedBox(height: 13.h),
               _DividerLine(),
-              SizedBox(height: 13.h,),
-             Padding(
-               padding:  EdgeInsets.only(right: 20.w),
-               child: SizedBox(
-                 height: 30.h,
-                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              SizedBox(height: 13.h),
+              Padding(
+                padding: EdgeInsets.only(right: 20.w),
+                child: SizedBox(
+                  height: 30.h,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Delete user',
@@ -187,15 +182,19 @@ class _UserEditState extends State<UserEdit> {
                           fontFamily: 'Inter',
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFFFE019A),
+                          color: const Color(0xFFFE019A),
                         ),
                       ),
-                      Image.asset("assets/images/delete1.png", height: 19.h, width: 16.w, fit: BoxFit.contain,)
-
+                      Image.asset(
+                        'assets/images/delete1.png',
+                        height: 19.h,
+                        width: 16.w,
+                        fit: BoxFit.contain,
+                      ),
                     ],
                   ),
-               ),
-             ),
+                ),
+              ),
 
               SizedBox(height: 43.h),
 
@@ -321,7 +320,6 @@ class _RoleIcons extends StatefulWidget {
   const _RoleIcons();
 
   static const Color _textDark = Color(0xFF111827);
-  static const Color _chipBg = Color(0xFFF3F4F6);
   static const Color _iconColor = Color(0xFF6B7280);
 
   @override
@@ -379,7 +377,9 @@ class _RoleIconsState extends State<_RoleIcons> {
         width: 32.w,
         height: 31.w,
         decoration: BoxDecoration(
-          color: isSelected ? _RoleIcons._chipBg : Colors.transparent,
+          color: isSelected
+              ? LiquidGlass.sheetGroupBubbleColor
+              : Colors.transparent,
           shape: BoxShape.circle,
         ),
         child: Center(
