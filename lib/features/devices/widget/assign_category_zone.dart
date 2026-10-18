@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
@@ -9,8 +7,7 @@ import 'package:workpleis/features/Zones/screen/zones_screen.dart';
 
 import '../../categories/screen/categories_screen.dart';
 
-const _bgOverlay = Color(0x99000000);
-const _cardBg = Colors.white;
+const _cardBg = Color(0xFFF3F4F6);
 const _primaryBlue = Color(0xFF0088FE);
 const _textPrimary = Color(0xFF111827);
 const _textSecondary = Color(0xFF6B7280);
@@ -59,108 +56,80 @@ class _AssignCategoryZoneSheetState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: _bgOverlay,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.pop(context),
-            ),
+    final BorderRadius radius =
+        BorderRadius.vertical(top: Radius.circular(26.r));
+    return LiquidGlassModalSheetPanel(
+      opaqueWhite: true,
+      borderRadius: radius,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            16.w,
+            8.h,
+            16.w,
+            MediaQuery.viewPaddingOf(context).bottom * 0.35 > 8.h
+                ? MediaQuery.viewPaddingOf(context).bottom * 0.35
+                : 8.h,
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: GestureDetector(
-              onTap: () {},
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(26.r)),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.9,
-                ),
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
-                decoration: LiquidGlass.sheetDecoration(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(26.r)),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      
-                      children: [
-                        /// HEADER
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 0.h),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    'Assign category & zone',
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: _textPrimary,
-                                      fontFamily: 'Inter',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              LiquidGlassCloseButton(
-                                size: 30.w,
-                                iconColor: _textPrimary,
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(18.w, 10.h, 0.w, 0.h),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            'Assign category & zone',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _textPrimary,
+                              fontFamily: 'Inter',
+                            ),
                           ),
                         ),
-                     
-
+                      ),
+                      LiquidGlassCloseButton(
+                        size: 30.w,
+                        iconColor: _textPrimary,
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
                 SizedBox(height: 20.h),
-
-                /// CATEGORIES CARD
                 _Card(
-                  title: "Categories",
+                  title: 'Categories',
                   children: [
                     ...categories.map((item) {
-                      final selected =
-                          item == selectedCategory;
+                      final selected = item == selectedCategory;
                       return _RadioRow(
                         title: item,
                         selected: selected,
                         onTap: () {
-                          setState(() {
-                            selectedCategory = item;
-                          });
+                          setState(() => selectedCategory = item);
                         },
                       );
                     }),
                     InkWell(
-                          onTap: (){
-                            context.push(CategoriesScreen.routeName);
-                          },
-                        
-                        child: _AddRow(label: "Add category"))
+                      onTap: () => context.push(CategoriesScreen.routeName),
+                      child: const _AddRow(label: 'Add category'),
+                    ),
                   ],
                 ),
-
                 SizedBox(height: 16.h),
-
-                /// ZONES CARD
                 _Card(
-                  title: "Zones",
+                  title: 'Zones',
                   children: [
                     ...zones.map((item) {
-                      final selected =
-                      selectedZones.contains(item);
+                      final selected = selectedZones.contains(item);
                       return _CheckboxRow(
                         title: item,
                         selected: selected,
@@ -176,22 +145,15 @@ class _AssignCategoryZoneSheetState
                       );
                     }),
                     InkWell(
-                        onTap: (){
-                          context.push(ZonesScreen.routeName);
-                        },
-                        child: _AddRow(label: "Add zone"))
+                      onTap: () => context.push(ZonesScreen.routeName),
+                      child: const _AddRow(label: 'Add zone'),
+                    ),
                   ],
                 ),
-                      ],
-                    ),
-                  ),
-                ),
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

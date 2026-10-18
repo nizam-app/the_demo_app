@@ -40,6 +40,7 @@ class HomeScreen extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
@@ -53,6 +54,7 @@ class HomeScreen extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
@@ -591,14 +593,11 @@ class _HomeScreenState extends State<HomeScreen> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: AddSectionSheet(
-                onClose: _closeAddDashboardSectionSheet,
-                onDevicesRequested: _pickDevicesForNewSection,
-                onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
-                onAdd: _addDashboardSectionFromConfiguration,
-              ),
+            child: AddSectionSheet(
+              onClose: _closeAddDashboardSectionSheet,
+              onDevicesRequested: _pickDevicesForNewSection,
+              onHeaderBackgroundRequested: _pickDashboardHeaderImagePath,
+              onAdd: _addDashboardSectionFromConfiguration,
             ),
           ),
         ],
@@ -1779,12 +1778,13 @@ class _HomeScreenState extends State<HomeScreen> {
               left: 0,
               right: 0,
               child: LiquidGlass(
+                linearFade: true,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                     15.w,
                     topInset + 10.h,
                     15.w,
-                    8.h,
+                    16.h,
                   ),
                   child: Builder(
                     builder: (ctx) => _Header(

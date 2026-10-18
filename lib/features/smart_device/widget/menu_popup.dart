@@ -120,8 +120,10 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
 
   @override
   Widget build(BuildContext context) {
-    final topPad = MediaQuery.viewPaddingOf(context).top;
     final headerH = 56.h;
+    final double bottomInset =
+        MediaQuery.viewPaddingOf(context).bottom * 0.35;
+    final double bottomPad = bottomInset > 8.h ? bottomInset : 8.h;
 
     return ClipRRect(
       borderRadius: BorderRadius.only(
@@ -139,6 +141,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
           ),
           child: SafeArea(
             top: false,
+            bottom: false,
             child: Stack(
               alignment: Alignment.center,
               clipBehavior: Clip.hardEdge,
@@ -146,9 +149,9 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
               SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
                   0,
-                  topPad + headerH + 8.h,
+                  headerH + 8.h,
                   0,
-                  16.h,
+                  bottomPad,
                 ),
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -336,7 +339,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                         ),
                       ),
 
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 10.h),
                     ],
                   ),
                 ),
@@ -346,10 +349,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
                 top: 0,
                 left: 0,
                 right: 0,
-                child: Padding(
-                  padding: EdgeInsets.only(top: topPad),
-                  child: _buildHeader(context),
-                ),
+                child: _buildHeader(context),
               ),
 
             // ===== Outside tap closes dropdown =====

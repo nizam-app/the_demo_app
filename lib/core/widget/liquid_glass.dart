@@ -10,15 +10,37 @@ class LiquidGlass extends StatelessWidget {
     this.borderRadius = BorderRadius.zero,
     this.sigma = 18,
     this.padding,
+    /// Soft linear fade at the bottom (no hairline) — dashboard top chrome.
+    this.linearFade = false,
   });
 
   final Widget child;
   final BorderRadius borderRadius;
   final double sigma;
   final EdgeInsetsGeometry? padding;
+  final bool linearFade;
 
   /// Chrome wash. [topEdge] is for a bottom bar; otherwise the hairline sits on the bottom.
-  static BoxDecoration barDecoration({bool topEdge = false}) {
+  static BoxDecoration barDecoration({
+    bool topEdge = false,
+    bool linearFade = false,
+  }) {
+    if (linearFade && !topEdge) {
+      // iOS Liquid Glass: opaque → clear, no hard edge / hairline.
+      return BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: 0.78),
+            Colors.white.withValues(alpha: 0.48),
+            Colors.white.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.0),
+          ],
+          stops: const [0.0, 0.42, 0.78, 1.0],
+        ),
+      );
+    }
     final BorderSide hairline = BorderSide(
       color: Colors.white.withOpacity(0.72),
       width: 0.6,
@@ -108,23 +130,23 @@ class LiquidGlass extends StatelessWidget {
   }
 
   /// Backdrop strength for the floating footer tab bar (iOS Liquid Glass).
-  static const double floatingTabBarBlurSigma = 32;
+  static const double floatingTabBarBlurSigma = 36;
 
-  /// Floating footer tab bar — low-opacity wash so [BackdropFilter] reads as glass.
+  /// Floating footer tab bar — clearer Liquid Glass wash (more transparent).
   static BoxDecoration floatingTabBarDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.white.withValues(alpha: 0.32),
-          Colors.white.withValues(alpha: 0.14),
+          Colors.white.withValues(alpha: 0.18),
+          Colors.white.withValues(alpha: 0.06),
         ],
       ),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.48),
-        width: 0.75,
+        color: Colors.white.withValues(alpha: 0.28),
+        width: 0.65,
       ),
     );
   }
@@ -232,32 +254,66 @@ class LiquidGlass extends StatelessWidget {
     final Widget body = padding == null
         ? child
         : Padding(padding: padding!, child: child);
-    return ClipRRect(
+    Widget glass = ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
         child: DecoratedBox(
-          decoration: barDecoration().copyWith(borderRadius: borderRadius),
+          decoration: barDecoration(linearFade: linearFade)
+              .copyWith(borderRadius: borderRadius),
           child: body,
         ),
       ),
     );
+    if (!linearFade) return glass;
+    // Soften the blur cutoff so content scrolls under without a hard line.
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (Rect bounds) {
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFFFFF),
+            Color(0xFFFFFFFF),
+            Color(0x00FFFFFF),
+          ],
+          stops: [0.0, 0.72, 1.0],
+        ).createShader(bounds);
+      },
+      child: glass,
+    );
   }
 }
 
-/// Frosted modal panel — same clear wash + blur as dashboard section popups.
+/// Modal panel — frosted by default; set [opaqueWhite] for solid full-white sheets.
 class LiquidGlassModalSheetPanel extends StatelessWidget {
   const LiquidGlassModalSheetPanel({
     super.key,
     required this.borderRadius,
     required this.child,
+    this.opaqueWhite = false,
   });
 
   final BorderRadius borderRadius;
   final Widget child;
 
+  /// Solid `#FFFFFF` panel (no blur / no transparent wash).
+  final bool opaqueWhite;
+
   @override
   Widget build(BuildContext context) {
+    if (opaqueWhite) {
+      return Material(
+        color: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        borderRadius: borderRadius,
+        clipBehavior: Clip.antiAlias,
+        child: child,
+      );
+    }
     return ClipRRect(
       borderRadius: borderRadius,
       clipBehavior: Clip.antiAlias,

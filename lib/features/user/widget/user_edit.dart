@@ -65,6 +65,7 @@ class _UserEditState extends State<UserEdit> {
         child: Align(
         alignment: Alignment.bottomCenter,
         child: LiquidGlassModalSheetPanel(
+          opaqueWhite: true,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
           child: Padding(
             padding: EdgeInsets.fromLTRB(33.w, 16.h, 12.w, 22.h),

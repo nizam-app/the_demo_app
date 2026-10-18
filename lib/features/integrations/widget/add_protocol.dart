@@ -100,6 +100,7 @@ class _AddProtocolBottomSheetState extends State<AddProtocolBottomSheet> {
           child: Material(
             color: Colors.transparent,
             child: LiquidGlassModalSheetPanel(
+              opaqueWhite: true,
               borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
               child: Padding(
                 padding: EdgeInsets.fromLTRB(0.w, 13.w, 8.w, 60.h),

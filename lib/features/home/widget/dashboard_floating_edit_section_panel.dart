@@ -43,14 +43,11 @@ class _DashboardFloatingEditSectionPanelState
 
   Offset _defaultPosition(BuildContext context) {
     final Size screen = MediaQuery.sizeOf(context);
-    final EdgeInsets padding = MediaQuery.paddingOf(context);
     final RenderBox? box =
         _sheetMeasureKey.currentContext?.findRenderObject() as RenderBox?;
     final double sheetHeight = box?.size.height ?? screen.height * 0.55;
-    return Offset(
-      0,
-      screen.height - sheetHeight - padding.bottom,
-    );
+    // Flush to the physical bottom — no safe-area gap under the sheet.
+    return Offset(0, screen.height - sheetHeight);
   }
 
   Offset _clampPosition(Offset position) {
@@ -94,8 +91,8 @@ class _DashboardFloatingEditSectionPanelState
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
           children: [
-            SafeArea(
-              top: false,
+            Align(
+              alignment: Alignment.bottomCenter,
               child: KeyedSubtree(
                 key: _sheetMeasureKey,
                 child: sheet,

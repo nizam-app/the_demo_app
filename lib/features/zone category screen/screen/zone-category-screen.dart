@@ -174,6 +174,7 @@ class Zone_Category_Screen extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
@@ -187,6 +188,7 @@ class Zone_Category_Screen extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
@@ -939,14 +941,11 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
             left: 0,
             right: 0,
             bottom: 0.h,
-            child: SafeArea(
-              top: false,
-              child: AddSectionSheet(
-                onClose: _closeAddSectionSheetOverlay,
-                onDevicesRequested: _pickDevicesForNewSection,
-                onHeaderBackgroundRequested: _pickHeaderImagePath,
-                onAdd: _addSectionFromConfiguration,
-              ),
+            child: AddSectionSheet(
+              onClose: _closeAddSectionSheetOverlay,
+              onDevicesRequested: _pickDevicesForNewSection,
+              onHeaderBackgroundRequested: _pickHeaderImagePath,
+              onAdd: _addSectionFromConfiguration,
             ),
           ),
         ],
@@ -1771,12 +1770,13 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
               left: 0,
               right: 0,
               child: LiquidGlass(
+                linearFade: true,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                     15.w,
                     topInset + 10.h,
                     15.w,
-                    8.h,
+                    16.h,
                   ),
                   child: Builder(
                     builder: (ctx) => _Header(

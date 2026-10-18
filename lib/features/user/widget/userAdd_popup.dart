@@ -75,6 +75,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
               onTap: () {},
               behavior: HitTestBehavior.opaque,
               child: LiquidGlassModalSheetPanel(
+                opaqueWhite: true,
                 borderRadius:
                     BorderRadius.vertical(top: Radius.circular(26.r)),
                 child: Padding(

@@ -108,6 +108,7 @@ class _SmartDevicesScreenState extends State<SmartDevicesScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: false,
       barrierColor: Colors.black.withOpacity(0.25),
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),

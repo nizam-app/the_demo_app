@@ -281,7 +281,12 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             left: 16.w,
             right: 16.w,
             top: 10.h,
-            bottom: 0.h,
+            // Tight bottom — sheet sits lower with less empty glass under the CTA.
+            bottom: () {
+              final double inset =
+                  MediaQuery.viewPaddingOf(context).bottom * 0.35;
+              return inset > 8.h ? inset : 8.h;
+            }(),
           ),
           decoration: LiquidGlass.sheetDecoration(
             borderRadius: BorderRadius.only(
@@ -291,6 +296,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
           ),
           child: SafeArea(
             top: false,
+            bottom: false,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.sizeOf(context).height * 0.72,
@@ -439,13 +445,13 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                       ),
                     ),
 
-                    SizedBox(height: 18.h),
+                    SizedBox(height: 12.h),
 
-                    /// REMOVE
+                    /// ADD CTA
                     Padding(
                       padding: EdgeInsets.only(
                         right: 17.w,
-                        bottom: 25.h,
+                        bottom: 8.h,
                       ),
                       child: GestureDetector(
                         onTap: _effectiveSectionName().isEmpty ? null : _submit,

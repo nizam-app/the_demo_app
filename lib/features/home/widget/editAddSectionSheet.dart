@@ -238,8 +238,13 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
           padding: EdgeInsets.only(
             left: 16.w,
             right: 16.w,
-            top:0.h,
-            bottom: 16.h,
+            top: 0.h,
+            // Tight bottom — sheet sits lower with less empty glass under Remove.
+            bottom: () {
+              final double inset =
+                  MediaQuery.viewPaddingOf(context).bottom * 0.35;
+              return inset > 8.h ? inset : 8.h;
+            }(),
           ),
           decoration: LiquidGlass.sheetDecoration(
             borderRadius: BorderRadius.only(
@@ -463,7 +468,7 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
                       ),
                     ),
 
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 6.h),
                   ],
                 ),
               ),

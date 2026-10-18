@@ -122,6 +122,7 @@ class SelectInterfaceBottomSheet extends StatelessWidget {
                 onTap: () {},
                 behavior: HitTestBehavior.opaque,
                 child: LiquidGlassModalSheetPanel(
+                  opaqueWhite: true,
                   borderRadius:
                       BorderRadius.vertical(top: Radius.circular(28.r)),
                   child: Padding(
