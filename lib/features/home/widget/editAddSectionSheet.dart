@@ -239,11 +239,11 @@ class _EditAddSectionSheetState extends State<EditAddSectionSheet> {
             left: 16.w,
             right: 16.w,
             top: 0.h,
-            // Tight bottom — sheet sits lower with less empty glass under Remove.
+            // Slight inset above home indicator — not full SafeArea lift.
             bottom: () {
               final double inset =
                   MediaQuery.viewPaddingOf(context).bottom * 0.35;
-              return inset > 8.h ? inset : 8.h;
+              return (inset > 8.h ? inset : 8.h) + 6.h;
             }(),
           ),
           decoration: LiquidGlass.sheetDecoration(

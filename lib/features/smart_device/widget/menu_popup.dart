@@ -123,7 +123,7 @@ class _EditDeviceSheetContentState extends State<_EditDeviceSheetContent> {
     final headerH = 56.h;
     final double bottomInset =
         MediaQuery.viewPaddingOf(context).bottom * 0.35;
-    final double bottomPad = bottomInset > 8.h ? bottomInset : 8.h;
+    final double bottomPad = (bottomInset > 8.h ? bottomInset : 8.h) + 6.h;
 
     return ClipRRect(
       borderRadius: BorderRadius.only(

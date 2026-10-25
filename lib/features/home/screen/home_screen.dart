@@ -698,7 +698,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Awning garden 123',
           imagePath: 'assets/Rectangle 823.png',
           iconWidget: dashboardLightingIconFrame(
-            DashboardAwningLevelIcon(level: 1.0),
+            DashboardAwningLevelIcon(level: 1.0, softInterior: true),
           ),
         );
       case 'irrigation':

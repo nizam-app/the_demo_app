@@ -281,11 +281,11 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
             left: 16.w,
             right: 16.w,
             top: 10.h,
-            // Tight bottom — sheet sits lower with less empty glass under the CTA.
+            // Slight inset above home indicator — not full SafeArea lift.
             bottom: () {
               final double inset =
                   MediaQuery.viewPaddingOf(context).bottom * 0.35;
-              return inset > 8.h ? inset : 8.h;
+              return (inset > 8.h ? inset : 8.h) + 6.h;
             }(),
           ),
           decoration: LiquidGlass.sheetDecoration(
@@ -449,10 +449,7 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
 
                     /// ADD CTA
                     Padding(
-                      padding: EdgeInsets.only(
-                        right: 17.w,
-                        bottom: 8.h,
-                      ),
+                      padding: EdgeInsets.only(bottom: 8.h),
                       child: GestureDetector(
                         onTap: _effectiveSectionName().isEmpty ? null : _submit,
                         child: Opacity(

@@ -139,14 +139,14 @@ class LiquidGlass extends StatelessWidget {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.white.withValues(alpha: 0.18),
-          Colors.white.withValues(alpha: 0.06),
+          Colors.white.withValues(alpha: 0.11),
+          Colors.white.withValues(alpha: 0.03),
         ],
       ),
       borderRadius: BorderRadius.circular(999),
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.28),
-        width: 0.65,
+        color: Colors.white.withValues(alpha: 0.18),
+        width: 0.55,
       ),
     );
   }
@@ -340,8 +340,7 @@ class LiquidGlassModalSheetPanel extends StatelessWidget {
   }
 }
 
-/// Modal bottom sheet with transparent route chrome (no M3 grey surface).
-/// Inner-screen top bar: solid [backgroundColor] at rest; fades to light frosted glass while scrolling.
+/// Inner-screen top bar — same linear Liquid Glass fade as the dashboard header.
 class LiquidGlassInnerScreenHeader extends StatelessWidget {
   const LiquidGlassInnerScreenHeader({
     super.key,
@@ -352,58 +351,26 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
     this.glassAfterPixels = 8,
   });
 
+  /// Kept for call sites; chrome is always frosted (not a solid wash).
   final Color backgroundColor;
   final EdgeInsetsGeometry padding;
   final Widget child;
   final double scrollOffset;
   final double glassAfterPixels;
 
-  /// 0 at rest → 1 when fully frosted (content visible through the bar).
+  /// 0 at rest → 1 when scrolled (slightly stronger blur).
   double get _glassStrength {
     if (scrollOffset <= glassAfterPixels) return 0;
     return ((scrollOffset - glassAfterPixels) / 28).clamp(0.0, 1.0);
   }
 
-  BoxDecoration _scrolledDecoration(double strength) {
-    return BoxDecoration(
-      color: backgroundColor.withValues(alpha: (1 - strength) * 0.92),
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.white.withValues(alpha: 0.30 * strength),
-          Colors.white.withValues(alpha: 0.10 * strength),
-        ],
-      ),
-      border: Border(
-        bottom: BorderSide(
-          color: Colors.white.withValues(alpha: 0.38 * strength),
-          width: 0.6,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final strength = _glassStrength;
-    if (strength <= 0) {
-      return ColoredBox(
-        color: backgroundColor,
-        child: Padding(padding: padding, child: child),
-      );
-    }
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 8 + 18 * strength,
-          sigmaY: 8 + 18 * strength,
-        ),
-        child: DecoratedBox(
-          decoration: _scrolledDecoration(strength),
-          child: Padding(padding: padding, child: child),
-        ),
-      ),
+    final double sigma = 18 + 8 * _glassStrength;
+    return LiquidGlass(
+      linearFade: true,
+      sigma: sigma,
+      child: Padding(padding: padding, child: child),
     );
   }
 }

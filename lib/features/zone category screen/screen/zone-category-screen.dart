@@ -657,7 +657,7 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
           title: 'Awning garden 123',
           imagePath: 'assets/Rectangle 823.png',
           iconWidget: dashboardLightingIconFrame(
-            DashboardAwningLevelIcon(level: 1.0),
+            DashboardAwningLevelIcon(level: 1.0, softInterior: true),
           ),
         );
       case 'irrigation':
@@ -2300,7 +2300,8 @@ class _Zone_Category_ScreenState extends State<Zone_Category_Screen> {
         return _buildLightingLargeRow(
           icon: DashboardAwningLevelIcon(
             level: _awningUp / 100.0,
-                      ),
+            softInterior: true,
+          ),
           deviceName: 'Awning garden 123',
           statusText: '$_awningUp%',
           mode: _awningManual ? 'M' : 'A',

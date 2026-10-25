@@ -28,7 +28,10 @@ double get kFloatingGlassTabBarHeight => 55.h;
 /// Gap from the physical bottom (home indicator) to the floating pill.
 double floatingGlassTabBarBottomPadding(BuildContext context) {
   final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-  return bottomInset > 0 ? bottomInset + 0.h :0.h;
+  if (bottomInset <= 0) return 0;
+  // Small nudge toward the screen edge (avoid large layout jumps).
+  const double nudgeDown = 2;
+  return (bottomInset - nudgeDown).clamp(0.0, bottomInset);
 }
 
 /// Scroll/list bottom padding when body extends under the floating glass tab bar.

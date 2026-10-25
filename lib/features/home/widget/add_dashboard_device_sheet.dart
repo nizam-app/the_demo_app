@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
 import 'package:workpleis/core/widget/pressable_circle_surface.dart';
+import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
 
 class DashboardAddDeviceOption {
   const DashboardAddDeviceOption({
@@ -147,7 +148,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                     color: bothSelected ? _selectedBg : _divider,
                     margin: bothSelected
                         ? EdgeInsets.zero
-                        : EdgeInsets.only(left: 50.w),
+                        : EdgeInsets.only(left: 17.w + kDashboardLightingIconSide),
                   );
                 },
                 itemBuilder: (context, i) {
@@ -214,28 +215,23 @@ class _AddDashboardDeviceRow extends StatelessWidget {
   static const _textSecondary = Color(0xFF6B7280);
   static const _selectedBg = Color(0xFFEAF1FF);
   static const _badgeBlue = Color(0xFF0088FE);
-  static const double _iconBox = 32;
-
   Widget _buildLeadingIcon() {
+    final double side = kDashboardLightingIconSide;
     return SizedBox(
-      width: _iconBox.w,
-      height: _iconBox.h,
-      child: iconWidget != null
-          ? FittedBox(
-              fit: BoxFit.contain,
-              child: iconWidget,
-            )
-          : Image.asset(
-              imagePath,
-              width: _iconBox.w,
-              height: _iconBox.h,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.device_hub,
-                size: 24.sp,
-                color: _textSecondary,
-              ),
+      width: side,
+      height: side,
+      child: iconWidget ??
+          Image.asset(
+            imagePath,
+            width: side,
+            height: side,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.device_hub,
+              size: 24.sp,
+              color: _textSecondary,
             ),
+          ),
     );
   }
 

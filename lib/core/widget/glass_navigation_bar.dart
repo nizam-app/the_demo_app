@@ -21,6 +21,7 @@ class GlassNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = topInset ?? MediaQuery.viewPaddingOf(context).top;
     return LiquidGlass(
+      linearFade: true,
       sigma: blurSigma,
       child: Padding(
         padding: EdgeInsets.only(top: top),
