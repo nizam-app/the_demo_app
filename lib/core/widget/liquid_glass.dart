@@ -67,19 +67,19 @@ class LiquidGlass extends StatelessWidget {
   /// Frosted circular control (header menu / edit / add on dashboard).
   static BoxDecoration circleButtonDecoration({bool pressed = false}) {
     return BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.white.withValues(alpha: pressed ? 0.82 : 0.72),
-          Colors.white.withValues(alpha: pressed ? 0.58 : 0.42),
-        ],
-      ),
+      color: pressed ? const Color(0xFFF3F4F6) : Colors.white,
       shape: BoxShape.circle,
       border: Border.all(
-        color: Colors.white.withValues(alpha: 0.78),
-        width: 0.85,
+        color: const Color(0xFFE5E7EB),
+        width: 1,
       ),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0xFF111827).withValues(alpha: 0.06),
+          blurRadius: 4,
+          offset: const Offset(0, 1),
+        ),
+      ],
     );
   }
 
@@ -251,37 +251,50 @@ class LiquidGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget body = padding == null
+    final Widget content = padding == null
         ? child
         : Padding(padding: padding!, child: child);
-    Widget glass = ClipRRect(
+
+    Widget chrome = ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
         child: DecoratedBox(
           decoration: barDecoration(linearFade: linearFade)
               .copyWith(borderRadius: borderRadius),
-          child: body,
+          child: const SizedBox.expand(),
         ),
       ),
     );
-    if (!linearFade) return glass;
-    // Soften the blur cutoff so content scrolls under without a hard line.
-    return ShaderMask(
-      blendMode: BlendMode.dstIn,
-      shaderCallback: (Rect bounds) {
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFFFFFFF),
-            Color(0xFFFFFFFF),
-            Color(0x00FFFFFF),
-          ],
-          stops: [0.0, 0.72, 1.0],
-        ).createShader(bounds);
-      },
-      child: glass,
+    if (linearFade) {
+      // Fade only the frosted chrome — title and header buttons stay fully opaque.
+      chrome = ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFFFFFF),
+              Color(0xFFFFFFFF),
+              Color(0x00FFFFFF),
+            ],
+            stops: [0.0, 0.72, 1.0],
+          ).createShader(bounds);
+        },
+        child: chrome,
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          Positioned.fill(child: chrome),
+          content,
+        ],
+      ),
     );
   }
 }
@@ -368,7 +381,7 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final double sigma = 18 + 8 * _glassStrength;
     return LiquidGlass(
-      linearFade: true,
+      linearFade: false,
       sigma: sigma,
       child: Padding(padding: padding, child: child),
     );

@@ -54,6 +54,11 @@ class UserEdit extends StatefulWidget {
 class _UserEditState extends State<UserEdit> {
   bool _sliderWidget = true;
 
+  double _sheetBottomPadding(BuildContext context) {
+    final double inset = MediaQuery.viewPaddingOf(context).bottom * 0.35;
+    return (inset > 8.h ? inset : 8.h) + 6.h;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -68,7 +73,12 @@ class _UserEditState extends State<UserEdit> {
           opaqueWhite: true,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(33.w, 16.h, 12.w, 22.h),
+            padding: EdgeInsets.fromLTRB(
+              33.w,
+              16.h,
+              12.w,
+              _sheetBottomPadding(context),
+            ),
             child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -230,8 +240,6 @@ class _UserEditState extends State<UserEdit> {
                   ),
                 ),
 
-              // Small bottom spacing so content isn't glued to the edge
-              SizedBox(height: 40.h),
             ],
           ),
         ),

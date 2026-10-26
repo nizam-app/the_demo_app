@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:workpleis/core/widget/liquid_glass.dart';
 import 'package:workpleis/core/widget/pressable_circle_surface.dart';
-import 'package:workpleis/features/device_details/device_dashboard_sync.dart';
-
 class DashboardAddDeviceOption {
   const DashboardAddDeviceOption({
     required this.id,
@@ -106,7 +104,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
           child: Column(
           children: [
             SizedBox(
-              height: 52.h,
+              height: 56.h,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -115,14 +113,14 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                       'Add dashboard device',
                       style: TextStyle(
                         fontFamily: 'Inter',
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: _textPrimary,
                       ),
                     ),
                   ),
                   Positioned(
-                    right: 10.w,
+                    right: 20.w,
                     child: LiquidGlassCloseButton(
                       size: 32.w,
                       iconColor: _textPrimary,
@@ -135,7 +133,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
             Expanded(
               child: ListView.separated(
                 controller: widget.scrollController,
-                padding: EdgeInsets.only(bottom: 24.h),
+                padding: EdgeInsets.only(bottom: 15.h),
                 itemCount: widget.devices.length,
                 separatorBuilder: (_, index) {
                   final String leftId = widget.devices[index].id;
@@ -148,7 +146,7 @@ class _AddDashboardDeviceSheetState extends State<AddDashboardDeviceSheet> {
                     color: bothSelected ? _selectedBg : _divider,
                     margin: bothSelected
                         ? EdgeInsets.zero
-                        : EdgeInsets.only(left: 17.w + kDashboardLightingIconSide),
+                        : EdgeInsets.only(left: 64.w),
                   );
                 },
                 itemBuilder: (context, i) {
@@ -214,24 +212,37 @@ class _AddDashboardDeviceRow extends StatelessWidget {
   static const _textPrimary = Color(0xFF111827);
   static const _textSecondary = Color(0xFF6B7280);
   static const _selectedBg = Color(0xFFEAF1FF);
-  static const _badgeBlue = Color(0xFF0088FE);
+  static const _badgeBlue = Color(0xFF007AFF);
+  static const double _iconSlot = 32;
+  static const double _iconGlyph = 26;
+
   Widget _buildLeadingIcon() {
-    final double side = kDashboardLightingIconSide;
-    return SizedBox(
-      width: side,
-      height: side,
-      child: iconWidget ??
-          Image.asset(
-            imagePath,
-            width: side,
-            height: side,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Icon(
-              Icons.device_hub,
-              size: 24.sp,
-              color: _textSecondary,
-            ),
-          ),
+    return Container(
+      width: _iconSlot.w,
+      height: _iconSlot.h,
+      color: selected ? _selectedBg : null,
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: _iconGlyph.w,
+        height: _iconGlyph.h,
+        child: iconWidget != null
+            ? FittedBox(
+                fit: BoxFit.contain,
+                child: iconWidget,
+              )
+            : Image.asset(
+                imagePath,
+                width: _iconGlyph.w,
+                height: _iconGlyph.h,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.device_hub,
+                  size: 20.sp,
+                  color: _textSecondary,
+                ),
+              ),
+      ),
     );
   }
 
@@ -251,7 +262,7 @@ class _AddDashboardDeviceRow extends StatelessWidget {
             child: Opacity(
               opacity: enabled ? 1 : 0.45,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 17.w, vertical: 16.h),
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
                 child: Row(
                   children: [
                     _buildLeadingIcon(),
@@ -287,8 +298,8 @@ class _AddDashboardDeviceRow extends StatelessWidget {
                     ),
                     if (badgeCount != null)
                       Container(
-                        width: 24.w,
-                        height: 24.w,
+                        width: 18.w,
+                        height: 18.h,
                         decoration: const BoxDecoration(
                           color: _badgeBlue,
                           shape: BoxShape.circle,

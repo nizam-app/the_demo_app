@@ -1362,6 +1362,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildLedDimmerHeroContent() {
     final double ringSize = 290.w;
     final double stroke = 12.r;
+    final bool ledOff = _ledDimmerPercent.clamp(0.0, 1.0) <= 0.001;
 
     return Column(
       children: [
@@ -1405,77 +1406,92 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      IgnorePointer(
-                        child: CustomPaint(
-                          size: sz,
-                          painter: _LedDimmerRingPainter(
-                            percent: _ledDimmerPercent.clamp(0.0, 1.0),
-                            strokeWidth: stroke,
-                          ),
-                        ),
-                      ),
-                      IgnorePointer(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${(_ledDimmerPercent * 100).round()}%',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 52.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111827),
+                      if (ledOff)
+                        IgnorePointer(
+                          child: SizedBox(
+                            width: sz.width,
+                            height: sz.height,
+                            child: FittedBox(
+                              child: DashboardRingProgressIcon(
+                                percent: _ledDimmerPercent.clamp(0.0, 1.0),
+                                ringStyle: DashboardRingStyle.led,
                               ),
                             ),
-                            SizedBox(height: 6.h),
-                            Icon(
-                              Icons.wb_sunny_outlined,
-                              size: 72.sp,
-                              color: _ledDimmerPercent <= 0
-                                  ? kDeviceOffGreyFill
-                                  : const Color(0xFFFAB300),
+                          ),
+                        )
+                      else ...[
+                        IgnorePointer(
+                          child: CustomPaint(
+                            size: sz,
+                            painter: _LedDimmerRingPainter(
+                              percent: _ledDimmerPercent.clamp(0.0, 1.0),
+                              strokeWidth: stroke,
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          final Offset c = Offset(sz.width / 2, sz.height / 2);
-                          final double radius =
-                              sz.shortestSide / 2 - stroke / 2 - 2;
-                          final double p = _ledDimmerPercent.clamp(0.0, 1.0);
-                          final double ang =
-                              _fullRingStart + (_fullRingSweep * p);
-                          final Offset thumb =
-                              c + Offset(math.cos(ang), math.sin(ang)) * radius;
-                          final double thumbSize = 38.r;
-                          final double haloPad = 8.r;
-                          final double outerSize = thumbSize + haloPad * 2;
-                          return Positioned(
-                            left: thumb.dx - outerSize / 2,
-                            top: thumb.dy - outerSize / 2,
-                            child: IgnorePointer(
-                              child: _ringControlThumb(
-                                pressed: _ledDimmerRingDragging,
-                                thumbDiameter: thumbSize,
-                                haloPadding: haloPad,
-                                thumb: Container(
-                                  width: thumbSize,
-                                  height: thumbSize,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00E52A),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      width: 5,
-                                      color: Colors.white.withOpacity(0.95),
+                        IgnorePointer(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${(_ledDimmerPercent * 100).round()}%',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 52.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF111827),
+                                ),
+                              ),
+                              SizedBox(height: 6.h),
+                              Icon(
+                                Icons.wb_sunny_outlined,
+                                size: 72.sp,
+                                color: const Color(0xFFFAB300),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Builder(
+                          builder: (context) {
+                            final Offset c =
+                                Offset(sz.width / 2, sz.height / 2);
+                            final double radius =
+                                sz.shortestSide / 2 - stroke / 2 - 2;
+                            final double p =
+                                _ledDimmerPercent.clamp(0.0, 1.0);
+                            final double ang =
+                                _fullRingStart + (_fullRingSweep * p);
+                            final Offset thumb = c +
+                                Offset(math.cos(ang), math.sin(ang)) * radius;
+                            final double thumbSize = 38.r;
+                            final double haloPad = 8.r;
+                            final double outerSize = thumbSize + haloPad * 2;
+                            return Positioned(
+                              left: thumb.dx - outerSize / 2,
+                              top: thumb.dy - outerSize / 2,
+                              child: IgnorePointer(
+                                child: _ringControlThumb(
+                                  pressed: _ledDimmerRingDragging,
+                                  thumbDiameter: thumbSize,
+                                  haloPadding: haloPad,
+                                  thumb: Container(
+                                    width: thumbSize,
+                                    height: thumbSize,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF00E52A),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        width: 5,
+                                        color: Colors.white.withOpacity(0.95),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 );
@@ -1663,6 +1679,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   Widget _buildTunableWhiteHeroContent() {
     final double diskSize = 280.w;
     final double thumbSize = 30.r;
+    final bool tunableOff =
+        _tunableWhiteIntensity.clamp(0.0, 1.0) <= 0.001;
 
     // Approximate warm↔cool kelvin range for the UI.
     const int warmK = 2700;
@@ -1720,106 +1738,122 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: Container(
-                          width: sz.width,
-                          height: sz.height,
-                          padding: EdgeInsets.all(dialBorderWidth),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: <Color>[
-                                Color(0xFFFEE481),
-                                Color(0xFFFFFFFF),
-                                Color(0xFF93E1E3),
-                              ],
-                              stops: <double>[0.0, 0.55, 1.0],
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                const DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: <Color>[
-                                        Color(0xFFFEE481),
-                                        Color(0xFFFFFFFF),
-                                        Color(0xFF93E1E3),
-                                      ],
-                                      stops: <double>[0.0, 0.48, 1.0],
+                        child: tunableOff
+                            ? SizedBox(
+                                width: sz.width,
+                                height: sz.height,
+                                child: FittedBox(
+                                  child: DashboardTunableWhiteIcon(
+                                    dotDx: _tunableWhiteDotDx,
+                                    dotDy: _tunableWhiteDotDy,
+                                    intensity: _tunableWhiteIntensity.clamp(
+                                      0.0,
+                                      1.0,
                                     ),
                                   ),
                                 ),
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        Colors.white.withValues(alpha: 0.0),
-                                        Colors.black.withValues(alpha: 0.06),
-                                      ],
-                                      stops: const <double>[0.65, 1.0],
-                                    ),
+                              )
+                            : Container(
+                                width: sz.width,
+                                height: sz.height,
+                                padding: EdgeInsets.all(dialBorderWidth),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: <Color>[
+                                      Color(0xFFFEE481),
+                                      Color(0xFFFFFFFF),
+                                      Color(0xFF93E1E3),
+                                    ],
+                                    stops: <double>[0.0, 0.55, 1.0],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Selector + "Daylight" label at the user's tap point.
-                      Builder(
-                        builder: (context) {
-                          final double x = _tunableWhiteDotDx * sz.width;
-                          final double y = _tunableWhiteDotDy * sz.height;
-                          final double ringSize = 40.r;
-                          final double labelGap = 8.h;
-                          final double labelHeight = 16.h;
-                          // Anchor ring center on (x, y); label sits below with Figma gap.
-                          return Positioned(
-                            left: x - ringSize / 2,
-                            top: y - ringSize / 2,
-                            child: IgnorePointer(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: ringSize,
-                                    height: ringSize,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.transparent,
-                                      border: Border.all(
-                                        color: kDeviceOffGreyBorder,
-                                        width: 2,
+                                child: ClipOval(
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      const DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: <Color>[
+                                              Color(0xFFFEE481),
+                                              Color(0xFFFFFFFF),
+                                              Color(0xFF93E1E3),
+                                            ],
+                                            stops: <double>[0.0, 0.48, 1.0],
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(height: labelGap),
-                                  SizedBox(
-                                    height: labelHeight,
-                                    child: Text(
-                                      'Daylight',
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: textSecondary,
+                                      DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: RadialGradient(
+                                            colors: [
+                                              Colors.white
+                                                  .withValues(alpha: 0.0),
+                                              Colors.black
+                                                  .withValues(alpha: 0.06),
+                                            ],
+                                            stops: const <double>[0.65, 1.0],
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
                       ),
+                      if (!tunableOff)
+                        Builder(
+                          builder: (context) {
+                            final double x = _tunableWhiteDotDx * sz.width;
+                            final double y = _tunableWhiteDotDy * sz.height;
+                            final double ringSize = 40.r;
+                            final double labelGap = 8.h;
+                            final double labelHeight = 16.h;
+                            return Positioned(
+                              left: x - ringSize / 2,
+                              top: y - ringSize / 2,
+                              child: IgnorePointer(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: ringSize,
+                                      height: ringSize,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.transparent,
+                                        border: Border.all(
+                                          color: kDeviceOffGreyBorder,
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: labelGap),
+                                    SizedBox(
+                                      height: labelHeight,
+                                      child: Text(
+                                        'Daylight',
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 );
@@ -1893,16 +1927,21 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 10.h,
                           trackShape: const _TunableWhiteIntensityGradientTrackShape(),
-                          activeTrackColor: accent,
-                          inactiveTrackColor: const Color(0xFFE5E7EB),
-                          thumbColor: accent,
+                          activeTrackColor:
+                              tunableOff ? kDeviceOffGreyFill : accent,
+                          inactiveTrackColor: tunableOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE5E7EB),
+                          thumbColor:
+                              tunableOff ? kDeviceOffGreyFill : accent,
                           overlayColor: _controlPressHaloColor,
                           overlayShape: RoundSliderOverlayShape(
                             overlayRadius: 22.r,
                           ),
                           thumbShape: _TunableWhiteThumbShape(
                             radius: thumbSize / 2,
-                            fillColor: accent,
+                            fillColor:
+                                tunableOff ? kDeviceOffGreyFill : accent,
                             dragging: _tunableWhiteSliderDragging,
                           ),
                         ),
@@ -1976,6 +2015,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         .toUpperCase();
 
     final double wheelSize = 310.w;
+    final bool rgbwOff = _rgbwIntensity.clamp(0.0, 1.0) <= 0.001;
 
     return Column(
       children: [
@@ -2012,75 +2052,91 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     children: [
                       IgnorePointer(
-                        child: Container(
-                          width: layoutSize.width,
-                          height: layoutSize.height,
-                          padding: EdgeInsets.all(6.w),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: SweepGradient(
-                              transform: const GradientRotation(-math.pi / 2),
-                              colors: <Color>[
-                                Color(0xFFBEEEDD), // top-left mint
-                                Color(0xFFF8F3A8), // top yellow
-                                Color(0xFFF8C8A0), // right-top orange
-                                Color(0xFFF6AFC8), // right-bottom pink
-                                Color(0xFFD2B6F1), // bottom purple
-                                Color(0xFF9FBEF2), // bottom-left blue
-                                Color(0xFF9EDFE9), // left cyan
-                                Color(0xFFBEEEDD), // close loop
-                              ],
-                              stops: <double>[
-                                0.00,
-                                0.16,
-                                0.30,
-                                0.48,
-                                0.64,
-                                0.79,
-                                0.92,
-                                1.00,
-                              ],
-                            ),
-                          ),
-                          child: ClipOval(
-                            child: CustomPaint(
-                              size: layoutSize,
-                              painter: _RgbHueWheelPainter(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          final Offset c = Offset(
-                            layoutSize.width / 2,
-                            layoutSize.height / 2,
-                          );
-                          final double maxR = _rgbwWheelMaxRadius(layoutSize);
-                          final double r =
-                              maxR * _rgbwSaturation.clamp(0.0, 1.0);
-                          final double rad = _rgbwHue * math.pi / 180;
-                          final Offset thumb =
-                              c + Offset(math.cos(rad) * r, -math.sin(rad) * r);
-                          final double thumbD = 38.r;
-                          final double haloPad = 8.r;
-                          final double outerD = thumbD + haloPad * 2;
-                          return Positioned(
-                            left: thumb.dx - outerD / 2,
-                            top: thumb.dy - outerD / 2,
-                            child: IgnorePointer(
-                              child: _hollowRingSelectorThumb(
-                                pressed: _rgbwWheelDragging,
-                                diameter: thumbD,
-                                strokeWidth: 5,
-                                pressHaloPadding: haloPad,
-                                idleStrokeColor: Colors.white,
-                                pressGlowColor: Colors.white,
+                        child: rgbwOff
+                            ? SizedBox(
+                                width: layoutSize.width,
+                                height: layoutSize.height,
+                                child: FittedBox(
+                                  child: DashboardRgbwIcon(
+                                    hue: _rgbwHue,
+                                    saturation: _rgbwSaturation,
+                                    intensity: _rgbwIntensity.clamp(0.0, 1.0),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                width: layoutSize.width,
+                                height: layoutSize.height,
+                                padding: EdgeInsets.all(6.w),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: SweepGradient(
+                                    transform: const GradientRotation(
+                                      -math.pi / 2,
+                                    ),
+                                    colors: <Color>[
+                                      Color(0xFFBEEEDD),
+                                      Color(0xFFF8F3A8),
+                                      Color(0xFFF8C8A0),
+                                      Color(0xFFF6AFC8),
+                                      Color(0xFFD2B6F1),
+                                      Color(0xFF9FBEF2),
+                                      Color(0xFF9EDFE9),
+                                      Color(0xFFBEEEDD),
+                                    ],
+                                    stops: <double>[
+                                      0.00,
+                                      0.16,
+                                      0.30,
+                                      0.48,
+                                      0.64,
+                                      0.79,
+                                      0.92,
+                                      1.00,
+                                    ],
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: CustomPaint(
+                                    size: layoutSize,
+                                    painter: _RgbHueWheelPainter(),
+                                  ),
+                                ),
                               ),
-                            ),
-                          );
-                        },
                       ),
+                      if (!rgbwOff)
+                        Builder(
+                          builder: (context) {
+                            final Offset c = Offset(
+                              layoutSize.width / 2,
+                              layoutSize.height / 2,
+                            );
+                            final double maxR =
+                                _rgbwWheelMaxRadius(layoutSize);
+                            final double r =
+                                maxR * _rgbwSaturation.clamp(0.0, 1.0);
+                            final double rad = _rgbwHue * math.pi / 180;
+                            final Offset thumb = c +
+                                Offset(math.cos(rad) * r, -math.sin(rad) * r);
+                            final double thumbD = 38.r;
+                            final double haloPad = 8.r;
+                            final double outerD = thumbD + haloPad * 2;
+                            return Positioned(
+                              left: thumb.dx - outerD / 2,
+                              top: thumb.dy - outerD / 2,
+                              child: IgnorePointer(
+                                child: _hollowRingSelectorThumb(
+                                  pressed: _rgbwWheelDragging,
+                                  diameter: thumbD,
+                                  strokeWidth: 5,
+                                  pressHaloPadding: haloPad,
+                                  idleStrokeColor: Colors.white,
+                                  pressGlowColor: Colors.white,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 );
@@ -2153,19 +2209,35 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                           overlayShape: RoundSliderOverlayShape(
                             overlayRadius: 22.r,
                           ),
-                          activeTrackColor: const Color(0xFFE91EAC),
-                          inactiveTrackColor: const Color(0xFFFFFFFF),
-                          disabledActiveTrackColor: const Color(0xFFE91EAC),
-                          disabledInactiveTrackColor: const Color(0xFFFFFFFF),
-                          thumbColor: const Color(0xFFE91EAC),
-                          disabledThumbColor: const Color(0xFFE91EAC),
+                          activeTrackColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE91EAC),
+                          inactiveTrackColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFFFFFFF),
+                          disabledActiveTrackColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE91EAC),
+                          disabledInactiveTrackColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFFFFFFF),
+                          thumbColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE91EAC),
+                          disabledThumbColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE91EAC),
                         ),
                         child: Slider(
                           value: _rgbwIntensity.clamp(0.0, 1.0),
                           min: 0,
                           max: 1,
-                          activeColor: const Color(0xFFE91EAC),
-                          inactiveColor: const Color(0xFFFFFFFF),
+                          activeColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFE91EAC),
+                          inactiveColor: rgbwOff
+                              ? kDeviceOffGreyFill
+                              : const Color(0xFFFFFFFF),
                           onChangeStart: (_) {
                             uiTapHaptic();
                             setState(() => _rgbwSliderDragging = true);

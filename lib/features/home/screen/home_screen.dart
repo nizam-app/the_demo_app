@@ -215,6 +215,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<CustomBottomNavBarState> _shellNavKey =
       GlobalKey<CustomBottomNavBarState>();
 
+  /// Liquid Glass: scroll up → footer only; scroll down → header + footer.
+  bool _dashboardChromeHeaderVisible = true;
+
   late final VoidCallback _dashboardSyncListener;
   bool _suppressDashboardSyncPull = false;
 
@@ -230,6 +233,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _setShellBottomBarVisible(bool visible) {
     _shellNavKey.currentState?.setBottomBarVisible(visible);
+  }
+
+  bool _onDashboardScroll(ScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+
+    if (notification.metrics.pixels <= 0) {
+      if (!_dashboardChromeHeaderVisible) {
+        setState(() => _dashboardChromeHeaderVisible = true);
+      }
+      _setShellBottomBarVisible(true);
+      return false;
+    }
+
+    if (notification is ScrollUpdateNotification) {
+      final double delta = notification.scrollDelta ?? 0;
+      if (delta.abs() < 0.5) return false;
+
+      if (delta > 0) {
+        // Scrolling down — show header and footer.
+        if (!_dashboardChromeHeaderVisible) {
+          setState(() => _dashboardChromeHeaderVisible = true);
+        }
+      } else {
+        // Scrolling up — footer only (hide header).
+        if (_dashboardChromeHeaderVisible) {
+          setState(() => _dashboardChromeHeaderVisible = false);
+        }
+      }
+      _setShellBottomBarVisible(true);
+    }
+    return false;
   }
 
   @override
@@ -1687,7 +1721,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CustomScrollView(
+            NotificationListener<ScrollNotification>(
+              onNotification: _onDashboardScroll,
+              child: CustomScrollView(
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
@@ -1773,26 +1809,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            ),
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              child: LiquidGlass(
-                linearFade: true,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    15.w,
-                    topInset + 10.h,
-                    15.w,
-                    16.h,
-                  ),
-                  child: Builder(
-                    builder: (ctx) => _Header(
-                      onMenuTap: () {
-                        ctx.push(MenuScreen.routeName);
-                      },
-                      onEditTap: _toggleDashboardEditMode,
-                      onAddTap: _showAddDashboardSectionSheet,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                offset: _dashboardChromeHeaderVisible
+                    ? Offset.zero
+                    : const Offset(0, -1),
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: _dashboardChromeHeaderVisible ? 1 : 0,
+                  child: IgnorePointer(
+                    ignoring: !_dashboardChromeHeaderVisible,
+                    child: LiquidGlass(
+                      linearFade: true,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          15.w,
+                          topInset + 10.h,
+                          15.w,
+                          16.h,
+                        ),
+                        child: Builder(
+                          builder: (ctx) => _Header(
+                            onMenuTap: () {
+                              ctx.push(MenuScreen.routeName);
+                            },
+                            onEditTap: _toggleDashboardEditMode,
+                            onAddTap: _showAddDashboardSectionSheet,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

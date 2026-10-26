@@ -94,8 +94,8 @@ class _UsersScreenState extends State<UsersScreen> {
                               image: [
                                 _InlineIcon(
                                   'assets/images/setting.png',
-                                  13.h,
-                                  13.w,
+                                  15.h,
+                                  15.w,
                                   color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
@@ -118,8 +118,8 @@ class _UsersScreenState extends State<UsersScreen> {
                               image: [
                                 _InlineIcon(
                                   'assets/Mask group (1) copy 2.png',
-                                  11.h,
-                                  11.w,
+                                  15.h,
+                                  15.w,
                                   color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
@@ -138,14 +138,14 @@ class _UsersScreenState extends State<UsersScreen> {
                               image: [
                                 _InlineIcon(
                                   'assets/key.png',
-                                  11.h,
-                                  11.w,
+                                  15.h,
+                                  15.w,
                                   color: UsersScreen._textDark,
                                 ),
                                 _InlineIcon(
                                   'assets/images/Group 55.png',
-                                  13.h,
-                                  13.w,
+                                  15.h,
+                                  15.w,
                                 ),
                               ],
                             ),

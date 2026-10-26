@@ -835,6 +835,8 @@ class DashboardRgbwIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_dashboardIsOffPercent(intensity)) {
       final double side = kDashboardLightingIconSide;
+      const double heroDisk = 280;
+      final double scale = side / heroDisk;
       final Size layoutSize = Size(side, side);
       final Offset center = Offset(side / 2, side / 2);
       final double maxR = layoutSize.shortestSide / 2 - (10 * side / 310);
@@ -842,14 +844,13 @@ class DashboardRgbwIcon extends StatelessWidget {
       final double rad = hue.clamp(0.0, 359.99) * math.pi / 180;
       final Offset thumbPos =
           center + Offset(math.cos(rad) * thumbR, -math.sin(rad) * thumbR);
-      final double thumbD = 38 * side / 310;
-      final double strokeW = math.max(1.2, 5 * side / 310);
+      final double ringSize = 40 * scale;
+      final double ringBorder = math.max(1.2, 2 * scale);
       return SizedBox(
         width: side,
         height: side,
         child: Stack(
           clipBehavior: Clip.none,
-          alignment: Alignment.center,
           children: [
             Container(
               width: side,
@@ -878,17 +879,17 @@ class DashboardRgbwIcon extends StatelessWidget {
               ),
             ),
             Positioned(
-              left: thumbPos.dx - thumbD / 2,
-              top: thumbPos.dy - thumbD / 2,
+              left: thumbPos.dx - ringSize / 2,
+              top: thumbPos.dy - ringSize / 2,
               child: Container(
-                width: thumbD,
-                height: thumbD,
+                width: ringSize,
+                height: ringSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.transparent,
                   border: Border.all(
                     color: const Color(0xFF9CA3AF),
-                    width: strokeW,
+                    width: ringBorder,
                   ),
                 ),
               ),
