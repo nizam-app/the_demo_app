@@ -45,7 +45,6 @@ class _DevicesScreenState extends State<DevicesScreen> {
   int _rgbwStepMark = 0;
   int _bathroomThermoMark = 0;
   int _blindStepMark = 0;
-  double _headerScrollOffset = 0;
   bool _irrigationPlaying = false;
   int _brightnessPct = 54;
   bool _cardReaderOn = false;
@@ -114,7 +113,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
     const bg = Colors.white;
     final topInset = MediaQuery.viewPaddingOf(context).top;
     final headerRowHeight = 36.w;
-    final headerExtent = topInset + 8.h + headerRowHeight + 8.h;
+    // Match dashboard: content starts under the same chrome height.
+    final headerChrome = 56.h;
+    final scrollTopPadding = topInset + headerChrome + 10.h;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     // Shell uses CustomBottomNavBar with extendBody — content draws under the 72px
     // track; keep the same bottom inset when this screen shows BottomNavBarWidget.
@@ -137,15 +138,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              listenInnerScreenScroll(
-                onScrollOffset: (px) => updateInnerScreenHeaderScrollOffset(
-                  current: _headerScrollOffset,
-                  next: px,
-                  apply: () => setState(() => _headerScrollOffset = px),
-                ),
-                child: SingleChildScrollView(
+              SingleChildScrollView(
                 padding: EdgeInsets.only(
-                  top: headerExtent,
+                  top: scrollTopPadding,
                   bottom: scrollBottomPad,
                 ),
               child: Column(
@@ -700,21 +695,20 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   ],
                 ),
               ),
-              ),
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                child: LiquidGlassInnerScreenHeader(
-                  backgroundColor: bg,
-                  scrollOffset: _headerScrollOffset,
-                  padding: EdgeInsets.only(
-                    left: 14.w,
-                    right: 14.w,
-                    top: topInset + 8.h,
-                    bottom: 12.h,
-                  ),
-                  child: SizedBox(
+                child: LiquidGlass(
+                  linearFade: true,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      15.w,
+                      topInset + 10.h,
+                      15.w,
+                      16.h,
+                    ),
+                    child: SizedBox(
                     height: headerRowHeight,
                     child: Stack(
                       alignment: Alignment.center,
@@ -788,6 +782,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ),
               ),

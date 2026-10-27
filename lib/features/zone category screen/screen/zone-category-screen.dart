@@ -5062,29 +5062,24 @@ Widget _deviceCardTitleSlot(String title, {required bool compact}) {
   );
 }
 
-/// S-only title for Awning / Blind Living Room (_BlindCard).
-/// Default 30.h + 16.sp clips the 2nd line into the control row.
+/// Awning / Blind — 16.sp + room for two lines (Kitchen / zone grid).
 Widget _blindCardTitleSlot(String title, {required bool compact}) {
-  if (!compact) {
-    return _deviceCardTitleSlot(title, compact: false);
-  }
+  final double h = compact ? 38.h : _deviceCardTitleHeight(false);
   return SizedBox(
-    height: 34.h,
+    height: h,
     width: double.infinity,
-    child: ClipRect(
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
-            color: const Color(0xFF111827),
-            height: 1.15,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+    child: Align(
+      alignment: Alignment.topLeft,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xFF111827),
+          height: 1.15,
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
     ),
   );

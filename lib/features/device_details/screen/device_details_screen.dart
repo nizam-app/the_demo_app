@@ -728,7 +728,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
           _buildHeroWithImageHeader(context, _buildHero()),
         ] else ...[
           _buildTopHeader(context),
-          _buildSwcBelowHeader(),
+          _buildSwcBelowHeader(
+            fontSize:
+                widget.controlMode == DeviceDetailsControlMode.blindControl ||
+                        widget.controlMode ==
+                            DeviceDetailsControlMode.awningControl
+                    ? 12
+                    : 10,
+          ),
           _buildHero(),
         ],
         SizedBox(
@@ -895,7 +902,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   /// Model / device id — under title in hero for [standard] / [lightSceneValues] / [fanLevel] / [heatingCooling], else under top header.
-  Widget _buildSwcBelowHeader() {
+  Widget _buildSwcBelowHeader({double fontSize = 10}) {
     return Padding(
       padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 4.h),
       child: Text(
@@ -903,7 +910,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
         textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'Inter',
-          fontSize: 10.sp,
+          fontSize: fontSize.sp,
           fontWeight: FontWeight.w400,
           color: const Color(0xFF6B7280),
         ),
@@ -1361,8 +1368,8 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
   Widget _buildLedDimmerHeroContent() {
     final double ringSize = 290.w;
-    final double stroke = 12.r;
     final bool ledOff = _ledDimmerPercent.clamp(0.0, 1.0) <= 0.001;
+    final double stroke = ledOff ? 7.r : 12.r;
 
     return Column(
       children: [
@@ -1406,51 +1413,40 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                     alignment: Alignment.center,
                     clipBehavior: Clip.none,
                     children: [
-                      if (ledOff)
-                        IgnorePointer(
-                          child: SizedBox(
-                            width: sz.width,
-                            height: sz.height,
-                            child: FittedBox(
-                              child: DashboardRingProgressIcon(
-                                percent: _ledDimmerPercent.clamp(0.0, 1.0),
-                                ringStyle: DashboardRingStyle.led,
-                              ),
-                            ),
-                          ),
-                        )
-                      else ...[
-                        IgnorePointer(
-                          child: CustomPaint(
-                            size: sz,
-                            painter: _LedDimmerRingPainter(
-                              percent: _ledDimmerPercent.clamp(0.0, 1.0),
-                              strokeWidth: stroke,
-                            ),
+                      IgnorePointer(
+                        child: CustomPaint(
+                          size: sz,
+                          painter: _LedDimmerRingPainter(
+                            percent: _ledDimmerPercent.clamp(0.0, 1.0),
+                            strokeWidth: stroke,
                           ),
                         ),
-                        IgnorePointer(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${(_ledDimmerPercent * 100).round()}%',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 52.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF111827),
-                                ),
+                      ),
+                      IgnorePointer(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${(_ledDimmerPercent * 100).round()}%',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 52.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF111827),
                               ),
-                              SizedBox(height: 6.h),
-                              Icon(
-                                Icons.wb_sunny_outlined,
-                                size: 72.sp,
-                                color: const Color(0xFFFAB300),
-                              ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 6.h),
+                            Icon(
+                              Icons.wb_sunny_outlined,
+                              size: 72.sp,
+                              color: ledOff
+                                  ? kDeviceOffGreyIcon
+                                  : const Color(0xFFFAB300),
+                            ),
+                          ],
                         ),
+                      ),
+                      if (!ledOff)
                         Builder(
                           builder: (context) {
                             final Offset c =
@@ -1491,7 +1487,6 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
                             );
                           },
                         ),
-                      ],
                     ],
                   ),
                 );
@@ -1528,27 +1523,48 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
   }
 
   /// Three-column stats row (On time / 7 Days / Cycles).
-  Widget _buildHeroStatsRow({String onTimeTop = '12:57'}) {
+  Widget _buildHeroStatsRow({
+    String onTimeTop = '12:57',
+    double captionFontSize = 10,
+  }) {
     return Padding(
       padding: EdgeInsets.only(left: 80.w, right: 90.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _StatBlock(top: onTimeTop, bottom: 'On time'),
-          _StatBlock(top: '5h 58m', bottom: '7 Days'),
-          _StatBlock(top: '1257', bottom: 'Cycles'),
+          _StatBlock(
+            top: onTimeTop,
+            bottom: 'On time',
+            captionFontSize: captionFontSize,
+          ),
+          _StatBlock(
+            top: '5h 58m',
+            bottom: '7 Days',
+            captionFontSize: captionFontSize,
+          ),
+          _StatBlock(
+            top: '1257',
+            bottom: 'Cycles',
+            captionFontSize: captionFontSize,
+          ),
         ],
       ),
     );
   }
 
   /// Spacer + stats only — for [standard] / [lightSceneValues] / [fanLevel] / [heatingCooling] the title and SWC sit above this in [_buildHero] (or default hero); else title is in [_buildTopHeader] and SWC may precede the hero.
-  Widget _buildHeroIdentityStats({String onTimeTop = '12:57'}) {
+  Widget _buildHeroIdentityStats({
+    String onTimeTop = '12:57',
+    double captionFontSize = 10,
+  }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: 6.h),
-        _buildHeroStatsRow(onTimeTop: onTimeTop),
+        _buildHeroStatsRow(
+          onTimeTop: onTimeTop,
+          captionFontSize: captionFontSize,
+        ),
       ],
     );
   }
@@ -3116,14 +3132,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
     final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 18.sp,
+      fontSize: 20.sp,
       fontWeight: FontWeight.w400,
       color: const Color(0xFF111827),
     );
 
     final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 18.sp,
+      fontSize: 20.sp,
       fontWeight: FontWeight.w700,
       color: const Color(0xFF111827),
     );
@@ -3131,7 +3147,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildHeroIdentityStats(),
+        _buildHeroIdentityStats(captionFontSize: 12),
 
         SizedBox(height: 8.h),
 
@@ -3538,14 +3554,14 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
 
     final TextStyle labelStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 18.sp,
+      fontSize: 20.sp,
       fontWeight: FontWeight.w400,
       color: const Color(0xFF111827),
     );
 
     final TextStyle valueStyle = TextStyle(
       fontFamily: 'Inter',
-      fontSize: 18.sp,
+      fontSize: 20.sp,
       fontWeight: FontWeight.w700,
       color: const Color(0xFF111827),
     );
@@ -3553,7 +3569,7 @@ class _DeviceDetailsScreenState extends State<DeviceDetailsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildHeroIdentityStats(),
+        _buildHeroIdentityStats(captionFontSize: 12),
         SizedBox(height: 8.h),
         Text.rich(
           TextSpan(
@@ -5764,10 +5780,15 @@ class _RgbHueWheelPainter extends CustomPainter {
 }
 
 class _StatBlock extends StatelessWidget {
-  const _StatBlock({required this.top, required this.bottom});
+  const _StatBlock({
+    required this.top,
+    required this.bottom,
+    this.captionFontSize = 10,
+  });
 
   final String top;
   final String bottom;
+  final double captionFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -5787,7 +5808,7 @@ class _StatBlock extends StatelessWidget {
           bottom,
           style: TextStyle(
             fontFamily: 'Inter',
-            fontSize: 10.sp,
+            fontSize: captionFontSize.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF6B7280),
           ),

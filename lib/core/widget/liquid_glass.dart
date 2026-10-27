@@ -67,19 +67,19 @@ class LiquidGlass extends StatelessWidget {
   /// Frosted circular control (header menu / edit / add on dashboard).
   static BoxDecoration circleButtonDecoration({bool pressed = false}) {
     return BoxDecoration(
-      color: pressed ? const Color(0xFFF3F4F6) : Colors.white,
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: pressed ? 0.82 : 0.72),
+          Colors.white.withValues(alpha: pressed ? 0.58 : 0.42),
+        ],
+      ),
       shape: BoxShape.circle,
       border: Border.all(
-        color: const Color(0xFFE5E7EB),
-        width: 1,
+        color: Colors.white.withValues(alpha: 0.78),
+        width: 0.85,
       ),
-      boxShadow: [
-        BoxShadow(
-          color: const Color(0xFF111827).withValues(alpha: 0.06),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ],
     );
   }
 
@@ -364,7 +364,7 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
     this.glassAfterPixels = 8,
   });
 
-  /// Kept for call sites; chrome is always frosted (not a solid wash).
+  /// Solid wash at rest; frosted chrome uses the same tone once scrolled.
   final Color backgroundColor;
   final EdgeInsetsGeometry padding;
   final Widget child;
@@ -379,11 +379,15 @@ class LiquidGlassInnerScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget padded = Padding(padding: padding, child: child);
+    if (scrollOffset <= glassAfterPixels) {
+      return ColoredBox(color: backgroundColor, child: padded);
+    }
     final double sigma = 18 + 8 * _glassStrength;
     return LiquidGlass(
-      linearFade: false,
+      linearFade: true,
       sigma: sigma,
-      child: Padding(padding: padding, child: child),
+      child: padded,
     );
   }
 }

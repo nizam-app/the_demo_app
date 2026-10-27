@@ -56,23 +56,35 @@ class _UserEditState extends State<UserEdit> {
 
   double _sheetBottomPadding(BuildContext context) {
     final double inset = MediaQuery.viewPaddingOf(context).bottom * 0.35;
-    return (inset > 8.h ? inset : 8.h) + 6.h;
+    return (inset > 8.h ? inset : 8.h) + 14.h;
   }
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
       top: false,
       bottom: false,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => Navigator.of(context).pop(),
-        child: Align(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => Navigator.of(context).pop(),
+              child: const SizedBox.expand(),
+            ),
+          ),
+          Align(
         alignment: Alignment.bottomCenter,
-        child: LiquidGlassModalSheetPanel(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: keyboardInset),
+          child: GestureDetector(
+            onTap: () {},
+            behavior: HitTestBehavior.opaque,
+            child: LiquidGlassModalSheetPanel(
           opaqueWhite: true,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
-          child: Padding(
+          child: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               33.w,
               16.h,
@@ -240,11 +252,15 @@ class _UserEditState extends State<UserEdit> {
                   ),
                 ),
 
+              SizedBox(height: 10.h),
             ],
           ),
         ),
       ),
+          ),
+        ),
       ),
+        ],
       ),
     );
   }
@@ -270,12 +286,17 @@ class _RowField extends StatelessWidget {
       fontWeight: FontWeight.w400,
       color: _textGrey,
     );
+    final double fieldMaxWidth = MediaQuery.sizeOf(context).width -
+        33.w -
+        12.w -
+        20.w -
+        72.w;
 
     return TapToEditSlot(
       initialText: right,
       style: valueStyle,
       showPencil: false,
-      maxWidth: 180.w,
+      maxWidth: fieldMaxWidth.clamp(160.w, 320.w),
       keyboardType: left == 'Email'
           ? TextInputType.emailAddress
           : TextInputType.text,
@@ -288,19 +309,24 @@ class _RowField extends StatelessWidget {
             child: SizedBox(
               height: 30.h,
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Text(
-                      left,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w400,
-                        color: _textDark,
-                      ),
+                  Text(
+                    left,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: _textDark,
                     ),
                   ),
-                  value,
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: value,
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -55,11 +55,12 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
 
   double _sheetBottomPadding(BuildContext context) {
     final double inset = MediaQuery.viewPaddingOf(context).bottom * 0.35;
-    return (inset > 8.h ? inset : 8.h) + 6.h;
+    return (inset > 8.h ? inset : 8.h) + 14.h;
   }
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
       top: false,
       bottom: false,
@@ -75,7 +76,9 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: GestureDetector(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: keyboardInset),
+              child: GestureDetector(
               // ভেতরে ট্যাপ করলে যেন close না হয়
               onTap: () {},
               behavior: HitTestBehavior.opaque,
@@ -83,7 +86,7 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                 opaqueWhite: true,
                 borderRadius:
                     BorderRadius.vertical(top: Radius.circular(26.r)),
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
                     33.w,
                     16.h,
@@ -224,10 +227,12 @@ class _AddUserBottomSheetState extends State<AddUserBottomSheet> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 10.h),
                   ],
                 ),
                 ),
               ),
+            ),
             ),
           ),
         ],
@@ -256,12 +261,17 @@ class _RowField extends StatelessWidget {
       fontWeight: FontWeight.w400,
       color: _textGrey,
     );
+    final double fieldMaxWidth = MediaQuery.sizeOf(context).width -
+        33.w -
+        12.w -
+        20.w -
+        72.w;
 
     return TapToEditSlot(
       initialText: right,
       style: valueStyle,
       showPencil: false,
-      maxWidth: 180.w,
+      maxWidth: fieldMaxWidth.clamp(160.w, 320.w),
       keyboardType: left == 'Email'
           ? TextInputType.emailAddress
           : TextInputType.text,
@@ -274,19 +284,24 @@ class _RowField extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(right: 20.w),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Text(
-                      left,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w400,
-                        color: _textDark,
-                      ),
+                  Text(
+                    left,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w400,
+                      color: _textDark,
                     ),
                   ),
-                  value,
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: value,
+                    ),
+                  ),
                 ],
               ),
             ),
