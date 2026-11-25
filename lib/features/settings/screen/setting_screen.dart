@@ -239,6 +239,7 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
     );
   }
+  // new update for the settings pages, 
 
   /// White circle with soft shadow (back / overflow menu).
   Widget _sectionTitle(String text) {
